@@ -55,6 +55,11 @@ router.beforeEach((to, from, next) => {
     return next('/login')
   }
 
+  // ❌ role tidak termasuk daftar yang diizinkan
+  if (to.meta.roles && !to.meta.roles.includes(auth.user?.role)) {
+    return next('/login')
+  }
+
   next()
 })
 

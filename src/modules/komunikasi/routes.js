@@ -25,5 +25,16 @@ export default [
       parent: 'Komunikasi',
       description: 'Pengaturan notifikasi dan pemberitahuan.'
     }
+  },
+  {
+    path: 'komunikasi/chat',
+    component: () => import('./pages/Chat.vue'),
+    meta: {
+      title: 'Chat',
+      parent: 'Komunikasi',
+      description: 'Pesan dan percakapan antara guru dan wali murid.',
+      requiresAuth: true,
+      roles: ['guru', 'siswa']
+    }
   }
 ]

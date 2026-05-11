@@ -28,7 +28,7 @@ import LoginForm from '@/components/LoginForm.vue'
     <div class="bg-muted relative hidden lg:block border-l overflow-hidden">
       <!-- Menggunakan gambar sekolah Indonesia yang hangat dan familiar -->
       <img
-        src="/Users/am/.gemini/antigravity/brain/6a40d252-a279-471e-9976-9bfb8c71848a/indonesian_school_vibe_1778426299094.png"
+        src="@/assets/images/login-bg.png"
         alt="Suasana Sekolah Indonesia"
         class="absolute inset-0 h-full w-full object-cover"
       />

@@ -1,10 +1,10 @@
 {
   "$schema": "https://shadcn-vue.com/schema.json",
-  "style": "new-york",
-  "font": "noto-sans",
-  "typescript": false,
+  "style": "reka-nova",
+  "font": "geist-sans",
+  "typescript": true,
   "tailwind": {
-    "config": "tailwind.config.js",
+    "config": "",
     "css": "src/assets/main.css",
     "baseColor": "neutral",
     "cssVariables": true,
@@ -19,5 +19,7 @@
     "lib": "@/lib",
     "composables": "@/composables"
   },
+  "menuColor": "default",
+  "menuAccent": "subtle",
   "registries": {}
 }

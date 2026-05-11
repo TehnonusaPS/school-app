@@ -1,15 +1,14 @@
-<script setup>
-import { cn } from "@/lib/utils";
+<script setup lang="ts">
+import type { HTMLAttributes } from 'vue'
+import { cn } from '@/lib/utils'
 
-const props = defineProps({
-  class: {
-    type: [Boolean, null, String, Object, Array],
-    required: false,
-    skipCheck: true,
-  },
-});
+interface SkeletonProps {
+  class?: HTMLAttributes['class']
+}
+
+const props = defineProps<SkeletonProps>()
 </script>
 
 <template>
-  <div :class="cn('animate-pulse rounded-md bg-primary/10', props.class)" />
+  <div data-slot="skeleton" :class="cn('bg-muted rounded-md animate-pulse', props.class)" />
 </template>

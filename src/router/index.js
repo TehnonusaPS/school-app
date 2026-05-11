@@ -1,32 +1,37 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import authRoutes from '../modules/auth/routes'
-import AdminLayout from '../layouts/AdminLayout.vue'
 import { useAuthStore } from '../stores/authStore'
+import SidebarLayout from '../layouts/SidebarLayout.vue'
+
+// Import rute dari setiap module
+import authRoutes from '../modules/auth/routes'
+import dashboardRoutes from '../modules/dashboard/routes'
+import manajemenDataRoutes from '../modules/manajemen-data/routes'
+import akademikRoutes from '../modules/akademik/routes'
+import keuanganRoutes from '../modules/keuangan/routes'
+import absensiRoutes from '../modules/absensi/routes'
+import komunikasiRoutes from '../modules/komunikasi/routes'
+import laporanRoutes from '../modules/laporan/routes'
+import lainnyaRoutes from '../modules/lainnya/routes'
 
 const routes = [
+  // Rute Auth (Login, dll) biasanya tidak pakai SidebarLayout
   ...authRoutes,
 
+  // Semua rute aplikasi yang pakai Sidebar
   {
-    path: '/admin',
-    component: AdminLayout,
-    meta: { requiresAuth: true, role: 'admin' },
+    path: '/',
+    component: SidebarLayout,
+    meta: { requiresAuth: true },
     children: [
-      {
-        path: 'dashboard',
-        component: () => import('../modules/dashboard/pages/Dashboard.vue'),
-      }
-    ]
-  },
-
-  {
-    path: '/guru',
-    component: AdminLayout,
-    meta: { requiresAuth: true, role: 'guru' },
-    children: [
-      {
-        path: 'dashboard',
-        component: { template: '<div>Dashboard Guru</div>' }
-      }
+      { path: '', redirect: '/dashboard' },
+      ...dashboardRoutes,
+      ...manajemenDataRoutes,
+      ...akademikRoutes,
+      ...keuanganRoutes,
+      ...absensiRoutes,
+      ...komunikasiRoutes,
+      ...laporanRoutes,
+      ...lainnyaRoutes
     ]
   }
 ]

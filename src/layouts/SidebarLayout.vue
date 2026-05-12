@@ -14,7 +14,8 @@ import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Bell, Search, UserPlus, CreditCard, MessageCircle } from 'lucide-vue-next'
+import { Bell, Search, UserPlus, CreditCard, MessageCircle, MessageSquare } from 'lucide-vue-next'
+import { useAuthStore } from '@/stores/authStore'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,12 +28,13 @@ import {
 
 const route = useRoute()
 const router = useRouter()
+const auth = useAuthStore()
 
 // Fungsi untuk menelusuri hierarki breadcrumb secara rekursif
 const breadcrumbs = computed(() => {
   const crumbs = []
   let current = route
-  
+
   crumbs.unshift({
     title: current.meta.title || 'Halaman',
     active: true
@@ -70,6 +72,7 @@ const notifications = [
     icon: UserPlus,
     color: 'text-blue-500'
   },
+
   {
     id: 2,
     title: 'Pembayaran Berhasil',
@@ -78,6 +81,7 @@ const notifications = [
     icon: CreditCard,
     color: 'text-green-500'
   },
+
   {
     id: 3,
     title: 'Pesan Baru',
@@ -94,7 +98,7 @@ const notifications = [
     <AppSidebar />
     <SidebarInset>
       <header
-        class="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b justify-between"
+        class="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b justify-between"
       >
         <!-- SISI KIRI: Sidebar Trigger & Breadcrumb -->
         <div class="flex items-center gap-2 px-4">
@@ -128,6 +132,22 @@ const notifications = [
             />
           </div>
 
+          <!-- Chat Icon (Guru & Siswa) -->
+          <div v-if="auth.user?.role === 'guru' || auth.user?.role === 'siswa'" class="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              class="rounded-full hover:bg-muted"
+              @click="router.push('/komunikasi/chat')"
+            >
+              <MessageSquare class="h-5 w-5" />
+            </Button>
+            <span
+              class="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] text-white"
+              >2</span
+            >
+          </div>
+
           <!-- Notification Dropdown -->
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
@@ -136,15 +156,20 @@ const notifications = [
                   <Bell class="h-5 w-5" />
                 </Button>
                 <span class="absolute top-2 right-2 flex h-2 w-2">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span
+                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"
+                  ></span>
                   <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                 </span>
               </div>
             </DropdownMenuTrigger>
+
             <DropdownMenuContent class="w-80" align="end">
               <DropdownMenuLabel class="font-bold flex justify-between items-center">
                 Notifikasi Terbaru
-                <span class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">3 Baru</span>
+                <span class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full"
+                  >3 Baru</span
+                >
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
@@ -161,8 +186,11 @@ const notifications = [
                   </div>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
+
               <DropdownMenuSeparator />
-              <DropdownMenuItem class="justify-center text-primary font-medium text-xs cursor-pointer">
+              <DropdownMenuItem
+                class="justify-center text-primary font-medium text-xs cursor-pointer"
+              >
                 Lihat Semua Notifikasi
               </DropdownMenuItem>
             </DropdownMenuContent>

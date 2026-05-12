@@ -17,13 +17,20 @@ const routes = [
   // Rute Auth (Login, dll) biasanya tidak pakai SidebarLayout
   ...authRoutes,
 
+  // Landing page publik
+  {
+    path: '/',
+    name: 'Landing',
+    component: () => import('../modules/public/pages/LandingPage.vue'),
+    meta: { requiresAuth: false }
+  },
+
   // Semua rute aplikasi yang pakai Sidebar
   {
     path: '/',
     component: SidebarLayout,
     meta: { requiresAuth: true },
     children: [
-      { path: '', redirect: '/dashboard' },
       ...dashboardRoutes,
       ...manajemenDataRoutes,
       ...akademikRoutes,

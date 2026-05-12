@@ -3,12 +3,12 @@ import { CheckCircle } from 'lucide-vue-next'
 import classroomImg from '@/assets/images/landing-classroom.png'
 
 const whyUs = [
-  'Multi-sekolah & multi-yayasan dalam satu akun',
-  'Akses kapan saja dan di mana saja',
-  'Manajemen hak akses berbasis peran (RBAC)',
-  'Laporan otomatis siap cetak & ekspor',
-  'Aman dan terenkripsi — data sekolah Anda terlindungi',
-  'Dukungan teknis responsif untuk semua mitra'
+  'Yayasan mendaftar, lalu tambahkan unit sekolah sebanyak apapun',
+  'Setiap unit sekolah punya data & laporan tersendiri',
+  'Manajemen hak akses per unit sekolah berbasis peran (RBAC)',
+  'Laporan otomatis per sekolah & rekap yayasan siap cetak',
+  'Aman dan terenkripsi — data tiap sekolah terlindungi',
+  'Dukungan teknis responsif untuk semua yayasan mitra',
 ]
 </script>
 

@@ -41,7 +41,7 @@ const navLinks = [
         </div>
         <div class="leading-tight">
           <div :class="['font-extrabold text-base', isScrolled ? 'text-blue-700' : 'text-white']">CerdasBangsa</div>
-          <div :class="['text-xs', isScrolled ? 'text-gray-400' : 'text-blue-100']">Platform Manajemen Sekolah</div>
+          <div :class="['text-xs', isScrolled ? 'text-gray-400' : 'text-blue-100']">Platform Manajemen Yayasan & Sekolah</div>
         </div>
       </a>
 

@@ -2,8 +2,8 @@
 import { Users, Award, Clock, School, Building2 } from 'lucide-vue-next'
 
 const stats = [
-  { number: '200+', label: 'Sekolah Terdaftar', icon: School },
-  { number: '50+', label: 'Yayasan Mitra', icon: Building2 },
+  { number: '50+', label: 'Yayasan Terdaftar', icon: Building2 },
+  { number: '200+', label: 'Unit Sekolah Aktif', icon: School },
   { number: '60.000+', label: 'Siswa Terkelola', icon: Users },
   { number: '99.9%', label: 'Uptime Sistem', icon: Award },
 ]

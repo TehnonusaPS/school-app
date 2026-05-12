@@ -32,7 +32,7 @@ const navLinks = [
             <div class="font-extrabold text-lg">CerdasBangsa</div>
           </div>
           <p class="text-blue-300 text-sm leading-relaxed">
-            Platform manajemen sekolah & yayasan terintegrasi. Satu sistem untuk semua kebutuhan administrasi pendidikan Anda.
+            Platform manajemen pendidikan untuk yayasan. Daftarkan yayasan Anda dan kelola semua unit sekolah di bawahnya dalam satu sistem.
           </p>
         </div>
 

@@ -6,17 +6,17 @@ const audiences = [
   {
     icon: Building2,
     title: 'Yayasan Pendidikan',
-    desc: 'Awasi seluruh unit sekolah di bawah naungan yayasan dari satu dasbor terpusat.'
+    desc: 'Yayasan mendaftar dan menjadi pemilik akun. Tambahkan 1 atau banyak unit sekolah di bawah naungan yayasan Anda.'
   },
   {
     icon: School,
-    title: 'Kepala Sekolah',
-    desc: 'Monitor kinerja guru, kehadiran siswa, dan kondisi akademik secara langsung.'
+    title: 'Kepala Sekolah & Staf',
+    desc: 'Tiap unit sekolah dikelola oleh kepala sekolah dan staf yang ditetapkan oleh yayasan dengan hak akses masing-masing.'
   },
   {
     icon: Users,
-    title: 'Guru & Staf TU',
-    desc: 'Input nilai, absensi, dan administrasi kelas menjadi lebih cepat dan tanpa kertas.'
+    title: 'Guru & Tenaga Pengajar',
+    desc: 'Guru mengelola absensi, nilai, dan komunikasi dengan orang tua langsung dari dalam sistem tanpa perlu aplikasi lain.'
   },
 ]
 </script>
@@ -30,11 +30,11 @@ const audiences = [
         <div>
           <span class="inline-block px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-semibold mb-4">Solusi Kami</span>
           <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-5 leading-tight">
-            Dirancang untuk Semua<br>
-            <span class="text-blue-600">Pemangku Kepentingan Sekolah</span>
+            Yayasan Mendaftar,<br>
+            <span class="text-blue-600">Sekolah-Sekolahnya Terkelola</span>
           </h2>
           <p class="text-gray-500 text-sm mb-8 leading-relaxed">
-            Baik Anda mengelola 1 sekolah maupun 20 unit di bawah satu yayasan, CerdasBangsa memberikan visibilitas dan kontrol penuh atas seluruh operasional pendidikan Anda.
+            Cukup daftarkan yayasan Anda sekali, lalu tambahkan unit-unit sekolah di bawahnya — baik 1 sekolah maupun puluhan. Setiap unit sekolah memiliki data, pengguna, dan laporannya sendiri, namun tetap terpantau dari satu akun yayasan.
           </p>
 
           <div class="space-y-4">

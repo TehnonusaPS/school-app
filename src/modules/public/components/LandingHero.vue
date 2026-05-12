@@ -22,16 +22,16 @@ const scrollTo = (id) => emit('scrollTo', id)
       <div class="max-w-2xl">
         <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-sm font-medium mb-6 backdrop-blur-sm">
           <Star class="w-4 h-4 text-yellow-400" />
-          Platform Manajemen Sekolah & Yayasan #1 di Indonesia
+          Platform Manajemen Yayasan & Unit Sekolah #1 di Indonesia
         </div>
 
         <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
-          Satu Platform untuk<br>
-          <span class="text-yellow-400">Semua Sekolah Anda</span>
+          Satu Yayasan,<br>
+          <span class="text-yellow-400">Semua Sekolah Terkelola</span>
         </h1>
 
         <p class="text-lg text-blue-100 mb-8 leading-relaxed max-w-xl">
-          CerdasBangsa adalah sistem informasi manajemen pendidikan yang dirancang untuk yayasan, kepala sekolah, guru, dan staf — mengintegrasikan seluruh proses administrasi sekolah dalam satu sistem yang mudah digunakan.
+          CerdasBangsa adalah platform manajemen pendidikan untuk yayasan. Daftarkan yayasan Anda, tambahkan unit sekolah sebanyak apapun, dan kelola seluruh operasional dari satu dasbor terpusat.
         </p>
 
         <div class="flex flex-wrap gap-3">

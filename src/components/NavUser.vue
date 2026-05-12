@@ -3,13 +3,13 @@ import {
   BadgeCheck,
   Bell,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
-  Sparkles,
   Sun,
   Moon
 } from 'lucide-vue-next'
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -27,6 +27,16 @@ import {
   SidebarMenuItem,
   useSidebar
 } from '@/components/ui/sidebar'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 const props = defineProps({
   user: {
@@ -36,6 +46,14 @@ const props = defineProps({
 })
 
 const { isMobile } = useSidebar()
+const auth = useAuthStore()
+const router = useRouter()
+const showLogoutDialog = ref(false)
+
+const confirmLogout = () => {
+  auth.logout()
+  router.push('/')
+}
 
 // --- Theme Logic ---
 const isDark = ref(false)
@@ -123,7 +141,10 @@ onMounted(() => {
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem class="text-destructive focus:bg-destructive/10 focus:text-destructive">
+          <DropdownMenuItem
+            class="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer"
+            @click="showLogoutDialog = true"
+          >
             <LogOut />
             Log out
           </DropdownMenuItem>
@@ -131,4 +152,25 @@ onMounted(() => {
       </DropdownMenu>
     </SidebarMenuItem>
   </SidebarMenu>
+
+  <!-- Dialog Konfirmasi Logout -->
+  <AlertDialog :open="showLogoutDialog" @update:open="showLogoutDialog = $event">
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>Konfirmasi Keluar</AlertDialogTitle>
+        <AlertDialogDescription>
+          Apakah Anda yakin ingin keluar dari sistem? Sesi Anda akan diakhiri.
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel>Batal</AlertDialogCancel>
+        <AlertDialogAction
+          class="bg-destructive text-white hover:bg-destructive/90"
+          @click="confirmLogout"
+        >
+          Ya, Keluar
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
 </template>

@@ -1,20 +1,23 @@
-<script setup>
-import { ChevronRight } from 'lucide-vue-next'
+<script lang="ts" setup>
+import type { HTMLAttributes } from 'vue'
+
+import { ChevronRightIcon } from 'lucide-vue-next'
 import { cn } from '@/lib/utils'
 
-const props = defineProps({
-  class: {
-    type: [Boolean, null, String, Object, Array],
-    required: false,
-    skipCheck: true
-  }
-})
+const props = defineProps<{
+  class?: HTMLAttributes['class']
+}>()
 </script>
 
 <template>
-  <li role="presentation" aria-hidden="true" :class="cn('[&>svg]:size-3.5', props.class)">
+  <li
+    data-slot="breadcrumb-separator"
+    role="presentation"
+    aria-hidden="true"
+    :class="cn('[&>svg]:size-3.5', props.class)"
+  >
     <slot>
-      <ChevronRight />
+      <ChevronRightIcon class="cn-rtl-flip" />
     </slot>
   </li>
 </template>

@@ -12,10 +12,19 @@ import absensiRoutes from '../modules/absensi/routes'
 import komunikasiRoutes from '../modules/komunikasi/routes'
 import laporanRoutes from '../modules/laporan/routes'
 import lainnyaRoutes from '../modules/lainnya/routes'
+import devRoutes from '../modules/dev/routes'
 
 const routes = [
   // Rute Auth (Login, dll) biasanya tidak pakai SidebarLayout
   ...authRoutes,
+
+  // Landing page publik
+  {
+    path: '/',
+    name: 'Landing',
+    component: () => import('../modules/public/pages/LandingPage.vue'),
+    meta: { requiresAuth: false }
+  },
 
   // Semua rute aplikasi yang pakai Sidebar
   {
@@ -23,7 +32,6 @@ const routes = [
     component: SidebarLayout,
     meta: { requiresAuth: true },
     children: [
-      { path: '', redirect: '/dashboard' },
       ...dashboardRoutes,
       ...manajemenDataRoutes,
       ...akademikRoutes,
@@ -31,7 +39,8 @@ const routes = [
       ...absensiRoutes,
       ...komunikasiRoutes,
       ...laporanRoutes,
-      ...lainnyaRoutes
+      ...lainnyaRoutes,
+      ...devRoutes
     ]
   }
 ]

@@ -1,17 +1,17 @@
-<script setup>
+<script lang="ts" setup>
+import type { HTMLAttributes } from 'vue'
 import { cn } from '@/lib/utils'
 
-const props = defineProps({
-  class: {
-    type: [Boolean, null, String, Object, Array],
-    required: false,
-    skipCheck: true
-  }
-})
+const props = defineProps<{
+  class?: HTMLAttributes['class']
+}>()
 </script>
 
 <template>
-  <li :class="cn('inline-flex items-center gap-1.5', props.class)">
+  <li
+    data-slot="breadcrumb-item"
+    :class="cn('gap-1 inline-flex items-center', props.class)"
+  >
     <slot />
   </li>
 </template>

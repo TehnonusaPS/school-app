@@ -1,20 +1,7 @@
 <script setup>
 import { defineProps, onMounted, ref } from 'vue'
 import { AlertCircle, BellRing, ChevronsUpDown, Settings, User } from 'lucide-vue-next'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger
-} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { ButtonGroup } from '@/components/ui/button-group'
 import {
   Card,
   CardAction,
@@ -31,7 +18,15 @@ import {
   CarouselNext,
   CarouselPrevious
 } from '@/components/ui/carousel'
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegendContent,
+  ChartCrosshair,
+  componentToString
+} from '@/components/ui/chart'
+import { VisXYContainer, VisLine, VisAxis, VisGroupedBar } from '@unovis/vue'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import {
@@ -121,18 +116,26 @@ const comboboxFrameworks = [
 ]
 
 const chartData = [
-  { name: 'Jan', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Feb', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Mar', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Apr', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'May', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Jun', total: Math.floor(Math.random() * 5000) + 1000 }
+  { month: 'Jan', data1: 186, data2: 80, data3: 45 },
+  { month: 'Feb', data1: 305, data2: 200, data3: 85 },
+  { month: 'Mar', data1: 237, data2: 120, data3: 60 },
+  { month: 'Apr', data1: 273, data2: 190, data3: 95 },
+  { month: 'May', data1: 209, data2: 130, data3: 75 },
+  { month: 'Jun', data1: 284, data2: 140, data3: 80 }
 ]
 
 const chartConfig = {
-  total: {
-    label: 'Total',
-    color: 'hsl(var(--primary))'
+  data1: {
+    label: 'Data 1',
+    color: 'var(--primary)'
+  },
+  data2: {
+    label: 'Data 2',
+    color: 'var(--muted-foreground)'
+  },
+  data3: {
+    label: 'Data 3',
+    color: 'var(--chart-3)'
   }
 }
 
@@ -335,20 +338,84 @@ const dialogOpen = ref(false)
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">16. Chart</h2>
         <p class="text-sm text-muted-foreground mt-1">
-          Komponen visualisasi data menggunakan Unovis. Di sini dicontohkan sebagai Line Chart
-          sederhana.
+          Komponen visualisasi data menggunakan Unovis. Mendukung Line Chart, Bar Chart (Grouped),
+          Tooltip interaktif bawaan, dan Legend.
         </p>
       </div>
 
-      <div class="p-6 border rounded-xl bg-card">
-        <ChartContainer :config="chartConfig" class="h-[250px] w-full">
-          <VisXYContainer :data="chartData">
-            <VisLine :x="(d, i) => i" :y="d => d.total" color="var(--color-primary)" />
-            <VisAxis type="x" :tickFormat="i => chartData[i]?.name" />
-            <VisAxis type="y" />
-            <ChartTooltip />
-          </VisXYContainer>
-        </ChartContainer>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Line Chart -->
+        <div class="p-4 border rounded-xl bg-card">
+          <p class="text-sm font-semibold mb-1">Line Chart — Random Data 3-Series</p>
+          <p class="text-xs text-muted-foreground mb-4">
+            Arahkan kursor untuk melihat tooltip informasi lengkap
+          </p>
+          <ChartContainer :config="chartConfig" class="h-[220px] w-full">
+            <VisXYContainer :data="chartData">
+              <VisLine :x="(d, i) => i" :y="d => d.data1" color="var(--color-data1)" />
+              <VisLine :x="(d, i) => i" :y="d => d.data2" color="var(--color-data2)" />
+              <VisLine :x="(d, i) => i" :y="d => d.data3" color="var(--color-data3)" />
+              <VisAxis
+                type="x"
+                :tickFormat="i => chartData[i]?.month"
+                :tickValues="chartData.map((_, i) => i)"
+                :grid-line="false"
+                :tick-line="false"
+              />
+              <VisAxis type="y" :tick-line="false" :domain-line="false" :grid-line="true" />
+              <ChartTooltip />
+              <ChartCrosshair
+                :template="
+                  componentToString(chartConfig, ChartTooltipContent, {
+                    labelFormatter: x => chartData[Math.round(Number(x))]?.month || ''
+                  })
+                "
+                :color="['var(--color-data1)', 'var(--color-data2)', 'var(--color-data3)']"
+                :hideWhenFarFromPointer="false"
+                :skipRangeCheck="true"
+              />
+            </VisXYContainer>
+            <ChartLegendContent />
+          </ChartContainer>
+        </div>
+
+        <!-- Bar Chart -->
+        <div class="p-4 border rounded-xl bg-card">
+          <p class="text-sm font-semibold mb-1">Bar Chart — Random Data 3-Series</p>
+          <p class="text-xs text-muted-foreground mb-4">
+            Arahkan kursor untuk melihat perbandingan data
+          </p>
+          <ChartContainer :config="chartConfig" class="h-[220px] w-full bar-chart-container">
+            <VisXYContainer :data="chartData" :xDomain="[-0.5, chartData.length - 0.5]">
+              <VisGroupedBar
+                :x="(d, i) => i"
+                :y="[d => d.data1, d => d.data2, d => d.data3]"
+                :color="['var(--color-data1)', 'var(--color-data2)', 'var(--color-data3)']"
+                :rounded-corners="4"
+              />
+              <VisAxis
+                type="x"
+                :tickFormat="i => chartData[i]?.month"
+                :tickValues="chartData.map((_, i) => i)"
+                :grid-line="false"
+                :tick-line="false"
+              />
+              <VisAxis type="y" :tick-line="false" :domain-line="false" :grid-line="true" />
+              <ChartTooltip />
+              <ChartCrosshair
+                :template="
+                  componentToString(chartConfig, ChartTooltipContent, {
+                    labelFormatter: x => chartData[Math.round(Number(x))]?.month || ''
+                  })
+                "
+                :color="['var(--color-data1)', 'var(--color-data2)', 'var(--color-data3)']"
+                :hideWhenFarFromPointer="false"
+                :skipRangeCheck="true"
+              />
+            </VisXYContainer>
+            <ChartLegendContent />
+          </ChartContainer>
+        </div>
       </div>
     </section>
 
@@ -542,3 +609,14 @@ const dialogOpen = ref(false)
     </section>
   </div>
 </template>
+
+<style scoped>
+:deep(.bar-chart-container) {
+  --vis-crosshair-line-stroke-width: 56px;
+  --vis-crosshair-line-stroke-color: var(--muted);
+  --vis-crosshair-line-stroke-opacity: 0.65;
+}
+:deep(.bar-chart-container circle) {
+  display: none !important;
+}
+</style>

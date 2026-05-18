@@ -12,6 +12,7 @@ import absensiRoutes from '../modules/absensi/routes'
 import komunikasiRoutes from '../modules/komunikasi/routes'
 import laporanRoutes from '../modules/laporan/routes'
 import lainnyaRoutes from '../modules/lainnya/routes'
+import devRoutes from '../modules/dev/routes'
 
 const routes = [
   // Rute Auth (Login, dll) biasanya tidak pakai SidebarLayout
@@ -38,7 +39,8 @@ const routes = [
       ...absensiRoutes,
       ...komunikasiRoutes,
       ...laporanRoutes,
-      ...lainnyaRoutes
+      ...lainnyaRoutes,
+      ...devRoutes
     ]
   }
 ]

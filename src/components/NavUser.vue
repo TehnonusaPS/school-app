@@ -5,7 +5,10 @@ import {
   ChevronsUpDown,
   LogOut,
   Sun,
-  Moon
+  Moon,
+  Paintbrush,
+  Check,
+  Palette
 } from 'lucide-vue-next'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -57,6 +60,7 @@ const confirmLogout = () => {
 
 // --- Theme Logic ---
 const isDark = ref(false)
+const activeThemeStyle = ref('tahoe')
 
 const toggleTheme = () => {
   isDark.value = !isDark.value
@@ -69,6 +73,38 @@ const toggleTheme = () => {
   }
 }
 
+const setThemeStyle = (styleName) => {
+  activeThemeStyle.value = styleName
+  // Hapus semua class theme-* dari body
+  document.body.classList.forEach(cls => {
+    if (cls.startsWith('theme-')) {
+      document.body.classList.remove(cls)
+    }
+  })
+  
+  if (styleName !== 'tahoe') {
+    document.body.classList.add(`theme-${styleName}`)
+  }
+  
+  localStorage.setItem('themeStyle', styleName)
+}
+
+const cycleThemeStyle = () => {
+  const themes = ['tahoe', 'emerald', 'indigo', 'bronze', 'navy', 'zinc']
+  const currentIndex = themes.indexOf(activeThemeStyle.value)
+  const newStyle = themes[(currentIndex + 1) % themes.length]
+  setThemeStyle(newStyle)
+}
+
+const themeNames = {
+  'tahoe': 'Blue Glossy',
+  'emerald': 'Emerald',
+  'indigo': 'Indigo',
+  'bronze': 'Bronze',
+  'navy': 'Navy',
+  'zinc': 'Zinc'
+}
+
 onMounted(() => {
   const savedTheme = localStorage.getItem('theme')
   if (
@@ -78,6 +114,10 @@ onMounted(() => {
     isDark.value = true
     document.documentElement.classList.add('dark')
   }
+
+  // Set Theme Style
+  const savedThemeStyle = localStorage.getItem('themeStyle') || 'tahoe'
+  setThemeStyle(savedThemeStyle)
 })
 </script>
 
@@ -123,10 +163,18 @@ onMounted(() => {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem @click="toggleTheme" class="cursor-pointer">
-              <Sun v-if="isDark" />
-              <Moon v-else />
-              {{ isDark ? 'Mode Terang' : 'Mode Gelap' }}
+            <DropdownMenuLabel class="text-xs text-muted-foreground">Tampilan & Tema</DropdownMenuLabel>
+            <DropdownMenuItem @select.prevent="toggleTheme" class="cursor-pointer">
+              <Sun v-if="isDark" class="size-4" />
+              <Moon v-else class="size-4" />
+              {{ isDark ? 'Beralih Mode Terang' : 'Beralih Mode Gelap' }}
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem @select.prevent="cycleThemeStyle" class="cursor-pointer">
+              <Palette class="size-4" />
+              <div class="truncate">
+                Ganti Tema: <span class="font-semibold text-primary ml-1">{{ themeNames[activeThemeStyle] || 'Blue Glossy' }}</span>
+              </div>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />

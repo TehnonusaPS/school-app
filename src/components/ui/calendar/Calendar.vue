@@ -24,7 +24,7 @@ const placeholder = useVModel(props, 'placeholder', emits, {
   defaultValue: props.defaultPlaceholder ?? today(getLocalTimeZone()),
 }) as Ref<DateValue>
 
-const formatter = useDateFormatter(props.locale ?? 'en')
+const formatter = useDateFormatter(props.locale ?? 'id-ID')
 
 const yearRange = computed(() => {
   return props.yearRange ?? createYearRange({
@@ -90,6 +90,8 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
   <CalendarRoot
     v-slot="{ grid, weekDays, date }"
     v-bind="forwarded"
+    locale="id-ID"
+    :week-starts-on="1"
     v-model:placeholder="placeholder"
     data-slot="calendar"
     :class="cn('p-2 [--cell-radius:var(--radius-md)] [--cell-size:--spacing(7)] group/calendar bg-background in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent', props.class)"
@@ -134,7 +136,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
         <CalendarGridHead>
           <CalendarGridRow>
             <CalendarHeadCell
-              v-for="day in weekDays" :key="day"
+              v-for="(day, index) in weekDays" :key="index"
             >
               {{ day }}
             </CalendarHeadCell>

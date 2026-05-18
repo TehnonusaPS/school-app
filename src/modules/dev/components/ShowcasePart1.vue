@@ -1,29 +1,13 @@
 <script setup>
-import {
-  AlertCircle,
-  Terminal,
-  User,
-  Settings,
-  BellRing,
-  ChevronsUpDown,
-  School,
-  LayoutDashboard,
-  Database,
-  GraduationCap
-} from 'lucide-vue-next'
-
-// 1. Accordion
+import { defineProps } from 'vue'
+import { AlertCircle, Settings, Terminal, User } from 'lucide-vue-next'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger
 } from '@/components/ui/accordion'
-
-// 2. Alert
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-
-// 3. Alert Dialog
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,18 +19,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog'
-import { Button } from '@/components/ui/button' // required to trigger the alert dialog
-
-// 4. Aspect Ratio
 import { AspectRatio } from '@/components/ui/aspect-ratio'
-
-// 5. Avatar
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-
-// 6. Badge
 import { Badge } from '@/components/ui/badge'
-
-// 7. Breadcrumb
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -55,29 +30,27 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
-
-// 8. Button (already imported above)
-// import { Button } from '@/components/ui/button'
-
-// 9. Button Group
+import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
-
-// 10. Calendar
 import { Calendar } from '@/components/ui/calendar'
+
+const props = defineProps({
+  searchQuery: {
+    type: String,
+    default: ''
+  }
+})
+
+const match = keywords => {
+  if (!props.searchQuery) return true
+  return keywords.toLowerCase().includes(props.searchQuery.toLowerCase())
+}
 </script>
 
 <template>
-  <div class="p-6 space-y-12 max-w-7xl mx-auto pb-24">
-    <div>
-      <h1 class="text-3xl font-bold tracking-tight text-foreground">UI Components Reference</h1>
-      <p class="text-muted-foreground mt-2 max-w-3xl">
-        Kumpulan dokumentasi lengkap seluruh komponen UI yang ada pada aplikasi ini. Daftar ini
-        dibuat berurutan sesuai alfabet (Bagian 2: 10 Komponen Pertama).
-      </p>
-    </div>
-
+  <div class="space-y-12">
     <!-- 1. ACCORDION -->
-    <section class="space-y-4">
+    <section v-show="match('accordion')" class="space-y-4">
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">1. Accordion</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -114,7 +87,7 @@ import { Calendar } from '@/components/ui/calendar'
     </section>
 
     <!-- 2. ALERT -->
-    <section class="space-y-4">
+    <section v-show="match('alert')" class="space-y-4">
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">2. Alert</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -156,7 +129,7 @@ import { Calendar } from '@/components/ui/calendar'
     </section>
 
     <!-- 3. ALERT DIALOG -->
-    <section class="space-y-4">
+    <section v-show="match('alert dialog')" class="space-y-4">
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">3. Alert Dialog (Modal)</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -211,7 +184,7 @@ import { Calendar } from '@/components/ui/calendar'
     </section>
 
     <!-- 4. ASPECT RATIO -->
-    <section class="space-y-4">
+    <section v-show="match('aspect ratio')" class="space-y-4">
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">4. Aspect Ratio</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -248,7 +221,7 @@ import { Calendar } from '@/components/ui/calendar'
     </section>
 
     <!-- 5. AVATAR -->
-    <section class="space-y-4">
+    <section v-show="match('avatar')" class="space-y-4">
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">5. Avatar</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -292,7 +265,7 @@ import { Calendar } from '@/components/ui/calendar'
     </section>
 
     <!-- 6. BADGE -->
-    <section class="space-y-4">
+    <section v-show="match('badge')" class="space-y-4">
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">6. Badge</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -315,7 +288,7 @@ import { Calendar } from '@/components/ui/calendar'
     </section>
 
     <!-- 7. BREADCRUMB -->
-    <section class="space-y-4">
+    <section v-show="match('breadcrumb')" class="space-y-4">
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">7. Breadcrumb</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -343,7 +316,7 @@ import { Calendar } from '@/components/ui/calendar'
     </section>
 
     <!-- 8. BUTTON -->
-    <section class="space-y-4">
+    <section v-show="match('button')" class="space-y-4">
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">8. Button</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -372,7 +345,7 @@ import { Calendar } from '@/components/ui/calendar'
     </section>
 
     <!-- 9. BUTTON GROUP -->
-    <section class="space-y-4">
+    <section v-show="match('button group')" class="space-y-4">
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">9. Button Group</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -393,7 +366,7 @@ import { Calendar } from '@/components/ui/calendar'
     </section>
 
     <!-- 10. CALENDAR -->
-    <section class="space-y-4">
+    <section v-show="match('calendar')" class="space-y-4">
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">10. Calendar</h2>
         <p class="text-sm text-muted-foreground mt-1">

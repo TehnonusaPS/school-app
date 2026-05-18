@@ -141,6 +141,8 @@ const chartConfig = {
 
 const drawerOpen = ref(false)
 const dialogOpen = ref(false)
+const commandOpen = ref(false)
+const goal = ref(350)
 </script>
 
 <template>
@@ -433,11 +435,13 @@ const dialogOpen = ref(false)
           <ComboboxAnchor class="w-[200px]">
             <ComboboxTrigger as-child>
               <Button variant="outline" role="combobox" class="w-[200px] justify-between">
-                {{
-                  comboboxValue
-                    ? comboboxFrameworks.find(f => f.value === comboboxValue)?.label
-                    : 'Select framework...'
-                }}
+                <span class="truncate">
+                  {{
+                    comboboxValue
+                      ? comboboxFrameworks.find(f => f.value === comboboxValue)?.label
+                      : 'Select framework...'
+                  }}
+                </span>
                 <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </ComboboxTrigger>
@@ -448,8 +452,8 @@ const dialogOpen = ref(false)
               <Search class="mr-2 h-4 w-4 shrink-0 opacity-50" />
               <ComboboxInput
                 :auto-focus="false"
-                placeholder="Search framework..."
-                class="flex h-9 w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 border-none shadow-none focus:ring-0"
+                placeholder="Search frameworks..."
+                class="flex-1 min-w-0 truncate h-9 bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 border-none shadow-none focus:ring-0"
               />
             </div>
             <ComboboxEmpty class="py-6 text-center text-sm">No framework found.</ComboboxEmpty>
@@ -583,15 +587,15 @@ const dialogOpen = ref(false)
                 <DrawerDescription>Set your daily activity goal.</DrawerDescription>
               </DrawerHeader>
               <div class="p-4 pb-0 flex items-center justify-center space-x-2">
-                <Button variant="outline" size="icon" class="h-8 w-8 shrink-0 rounded-full">
+                <Button variant="outline" size="icon" class="h-8 w-8 shrink-0 rounded-full" @click="goal = Math.max(200, goal - 10)" :disabled="goal <= 200">
                   <span class="sr-only">Decrease</span>
                   -
                 </Button>
                 <div class="flex-1 text-center">
-                  <div class="text-7xl font-bold tracking-tighter">350</div>
+                  <div class="text-7xl font-bold tracking-tighter">{{ goal }}</div>
                   <div class="text-[0.70rem] uppercase text-muted-foreground">Calories/day</div>
                 </div>
-                <Button variant="outline" size="icon" class="h-8 w-8 shrink-0 rounded-full">
+                <Button variant="outline" size="icon" class="h-8 w-8 shrink-0 rounded-full" @click="goal = Math.min(500, goal + 10)" :disabled="goal >= 500">
                   <span class="sr-only">Increase</span>
                   +
                 </Button>

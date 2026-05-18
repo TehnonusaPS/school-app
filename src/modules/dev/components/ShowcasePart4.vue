@@ -229,20 +229,16 @@ const radioValue = ref('comfortable')
         </p>
       </div>
       <div class="p-6 border rounded-xl bg-card flex justify-center">
-        <Pagination :total="100" :sibling-count="1" show-edges :default-page="2">
-          <PaginationContent>
+        <Pagination v-slot="{ page }" :total="100" :sibling-count="1" show-edges :default-page="2">
+          <PaginationContent v-slot="{ items }">
             <PaginationFirst />
             <PaginationPrevious />
-            <PaginationItem>
-              <PaginationLink :page="1">1</PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink :page="2" is-active>2</PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink :page="3">3</PaginationLink>
-            </PaginationItem>
-            <PaginationEllipsis />
+            <template v-for="(item, index) in items">
+              <PaginationItem v-if="item.type === 'page'" :key="index" :value="item.value" :is-active="item.value === page">
+                {{ item.value }}
+              </PaginationItem>
+              <PaginationEllipsis v-else :key="item.type" :index="index" />
+            </template>
             <PaginationNext />
             <PaginationLast />
           </PaginationContent>
@@ -259,7 +255,7 @@ const radioValue = ref('comfortable')
         </p>
       </div>
       <div class="p-6 border rounded-xl bg-card flex justify-center">
-        <PinInput id="pin-input" v-model="pinValue" placeholder="○">
+        <PinInput id="pin-input" v-model="pinValue" placeholder="○" mask>
           <PinInputGroup>
             <PinInputSlot v-for="(id, index) in 5" :key="id" :index="index" />
           </PinInputGroup>

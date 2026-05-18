@@ -4,11 +4,11 @@ import {
   FolderOpen,
   Search,
   Settings,
-  User
+  User,
+  CalendarDays
 } from 'lucide-vue-next'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -291,7 +291,7 @@ const otpValue = ref('')
             <Button variant="link">@vuejs</Button>
           </HoverCardTrigger>
           <HoverCardContent class="w-80">
-            <div class="flex justify-between space-x-4">
+            <div class="flex items-start space-x-4">
               <Avatar>
                 <AvatarImage src="https://github.com/vuejs.png" />
                 <AvatarFallback>VC</AvatarFallback>
@@ -300,7 +300,7 @@ const otpValue = ref('')
                 <h4 class="text-sm font-semibold">@vuejs</h4>
                 <p class="text-sm">The Progressive JavaScript Framework.</p>
                 <div class="flex items-center pt-2">
-                  <Calendar class="mr-2 h-4 w-4 opacity-70" />
+                  <CalendarDays class="mr-2 h-4 w-4 opacity-70" />
                   <span class="text-xs text-muted-foreground"> Joined January 2014 </span>
                 </div>
               </div>
@@ -377,7 +377,7 @@ const otpValue = ref('')
       </div>
 
       <div class="p-6 border rounded-xl bg-card flex justify-center">
-        <InputOTP v-model="otpValue" :max-length="6">
+        <InputOTP v-model="otpValue" maxlength="6">
           <InputOTPGroup>
             <InputOTPSlot :index="0" />
             <InputOTPSlot :index="1" />

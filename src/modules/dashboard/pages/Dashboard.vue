@@ -4,7 +4,7 @@
     <div class="border-b pb-4">
       <h1 class="text-2xl font-bold tracking-tight">Dashboard</h1>
       <p class="text-muted-foreground mt-1">
-        Selamat datang! Berikut adalah ringkasan aktivitas aplikasi sekolah.
+        Selamat datang!! Berikut adalah ringkasan aktivitas aplikasi sekolah.
       </p>
     </div>
 

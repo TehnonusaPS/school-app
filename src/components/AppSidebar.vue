@@ -143,7 +143,7 @@ const data = {
     <SidebarHeader class="sidebar-brand-header">
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton size="lg" as-child class="sidebar-brand-btn">
+          <SidebarMenuButton size="lg" as-child class="sidebar-brand-btn bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/80">
             <a href="/dashboard">
               <div class="sidebar-brand-icon">
                 <School class="size-5" />

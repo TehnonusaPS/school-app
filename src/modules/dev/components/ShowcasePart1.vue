@@ -285,6 +285,28 @@ const match = keywords => {
         <Badge class="bg-amber-500 hover:bg-amber-600 text-white">Pending / Warning</Badge>
         <Badge class="bg-blue-500 hover:bg-blue-600 text-white">Info / Process</Badge>
       </div>
+
+      <div class="flex flex-wrap gap-4 p-6 border rounded-xl bg-card">
+        <Badge variant="gray" show-dot>Badge</Badge>
+        <Badge variant="red" show-dot>Badge</Badge>
+        <Badge variant="amber" show-dot>Badge</Badge>
+        <Badge variant="green" show-dot>Badge</Badge>
+        <Badge variant="blue" show-dot>Badge</Badge>
+        <Badge variant="indigo" show-dot>Badge</Badge>
+        <Badge variant="purple" show-dot>Badge</Badge>
+        <Badge variant="pink" show-dot>Badge</Badge>
+      </div>
+
+      <div class="flex flex-wrap gap-4 p-6 border rounded-xl bg-card">
+        <Badge variant="gray" show-dot pulse>Badge</Badge>
+        <Badge variant="red" show-dot pulse>Badge</Badge>
+        <Badge variant="amber" show-dot pulse>Badge</Badge>
+        <Badge variant="green" show-dot pulse>Badge</Badge>
+        <Badge variant="blue" show-dot pulse>Badge</Badge>
+        <Badge variant="indigo" show-dot pulse>Badge</Badge>
+        <Badge variant="purple" show-dot pulse>Badge</Badge>
+        <Badge variant="pink" show-dot pulse>Badge</Badge>
+      </div>
     </section>
 
     <!-- 7. BREADCRUMB -->

@@ -10,6 +10,8 @@ import {
   Moon
 } from 'lucide-vue-next'
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -36,6 +38,8 @@ const props = defineProps({
 })
 
 const { isMobile } = useSidebar()
+const router = useRouter()
+const auth = useAuthStore()
 
 // --- Theme Logic ---
 const isDark = ref(false)
@@ -49,6 +53,11 @@ const toggleTheme = () => {
     document.documentElement.classList.remove('dark')
     localStorage.setItem('theme', 'light')
   }
+}
+
+const handleLogout = () => {
+  auth.logout()
+  router.push('/login')
 }
 
 onMounted(() => {
@@ -123,7 +132,10 @@ onMounted(() => {
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem class="text-destructive focus:bg-destructive/10 focus:text-destructive">
+          <DropdownMenuItem
+            class="text-destructive focus:bg-destructive/10 focus:text-destructive"
+            @click="handleLogout"
+          >
             <LogOut />
             Log out
           </DropdownMenuItem>

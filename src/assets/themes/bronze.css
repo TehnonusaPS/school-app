@@ -1,0 +1,144 @@
+/*
+ * ═══════════════════════════════════════════════════════════════════
+ *  TEMA BRONZE
+ *  Hue   : 45 (cokelat keemasan) + sidebar 260 (slate gelap)
+ *  Finish: Glossy | Solid (via .finish-solid)
+ * ═══════════════════════════════════════════════════════════════════
+ */
+
+/* ── Light Glossy ── */
+.theme-bronze {
+  --background: oklch(0.98 0.01 260);
+  --foreground: oklch(0.20 0.03 260);
+
+  --card: oklch(1 0 0 / 0.85);
+  --card-foreground: oklch(0.20 0.03 260);
+
+  --popover: oklch(1 0 0 / 0.95);
+  --popover-foreground: oklch(0.20 0.03 260);
+
+  --primary: oklch(0.60 0.15 45);
+  --primary-foreground: oklch(1 0 0);
+
+  --secondary: oklch(0.96 0.01 260);
+  --secondary-foreground: oklch(0.30 0.03 260);
+
+  --muted: oklch(0.96 0.01 260);
+  --muted-foreground: oklch(0.55 0.02 260);
+
+  --accent: oklch(0.96 0.01 260);
+  --accent-foreground: oklch(0.20 0.03 260);
+
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(1 0 0);
+
+  --border: oklch(0.90 0.01 260 / 0.60);
+  --input: oklch(0.90 0.01 260 / 0.50);
+  --ring: oklch(0.60 0.15 45 / 0.30);
+  --radius: 0.875rem;
+
+  --sidebar: oklch(0.20 0.02 260 / 0.90);
+  --sidebar-foreground: oklch(0.96 0.01 260);
+  --sidebar-primary: oklch(0.60 0.15 45);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.26 0.03 260);
+  --sidebar-accent-foreground: oklch(0.98 0.01 260);
+  --sidebar-border: oklch(0.20 0.03 260 / 0.50);
+  --sidebar-ring: oklch(0.60 0.15 45 / 0.50);
+
+  --grad-primary: oklch(0.60 0.15 45);
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.70);
+  --glass-shadow:
+    0 4px 16px oklch(0.60 0.15 45 / 0.08),
+    0 1px  3px oklch(0.60 0.15 45 / 0.05),
+    0 1px  0   rgba(255, 255, 255, 0.60) inset;
+  --ambient-grad-1: oklch(0.95 0.02 45 / 0.55);
+  --ambient-grad-2: oklch(0.96 0.02 260 / 0.50);
+}
+
+/* ── Dark Glossy ── */
+.dark .theme-bronze {
+  --background: oklch(0.15 0.02 260);
+  --foreground: oklch(0.96 0.01 260);
+
+  --card: oklch(0.20 0.03 260 / 0.85);
+  --card-foreground: oklch(0.96 0.01 260);
+
+  --popover: oklch(0.20 0.03 260 / 0.95);
+  --popover-foreground: oklch(0.96 0.01 260);
+
+  --primary: oklch(0.65 0.16 45);
+  --primary-foreground: oklch(0.98 0.01 260);
+
+  --secondary: oklch(0.28 0.03 260);
+  --secondary-foreground: oklch(0.98 0.01 260);
+
+  --muted: oklch(0.28 0.03 260);
+  --muted-foreground: oklch(0.65 0.02 260);
+
+  --accent: oklch(0.28 0.03 260);
+  --accent-foreground: oklch(0.98 0.01 260);
+
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.96 0 0);
+
+  --border: oklch(0.28 0.03 260 / 0.60);
+  --input: oklch(0.28 0.03 260 / 0.50);
+  --ring: oklch(0.65 0.16 45 / 0.30);
+  --radius: 0.875rem;
+
+  --sidebar: oklch(0.12 0.02 260 / 0.90);
+  --sidebar-foreground: oklch(0.96 0.01 260);
+  --sidebar-primary: oklch(0.65 0.16 45);
+  --sidebar-primary-foreground: oklch(0.98 0.01 260);
+  --sidebar-accent: oklch(0.20 0.03 260);
+  --sidebar-accent-foreground: oklch(0.98 0.01 260);
+  --sidebar-border: oklch(0.12 0.02 260 / 0.50);
+  --sidebar-ring: oklch(0.65 0.16 45 / 0.50);
+
+  --grad-primary: oklch(0.65 0.16 45);
+  --glass-bg: rgba(20, 18, 36, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.50),
+    0 1px  0   rgba(255, 255, 255, 0.06) inset;
+  --ambient-grad-1: oklch(0.25 0.05 45 / 0.28);
+  --ambient-grad-2: oklch(0.22 0.03 260 / 0.25);
+}
+
+/* ── Light Solid (overrides only) ── */
+.theme-bronze.finish-solid {
+  --card: oklch(1 0 0);
+  --popover: oklch(0.98 0.01 260);
+
+  --border: oklch(0.90 0.01 260);
+  --input: oklch(0.90 0.01 260);
+
+  --sidebar: oklch(0.20 0.02 260);
+
+  --grad-primary: oklch(0.60 0.15 45);
+  --glass-bg: rgba(255, 255, 255, 1);
+  --glass-border: oklch(0.90 0.01 260 / 0.40);
+  --glass-shadow: 0 2px 8px oklch(0.60 0.15 45 / 0.08), 0 1px 2px rgba(0, 0, 0, 0.05);
+  --ambient-grad-1: oklch(1 0 0 / 0);
+  --ambient-grad-2: oklch(1 0 0 / 0);
+}
+
+/* ── Dark Solid (overrides only) ── */
+.dark .theme-bronze.finish-solid {
+  --card: oklch(0.20 0.03 260);
+  --popover: oklch(0.15 0.02 260);
+
+  --border: oklch(0.28 0.03 260);
+  --input: oklch(0.28 0.03 260);
+
+  --sidebar: oklch(0.12 0.02 260);
+
+  --grad-primary: oklch(0.65 0.16 45);
+  --glass-bg: rgba(20, 18, 36, 1);
+  --glass-border: oklch(0.28 0.03 260 / 0.50);
+  --glass-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.20);
+  --ambient-grad-1: oklch(1 0 0 / 0);
+  --ambient-grad-2: oklch(1 0 0 / 0);
+}

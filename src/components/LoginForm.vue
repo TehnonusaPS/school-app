@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { useAuthStore } from '@/stores/authStore'
 import { useRouter } from 'vue-router'
 import { Eye, EyeOff } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -46,12 +47,15 @@ const handleLogin = async () => {
   try {
     const success = await auth.login(email.value, password.value)
     if (success) {
+      toast.success(`Login Berhasil! Selamat datang kembali.`)
       router.push('/dashboard')
     } else {
       error.value = 'Email atau password salah.'
+      toast.error('Login Gagal! Email atau password salah.')
     }
   } catch (e) {
     error.value = 'Terjadi kesalahan saat login.'
+    toast.error('Login Gagal! Terjadi kesalahan sistem.')
   } finally {
     isLoading.value = false
   }

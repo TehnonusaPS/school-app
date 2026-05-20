@@ -13,6 +13,7 @@ import {
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import { toast } from 'vue-sonner'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -55,6 +56,7 @@ const showLogoutDialog = ref(false)
 
 const confirmLogout = () => {
   auth.logout()
+  toast.success('Logout Berhasil! Anda telah keluar dari sistem.')
   router.push('/')
 }
 

@@ -3,6 +3,7 @@ import { useAuthStore } from '../stores/authStore'
 import SidebarLayout from '../layouts/SidebarLayout.vue'
 
 // Import rute dari setiap module
+import landingRoutes from '../modules/landing/routes'
 import authRoutes from '../modules/auth/routes'
 import dashboardRoutes from '../modules/dashboard/routes'
 import manajemenDataRoutes from '../modules/manajemen-data/routes'
@@ -15,6 +16,9 @@ import lainnyaRoutes from '../modules/lainnya/routes'
 import devRoutes from '../modules/dev/routes'
 
 const routes = [
+  // Landing page
+  ...landingRoutes,
+
   // Rute Auth (Login, dll) biasanya tidak pakai SidebarLayout
   ...authRoutes,
 

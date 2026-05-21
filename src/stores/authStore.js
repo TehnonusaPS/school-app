@@ -7,7 +7,6 @@ export const useAuthStore = defineStore('auth', {
 
   actions: {
     login(email, password) {
-      // 🔥 dummy multi-role
       let user = null
 
       if (email === 'admin@mail.com' && password === '123456') {

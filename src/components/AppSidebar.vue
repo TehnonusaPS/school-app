@@ -51,6 +51,7 @@ const roleLabels = {
   guru: 'Guru',
   siswa: 'Siswa'
 }
+}
 
 const role = computed(() => auth.user?.role || 'guest')
 const roleLabel = computed(() => roleLabels[role.value] || role.value)
@@ -210,16 +211,18 @@ const user = computed(() => ({
     <SidebarHeader class="sidebar-brand-header">
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton size="lg" as-child class="sidebar-brand-btn bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/80">
+          <SidebarMenuButton
+            size="lg"
+            as-child
+            class="sidebar-brand-btn bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/80"
+          >
             <a href="/dashboard">
               <div class="sidebar-brand-icon">
                 <School class="size-5" />
               </div>
               <div class="grid flex-1 text-left text-sm leading-tight">
-                <span class="truncate font-extrabold text-sidebar-foreground tracking-tight">CerdasBangsa</span>
-                <span class="truncate text-[10px] capitalize text-sidebar-foreground/70 font-medium">
-                  {{ roleLabel }}
-                </span>
+                <span class="truncate font-semibold">Sekolah App</span>
+                <span class="truncate text-xs capitalize">{{ roleLabel }}</span>
               </div>
             </a>
           </SidebarMenuButton>

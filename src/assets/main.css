@@ -1,14 +1,28 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&display=swap');
 @import 'tailwindcss';
+@import './themes/blue.css';
+@import './themes/emerald.css';
+@import './themes/indigo.css';
+@import './themes/bronze.css';
+@import './themes/navy.css';
+@import './themes/zinc.css';
 @plugin "tailwindcss-animate";
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant data-open (&[data-state=open]);
+@custom-variant data-closed (&[data-state=closed]);
+@custom-variant data-checked (&[data-state=checked]);
+@custom-variant data-unchecked (&[data-state=unchecked]);
+@custom-variant data-active (&[data-state=active]);
+@custom-variant data-inactive (&[data-state=inactive]);
+@custom-variant data-horizontal (&[data-orientation=horizontal]);
+@custom-variant data-vertical (&[data-orientation=vertical]);
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
-  --font-heading: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -26,11 +40,6 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -45,7 +54,12 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* ── Global Defaults (fallback jika tidak ada class tema) ────────────
+   Semua token warna tema ada di themes.css.
+   :root hanya berisi nilai global non-warna.
+   ─────────────────────────────────────────────────────────────────── */
 :root {
+<<<<<<< HEAD
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
   --card: oklch(1 0 0);
@@ -121,6 +135,13 @@
   --sidebar-border: oklch(0.278 0.033 256.848);
   --sidebar-ring: oklch(0.443 0.032 258.919);
 }
+=======
+  --radius: 0.875rem;
+}
+
+
+
+>>>>>>> 0c89d1d1f56aa0d64357dec303f8c7f7eb509621
 
 @layer base {
   * {
@@ -128,6 +149,286 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(ellipse 110% 70% at  8% -10%, var(--ambient-grad-1) 0%, transparent 55%),
+      radial-gradient(ellipse  80% 55% at 92% 115%, var(--ambient-grad-2) 0%, transparent 50%),
+      radial-gradient(ellipse  55% 40% at 88%  12%, var(--ambient-grad-2) 0%, transparent 60%),
+      radial-gradient(ellipse  50% 35% at 12%  88%, var(--ambient-grad-1) 0%, transparent 55%),
+      radial-gradient(ellipse  40% 30% at 50%  50%, var(--ambient-grad-1) 0%, transparent 70%);
+    background-attachment: fixed;
+  }
+
+  /* ── Mode Solid: nonaktifkan ambient gradient ── */
+  body.finish-solid {
+    background-image: none !important;
+  }
+
+
+  /* Interactive cursor pointer */
+  button, a, [role="button"], [role="menuitem"], [role="tab"], label[for], select {
+    cursor: pointer;
+  }
+}
+
+@layer components {
+  /* ══ SIDEBAR BRAND HEADER ══ */
+  .sidebar-brand-header {
+    height: 4rem; /* 64px - exactly aligns with topbar */
+    background: transparent;
+    border-bottom: 1px solid var(--sidebar-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0 0.5rem; /* 8px left/right from sidebar edge, matches SidebarGroup and SidebarFooter */
+    overflow: hidden;
+  }
+  
+  :where([data-collapsible=icon]) .sidebar-brand-header {
+    height: 3rem;
+    padding: 0;
+    justify-content: center;
+  }
+  
+  .sidebar-brand-btn {
+    width: 100%;
+    height: 3rem !important; /* 48px - perfectly matches UserNav height */
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important; /* 8px gap */
+    padding: 0 0.5rem !important; /* 8px left/right inside the button */
+    border-radius: 0.5rem !important;
+    transition: all 0.3s ease !important;
+  }
+  
+  :where([data-collapsible=icon]) .sidebar-brand-btn {
+    padding: 0 !important;
+    justify-content: center !important;
+    height: 2.5rem !important;
+    width: 2.5rem !important;
+    margin: 0 auto;
+  }
+  
+  .sidebar-brand-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem; /* 32px - perfectly matches UserNav Avatar */
+    height: 2rem;
+    border-radius: 0.5rem;
+    background: var(--grad-primary);
+    color: white;
+    box-shadow: 0 4px 12px oklch(0.52 0.28 265 / 0.25);
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .sidebar-brand-icon::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+    pointer-events: none;
+  }
+  
+  :where([data-collapsible=icon]) .sidebar-brand-icon {
+    width: 2rem;
+    height: 2rem;
+  }
+  
+  .sidebar-brand-btn div:last-child {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  
+  :where([data-collapsible=icon]) .sidebar-brand-btn div:last-child {
+    opacity: 0;
+    transform: translateX(-10px);
+    pointer-events: none;
+    display: none;
+  }
+
+  /* ══ SIDEBAR GLOSS ══ */
+  [data-slot="sidebar-inner"],
+  [data-slot="sidebar"][data-mobile="true"] {
+    background: var(--sidebar) !important;
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border-right: 1px solid var(--sidebar-border) !important;
+  }
+
+  /* ── Mode Solid: nonaktifkan backdrop-filter di sidebar ── */
+  body.finish-solid [data-slot="sidebar-inner"],
+  body.finish-solid [data-slot="sidebar"][data-mobile="true"] {
+    background: var(--sidebar) !important;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  /* ══ BUTTON OVERRIDES ══ */
+  [data-slot="button"] {
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.02em;
+  }
+
+  [data-slot="button"]:not([variant="ghost"]):not([variant="link"]):not([variant="outline"])::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 45%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* ── Mode Solid: nonaktifkan button shine & icon glow ── */
+  body.finish-solid [data-slot="button"]::before {
+    display: none !important;
+  }
+  
+  body.finish-solid .sidebar-brand-icon {
+    box-shadow: none !important;
+  }
+  
+  body.finish-solid .sidebar-brand-icon::after {
+    display: none !important;
+  }
+
+  /* ══ GLASS COMPONENTS ══ */
+
+  /* Card */
+  [data-slot="card"] {
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid var(--border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  /* Input & Select — border lebih visible */
+  [data-slot="input"],
+  [data-slot="textarea"],
+  [data-slot="select-trigger"] {
+    border-color: color-mix(in oklch, var(--foreground) 22%, transparent) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  [data-slot="input"]:focus,
+  [data-slot="textarea"]:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 15%, transparent) !important;
+    outline: none !important;
+  }
+
+  body.finish-solid [data-slot="input"]:focus,
+  body.finish-solid [data-slot="textarea"]:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 2px color-mix(in oklch, var(--primary) 20%, transparent) !important;
+  }
+
+  /* Popover & Dropdown */
+  [data-slot="popover-content"],
+  [data-slot="dropdown-menu-content"],
+  [data-slot="context-menu-content"],
+  [data-slot="select-content"],
+  [data-slot="command"] {
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
+    background: var(--popover) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow:
+      var(--glass-shadow),
+      0 0 0 1px var(--border) !important;
+  }
+
+  /* Dialog / Sheet */
+  [data-slot="dialog-content"],
+  [data-slot="sheet-content"] {
+    backdrop-filter: blur(32px) saturate(200%);
+    -webkit-backdrop-filter: blur(32px) saturate(200%);
+    background: var(--card) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: var(--glass-shadow) !important;
+  }
+
+  /* ── Mode Solid: disable semua glass effects ── */
+  body.finish-solid [data-slot="card"],
+  body.finish-solid [data-slot="popover-content"],
+  body.finish-solid [data-slot="dropdown-menu-content"],
+  body.finish-solid [data-slot="context-menu-content"],
+  body.finish-solid [data-slot="select-content"],
+  body.finish-solid [data-slot="command"],
+  body.finish-solid [data-slot="dialog-content"],
+  body.finish-solid [data-slot="sheet-content"] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: var(--card) !important;
+    border-color: var(--border) !important;
+    box-shadow: none !important;
+  }
+
+  body.finish-solid [data-slot="popover-content"],
+  body.finish-solid [data-slot="dropdown-menu-content"],
+  body.finish-solid [data-slot="context-menu-content"],
+  body.finish-solid [data-slot="select-content"],
+  body.finish-solid [data-slot="command"] {
+    background: var(--popover) !important;
+  }
+}
+
+
+@layer utilities {
+  .glass-card {
+    background: var(--card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  /* Special active class for glossy themes (Tahoe) vs Flat (Zinc/Emerald/Indigo/Bronze) */
+  .glossy-active {
+    background: var(--grad-primary) !important;
+    color: white !important;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+      0 4px 12px var(--ring),
+      0 0 0 1px var(--ring) inset !important;
+    z-index: 1;
+  }
+
+  .glossy-active::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 100%);
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+
+  /* ── Mode Solid: glossy-active → flat primary ── */
+  body.finish-solid .glossy-active {
+    background: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+    box-shadow: none !important;
+  }
+  
+  body.finish-solid .glossy-active::after {
+    display: none !important;
+  }
+
+  /* Transition for non-active states to ensure smooth exit */
+  [data-slot="sidebar-menu-button"] {
+    transition: background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease !important;
   }
 }
 

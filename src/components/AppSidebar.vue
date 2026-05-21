@@ -22,7 +22,8 @@ import {
   BarChart3,
   School,
   UserCog,
-  Settings
+  Settings,
+  Palette
 } from 'lucide-vue-next'
 import NavMain from '@/components/NavMain.vue'
 import NavUser from '@/components/NavUser.vue'
@@ -206,19 +207,19 @@ const user = computed(() => ({
 
 <template>
   <Sidebar collapsible="icon">
-    <SidebarHeader>
+    <SidebarHeader class="sidebar-brand-header">
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton size="lg" as-child>
+          <SidebarMenuButton size="lg" as-child class="sidebar-brand-btn bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/80">
             <a href="/dashboard">
-              <div
-                class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
-              >
-                <School class="size-4" />
+              <div class="sidebar-brand-icon">
+                <School class="size-5" />
               </div>
               <div class="grid flex-1 text-left text-sm leading-tight">
-                <span class="truncate font-semibold">Sekolah App</span>
-                <span class="truncate text-xs capitalize">{{ roleLabel }}</span>
+                <span class="truncate font-extrabold text-sidebar-foreground tracking-tight">CerdasBangsa</span>
+                <span class="truncate text-[10px] capitalize text-sidebar-foreground/70 font-medium">
+                  {{ roleLabel }}
+                </span>
               </div>
             </a>
           </SidebarMenuButton>

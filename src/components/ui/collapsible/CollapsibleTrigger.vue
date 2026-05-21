@@ -1,14 +1,15 @@
-<script setup>
+<script setup lang="ts">
+import type { CollapsibleTriggerProps } from 'reka-ui'
 import { CollapsibleTrigger } from 'reka-ui'
 
-const props = defineProps({
-  asChild: { type: Boolean, required: false },
-  as: { type: null, required: false }
-})
+const props = defineProps<CollapsibleTriggerProps>()
 </script>
 
 <template>
-  <CollapsibleTrigger v-bind="props">
+  <CollapsibleTrigger
+    data-slot="collapsible-trigger"
+    v-bind="props"
+  >
     <slot />
   </CollapsibleTrigger>
 </template>

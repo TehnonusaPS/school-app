@@ -1,17 +1,14 @@
-<script setup>
+<script setup lang="ts">
+import type { CollapsibleContentProps } from 'reka-ui'
 import { CollapsibleContent } from 'reka-ui'
 
-const props = defineProps({
-  forceMount: { type: Boolean, required: false },
-  asChild: { type: Boolean, required: false },
-  as: { type: null, required: false }
-})
+const props = defineProps<CollapsibleContentProps>()
 </script>
 
 <template>
   <CollapsibleContent
+    data-slot="collapsible-content"
     v-bind="props"
-    class="overflow-hidden transition-all data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down"
   >
     <slot />
   </CollapsibleContent>

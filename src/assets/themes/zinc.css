@@ -1,0 +1,144 @@
+/*
+ * ═══════════════════════════════════════════════════════════════════
+ *  TEMA ZINC
+ *  Hue   : 0 (grayscale/netral — shadcn default)
+ *  Finish: Glossy | Solid (via .finish-solid)
+ * ═══════════════════════════════════════════════════════════════════
+ */
+
+/* ── Light Glossy ── */
+.theme-zinc {
+  --background: oklch(0.99 0 0);
+  --foreground: oklch(0.145 0 0);
+
+  --card: oklch(1 0 0 / 0.85);
+  --card-foreground: oklch(0.145 0 0);
+
+  --popover: oklch(0.99 0 0 / 0.95);
+  --popover-foreground: oklch(0.145 0 0);
+
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+
+  --secondary: oklch(0.95 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+
+  --muted: oklch(0.96 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+
+  --accent: oklch(0.93 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(1 0 0);
+
+  --border: oklch(0.85 0 0 / 0.50);
+  --input: oklch(0.87 0 0 / 0.40);
+  --ring: oklch(0.50 0 0 / 0.50);
+  --radius: 0.875rem;
+
+  --sidebar: oklch(0.97 0 0 / 0.80);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.92 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.85 0 0 / 0.35);
+  --sidebar-ring: oklch(0.50 0 0 / 0.40);
+
+  --grad-primary: linear-gradient(135deg, oklch(0.22 0 0), oklch(0.15 0 0));
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.70);
+  --glass-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.10),
+    0 2px  8px rgba(0, 0, 0, 0.06),
+    0 1px  0   rgba(255, 255, 255, 0.90) inset;
+  --ambient-grad-1: oklch(1 0 0 / 0);
+  --ambient-grad-2: oklch(1 0 0 / 0);
+}
+
+/* ── Dark Glossy ── */
+.dark .theme-zinc {
+  --background: oklch(0.12 0 0);
+  --foreground: oklch(0.985 0 0);
+
+  --card: oklch(0.16 0 0 / 0.85);
+  --card-foreground: oklch(0.985 0 0);
+
+  --popover: oklch(0.14 0 0 / 0.95);
+  --popover-foreground: oklch(0.985 0 0);
+
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+
+  --secondary: oklch(0.22 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+
+  --muted: oklch(0.20 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+
+  --accent: oklch(0.24 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.96 0 0);
+
+  --border: oklch(0.28 0 0 / 0.60);
+  --input: oklch(0.26 0 0 / 0.50);
+  --ring: oklch(0.70 0 0 / 0.50);
+  --radius: 0.875rem;
+
+  --sidebar: oklch(0.13 0 0 / 0.85);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.985 0 0);
+  --sidebar-primary-foreground: oklch(0.205 0 0);
+  --sidebar-accent: oklch(0.22 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.25 0 0 / 0.50);
+  --sidebar-ring: oklch(0.70 0 0 / 0.40);
+
+  --grad-primary: linear-gradient(135deg, oklch(0.22 0 0), oklch(0.15 0 0));
+  --glass-bg: rgba(18, 18, 18, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.50),
+    0 1px  0   rgba(255, 255, 255, 0.06) inset;
+  --ambient-grad-1: oklch(1 0 0 / 0);
+  --ambient-grad-2: oklch(1 0 0 / 0);
+}
+
+/* ── Light Solid (overrides only) ── */
+.theme-zinc.finish-solid {
+  --card: oklch(1 0 0);
+  --popover: oklch(1 0 0);
+
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+
+  --sidebar: oklch(0.985 0 0);
+
+  --grad-primary: oklch(0.205 0 0);
+  --glass-bg: rgba(255, 255, 255, 1);
+  --glass-border: oklch(0.922 0 0);
+  --glass-shadow: none;
+  --ambient-grad-1: oklch(1 0 0 / 0);
+  --ambient-grad-2: oklch(1 0 0 / 0);
+}
+
+/* ── Dark Solid (overrides only) ── */
+.dark .theme-zinc.finish-solid {
+  --card: oklch(0.145 0 0);
+  --popover: oklch(0.145 0 0);
+
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+
+  --sidebar: oklch(0.145 0 0);
+
+  --grad-primary: linear-gradient(135deg, oklch(0.22 0 0), oklch(0.15 0 0));
+  --glass-bg: rgba(20, 20, 20, 1);
+  --glass-border: oklch(0.269 0 0);
+  --glass-shadow: none;
+  --ambient-grad-1: oklch(1 0 0 / 0);
+  --ambient-grad-2: oklch(1 0 0 / 0);
+}

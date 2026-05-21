@@ -1,0 +1,144 @@
+/*
+ * ═══════════════════════════════════════════════════════════════════
+ *  TEMA EMERALD
+ *  Hue   : 155–160 (hijau emerald)
+ *  Finish: Glossy | Solid (via .finish-solid)
+ * ═══════════════════════════════════════════════════════════════════
+ */
+
+/* ── Light Glossy ── */
+.theme-emerald {
+  --background: oklch(0.99 0.005 160);
+  --foreground: oklch(0.145 0.02 160);
+
+  --card: oklch(1 0 0 / 0.85);
+  --card-foreground: oklch(0.145 0.02 160);
+
+  --popover: oklch(0.99 0.01 160 / 0.95);
+  --popover-foreground: oklch(0.145 0.02 160);
+
+  --primary: oklch(0.65 0.13 155);
+  --primary-foreground: oklch(1 0 0);
+
+  --secondary: oklch(0.96 0.02 160);
+  --secondary-foreground: oklch(0.35 0.05 160);
+
+  --muted: oklch(0.97 0.01 160);
+  --muted-foreground: oklch(0.55 0.03 160);
+
+  --accent: oklch(0.95 0.02 160);
+  --accent-foreground: oklch(0.20 0.05 160);
+
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(1 0 0);
+
+  --border: oklch(0.92 0.01 160 / 0.60);
+  --input: oklch(0.94 0.01 160 / 0.50);
+  --ring: oklch(0.65 0.13 155 / 0.30);
+  --radius: 0.875rem;
+
+  --sidebar: oklch(0.99 0.005 160 / 0.85);
+  --sidebar-foreground: oklch(0.15 0.03 160);
+  --sidebar-primary: oklch(0.65 0.13 155);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.94 0.02 160);
+  --sidebar-accent-foreground: oklch(0.20 0.05 160);
+  --sidebar-border: oklch(0.92 0.01 160 / 0.50);
+  --sidebar-ring: oklch(0.65 0.13 155 / 0.30);
+
+  --grad-primary: linear-gradient(135deg, oklch(0.67 0.13 155), oklch(0.62 0.12 162));
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.70);
+  --glass-shadow:
+    0 4px 16px oklch(0.65 0.13 155 / 0.10),
+    0 1px  3px oklch(0.65 0.13 155 / 0.05),
+    0 1px  0   rgba(255, 255, 255, 0.80) inset;
+  --ambient-grad-1: oklch(0.95 0.04 150 / 0.50);
+  --ambient-grad-2: oklch(0.96 0.03 165 / 0.45);
+}
+
+/* ── Dark Glossy ── */
+.dark .theme-emerald {
+  --background: oklch(0.15 0.01 160);
+  --foreground: oklch(0.98 0.01 160);
+
+  --card: oklch(0.18 0.02 160 / 0.85);
+  --card-foreground: oklch(0.98 0.01 160);
+
+  --popover: oklch(0.15 0.01 160 / 0.95);
+  --popover-foreground: oklch(0.98 0.01 160);
+
+  --primary: oklch(0.65 0.13 155);
+  --primary-foreground: oklch(1 0 0);
+
+  --secondary: oklch(0.25 0.03 160);
+  --secondary-foreground: oklch(0.98 0.01 160);
+
+  --muted: oklch(0.22 0.02 160);
+  --muted-foreground: oklch(0.75 0.02 160);
+
+  --accent: oklch(0.24 0.03 160);
+  --accent-foreground: oklch(0.98 0.01 160);
+
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.96 0 0);
+
+  --border: oklch(0.25 0.02 160 / 0.60);
+  --input: oklch(0.24 0.02 160 / 0.50);
+  --ring: oklch(0.65 0.13 155 / 0.30);
+  --radius: 0.875rem;
+
+  --sidebar: oklch(0.14 0.02 160 / 0.85);
+  --sidebar-foreground: oklch(0.96 0.01 160);
+  --sidebar-primary: oklch(0.65 0.13 155);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.22 0.03 160);
+  --sidebar-accent-foreground: oklch(0.96 0.01 160);
+  --sidebar-border: oklch(0.25 0.02 160 / 0.50);
+  --sidebar-ring: oklch(0.65 0.13 155 / 0.30);
+
+  --grad-primary: linear-gradient(135deg, oklch(0.67 0.13 150), oklch(0.62 0.12 160));
+  --glass-bg: rgba(10, 25, 20, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.50),
+    0 1px  0   rgba(255, 255, 255, 0.06) inset;
+  --ambient-grad-1: oklch(0.25 0.04 150 / 0.35);
+  --ambient-grad-2: oklch(0.22 0.03 160 / 0.28);
+}
+
+/* ── Light Solid (overrides only) ── */
+.theme-emerald.finish-solid {
+  --card: oklch(1 0 0);
+  --popover: oklch(0.99 0.01 160);
+
+  --border: oklch(0.92 0.01 160);
+  --input: oklch(0.94 0.01 160);
+
+  --sidebar: oklch(0.99 0.005 160);
+
+  --grad-primary: oklch(0.65 0.13 155);
+  --glass-bg: rgba(255, 255, 255, 1);
+  --glass-border: oklch(0.92 0.01 160 / 0.40);
+  --glass-shadow: 0 2px 8px oklch(0.65 0.13 155 / 0.08), 0 1px 2px rgba(0, 0, 0, 0.05);
+  --ambient-grad-1: oklch(1 0 0 / 0);
+  --ambient-grad-2: oklch(1 0 0 / 0);
+}
+
+/* ── Dark Solid (overrides only) ── */
+.dark .theme-emerald.finish-solid {
+  --card: oklch(0.18 0.02 160);
+  --popover: oklch(0.15 0.01 160);
+
+  --border: oklch(0.25 0.02 160);
+  --input: oklch(0.24 0.02 160);
+
+  --sidebar: oklch(0.14 0.02 160);
+
+  --grad-primary: oklch(0.65 0.13 155);
+  --glass-bg: rgba(10, 20, 15, 1);
+  --glass-border: oklch(0.25 0.02 160 / 0.50);
+  --glass-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.20);
+  --ambient-grad-1: oklch(1 0 0 / 0);
+  --ambient-grad-2: oklch(1 0 0 / 0);
+}

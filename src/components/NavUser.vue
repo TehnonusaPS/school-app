@@ -10,7 +10,7 @@ import {
   Sparkles,
   Square
 } from 'lucide-vue-next'
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 
@@ -38,7 +38,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 
 const props = defineProps({
@@ -99,7 +99,7 @@ const applyThemeClass = (styleName, finish) => {
   }
 }
 
-const setThemeStyle = (styleName) => {
+const setThemeStyle = styleName => {
   activeThemeStyle.value = styleName
   // Pertahankan finish saat pindah tema agar konsisten
   applyThemeClass(styleName, themeFinish.value)
@@ -120,12 +120,12 @@ const cycleThemeStyle = () => {
 }
 
 const themeNames = {
-  'blue':    'Blue',
-  'emerald': 'Emerald',
-  'indigo':  'Indigo',
-  'bronze':  'Bronze',
-  'navy':    'Navy',
-  'zinc':    'Zinc'
+  blue: 'Blue',
+  emerald: 'Emerald',
+  indigo: 'Indigo',
+  bronze: 'Bronze',
+  navy: 'Navy',
+  zinc: 'Zinc'
 }
 
 onMounted(() => {
@@ -195,7 +195,9 @@ onMounted(() => {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuLabel class="text-xs text-muted-foreground">Tampilan &amp; Tema</DropdownMenuLabel>
+            <DropdownMenuLabel class="text-xs text-muted-foreground"
+              >Tampilan &amp; Tema</DropdownMenuLabel
+            >
 
             <!-- Dark / Light Mode Toggle -->
             <DropdownMenuItem @select.prevent="toggleTheme" class="cursor-pointer">
@@ -208,15 +210,15 @@ onMounted(() => {
             <DropdownMenuItem @select.prevent="cycleThemeStyle" class="cursor-pointer">
               <Palette class="size-4" />
               <div class="truncate">
-                Ganti Tema: <span class="font-semibold text-primary ml-1">{{ themeNames[activeThemeStyle] || 'Blue' }}</span>
+                Ganti Tema:
+                <span class="font-semibold text-primary ml-1">{{
+                  themeNames[activeThemeStyle] || 'Blue'
+                }}</span>
               </div>
             </DropdownMenuItem>
 
             <!-- Glossy / Solid Toggle — tampil untuk semua tema -->
-            <DropdownMenuItem
-              @select.prevent="toggleThemeFinish"
-              class="cursor-pointer"
-            >
+            <DropdownMenuItem @select.prevent="toggleThemeFinish" class="cursor-pointer">
               <Sparkles v-if="themeFinish === 'glossy'" class="size-4" />
               <Square v-else class="size-4" />
               <div class="truncate">
@@ -272,4 +274,3 @@ onMounted(() => {
     </AlertDialogContent>
   </AlertDialog>
 </template>
-

@@ -32,10 +32,10 @@ const auth = useAuthStore()
 <template>
   <!-- ── Superadmin Dashboard ── -->
   <div v-if="auth.user?.role === 'superadmin'" class="space-y-6">
-    <DashboardStatCards />
+    <SuperadminStatCards />
     <div class="grid gap-4 lg:grid-cols-5">
-      <DashboardGrowthChart />
-      <DashboardActivityLog />
+      <SuperadminGrowthChart />
+      <SuperadminActivityLog />
     </div>
   </div>
 

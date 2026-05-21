@@ -56,7 +56,7 @@ const showLogoutDialog = ref(false)
 
 const confirmLogout = () => {
   auth.logout()
-  toast.success('Logout Berhasil! Anda telah keluar dari sistem.')
+  toast.success('Logout Berhasil!.', { cancel: { label: 'Tutup', onClick: () => {} } })
   router.push('/')
 }
 

@@ -24,6 +24,7 @@ const props = defineProps<ToasterProps>()
       '--normal-border': 'var(--border)',
       '--border-radius': '12px',
     }"
+    :close-button="true"
     :toast-options="{
       classes: {
         toast:
@@ -33,6 +34,8 @@ const props = defineProps<ToasterProps>()
           'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
         cancelButton:
           'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
+        closeButton:
+          'group-[.toast]:!bg-background group-[.toast]:!border group-[.toast]:!text-muted-foreground group-[.toast]:hover:!text-foreground group-[.toast]:hover:!border-foreground/30',
       },
     }"
     v-bind="props"

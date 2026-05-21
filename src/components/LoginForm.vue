@@ -47,15 +47,15 @@ const handleLogin = async () => {
   try {
     const success = await auth.login(email.value, password.value)
     if (success) {
-      toast.success(`Login Berhasil! Selamat datang kembali.`)
+      toast.success('Login Berhasil!', { cancel: { label: 'Tutup', onClick: () => {} } })
       router.push('/dashboard')
     } else {
       error.value = 'Email atau password salah.'
-      toast.error('Login Gagal! Email atau password salah.')
+      toast.error('Login Gagal! Email atau password salah.', { cancel: { label: 'Tutup', onClick: () => {} } })
     }
   } catch (e) {
     error.value = 'Terjadi kesalahan saat login.'
-    toast.error('Login Gagal! Terjadi kesalahan sistem.')
+    toast.error('Login Gagal! Terjadi kesalahan sistem.', { cancel: { label: 'Tutup', onClick: () => {} } })
   } finally {
     isLoading.value = false
   }

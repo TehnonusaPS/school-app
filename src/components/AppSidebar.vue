@@ -199,7 +199,7 @@ const navMain = computed(() => {
 
 const user = computed(() => ({
   name: auth.user?.name || 'Pengguna',
-  email: roleLabel.value,
+  email: auth.user?.email || '',
   role: roleLabel.value,
   avatar: ''
 }))

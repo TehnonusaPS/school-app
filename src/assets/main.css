@@ -59,7 +59,6 @@
    :root hanya berisi nilai global non-warna.
    ─────────────────────────────────────────────────────────────────── */
 :root {
-<<<<<<< HEAD
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
   --card: oklch(1 0 0);
@@ -135,13 +134,6 @@
   --sidebar-border: oklch(0.278 0.033 256.848);
   --sidebar-ring: oklch(0.443 0.032 258.919);
 }
-=======
-  --radius: 0.875rem;
-}
-
-
-
->>>>>>> 0c89d1d1f56aa0d64357dec303f8c7f7eb509621
 
 @layer base {
   * {

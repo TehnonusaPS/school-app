@@ -51,7 +51,6 @@ const roleLabels = {
   guru: 'Guru',
   siswa: 'Siswa'
 }
-}
 
 const role = computed(() => auth.user?.role || 'guest')
 const roleLabel = computed(() => roleLabels[role.value] || role.value)

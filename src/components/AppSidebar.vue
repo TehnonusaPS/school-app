@@ -178,22 +178,11 @@ const tataUsahaNav = [
   navByTitle['Komunikasi']
 ].filter(Boolean)
 
-const dashboardOnlyNav = [
-  {
-    title: 'Dashboard',
-    url: '/dashboard',
-    icon: LayoutDashboard
-  }
-]
-
-const dashboardOnlyRoles = new Set([])
-
 const navMain = computed(() => {
   if (role.value === 'admin-yayasan') return adminYayasanNav
   if (role.value === 'kepala-sekolah') return kepalaSekolahNav
   if (role.value === 'admin-sekolah') return adminSekolahNav
   if (role.value === 'tata-usaha') return tataUsahaNav
-  if (dashboardOnlyRoles.has(role.value)) return dashboardOnlyNav
   return fullNav
 })
 

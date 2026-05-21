@@ -227,7 +227,7 @@ const conversationsByRole = {
 const activeFilter = ref('all')
 const searchQuery = ref('')
 const newMessage = ref('')
-const activeConversationId = ref(conversationsByRole[currentRole.value][0].id)
+const activeConversationId = ref(conversationsByRole[currentRole.value]?.[0]?.id || null)
 
 const filterOptions = computed(() => (isStudent.value ? [] : filters))
 

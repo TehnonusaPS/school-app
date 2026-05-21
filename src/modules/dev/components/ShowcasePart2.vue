@@ -614,13 +614,4 @@ const goal = ref(350)
   </div>
 </template>
 
-<style scoped>
-:deep(.bar-chart-container) {
-  --vis-crosshair-line-stroke-width: 56px;
-  --vis-crosshair-line-stroke-color: var(--muted);
-  --vis-crosshair-line-stroke-opacity: 0.65;
-}
-:deep(.bar-chart-container circle) {
-  display: none !important;
-}
-</style>
+

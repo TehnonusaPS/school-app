@@ -5,7 +5,7 @@ import { Toaster } from '@/components/ui/sonner'
 
 <template>
   <router-view />
-  <Toaster position="top-right" />
+  <Toaster position="top-center" />
 </template>
 
 <!-- <template>

@@ -13,6 +13,7 @@ import {
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import { toast } from 'vue-sonner'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -55,7 +56,8 @@ const showLogoutDialog = ref(false)
 
 const confirmLogout = () => {
   auth.logout()
-  router.push('/login')
+  toast.success('Logout Berhasil!', { cancel: { label: 'Tutup', onClick: () => {} } })
+  router.push('/')
 }
 
 // --- Theme Logic ---

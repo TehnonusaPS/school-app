@@ -51,7 +51,7 @@ const handleSubmit = () => {
     <!-- Header dengan Tombol Kembali -->
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <div class="flex items-center gap-4">
-        <Button variant="outline" size="icon" @click="goBack" class="rounded-full shadow-sm">
+        <Button variant="secondary" size="icon" @click="goBack" class="rounded-full shadow-sm">
           <ChevronLeft class="h-5 w-5" />
         </Button>
         <div>
@@ -60,7 +60,7 @@ const handleSubmit = () => {
         </div>
       </div>
       <div class="flex gap-3">
-        <Button variant="ghost" @click="goBack" :disabled="isLoading">Batal</Button>
+        <Button variant="secondary" @click="goBack" :disabled="isLoading">Batal</Button>
         <Button @click="handleSubmit" :disabled="isLoading" class="shadow-md">
           <Save v-if="!isLoading" class="mr-2 h-4 w-4" />
           <span v-else class="mr-2 h-4 w-4 animate-spin border-2 border-current border-t-transparent rounded-full"></span>

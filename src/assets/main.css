@@ -95,6 +95,8 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+  --glass-gradient: linear-gradient(0deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.02) 45%, transparent 50%);
+  --button-gloss: linear-gradient(0deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.04) 45%, transparent 50%);
 }
 
 .dark {
@@ -133,6 +135,8 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(0.278 0.033 256.848);
   --sidebar-ring: oklch(0.443 0.032 258.919);
+  --glass-gradient: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.02) 45%, transparent 50%);
+  --button-gloss: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 45%, transparent 50%);
 }
 
 @layer base {
@@ -264,22 +268,74 @@
   }
 
   /* ══ BUTTON OVERRIDES ══ */
-  [data-slot="button"] {
+  [data-slot="button"],
+  [data-slot="badge"],
+  [data-slot="progress-indicator"],
+  [data-slot="slider-range"],
+  [data-slot="slider-thumb"],
+  [data-slot="alert-dialog-action"],
+  [data-slot="alert-dialog-cancel"],
+  [data-slot="alert-dialog-trigger"],
+  [data-slot="dialog-trigger"],
+  [data-slot="toggle-group-item"],
+  [data-slot="calendar-cell-trigger"],
+  [data-slot="checkbox"],
+  [data-slot="switch"],
+  [data-slot="switch-thumb"],
+  [data-slot="radio-group-indicator"],
+  [data-slot="tabs-trigger"],
+  [data-slot="pagination-link"],
+  [data-slot="pagination-previous"],
+  [data-slot="pagination-next"],
+  [data-slot="pagination-first"],
+  [data-slot="pagination-last"] {
     position: relative;
     overflow: hidden;
     letter-spacing: 0.02em;
   }
 
-  [data-slot="button"]:not([variant="ghost"]):not([variant="link"]):not([variant="outline"])::before {
+  [data-slot="button"]:not([variant="ghost"]):not([variant="link"]):not([data-variant="ghost"]):not([data-variant="link"])::before,
+  [data-slot="badge"]:not([data-variant="ghost"]):not([data-variant="link"])::before,
+  [data-slot="alert-dialog-action"]:not([data-variant="ghost"]):not([data-variant="link"])::before,
+  [data-slot="alert-dialog-cancel"]:not([data-variant="ghost"]):not([data-variant="link"])::before,
+  [data-slot="alert-dialog-trigger"]:not([data-variant="ghost"]):not([data-variant="link"])::before,
+  [data-slot="dialog-trigger"]:not([data-variant="ghost"]):not([data-variant="link"])::before,
+  [data-slot="toggle-group-item"][data-state="on"]::before,
+  [data-slot="calendar-cell-trigger"][data-selected]::before,
+  [data-slot="checkbox"][data-state="checked"]::before,
+  [data-slot="switch"][data-state="checked"]::before,
+  [data-slot="switch-thumb"]::before,
+  [data-slot="radio-group-indicator"]::before,
+  [data-slot="tabs-trigger"][data-state="active"]::before,
+  [data-slot="pagination-link"][aria-current="page"]::before,
+  [data-slot="progress-indicator"]::before,
+  [data-slot="slider-range"]::before,
+  [data-slot="slider-thumb"]::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 45%, transparent 50%);
+    background: var(--button-gloss);
     pointer-events: none;
   }
 
   /* ── Mode Solid: nonaktifkan button shine & icon glow ── */
-  body.finish-solid [data-slot="button"]::before {
+  body.finish-solid [data-slot="button"]::before,
+  body.finish-solid [data-slot="badge"]::before,
+  body.finish-solid [data-slot="alert-dialog-action"]::before,
+  body.finish-solid [data-slot="alert-dialog-cancel"]::before,
+  body.finish-solid [data-slot="alert-dialog-trigger"]::before,
+  body.finish-solid [data-slot="dialog-trigger"]::before,
+  body.finish-solid [data-slot="toggle-group-item"]::before,
+  body.finish-solid [data-slot="calendar-cell-trigger"]::before,
+  body.finish-solid [data-slot="checkbox"]::before,
+  body.finish-solid [data-slot="switch"]::before,
+  body.finish-solid [data-slot="switch-thumb"]::before,
+  body.finish-solid [data-slot="radio-group-indicator"]::before,
+  body.finish-solid [data-slot="tabs-trigger"]::before,
+  body.finish-solid [data-slot="pagination-link"]::before,
+  body.finish-solid [data-slot="progress-indicator"]::before,
+  body.finish-solid [data-slot="slider-range"]::before,
+  body.finish-solid [data-slot="slider-thumb"]::before {
     display: none !important;
   }
   
@@ -293,18 +349,26 @@
 
   /* ══ GLASS COMPONENTS ══ */
 
-  /* Card */
-  [data-slot="card"] {
+  /* Card, Calendar & Alert */
+  [data-slot="card"],
+  [data-slot="calendar"],
+  [data-slot="range-calendar"],
+  [data-slot="alert"] {
+    position: relative;
+    overflow: hidden;
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     border: 1px solid var(--border);
     box-shadow: var(--glass-shadow);
+    /* Gunakan background-image agar efek glossy ada di belakang konten (tidak membuat redup) */
+    background-image: var(--glass-gradient);
   }
 
-  /* Input & Select — border lebih visible */
+  /* Input & Select & Checkbox — border lebih visible */
   [data-slot="input"],
   [data-slot="textarea"],
-  [data-slot="select-trigger"] {
+  [data-slot="select-trigger"],
+  [data-slot="checkbox"] {
     border-color: color-mix(in oklch, var(--foreground) 22%, transparent) !important;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
@@ -322,11 +386,13 @@
     box-shadow: 0 0 0 2px color-mix(in oklch, var(--primary) 20%, transparent) !important;
   }
 
-  /* Popover & Dropdown */
+  /* Popover & Dropdown & Tooltip */
   [data-slot="popover-content"],
   [data-slot="dropdown-menu-content"],
   [data-slot="context-menu-content"],
   [data-slot="select-content"],
+  [data-slot="hover-card-content"],
+  [data-slot="tooltip-content"],
   [data-slot="command"] {
     backdrop-filter: blur(24px) saturate(200%);
     -webkit-backdrop-filter: blur(24px) saturate(200%);
@@ -337,9 +403,10 @@
       0 0 0 1px var(--border) !important;
   }
 
-  /* Dialog / Sheet */
+  /* Dialog / Sheet / Drawer */
   [data-slot="dialog-content"],
-  [data-slot="sheet-content"] {
+  [data-slot="sheet-content"],
+  [data-slot="drawer-content"] {
     backdrop-filter: blur(32px) saturate(200%);
     -webkit-backdrop-filter: blur(32px) saturate(200%);
     background: var(--card) !important;
@@ -349,18 +416,31 @@
 
   /* ── Mode Solid: disable semua glass effects ── */
   body.finish-solid [data-slot="card"],
+  body.finish-solid [data-slot="calendar"],
+  body.finish-solid [data-slot="range-calendar"],
+  body.finish-solid [data-slot="alert"],
   body.finish-solid [data-slot="popover-content"],
   body.finish-solid [data-slot="dropdown-menu-content"],
   body.finish-solid [data-slot="context-menu-content"],
   body.finish-solid [data-slot="select-content"],
+  body.finish-solid [data-slot="hover-card-content"],
+  body.finish-solid [data-slot="tooltip-content"],
   body.finish-solid [data-slot="command"],
   body.finish-solid [data-slot="dialog-content"],
-  body.finish-solid [data-slot="sheet-content"] {
+  body.finish-solid [data-slot="sheet-content"],
+  body.finish-solid [data-slot="drawer-content"] {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     background: var(--card) !important;
     border-color: var(--border) !important;
     box-shadow: none !important;
+  }
+
+  body.finish-solid [data-slot="card"],
+  body.finish-solid [data-slot="calendar"],
+  body.finish-solid [data-slot="range-calendar"],
+  body.finish-solid [data-slot="alert"] {
+    background-image: none !important;
   }
 
   body.finish-solid [data-slot="popover-content"],

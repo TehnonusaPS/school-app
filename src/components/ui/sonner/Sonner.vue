@@ -19,9 +19,9 @@ const props = defineProps<ToasterProps>()
   <Sonner
     :class="cn('toaster group', props.class)"
     :style="{
-      '--normal-bg': 'var(--popover)',
-      '--normal-text': 'var(--popover-foreground)',
-      '--normal-border': 'var(--border)',
+      '--normal-bg': 'color-mix(in oklch, var(--primary) 85%, transparent)',
+      '--normal-text': 'var(--primary-foreground)',
+      '--normal-border': 'transparent',
       '--border-radius': '12px',
     }"
     :close-button="true"
@@ -29,7 +29,7 @@ const props = defineProps<ToasterProps>()
       classes: {
         toast:
           'group toast shadow-xl rounded-xl border p-4 text-sm font-medium transition-all duration-300 flex items-center gap-3',
-        description: 'group-[.toast]:text-muted-foreground text-xs',
+        description: '!text-primary-foreground opacity-90 text-xs',
         actionButton:
           'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
         cancelButton:
@@ -77,6 +77,12 @@ const props = defineProps<ToasterProps>()
   to {
     transform: scale(1);
   }
+}
+
+/* Force description text color for normal primary toasts */
+.toaster [data-sonner-toast]:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"]) [data-description] {
+  color: var(--primary-foreground) !important;
+  opacity: 0.9 !important;
 }
 
 /* Light mode overrides */

@@ -33,8 +33,8 @@ onMounted(() => {
         <p class="text-muted-foreground">Kelola informasi data siswa sekolah Anda di sini.</p>
       </div>
       <div class="flex items-center gap-2">
-        <Button variant="outline" @click="execute" :disabled="isLoading">
-          <RefreshCw class="mr-2 h-4 w-4" :class="{ 'animate-spin': isLoading }" />
+        <Button variant="secondary" @click="execute" :disabled="isLoading">
+          <RefreshCw class="mr-2 h-4 w-4" :class="{ 'animate-spin': isLoading, }"  />
           Refresh
         </Button>
         <Button @click="$router.push('/manajemen-data/siswa/tambah')">

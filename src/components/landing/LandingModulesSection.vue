@@ -2,11 +2,11 @@
 import { Check, GraduationCap } from 'lucide-vue-next'
 
 const activeSchools = [
-  { name: 'TK Cahaya Kecil', siswa: 142, color: 'bg-coral' },
-  { name: 'SD Cahaya Bangsa 1', siswa: 612, color: 'bg-primary' },
-  { name: 'SMP Cahaya Bangsa', siswa: 488, color: 'bg-accent' },
-  { name: 'SMA Cahaya Bangsa', siswa: 524, color: 'bg-lavender' },
-  { name: 'Pesantren Al-Cahaya', siswa: 318, color: 'bg-secondary' }
+  { name: 'TK Cahaya Kecil', siswa: 142, color: 'bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400' },
+  { name: 'SD Cahaya Bangsa 1', siswa: 612, color: 'bg-rose-100 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400' },
+  { name: 'SMP Cahaya Bangsa', siswa: 488, color: 'bg-blue-100 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400' },
+  { name: 'SMA Cahaya Bangsa', siswa: 524, color: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300' },
+  { name: 'Pesantren Al-Cahaya', siswa: 318, color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400' }
 ]
 </script>
 
@@ -59,7 +59,7 @@ const activeSchools = [
               class="flex items-center gap-3 rounded-2xl bg-white/60 p-3"
             >
               <div
-                class="flex h-11 w-11 items-center justify-center rounded-xl text-white"
+                class="flex h-11 w-11 items-center justify-center rounded-xl font-medium"
                 :class="school.color"
               >
                 <GraduationCap class="h-5 w-5" />

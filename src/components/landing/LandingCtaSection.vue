@@ -1,26 +1,34 @@
+<script setup>
+import LandingContactInfo from './LandingContactInfo.vue'
+import LandingContactForm from './LandingContactForm.vue'
+</script>
+
 <template>
-  <section class="relative px-6 py-24">
-    <div
-      class="relative mx-auto max-w-5xl overflow-hidden rounded-[2.5rem] bg-foreground p-10 text-background md:p-16"
-    >
-      <div class="blob -right-10 -top-10 h-70 w-70 bg-primary opacity-60" />
-      <div class="blob -bottom-10 -left-10 h-65 w-65 bg-coral opacity-50" />
-      <div class="relative grid gap-8 md:grid-cols-2 md:items-center">
-        <div>
-          <h2 class="text-4xl font-bold tracking-tight md:text-5xl">
-            Siap modernisasi yayasan Anda?
-          </h2>
-          <p class="mt-4 text-background/70">
-            Tim kami siap membantu setup, migrasi data, dan training guru dan staff.
-          </p>
+  <section id="kontak" class="relative px-6 py-24 bg-gradient-to-b from-transparent to-slate-50/30 dark:to-slate-950/5">
+    <div class="mx-auto max-w-6xl">
+      <!-- Section Header -->
+      <div class="mx-auto max-w-2xl text-center space-y-3 mb-14">
+        <span class="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold text-primary dark:border-primary/30 dark:bg-primary/10 dark:text-primary-foreground/90">
+          Hubungi Kami
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+          Siap Bergabung Bersama Kami?
+        </h2>
+        <p class="text-sm sm:text-base text-slate-500 dark:text-slate-400 leading-relaxed">
+          Isi formulir di bawah dan tim kami akan menghubungi Anda untuk demonstrasi gratis sesuai kebutuhan sekolah atau yayasan Anda.
+        </p>
+      </div>
+
+      <!-- Main Layout Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+        <!-- Left Side: Contact Info & Banner -->
+        <div class="lg:col-span-5">
+          <LandingContactInfo />
         </div>
-        <div class="flex flex-col gap-3 sm:flex-row md:justify-start md:pl-36">
-          <button
-            class="rounded-full bg-secondary px-6 py-3.5 text-sm font-semibold text-secondary-foreground transition hover:bg-secondary/90"
-            type="button"
-          >
-            Hubungi Sales
-          </button>
+
+        <!-- Right Side: The Premium Form -->
+        <div class="lg:col-span-7">
+          <LandingContactForm />
         </div>
       </div>
     </div>

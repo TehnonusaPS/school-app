@@ -16,7 +16,8 @@ defineProps({
       { label: 'Fitur', href: '#fitur' },
       { label: 'Modul', href: '#modul' },
       { label: 'Harga', href: '#harga' },
-      { label: 'Testimoni', href: '#testimoni' }
+      { label: 'Testimoni', href: '#testimoni' },
+      { label: 'Hubungi Kami', href: '#kontak' }
     ]
   }
 })

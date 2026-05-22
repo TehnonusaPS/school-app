@@ -7,7 +7,7 @@ const plans = [
     price: 'Rp 1,5jt',
     desc: 'Untuk 1 sekolah, hingga 300 siswa.',
     features: ['Akademik & Rapor', 'Absensi digital', 'Komunikasi orang tua', 'Support email'],
-    color: 'bg-secondary',
+    color: 'bg-secondary text-secondary-foreground',
     featured: false
   },
   {
@@ -21,7 +21,7 @@ const plans = [
       'PPDB online',
       'Support prioritas'
     ],
-    color: 'bg-primary',
+    color: 'bg-primary text-primary-foreground',
     featured: true
   },
   {
@@ -29,7 +29,7 @@ const plans = [
     price: 'Custom',
     desc: 'Yayasan besar, kustomisasi penuh.',
     features: ['Semua di Yayasan', 'Single Sign-On', 'Integrasi kustom', 'Dedicated manager'],
-    color: 'bg-lavender',
+    color: 'bg-accent text-accent-foreground',
     featured: false
   }
 ]
@@ -66,7 +66,7 @@ const plans = [
             Paling Populer
           </span>
           <div
-            class="mb-5 inline-flex h-10 w-10 items-center justify-center rounded-xl text-white"
+            class="mb-5 inline-flex h-10 w-10 items-center justify-center rounded-xl font-medium"
             :class="plan.color"
           >
             <ShieldCheck class="h-5 w-5" />

@@ -140,36 +140,18 @@ onMounted(() => {
     document.documentElement.classList.add('dark')
   }
 
-  const detectBodyTheme = () => {
-    const themeClass = Array.from(document.body.classList).find(cls => cls.startsWith('theme-'))
-    return themeClass ? themeClass.replace('theme-', '') : null
-  }
-
-  const savedThemeStyle = localStorage.getItem('themeStyle')
-  const currentThemeStyle = savedThemeStyle
-    ? savedThemeStyle === 'tahoe'
-      ? 'blue'
-      : savedThemeStyle
-    : detectBodyTheme()
-
-  if (currentThemeStyle) {
-    activeThemeStyle.value = currentThemeStyle
-  }
+  // Restore theme style (support legacy 'tahoe' → map ke 'blue')
+  const savedThemeStyle = localStorage.getItem('themeStyle') || 'blue'
+  const mappedStyle = savedThemeStyle === 'tahoe' ? 'blue' : savedThemeStyle
+  activeThemeStyle.value = mappedStyle
 
   // Restore finish (berlaku untuk semua tema)
-  const savedFinish = localStorage.getItem('themeFinish')
-  if (savedFinish) {
-    themeFinish.value = savedFinish
-  }
+  const savedFinish = localStorage.getItem('themeFinish') || 'glossy'
+  themeFinish.value = savedFinish
 
-  if (currentThemeStyle || savedFinish) {
-    applyThemeClass(activeThemeStyle.value, themeFinish.value)
-  }
-
-  // Simpan ulang jika ada konversi dari legacy 'tahoe'
-  if (savedThemeStyle === 'tahoe') {
-    localStorage.setItem('themeStyle', 'blue')
-  }
+  applyThemeClass(mappedStyle, savedFinish)
+  // Simpan ulang jika ada konversi dari 'tahoe'
+  if (savedThemeStyle === 'tahoe') localStorage.setItem('themeStyle', 'blue')
 })
 </script>
 

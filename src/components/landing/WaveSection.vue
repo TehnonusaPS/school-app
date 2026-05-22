@@ -1,9 +1,9 @@
 <script setup>
-import s1 from '@/assets/students-1.jpg'
-import s2 from '@/assets/students-2.jpg'
-import s3 from '@/assets/students-3.jpg'
-import s4 from '@/assets/students-4.jpg'
-import s5 from '@/assets/students-5.jpg'
+import s1 from '@/assets/images/students-1.jpg'
+import s2 from '@/assets/images/students-2.jpg'
+import s3 from '@/assets/images/students-3.jpg'
+import s4 from '@/assets/images/students-4.jpg'
+import s5 from '@/assets/images/students-5.jpg'
 import { Sparkles } from 'lucide-vue-next'
 
 const slides = [
@@ -120,10 +120,6 @@ const waveClip =
                   </figure>
                 </div>
               </div>
-            </div>
-
-            <div class="mt-4 text-center text-xs text-foreground/60">
-              Hover untuk menjeda carousel
             </div>
           </div>
         </div>

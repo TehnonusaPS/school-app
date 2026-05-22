@@ -49,6 +49,35 @@ const currentUser = computed(() => ({
   avatar: ''
 }))
 
+const filteredNavMain = computed(() => {
+  return data.navMain.map(item => {
+    if (item.title === 'Komunikasi') {
+      if (auth.user?.role === 'admin_yayasan') {
+        return {
+          ...item,
+          items: item.items.filter(sub => sub.title === 'Pengumuman')
+        }
+      } else if (auth.user?.role === 'kepala_sekolah') {
+        return {
+          ...item,
+          items: item.items.filter(sub => sub.title === 'Pengumuman' || sub.title === 'Feedback Orang Tua')
+        }
+      } else if (auth.user?.role === 'admin_sekolah') {
+        return {
+          ...item,
+          items: item.items.filter(sub => sub.title !== 'Feedback Orang Tua' && sub.title !== 'Pengumuman')
+        }
+      } else {
+        return {
+          ...item,
+          items: item.items.filter(sub => sub.title !== 'Feedback Orang Tua' && sub.title !== 'Pengumuman')
+        }
+      }
+    }
+    return item
+  })
+})
+
 const data = {
   navMain: [
     {
@@ -107,6 +136,8 @@ const data = {
       icon: MessageSquare,
       items: [
         { title: 'Pengumuman', url: '/komunikasi/pengumuman' },
+        { title: 'Berita Kegiatan', url: '/komunikasi/berita-kegiatan' },
+        { title: 'Feedback Orang Tua', url: '/komunikasi/feedback' },
         { title: 'Pesan Internal', url: '/komunikasi/pesan' },
         { title: 'Notifikasi', url: '/komunikasi/notifikasi' }
       ]
@@ -163,7 +194,7 @@ const data = {
       </SidebarMenu>
     </SidebarHeader>
     <SidebarContent>
-      <NavMain :items="data.navMain" />
+      <NavMain :items="filteredNavMain" />
     </SidebarContent>
     <SidebarFooter>
       <NavUser :user="currentUser" />

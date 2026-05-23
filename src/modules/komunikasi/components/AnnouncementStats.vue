@@ -35,7 +35,7 @@ defineEmits(['create'])
           <Megaphone class="size-6 text-primary" />
         </div>
         <div>
-          <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wider leading-none">Total Berita Terbuat</p>
+          <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wider leading-none">Total Pengumuman</p>
           <p class="text-3xl font-extrabold text-foreground mt-1.5 tabular-nums leading-none">
             {{ total }}
           </p>

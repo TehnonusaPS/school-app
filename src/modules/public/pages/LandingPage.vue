@@ -1,34 +1,56 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { onMounted } from 'vue'
 
-import LandingNavbar   from '../components/LandingNavbar.vue'
-import LandingHero     from '../components/LandingHero.vue'
-import LandingStats    from '../components/LandingStats.vue'
-import LandingFeatures from '../components/LandingFeatures.vue'
-import LandingSolusi   from '../components/LandingSolusi.vue'
-import LandingTentang  from '../components/LandingTentang.vue'
-import LandingKontak   from '../components/LandingKontak.vue'
-import LandingFooter   from '../components/LandingFooter.vue'
+import LandingNavbar from '@/components/landing/LandingNavbar.vue'
+import LandingHeroSection from '@/components/landing/LandingHeroSection.vue'
+import WaveSection from '@/components/landing/WaveSection.vue'
+import LandingFeaturesSection from '@/components/landing/LandingFeaturesSection.vue'
+import LandingModulesSection from '@/components/landing/LandingModulesSection.vue'
+import LandingPricingSection from '@/components/landing/LandingPricingSection.vue'
+import LandingTestimonialsSection from '@/components/landing/LandingTestimonialsSection.vue'
+import LandingCtaSection from '@/components/landing/LandingCtaSection.vue'
+import LandingFooter from '@/components/landing/LandingFooter.vue'
+import LandingChatWidget from '@/components/landing/LandingChatWidget.vue'
 
-const isScrolled = ref(false)
-const handleScroll = () => { isScrolled.value = window.scrollY > 50 }
-onMounted(() => window.addEventListener('scroll', handleScroll))
-onUnmounted(() => window.removeEventListener('scroll', handleScroll))
-
-const scrollTo = (id) => {
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
-}
+onMounted(() => {
+  // Pastikan class theme-emerald ada di body agar ambient gradients dan styles menyala indah
+  if (!document.body.classList.contains('theme-emerald')) {
+    document.body.classList.add('theme-emerald')
+  }
+})
 </script>
 
 <template>
-  <div class="font-sans text-gray-800 antialiased">
-    <LandingNavbar :isScrolled="isScrolled" @scrollTo="scrollTo" />
-    <LandingHero   @scrollTo="scrollTo" />
-    <LandingStats  />
-    <LandingFeatures />
-    <LandingSolusi />
-    <LandingTentang />
-    <LandingKontak />
-    <LandingFooter @scrollTo="scrollTo" />
+  <div class="font-sans antialiased text-foreground bg-background">
+    <!-- Navbar (floating glass) -->
+    <LandingNavbar brandName="Sekolahku ERP" loginPath="/login" />
+
+    <!-- Hero Section -->
+    <LandingHeroSection />
+
+    <!-- Wave Carousel (visual asset showcaser & value list) -->
+    <WaveSection />
+
+    <!-- Fitur Section -->
+    <LandingFeaturesSection />
+
+    <!-- Modul Section -->
+    <LandingModulesSection />
+
+    <!-- Harga Section -->
+    <LandingPricingSection />
+
+    <!-- Testimoni Section -->
+    <LandingTestimonialsSection />
+
+    <!-- CTA Section -->
+    <LandingCtaSection />
+
+    <!-- Footer Section -->
+    <LandingFooter brandName="Sekolahku ERP" />
+
+    <!-- Live Floating WhatsApp Chat Helper -->
+    <LandingChatWidget />
   </div>
 </template>
+

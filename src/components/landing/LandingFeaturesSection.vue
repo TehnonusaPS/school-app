@@ -24,19 +24,19 @@ const features = [
     icon: CalendarCheck,
     title: 'Absensi & Kehadiran',
     desc: 'Absen QR/biometrik untuk siswa & guru, otomatis terekap.',
-    color: 'bg-coral text-coral-foreground'
+    color: 'bg-primary/20 text-primary'
   },
   {
     icon: MessageCircle,
     title: 'Komunikasi Orang Tua',
     desc: 'Broadcast, chat, dan notifikasi via app & WhatsApp.',
-    color: 'bg-lavender text-lavender-foreground'
+    color: 'bg-secondary/80 text-secondary-foreground'
   },
   {
     icon: BarChart3,
     title: 'Dashboard Yayasan',
     desc: 'Lihat performa semua sekolah dalam satu layar.',
-    color: 'bg-primary text-primary-foreground'
+    color: 'bg-accent/80 text-accent-foreground'
   }
 ]
 </script>

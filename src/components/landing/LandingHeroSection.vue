@@ -1,5 +1,6 @@
 <script setup>
 import { ArrowRight, Building2, MessageCircle, School, Sparkles } from 'lucide-vue-next'
+import heroBg from '@/assets/images/landing-hero.png'
 
 const stats = [
   { label: 'Total Siswa', value: '4.218', color: 'bg-primary' },
@@ -24,9 +25,28 @@ const marqueeItems = [...yayasan, ...yayasan]
 
 <template>
   <section class="relative overflow-hidden pb-24 pt-36">
-    <div class="blob -left-20 -top-20 h-105 w-105 bg-primary" />
-    <div class="blob right-0 top-40 h-95 w-95 bg-accent" />
-    <div class="blob bottom-0 left-1/3 h-80 w-80 bg-secondary" />
+    <!-- Background Image with premium blend overlays using standard CSS variable gradients -->
+    <div class="absolute inset-0 z-0 overflow-hidden">
+      <img 
+        :src="heroBg" 
+        alt="Hero Background" 
+        class="w-full h-full object-cover opacity-25 dark:opacity-30 pointer-events-none select-none scale-105 transition-opacity duration-700" 
+      />
+      <!-- Fading vertical and radial overlays using standard CSS variables to ensure flawless compilation -->
+      <div 
+        class="absolute inset-0"
+        style="background: linear-gradient(to bottom, transparent 20%, var(--background) 95%);"
+      ></div>
+      <div 
+        class="absolute inset-0"
+        style="background: radial-gradient(circle at center, transparent 20%, var(--background) 90%);"
+      ></div>
+    </div>
+
+    <!-- Soft Ambient Glows -->
+    <div class="blob -left-20 -top-20 h-105 w-105 bg-primary/30 dark:bg-primary/15" />
+    <div class="blob right-0 top-40 h-95 w-95 bg-accent/30 dark:bg-accent/15" />
+    <div class="blob bottom-0 left-1/3 h-80 w-80 bg-secondary/20" />
 
     <div class="relative mx-auto max-w-6xl px-6 text-center">
       <div
@@ -41,9 +61,7 @@ const marqueeItems = [...yayasan, ...yayasan]
         Kelola seluruh sekolah yayasan Anda dari
         <span class="relative inline-block">
           <span class="relative z-10">satu dashboard</span>
-          <span class="absolute inset-x-0 bottom-2 z-0 h-3 rounded-full bg-secondary/70" />
-        </span>
-        .
+          <span class="absolute inset-x-0 bottom-2 z-0 h-3 rounded-full bg-secondary/70" /></span>.
       </h1>
       <p class="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
         Sekolahku menyatukan akademik, keuangan, kesiswaan, dan komunikasi orang tua untuk semua

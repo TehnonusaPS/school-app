@@ -149,10 +149,10 @@ function handleSubmit() {
               </SelectTrigger>
               <SelectContent class="rounded-xl shadow-lg border-border bg-card">
                 <SelectItem value="SEMUA SEKOLAH">Semua Sekolah</SelectItem>
-                <SelectItem v-if="!userSchool.value || userSchool.value === '8D Tehnonusa I'" value="8D Tehnonusa I">
+                <SelectItem v-if="!userSchool || userSchool === '8D Tehnonusa I'" value="8D Tehnonusa I">
                   8D Tehnonusa I
                 </SelectItem>
-                <SelectItem v-if="!userSchool.value || userSchool.value === '8D Tehnonusa II'" value="8D Tehnonusa II">
+                <SelectItem v-if="!userSchool || userSchool === '8D Tehnonusa II'" value="8D Tehnonusa II">
                   8D Tehnonusa II
                 </SelectItem>
               </SelectContent>

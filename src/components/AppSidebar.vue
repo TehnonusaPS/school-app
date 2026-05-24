@@ -49,33 +49,39 @@ const currentUser = computed(() => ({
   avatar: ''
 }))
 
+// Struktur RBAC Dinamis
+// Cara Penggunaan:
+// Tambahkan properti `roles: ['nama_role']` pada item parent atau children untuk membatasi akses.
+// Jika properti `roles` tidak ada, maka menu tersebut dapat diakses oleh SEMUA role.
+// Role yang tersedia di authStore: 'superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'tata_usaha', 'guru', 'wali_kelas', 'siswa', 'orang_tua'
+
 const filteredNavMain = computed(() => {
-  return data.navMain.map(item => {
-    if (item.title === 'Komunikasi') {
-      if (auth.user?.role === 'admin_yayasan') {
+  const currentRole = auth.user?.role
+
+  return data.navMain
+    // 1. Filter parent menu
+    .filter(item => {
+      if (!item.roles) return true // Terbuka untuk semua jika tidak ada pembatasan
+      return item.roles.includes(currentRole)
+    })
+    // 2. Filter children menu (jika ada)
+    .map(item => {
+      if (item.items) {
         return {
           ...item,
-          items: item.items.filter(sub => sub.title === 'Pengumuman')
-        }
-      } else if (auth.user?.role === 'kepala_sekolah') {
-        return {
-          ...item,
-          items: item.items.filter(sub => sub.title === 'Pengumuman' || sub.title === 'Feedback Orang Tua')
-        }
-      } else if (auth.user?.role === 'admin_sekolah') {
-        return {
-          ...item,
-          items: item.items.filter(sub => sub.title !== 'Feedback Orang Tua' && sub.title !== 'Pengumuman')
-        }
-      } else {
-        return {
-          ...item,
-          items: item.items.filter(sub => sub.title !== 'Feedback Orang Tua' && sub.title !== 'Pengumuman')
+          items: item.items.filter(sub => {
+            if (!sub.roles) return true
+            return sub.roles.includes(currentRole)
+          })
         }
       }
-    }
-    return item
-  })
+      return item
+    })
+    // 3. Sembunyikan parent jika semua childnya tersembunyi (opsional, tapi disarankan)
+    .filter(item => {
+      if (item.items && item.items.length === 0) return false
+      return true
+    })
 })
 
 const data = {
@@ -84,13 +90,18 @@ const data = {
       title: 'Dashboard',
       url: '/dashboard',
       icon: LayoutDashboard
+      // roles: ['superadmin', 'admin_yayasan', 'kepala_sekolah'] <-- Contoh penggunaan
     },
     {
       title: 'Manajemen Data',
       url: '/manajemen-data',
       icon: Database,
       items: [
-        { title: 'Data Siswa', url: '/manajemen-data/siswa' },
+        { 
+          title: 'Data Siswa', 
+          url: '/manajemen-data/siswa'
+          // roles: ['superadmin', 'admin_sekolah'] <-- Contoh membatasi sub-menu
+        },
         { title: 'Data Guru & Staff', url: '/manajemen-data/guru-staff' },
         { title: 'Data Kelas', url: '/manajemen-data/kelas' },
         { title: 'Data Mata Pelajaran', url: '/manajemen-data/mata-pelajaran' },
@@ -166,7 +177,9 @@ const data = {
     {
       title: 'UI Components',
       url: '/components',
-      icon: Palette
+      icon: Palette,
+      // Contoh pembatasan: Hanya role 'superadmin' yang bisa melihat menu ini
+      roles: ['superadmin']
     }
   ]
 }

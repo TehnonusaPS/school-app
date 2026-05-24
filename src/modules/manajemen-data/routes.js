@@ -6,6 +6,7 @@ export default [
       title: 'Data Siswa',
       parent: 'Manajemen Data',
       description: 'Kelola data seluruh siswa aktif.'
+      // roles: ['superadmin', 'admin_sekolah'] <-- Contoh cara membatasi rute
     }
   },
   {

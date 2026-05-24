@@ -6,7 +6,7 @@
 @import './themes/bronze.css';
 @import './themes/navy.css';
 @import './themes/zinc.css';
-@import 'tailwindcss-animate';
+@plugin "tailwindcss-animate";
 
 @custom-variant dark (&:is(.dark *));
 @custom-variant data-open (&[data-state=open]);

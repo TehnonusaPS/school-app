@@ -81,5 +81,115 @@ export default [
       requiresAuth: true,
       roles: ['guru', 'siswa']
     }
+  },
+  {
+    path: 'komunikasi/persuratan/aktif',
+    component: () => import('./pages/SuratKeteranganAktif.vue'),
+    meta: {
+      title: 'Surat Keterangan Aktif',
+      parent: 'Komunikasi',
+      description: 'Daftar surat keterangan siswa aktif yang diterbitkan.',
+      requiresAuth: true,
+      roles: ['tata_usaha']
+    }
+  },
+  {
+    path: 'komunikasi/persuratan/aktif/buat',
+    component: () => import('./pages/BuatSuratAktif.vue'),
+    meta: {
+      title: 'Buat Surat Keterangan Aktif',
+      parent: 'Komunikasi',
+      description: 'Form pembuatan surat keterangan siswa aktif.',
+      requiresAuth: true,
+      roles: ['tata_usaha']
+    }
+  },
+  {
+    path: 'komunikasi/persuratan/aktif/edit/:id',
+    component: () => import('./pages/EditSuratAktif.vue'),
+    meta: {
+      title: 'Edit Surat Keterangan Aktif',
+      parent: 'Komunikasi',
+      description: 'Form edit surat keterangan siswa aktif.',
+      requiresAuth: true,
+      roles: ['tata_usaha']
+    }
+  },
+  {
+    path: 'komunikasi/persuratan/dispensasi',
+    component: () => import('./pages/SuratDispensasi.vue'),
+    meta: {
+      title: 'Surat Dispensasi',
+      parent: 'Komunikasi',
+      description: 'Manajemen surat izin dan dispensasi kegiatan siswa.',
+      requiresAuth: true,
+      roles: ['tata_usaha']
+    }
+  },
+  {
+    path: 'komunikasi/persuratan/dispensasi/buat',
+    component: () => import('./pages/BuatSuratDispensasi.vue'),
+    meta: {
+      title: 'Buat Surat Dispensasi',
+      parent: 'Komunikasi',
+      description: 'Form pembuatan surat izin atau dispensasi siswa.',
+      requiresAuth: true,
+      roles: ['tata_usaha']
+    }
+  },
+  {
+    path: 'komunikasi/persuratan/dispensasi/edit/:id',
+    component: () => import('./pages/EditSuratDispensasi.vue'),
+    meta: {
+      title: 'Edit Surat Dispensasi',
+      parent: 'Komunikasi',
+      description: 'Form edit surat izin atau dispensasi siswa.',
+      requiresAuth: true,
+      roles: ['tata_usaha']
+    }
+  },
+  {
+    path: 'komunikasi/persuratan/lulus',
+    component: () => import('./pages/SuratKeteranganLulus.vue'),
+    meta: {
+      title: 'Surat Keterangan Lulus',
+      parent: 'Komunikasi',
+      description: 'Penerbitan Surat Keterangan Lulus (SKL) sementara.',
+      requiresAuth: true,
+      roles: ['tata_usaha']
+    }
+  },
+  {
+    path: 'komunikasi/persuratan/peringatan',
+    component: () => import('./pages/SuratPeringatan.vue'),
+    meta: {
+      title: 'Surat Peringatan & Tunggakan',
+      parent: 'Komunikasi',
+      description: 'Manajemen surat peringatan, tagihan, dan pemanggilan.',
+      requiresAuth: true,
+      roles: ['tata_usaha']
+    }
+  },
+  {
+    path: 'komunikasi/persuratan/peringatan/buat',
+    component: () => import('./pages/BuatSuratPeringatan.vue'),
+    meta: {
+      title: 'Buat Surat Peringatan & Tunggakan',
+      parent: 'Komunikasi',
+      description: 'Form pembuatan surat peringatan, tagihan, dan pemanggilan.',
+      requiresAuth: true,
+      roles: ['tata_usaha']
+    }
+  },
+  {
+    path: 'komunikasi/persuratan/peringatan/edit/:id',
+    component: () => import('./pages/EditSuratPeringatan.vue'),
+    meta: {
+      title: 'Edit Surat Peringatan & Tunggakan',
+      parent: 'Komunikasi',
+      description: 'Form edit surat peringatan, tagihan, dan pemanggilan.',
+      requiresAuth: true,
+      roles: ['tata_usaha']
+    }
   }
 ]

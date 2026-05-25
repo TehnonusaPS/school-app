@@ -78,7 +78,51 @@ const isParentActive = items => {
             <CollapsibleContent class="mt-1 group-data-[collapsible=icon]:hidden">
               <SidebarMenuSub class="ml-4 border-l-2 border-primary/10 pl-2">
                 <SidebarMenuSubItem v-for="subItem in item.items" :key="subItem.title">
+                  <!-- Jika subItem punya anak lagi (Level 3) -->
+                  <Collapsible
+                    v-if="subItem.items && subItem.items.length > 0"
+                    as-child
+                    :default-open="isParentActive(subItem.items)"
+                    class="group/subcollapsible"
+                  >
+                    <CollapsibleTrigger as-child>
+                      <SidebarMenuSubButton
+                        class="!h-9 px-3 text-xs transition-all duration-200 cursor-pointer w-full flex items-center justify-between"
+                        :class="[
+                          isParentActive(subItem.items)
+                            ? 'font-semibold text-foreground'
+                            : '!bg-transparent text-sidebar-foreground/70 hover:!bg-sidebar-accent hover:!text-sidebar-foreground font-medium'
+                        ]"
+                      >
+                        <span>{{ subItem.title }}</span>
+                        <ChevronRight class="ml-auto transition-transform duration-200 group-data-[state=open]/subcollapsible:rotate-90 !size-3.5" />
+                      </SidebarMenuSubButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent class="mt-1">
+                      <SidebarMenuSub class="ml-2 border-l border-primary/20 pl-2">
+                        <SidebarMenuSubItem v-for="child in subItem.items" :key="child.title">
+                          <SidebarMenuSubButton
+                            as-child
+                            :is-active="isPageActive(child.url)"
+                            class="!h-8 px-2 text-[11px] transition-all duration-200"
+                            :class="[
+                              isPageActive(child.url)
+                                ? 'glossy-active font-semibold'
+                                : '!bg-transparent text-sidebar-foreground/70 hover:!bg-sidebar-accent hover:!text-sidebar-foreground font-medium'
+                            ]"
+                          >
+                            <router-link :to="child.url">
+                              <span>{{ child.title }}</span>
+                            </router-link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </Collapsible>
+
+                  <!-- Jika subItem biasa (Level 2) -->
                   <SidebarMenuSubButton
+                    v-else
                     as-child
                     :is-active="isPageActive(subItem.url)"
                     class="!h-9 px-3 text-xs transition-all duration-200"

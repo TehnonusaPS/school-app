@@ -61,6 +61,7 @@ const filteredNavMain = computed(() => {
   return data.navMain
     // 1. Filter parent menu
     .filter(item => {
+      if (item.excludeRoles && item.excludeRoles.includes(currentRole)) return false
       if (!item.roles) return true // Terbuka untuk semua jika tidak ada pembatasan
       return item.roles.includes(currentRole)
     })
@@ -70,6 +71,7 @@ const filteredNavMain = computed(() => {
         return {
           ...item,
           items: item.items.filter(sub => {
+            if (sub.excludeRoles && sub.excludeRoles.includes(currentRole)) return false
             if (!sub.roles) return true
             return sub.roles.includes(currentRole)
           })
@@ -146,11 +148,15 @@ const data = {
       url: '/komunikasi',
       icon: MessageSquare,
       items: [
-        { title: 'Pengumuman', url: '/komunikasi/pengumuman' },
-        { title: 'Berita Kegiatan', url: '/komunikasi/berita-kegiatan' },
-        { title: 'Feedback Orang Tua', url: '/komunikasi/feedback' },
-        { title: 'Pesan Internal', url: '/komunikasi/pesan' },
-        { title: 'Notifikasi', url: '/komunikasi/notifikasi' }
+        { title: 'Pengumuman', url: '/komunikasi/pengumuman', excludeRoles: ['tata_usaha'] },
+        { title: 'Berita Kegiatan', url: '/komunikasi/berita-kegiatan', excludeRoles: ['tata_usaha'] },
+        { title: 'Feedback Orang Tua', url: '/komunikasi/feedback', excludeRoles: ['tata_usaha'] },
+        { title: 'Pesan Internal', url: '/komunikasi/pesan', excludeRoles: ['tata_usaha'] },
+        { title: 'Notifikasi', url: '/komunikasi/notifikasi', excludeRoles: ['tata_usaha'] },
+        { title: 'Keterangan Aktif', url: '/komunikasi/persuratan/aktif', roles: ['tata_usaha'] },
+        { title: 'Surat Dispensasi', url: '/komunikasi/persuratan/dispensasi', roles: ['tata_usaha'] },
+        { title: 'Keterangan Lulus', url: '/komunikasi/persuratan/lulus', roles: ['tata_usaha'] },
+        { title: 'Peringatan/Tunggakan', url: '/komunikasi/persuratan/peringatan', roles: ['tata_usaha'] }
       ]
     },
     {

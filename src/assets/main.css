@@ -95,8 +95,6 @@
   --coral-foreground: oklch(1 0 0);
   --lavender: oklch(0.78 0.12 280);
   --lavender-foreground: oklch(1 0 0);
-  --glass-gradient: linear-gradient(0deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.02) 45%, transparent 50%);
-  --button-gloss: linear-gradient(0deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.04) 45%, transparent 50%);
 }
 
 .dark {
@@ -135,30 +133,26 @@
   --coral-foreground: oklch(1 0 0);
   --lavender: oklch(0.70 0.12 280);
   --lavender-foreground: oklch(1 0 0);
-  --glass-gradient: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.02) 45%, transparent 50%);
-  --button-gloss: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 45%, transparent 50%);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    @apply bg-background;
+  }
   body {
     @apply bg-background text-foreground;
     font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
-    background-image:
-      radial-gradient(ellipse 110% 70% at 8% -10%, var(--ambient-grad-1) 0%, transparent 55%),
-      radial-gradient(ellipse 80% 55% at 92% 115%, var(--ambient-grad-2) 0%, transparent 50%),
-      radial-gradient(ellipse 55% 40% at 88% 12%, var(--ambient-grad-2) 0%, transparent 60%),
-      radial-gradient(ellipse 50% 35% at 12% 88%, var(--ambient-grad-1) 0%, transparent 55%),
-      radial-gradient(ellipse 40% 30% at 50% 50%, var(--ambient-grad-1) 0%, transparent 70%);
-    background-attachment: fixed;
+    position: relative;
+    overflow-x: hidden;
+    background-color: transparent; /* Transparan agar bg-squares di bawahnya terlihat */
   }
-
-  /* ── Mode Solid: nonaktifkan ambient gradient ── */
-  body.finish-solid {
-    background-image: none !important;
+  
+  .dark body {
+    background-color: transparent;
   }
 
   /* Interactive cursor pointer */
@@ -219,24 +213,12 @@
     width: 2rem; /* 32px - perfectly matches UserNav Avatar */
     height: 2rem;
     border-radius: 0.5rem;
-    background: var(--grad-primary);
-    color: white;
-    box-shadow: 0 4px 12px oklch(0.52 0.28 265 / 0.25);
+    background: var(--primary);
+    color: var(--primary-foreground);
     flex-shrink: 0;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
-  }
-
-  .sidebar-brand-icon::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 50%;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
-    pointer-events: none;
   }
 
   :where([data-collapsible='icon']) .sidebar-brand-icon {
@@ -257,24 +239,21 @@
     display: none;
   }
 
-  /* ══ SIDEBAR GLOSS ══ */
+  /* ══ SIDEBAR (GLOBAL GLASSMORPHISM) ══ */
   [data-slot='sidebar-inner'],
   [data-slot='sidebar'][data-mobile='true'] {
-    background: var(--sidebar) !important;
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
-    border-right: 1px solid var(--sidebar-border) !important;
+    background: color-mix(in oklch, var(--sidebar) 65%, transparent) !important;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+  }
+  
+  .dark [data-slot='sidebar-inner'],
+  .dark [data-slot='sidebar'][data-mobile='true'] {
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
   }
 
-  /* ── Mode Solid: nonaktifkan backdrop-filter di sidebar ── */
-  body.finish-solid [data-slot='sidebar-inner'],
-  body.finish-solid [data-slot='sidebar'][data-mobile='true'] {
-    background: var(--sidebar) !important;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-
-  /* ══ BUTTON OVERRIDES ══ */
+  /* ══ INTERACTIVE ELEMENTS (Solid Mode) ══ */
   [data-slot="button"],
   [data-slot="badge"],
   [data-slot="progress-indicator"],
@@ -296,82 +275,197 @@
   [data-slot="pagination-next"],
   [data-slot="pagination-first"],
   [data-slot="pagination-last"] {
-    position: relative;
-    overflow: hidden;
     letter-spacing: 0.02em;
   }
 
-  [data-slot="button"]:not([variant="ghost"]):not([variant="link"]):not([data-variant="ghost"]):not([data-variant="link"])::before,
-  [data-slot="badge"]:not([data-variant="ghost"]):not([data-variant="link"])::before,
-  [data-slot="alert-dialog-action"]:not([data-variant="ghost"]):not([data-variant="link"])::before,
-  [data-slot="alert-dialog-cancel"]:not([data-variant="ghost"]):not([data-variant="link"])::before,
-  [data-slot="alert-dialog-trigger"]:not([data-variant="ghost"]):not([data-variant="link"])::before,
-  [data-slot="dialog-trigger"]:not([data-variant="ghost"]):not([data-variant="link"])::before,
-  [data-slot="toggle-group-item"][data-state="on"]::before,
-  [data-slot="calendar-cell-trigger"][data-selected]::before,
-  [data-slot="checkbox"][data-state="checked"]::before,
-  [data-slot="switch"][data-state="checked"]::before,
-  [data-slot="switch-thumb"]::before,
-  [data-slot="radio-group-indicator"]::before,
-  [data-slot="tabs-trigger"][data-state="active"]::before,
-  [data-slot="pagination-link"][aria-current="page"]::before,
-  [data-slot="progress-indicator"]::before,
-  [data-slot="slider-range"]::before,
-  [data-slot="slider-thumb"]::before {
+  /* ══ BUTTON OVERRIDES (GLOBAL GLASS) ══ */
+  [data-slot="button"]:not([variant="ghost"]):not([variant="link"]),
+  [data-slot="badge"] {
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+  [data-slot="button"]:not([variant="ghost"]):not([variant="link"])::before,
+  [data-slot="badge"]::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: var(--button-gloss);
     pointer-events: none;
+    background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
   }
 
-  /* ── Mode Solid: nonaktifkan button shine & icon glow ── */
-  body.finish-solid [data-slot="button"]::before,
-  body.finish-solid [data-slot="badge"]::before,
-  body.finish-solid [data-slot="alert-dialog-action"]::before,
-  body.finish-solid [data-slot="alert-dialog-cancel"]::before,
-  body.finish-solid [data-slot="alert-dialog-trigger"]::before,
-  body.finish-solid [data-slot="dialog-trigger"]::before,
-  body.finish-solid [data-slot="toggle-group-item"]::before,
-  body.finish-solid [data-slot="calendar-cell-trigger"]::before,
-  body.finish-solid [data-slot="checkbox"]::before,
-  body.finish-solid [data-slot="switch"]::before,
-  body.finish-solid [data-slot="switch-thumb"]::before,
-  body.finish-solid [data-slot="radio-group-indicator"]::before,
-  body.finish-solid [data-slot="tabs-trigger"]::before,
-  body.finish-solid [data-slot="pagination-link"]::before,
-  body.finish-solid [data-slot="progress-indicator"]::before,
-  body.finish-solid [data-slot="slider-range"]::before,
-  body.finish-solid [data-slot="slider-thumb"]::before {
-    display: none !important;
-  }
-
-  body.finish-solid .sidebar-brand-icon {
-    box-shadow: none !important;
-  }
-
-  body.finish-solid .sidebar-brand-icon::after {
-    display: none !important;
-  }
-
-  /* ══ GLASS COMPONENTS ══ */
-
-  /* Card, Calendar & Alert */
+  /* ══ GLOBAL GLASS COMPONENTS ══ */
+  /* Card, Calendar & Alert (PERFECT GLASS + BLOB BACKGROUND) */
   [data-slot="card"],
   [data-slot="calendar"],
   [data-slot="range-calendar"],
-  [data-slot="alert"] {
+  [data-slot="alert"],
+  [data-slot="sidebar-inner"] {
     position: relative;
     overflow: hidden;
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid var(--border);
-    box-shadow: var(--glass-shadow);
-    /* Gunakan background-image agar efek glossy ada di belakang konten (tidak membuat redup) */
-    background-image: var(--glass-gradient);
+    z-index: 1;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 32px !important;
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1) !important;
   }
 
-  /* Input & Select & Checkbox — border lebih visible */
+  /* The Glass Surface (Figma Style) */
+  [data-slot="card"]::after,
+  [data-slot="calendar"]::after,
+  [data-slot="range-calendar"]::after,
+  [data-slot="alert"]::after,
+  [data-slot="sidebar-inner"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    
+    background: 
+      linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 32.69%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.05) 100%),
+      rgba(255, 255, 255, 0.03);
+      
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 2px solid rgba(255, 255, 255, 0.6);
+    border-left: 2px solid rgba(255, 255, 255, 0.5);
+    
+    box-shadow: 
+      inset 0px 0px 22px 0px rgba(255, 255, 255, 0.5),
+      inset 2px 2px 1px -2px rgba(255, 255, 255, 0.6),
+      inset -12px -12px 6px -14px rgba(255, 255, 255, 0.3),
+      inset 16px 16px 9px -18px rgba(255, 255, 255, 0.9);
+      
+    z-index: -1;
+    pointer-events: none;
+  }
+  
+  .dark [data-slot="card"]::after,
+  .dark [data-slot="calendar"]::after,
+  .dark [data-slot="range-calendar"]::after,
+  .dark [data-slot="alert"]::after,
+  .dark [data-slot="sidebar-inner"]::after {
+    background: 
+      linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 32.69%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.02) 100%),
+      rgba(0, 0, 0, 0.1);
+    
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 2px solid rgba(255, 255, 255, 0.2);
+    border-left: 2px solid rgba(255, 255, 255, 0.15);
+    
+    box-shadow: 
+      inset 0px 0px 22px 0px rgba(255, 255, 255, 0.1),
+      inset 2px 2px 1px -2px rgba(255, 255, 255, 0.15),
+      inset -12px -12px 6px -14px rgba(255, 255, 255, 0.05),
+      inset 16px 16px 9px -18px rgba(255, 255, 255, 0.2);
+  }
+
+  /* Glass Mini (For smaller panels, buttons, headers) */
+  .glass-mini {
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    background: transparent;
+    border: none !important;
+    border-radius: 32px !important;
+    box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .glass-mini::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    
+    background: 
+      linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 32.69%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.05) 100%),
+      rgba(255, 255, 255, 0.03);
+      
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1.5px solid rgba(255, 255, 255, 0.6);
+    border-left: 1.5px solid rgba(255, 255, 255, 0.5);
+    
+    box-shadow: 
+      inset 0px 0px 12px 0px rgba(255, 255, 255, 0.5),
+      inset 1px 1px 1px -1px rgba(255, 255, 255, 0.6),
+      inset -6px -6px 4px -7px rgba(255, 255, 255, 0.3),
+      inset 8px 8px 5px -9px rgba(255, 255, 255, 0.9);
+      
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .dark .glass-mini::after {
+    background: 
+      linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 32.69%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.02) 100%),
+      rgba(0, 0, 0, 0.1);
+    
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1.5px solid rgba(255, 255, 255, 0.2);
+    border-left: 1.5px solid rgba(255, 255, 255, 0.15);
+    
+    box-shadow: 
+      inset 0px 0px 12px 0px rgba(255, 255, 255, 0.1),
+      inset 1px 1px 1px -1px rgba(255, 255, 255, 0.15),
+      inset -6px -6px 4px -7px rgba(255, 255, 255, 0.05),
+      inset 8px 8px 5px -9px rgba(255, 255, 255, 0.2);
+  }
+
+  /* Glass Header (For top sticky bars) */
+  .glass-header {
+    position: relative;
+    overflow: hidden;
+    z-index: 10;
+    background: transparent;
+    border: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .glass-header::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    
+    background: 
+      linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%),
+      rgba(255, 255, 255, 0.02);
+      
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    
+    border-bottom: 1.5px solid rgba(255, 255, 255, 0.3);
+    
+    box-shadow: 
+      inset 0px -10px 20px -10px rgba(255, 255, 255, 0.2),
+      inset 0px 2px 4px 0px rgba(255, 255, 255, 0.4);
+      
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .dark .glass-header::after {
+    background: 
+      linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%),
+      rgba(0, 0, 0, 0.15);
+    
+    border-bottom: 1.5px solid rgba(255, 255, 255, 0.1);
+    
+    box-shadow: 
+      inset 0px -10px 20px -10px rgba(255, 255, 255, 0.05),
+      inset 0px 2px 4px 0px rgba(255, 255, 255, 0.1);
+  }
+
+  /* Input & Select & Checkbox */
   [data-slot="input"],
   [data-slot="textarea"],
   [data-slot="select-trigger"],
@@ -385,14 +479,8 @@
   [data-slot='input']:focus,
   [data-slot='textarea']:focus {
     border-color: var(--primary) !important;
-    box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 15%, transparent) !important;
-    outline: none !important;
-  }
-
-  body.finish-solid [data-slot='input']:focus,
-  body.finish-solid [data-slot='textarea']:focus {
-    border-color: var(--primary) !important;
     box-shadow: 0 0 0 2px color-mix(in oklch, var(--primary) 20%, transparent) !important;
+    outline: none !important;
   }
 
   /* Popover & Dropdown & Tooltip */
@@ -403,107 +491,69 @@
   [data-slot="hover-card-content"],
   [data-slot="tooltip-content"],
   [data-slot="command"] {
+    background: color-mix(in oklch, var(--popover) 70%, transparent) !important;
     backdrop-filter: blur(24px) saturate(200%);
     -webkit-backdrop-filter: blur(24px) saturate(200%);
-    background: var(--popover) !important;
-    border: 1px solid var(--glass-border) !important;
-    box-shadow:
-      var(--glass-shadow),
-      0 0 0 1px var(--border) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  .dark [data-slot="popover-content"],
+  .dark [data-slot="dropdown-menu-content"],
+  .dark [data-slot="context-menu-content"],
+  .dark [data-slot="select-content"],
+  .dark [data-slot="hover-card-content"],
+  .dark [data-slot="tooltip-content"],
+  .dark [data-slot="command"] {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
   }
 
   /* Dialog / Sheet / Drawer */
   [data-slot="dialog-content"],
   [data-slot="sheet-content"],
   [data-slot="drawer-content"] {
+    background: color-mix(in oklch, var(--card) 60%, transparent) !important;
     backdrop-filter: blur(32px) saturate(200%);
     -webkit-backdrop-filter: blur(32px) saturate(200%);
-    background: var(--card) !important;
-    border: 1px solid var(--glass-border) !important;
-    box-shadow: var(--glass-shadow) !important;
-  }
-
-  /* ── Mode Solid: disable semua glass effects ── */
-  body.finish-solid [data-slot="card"],
-  body.finish-solid [data-slot="calendar"],
-  body.finish-solid [data-slot="range-calendar"],
-  body.finish-solid [data-slot="alert"],
-  body.finish-solid [data-slot="popover-content"],
-  body.finish-solid [data-slot="dropdown-menu-content"],
-  body.finish-solid [data-slot="context-menu-content"],
-  body.finish-solid [data-slot="select-content"],
-  body.finish-solid [data-slot="hover-card-content"],
-  body.finish-solid [data-slot="tooltip-content"],
-  body.finish-solid [data-slot="command"],
-  body.finish-solid [data-slot="dialog-content"],
-  body.finish-solid [data-slot="sheet-content"],
-  body.finish-solid [data-slot="drawer-content"] {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background: var(--card) !important;
-    border-color: var(--border) !important;
-    box-shadow: none !important;
-  }
-
-  body.finish-solid [data-slot="card"],
-  body.finish-solid [data-slot="calendar"],
-  body.finish-solid [data-slot="range-calendar"],
-  body.finish-solid [data-slot="alert"] {
-    background-image: none !important;
-  }
-
-  body.finish-solid [data-slot="popover-content"],
-  body.finish-solid [data-slot="dropdown-menu-content"],
-  body.finish-solid [data-slot="context-menu-content"],
-  body.finish-solid [data-slot="select-content"],
-  body.finish-solid [data-slot="command"] {
-    background: var(--popover) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2) !important;
   }
 }
 
 @layer utilities {
-  .glass-card {
-    background: var(--card);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--border);
-    box-shadow: var(--glass-shadow);
-  }
-
-  /* Special active class for glossy themes (Tahoe) vs Flat (Zinc/Emerald/Indigo/Bronze) */
+  /* Active class for selected navigation items */
   .glossy-active {
-    background: var(--grad-primary) !important;
-    color: white !important;
     position: relative;
     overflow: hidden;
-    box-shadow:
-      0 4px 12px var(--ring),
-      0 0 0 1px var(--ring) inset !important;
     z-index: 1;
+    background: color-mix(in oklch, var(--primary) 70%, transparent) !important;
+    color: var(--primary-foreground) !important;
+    border: none !important;
+    box-shadow: 0 4px 16px -4px color-mix(in oklch, var(--primary) 50%, transparent) !important;
   }
 
   .glossy-active::after {
-    content: '';
+    content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 50%;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, transparent 100%);
+    inset: 0;
+    
+    background: 
+      linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 100%),
+      rgba(255, 255, 255, 0.05);
+      
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    
+    border-radius: inherit;
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    
+    box-shadow: 
+      inset 0px 1px 2px rgba(255, 255, 255, 0.3);
+      
+    z-index: -1;
     pointer-events: none;
-    opacity: 1;
-    transition: opacity 0.3s ease;
-  }
-
-  /* ── Mode Solid: glossy-active → flat primary ── */
-  body.finish-solid .glossy-active {
-    background: var(--primary) !important;
-    color: var(--primary-foreground) !important;
-    box-shadow: none !important;
-  }
-
-  body.finish-solid .glossy-active::after {
-    display: none !important;
   }
 
   /* Transition for non-active states to ensure smooth exit */
@@ -532,15 +582,13 @@
   }
 
   .glass {
-    background-color: rgb(255 255 255 / 0.72);
-    box-shadow: 0 18px 40px -24px rgb(15 23 42 / 0.35);
-    backdrop-filter: blur(18px);
+    background-color: var(--card);
+    border: 1px solid var(--border);
   }
 
   .glass-dark {
-    background-color: rgb(15 23 42 / 0.6);
-    box-shadow: 0 20px 40px -24px rgb(2 6 23 / 0.6);
-    backdrop-filter: blur(18px);
+    background-color: var(--card);
+    border: 1px solid var(--border);
   }
 
   .blob {
@@ -593,6 +641,230 @@
   }
   c .animate-wa-pulse {
     animation: wa-pulse 2.4s ease-in-out infinite;
+  }
+
+  /* ══ 🔮 GLASSMORPHISM UI SYSTEM (PREMIUM) ══ */
+  
+  /* 1. Base Glass: Blur + Soft Shadow + Subtly Light Border */
+  /* Dirancang untuk digabung dengan background semi-transparan Tailwind (misal: bg-primary/20) */
+  .glass-ui {
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  .dark .glass-ui {
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+  }
+
+  /* 2. Glass Overlay (Frosted Overlay) */
+  /* Memberikan lapisan putih/gelap tipis *di atas* warna asli tanpa menutupi warna dasar */
+  .glass-overlay {
+    position: relative;
+    z-index: 0;
+  }
+  .glass-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    /* Overlay putih transparan tipis */
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.01) 100%);
+  }
+  .dark .glass-overlay::after {
+    /* Overlay gelap transparan tipis */
+    background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.01) 100%);
+  }
+
+  /* 3. Neon Glow Shadow */
+  /* Menggunakan warna teks saat ini (currentColor) sebagai warna bayangan! 
+     Sangat cocok untuk tombol dengan warna spesifik (merah, biru, ungu) */
+  .neon-glow {
+    box-shadow: 0 8px 24px color-mix(in oklch, currentColor 35%, transparent);
+  }
+  
+  .neon-glow-strong {
+    box-shadow: 0 8px 32px color-mix(in oklch, currentColor 50%, transparent);
+  }
+
+  /* 4. Shapes */
+  .shape-pill {
+    border-radius: 999px;
+  }
+  
+  .shape-blob {
+    border-radius: 58% 42% 37% 63% / 45% 55% 45% 55%;
+  }
+}
+
+/* ── BACKGROUND STYLES ── */
+/* Sembunyikan semua background layer secara bawaan */
+.apple-glass-background,
+.background-squares,
+.background-squares-static {
+  display: none !important;
+}
+
+/* Munculkan hanya background layer yang aktif sesuai class body */
+body.bg-glass .apple-glass-background {
+  display: block !important;
+}
+
+body.bg-animated .background-squares {
+  display: block !important;
+}
+
+body.bg-static_squares .background-squares-static {
+  display: block !important;
+}
+
+
+/* 🧊 Apple Glass Dynamic Image Background */
+.apple-glass-background {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: var(--primary);
+  background-image: url('./apple_glass_bg.png');
+  background-size: cover;
+  background-position: center;
+  background-blend-mode: luminosity;
+  
+  /* Opasitas disesuaikan ulang agar lebih terlihat 
+     tapi tetap tidak terlalu ngejreng. */
+  opacity: 0.3;
+}
+
+.dark .apple-glass-background {
+  /* Di mode gelap, kita naikkan sedikit agar terlihat menembus layar hitam */
+  background-image: url('./apple_glass_bg.png');
+  opacity: 0.5;
+}
+
+/* 🧊 CSS Floating Squares Background (Animasi Bergerak) */
+.background-squares {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.background-squares li {
+  position: absolute;
+  display: block;
+  list-style: none;
+  width: 20px;
+  height: 20px;
+  background: color-mix(in oklch, var(--primary) 40%, transparent);
+  border: 1px solid color-mix(in oklch, var(--primary) 60%, transparent);
+  animation: square-float 25s linear infinite;
+  bottom: -150px;
+  border-radius: 8px;
+  backdrop-filter: blur(2px);
+}
+
+.background-squares li:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+.background-squares li:nth-child(2) { left: 10%; width: 30px; height: 30px; animation-delay: 2s; animation-duration: 12s; }
+.background-squares li:nth-child(3) { left: 70%; width: 25px; height: 25px; animation-delay: 4s; }
+.background-squares li:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+.background-squares li:nth-child(5) { left: 65%; width: 40px; height: 40px; animation-delay: 0s; }
+.background-squares li:nth-child(6) { left: 75%; width: 110px; height: 110px; animation-delay: 3s; }
+.background-squares li:nth-child(7) { left: 35%; width: 150px; height: 150px; animation-delay: 7s; }
+.background-squares li:nth-child(8) { left: 50%; width: 25px; height: 25px; animation-delay: 15s; animation-duration: 45s; }
+.background-squares li:nth-child(9) { left: 20%; width: 15px; height: 15px; animation-delay: 2s; animation-duration: 35s; }
+.background-squares li:nth-child(10) { left: 85%; width: 150px; height: 150px; animation-delay: 0s; animation-duration: 11s; }
+.background-squares li:nth-child(11) { left: 5%; width: 45px; height: 45px; animation-delay: 1s; animation-duration: 22s; }
+.background-squares li:nth-child(12) { left: 95%; width: 65px; height: 65px; animation-delay: 5s; animation-duration: 15s; }
+.background-squares li:nth-child(13) { left: 15%; width: 100px; height: 100px; animation-delay: 8s; animation-duration: 28s; }
+.background-squares li:nth-child(14) { left: 80%; width: 35px; height: 35px; animation-delay: 12s; animation-duration: 14s; }
+.background-squares li:nth-child(15) { left: 30%; width: 120px; height: 120px; animation-delay: 6s; animation-duration: 20s; }
+.background-squares li:nth-child(16) { left: 60%; width: 55px; height: 55px; animation-delay: 9s; animation-duration: 16s; }
+.background-squares li:nth-child(17) { left: 45%; width: 20px; height: 20px; animation-delay: 11s; animation-duration: 25s; }
+.background-squares li:nth-child(18) { left: 90%; width: 75px; height: 75px; animation-delay: 4s; animation-duration: 19s; }
+.background-squares li:nth-child(19) { left: 55%; width: 140px; height: 140px; animation-delay: 13s; animation-duration: 30s; }
+.background-squares li:nth-child(20) { left: 2%; width: 25px; height: 25px; animation-delay: 7s; animation-duration: 13s; }
+
+@keyframes square-float {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+    border-radius: 8px;
+  }
+  100% {
+    transform: translateY(-120vh) rotate(720deg);
+    opacity: 1;
+    border-radius: 50%;
+  }
+}
+
+/* 🧊 CSS Static Squares Background (Tidak Bergerak) */
+.background-squares-static {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.background-squares-static li {
+  position: absolute;
+  display: block;
+  list-style: none;
+  background: color-mix(in oklch, var(--primary) 40%, transparent);
+  border: 1px solid color-mix(in oklch, var(--primary) 60%, transparent);
+  backdrop-filter: blur(2px);
+}
+
+/* Menyebar kotak secara statis ke seluruh layar dengan rotasi & lekukan layaknya berhenti di tengah animasi */
+.background-squares-static li:nth-child(1) { left: 25%; top: 15%; width: 80px; height: 80px; transform: rotate(45deg); border-radius: 20%; }
+.background-squares-static li:nth-child(2) { left: 10%; top: 60%; width: 30px; height: 30px; transform: rotate(15deg); border-radius: 10%; }
+.background-squares-static li:nth-child(3) { left: 70%; top: 25%; width: 25px; height: 25px; transform: rotate(70deg); border-radius: 30%; }
+.background-squares-static li:nth-child(4) { left: 40%; top: 80%; width: 60px; height: 60px; transform: rotate(120deg); border-radius: 40%; }
+.background-squares-static li:nth-child(5) { left: 65%; top: 45%; width: 40px; height: 40px; transform: rotate(30deg); border-radius: 15%; }
+.background-squares-static li:nth-child(6) { left: 75%; top: 70%; width: 110px; height: 110px; transform: rotate(90deg); border-radius: 50%; }
+.background-squares-static li:nth-child(7) { left: 35%; top: 35%; width: 150px; height: 150px; transform: rotate(25deg); border-radius: 25%; }
+.background-squares-static li:nth-child(8) { left: 50%; top: 10%; width: 25px; height: 25px; transform: rotate(5deg); border-radius: 10%; }
+.background-squares-static li:nth-child(9) { left: 20%; top: 85%; width: 15px; height: 15px; transform: rotate(80deg); border-radius: 5%; }
+.background-squares-static li:nth-child(10) { left: 85%; top: 15%; width: 150px; height: 150px; transform: rotate(45deg); border-radius: 35%; }
+.background-squares-static li:nth-child(11) { left: 5%; top: 30%; width: 45px; height: 45px; transform: rotate(110deg); border-radius: 20%; }
+.background-squares-static li:nth-child(12) { left: 95%; top: 50%; width: 65px; height: 65px; transform: rotate(60deg); border-radius: 45%; }
+.background-squares-static li:nth-child(13) { left: 15%; top: 75%; width: 100px; height: 100px; transform: rotate(20deg); border-radius: 30%; }
+.background-squares-static li:nth-child(14) { left: 80%; top: 85%; width: 35px; height: 35px; transform: rotate(135deg); border-radius: 15%; }
+.background-squares-static li:nth-child(15) { left: 30%; top: 55%; width: 120px; height: 120px; transform: rotate(75deg); border-radius: 25%; }
+.background-squares-static li:nth-child(16) { left: 60%; top: 90%; width: 55px; height: 55px; transform: rotate(10deg); border-radius: 10%; }
+.background-squares-static li:nth-child(17) { left: 45%; top: 65%; width: 20px; height: 20px; transform: rotate(50deg); border-radius: 5%; }
+.background-squares-static li:nth-child(18) { left: 90%; top: 35%; width: 75px; height: 75px; transform: rotate(95deg); border-radius: 40%; }
+.background-squares-static li:nth-child(19) { left: 55%; top: 20%; width: 140px; height: 140px; transform: rotate(35deg); border-radius: 35%; }
+.background-squares-static li:nth-child(20) { left: 2%; top: 5%; width: 25px; height: 25px; transform: rotate(15deg); border-radius: 10%; }
+
+@keyframes blob-drift {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(10vw, 5vh) scale(1.1);
+  }
+  66% {
+    transform: translate(-5vw, 15vh) scale(0.9);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
   }
 }
 

@@ -104,7 +104,7 @@ function handleSubmit() {
 
 <template>
   <Dialog v-model:open="isOpen">
-    <DialogContent class="sm:max-w-[600px] rounded-2xl border border-border bg-card shadow-2xl backdrop-blur-xl p-6">
+    <DialogContent class="sm:max-w-[600px] rounded-2xl border border-border bg-card shadow-2xl  p-6">
       <DialogHeader>
         <DialogTitle class="text-lg font-extrabold text-foreground leading-none">
           {{ mode === 'create' ? 'Buat Pengumuman Baru' : 'Edit Pengumuman' }}

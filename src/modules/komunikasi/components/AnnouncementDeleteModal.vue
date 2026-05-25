@@ -35,7 +35,7 @@ function onConfirm() {
 
 <template>
   <Dialog v-model:open="isOpen">
-    <DialogContent class="sm:max-w-[420px] rounded-2xl border-border bg-card shadow-2xl backdrop-blur-xl p-6">
+    <DialogContent class="sm:max-w-[420px] rounded-2xl border-border bg-card shadow-2xl  p-6">
       <DialogHeader>
         <DialogTitle class="text-base font-extrabold text-foreground leading-none">Hapus Pengumuman?</DialogTitle>
         <DialogDescription class="text-xs text-muted-foreground mt-2 leading-relaxed">

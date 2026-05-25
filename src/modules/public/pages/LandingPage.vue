@@ -13,6 +13,9 @@ import LandingFooter from '@/components/landing/LandingFooter.vue'
 import LandingChatWidget from '@/components/landing/LandingChatWidget.vue'
 
 onMounted(() => {
+  // Paksa halaman landing selalu dalam light mode
+  document.documentElement.classList.remove('dark')
+
   // Pastikan class theme-emerald ada di body agar ambient gradients dan styles menyala indah
   if (!document.body.classList.contains('theme-emerald')) {
     document.body.classList.add('theme-emerald')

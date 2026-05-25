@@ -47,12 +47,6 @@
   --sidebar-ring: oklch(0.50 0 0 / 0.40);
 
   --grad-primary: linear-gradient(135deg, oklch(0.22 0 0), oklch(0.15 0 0));
-  --glass-bg: rgba(255, 255, 255, 0.45);
-  --glass-border: rgba(255, 255, 255, 0.70);
-  --glass-shadow:
-    0 8px 40px rgba(0, 0, 0, 0.10),
-    0 2px  8px rgba(0, 0, 0, 0.06),
-    0 1px  0   rgba(255, 255, 255, 0.90) inset;
   --ambient-grad-1: oklch(1 0 0 / 0);
   --ambient-grad-2: oklch(1 0 0 / 0);
 }
@@ -98,11 +92,6 @@
   --sidebar-ring: oklch(0.70 0 0 / 0.40);
 
   --grad-primary: linear-gradient(135deg, oklch(0.22 0 0), oklch(0.15 0 0));
-  --glass-bg: rgba(18, 18, 18, 0.55);
-  --glass-border: rgba(255, 255, 255, 0.10);
-  --glass-shadow:
-    0 8px 40px rgba(0, 0, 0, 0.50),
-    0 1px  0   rgba(255, 255, 255, 0.06) inset;
   --ambient-grad-1: oklch(1 0 0 / 0);
   --ambient-grad-2: oklch(1 0 0 / 0);
 }
@@ -118,9 +107,6 @@
   --sidebar: oklch(0.985 0 0);
 
   --grad-primary: oklch(0.205 0 0);
-  --glass-bg: rgba(255, 255, 255, 1);
-  --glass-border: oklch(0.922 0 0);
-  --glass-shadow: none;
   --ambient-grad-1: oklch(1 0 0 / 0);
   --ambient-grad-2: oklch(1 0 0 / 0);
 }
@@ -136,9 +122,6 @@
   --sidebar: oklch(0.145 0 0);
 
   --grad-primary: linear-gradient(135deg, oklch(0.22 0 0), oklch(0.15 0 0));
-  --glass-bg: rgba(20, 20, 20, 1);
-  --glass-border: oklch(0.269 0 0);
-  --glass-shadow: none;
   --ambient-grad-1: oklch(1 0 0 / 0);
   --ambient-grad-2: oklch(1 0 0 / 0);
 }

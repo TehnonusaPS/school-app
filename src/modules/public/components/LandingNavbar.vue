@@ -92,7 +92,7 @@ const navLinks = [
               'flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium',
               isScrolled
                 ? 'text-gray-700 bg-gray-50 border border-gray-200'
-                : 'text-white bg-white/10 border border-white/20'
+                : 'text-white  border border-white/20'
             ]"
           >
             <User class="w-4 h-4" /> {{ auth.user.name }}

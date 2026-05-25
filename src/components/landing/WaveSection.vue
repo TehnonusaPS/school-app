@@ -113,7 +113,7 @@ const waveClip =
                       />
                     </div>
                     <figcaption
-                      class="absolute inset-x-4 bottom-6 z-10 rounded-full bg-background/85 px-3 py-1.5 text-center text-xs font-semibold text-foreground backdrop-blur"
+                      class="absolute inset-x-4 bottom-6 z-10 rounded-full bg-background/85 px-3 py-1.5 text-center text-xs font-semibold text-foreground "
                     >
                       {{ slide.label }}
                     </figcaption>

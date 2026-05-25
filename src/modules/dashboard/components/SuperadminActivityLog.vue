@@ -83,16 +83,16 @@ const activityTypeClass = (type: string) =>
       </CardDescription>
     </CardHeader>
 
-    <CardContent class="flex-1 p-0">
+    <CardContent class="flex-1 p-0 relative z-10">
       <ScrollArea class="h-[360px] px-6">
         <div class="space-y-1 py-1">
           <div
             v-for="activity in activities"
             :key="activity.id"
-            class="group flex items-start gap-3 rounded-lg p-2.5 transition-colors hover:bg-muted/50 cursor-default"
+            class="group flex items-start gap-3 rounded-xl p-3 transition-all hover:bg-white/5 dark:hover:bg-white/5 cursor-default border border-transparent hover:border-white/10 hover:shadow-lg"
           >
             <!-- Avatar -->
-            <div class="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-bold text-muted-foreground">
+            <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/20 backdrop-blur-md border border-primary/20 text-[10px] font-bold text-primary drop-shadow-sm">
               {{ activity.initials }}
             </div>
             <!-- Content -->
@@ -101,7 +101,7 @@ const activityTypeClass = (type: string) =>
                 <p class="truncate text-sm font-medium">{{ activity.title }}</p>
                 <component
                   :is="activity.icon"
-                  :class="['size-3.5 shrink-0', activityTypeClass(activity.type)]"
+                  :class="['size-3.5 shrink-0 drop-shadow-sm', activityTypeClass(activity.type)]"
                 />
               </div>
               <p class="mt-0.5 truncate text-xs text-muted-foreground">{{ activity.desc }}</p>
@@ -112,7 +112,7 @@ const activityTypeClass = (type: string) =>
       </ScrollArea>
     </CardContent>
 
-    <CardFooter class="border-t pt-4">
+    <CardFooter class="border-t border-white/10 pt-4 relative z-10">
       <Button variant="ghost" class="w-full gap-1.5 text-xs h-8 text-muted-foreground hover:text-foreground">
         Lihat semua log
         <ChevronRight class="size-3.5" />

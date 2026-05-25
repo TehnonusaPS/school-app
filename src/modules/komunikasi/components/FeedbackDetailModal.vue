@@ -54,7 +54,7 @@ const categoryBadgeClass = (kategori) => {
 
 <template>
   <Dialog v-model:open="isOpen">
-    <DialogContent class="sm:max-w-[550px] rounded-2xl border-border bg-card shadow-2xl backdrop-blur-xl max-h-[90vh] flex flex-col p-6 animate-fade-in">
+    <DialogContent class="sm:max-w-[550px] rounded-2xl border-border bg-card shadow-2xl  max-h-[90vh] flex flex-col p-6 animate-fade-in">
       <DialogHeader class="shrink-0 text-left" v-if="feedback">
         <div class="flex flex-wrap items-center gap-2">
           <Badge :class="categoryBadgeClass(feedback.kategori)" class="rounded-full px-2.5 py-0.5 font-bold uppercase tracking-wider text-[9px]">

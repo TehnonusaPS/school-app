@@ -37,22 +37,16 @@
   --ring: oklch(0.54 0.22 268 / 0.30);
   --radius: 0.875rem;
 
-  --sidebar: oklch(0.20 0.03 260 / 0.90);
-  --sidebar-foreground: oklch(0.96 0.01 260);
+  --sidebar: oklch(0.98 0.01 260 / 0.72);
+  --sidebar-foreground: oklch(0.20 0.03 260);
   --sidebar-primary: oklch(0.54 0.22 268);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.28 0.03 260);
-  --sidebar-accent-foreground: oklch(0.98 0.01 260);
-  --sidebar-border: oklch(0.20 0.03 260);
-  --sidebar-ring: oklch(0.54 0.22 268 / 0.50);
+  --sidebar-accent: oklch(0.96 0.01 260);
+  --sidebar-accent-foreground: oklch(0.20 0.03 260);
+  --sidebar-border: oklch(0.90 0.01 260 / 0.35);
+  --sidebar-ring: oklch(0.54 0.22 268 / 0.40);
 
   --grad-primary: oklch(0.54 0.22 268);
-  --glass-bg: rgba(255, 255, 255, 0.45);
-  --glass-border: rgba(255, 255, 255, 0.70);
-  --glass-shadow:
-    0 8px 40px oklch(0.54 0.22 268 / 0.12),
-    0 2px  8px oklch(0.54 0.22 268 / 0.06),
-    0 1px  0   rgba(255, 255, 255, 0.80) inset;
   --ambient-grad-1: oklch(1 0 0 / 0);
   --ambient-grad-2: oklch(1 0 0 / 0);
 }
@@ -98,11 +92,6 @@
   --sidebar-ring: oklch(0.60 0.20 268 / 0.50);
 
   --grad-primary: oklch(0.60 0.20 268);
-  --glass-bg: rgba(20, 18, 40, 0.55);
-  --glass-border: rgba(255, 255, 255, 0.10);
-  --glass-shadow:
-    0 8px 40px rgba(0, 0, 0, 0.50),
-    0 1px  0   rgba(255, 255, 255, 0.06) inset;
   --ambient-grad-1: oklch(1 0 0 / 0);
   --ambient-grad-2: oklch(1 0 0 / 0);
 }
@@ -115,12 +104,9 @@
   --border: oklch(0.90 0.01 260);
   --input: oklch(0.90 0.01 260);
 
-  --sidebar: oklch(0.20 0.03 260);
+  --sidebar: oklch(0.98 0.01 260);
 
   --grad-primary: oklch(0.54 0.22 268);
-  --glass-bg: rgba(255, 255, 255, 1);
-  --glass-border: oklch(0.90 0.01 260 / 0.50);
-  --glass-shadow: none;
   --ambient-grad-1: oklch(1 0 0 / 0);
   --ambient-grad-2: oklch(1 0 0 / 0);
 }
@@ -136,9 +122,6 @@
   --sidebar: oklch(0.12 0.02 260);
 
   --grad-primary: oklch(0.60 0.20 268);
-  --glass-bg: rgba(20, 18, 40, 1);
-  --glass-border: oklch(0.28 0.03 260 / 0.50);
-  --glass-shadow: none;
   --ambient-grad-1: oklch(1 0 0 / 0);
   --ambient-grad-2: oklch(1 0 0 / 0);
 }

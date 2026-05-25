@@ -98,7 +98,7 @@ const notifications = [
     <AppSidebar />
     <SidebarInset>
       <header
-        class="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b justify-between"
+        class="sticky top-2 z-10 flex h-14 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 glass-mini mx-2 mt-2 px-4 justify-between"
       >
         <!-- SISI KIRI: Sidebar Trigger & Breadcrumb -->
         <div class="flex items-center gap-2 px-4">

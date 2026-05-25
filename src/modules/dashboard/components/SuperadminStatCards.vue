@@ -47,20 +47,26 @@ const stats = [
     <Card
       v-for="(stat, i) in stats"
       :key="i"
-      class="transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
+      class="relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-white/40"
     >
-      <CardHeader class="pb-2">
+      <!-- Watermark Icon Background -->
+      <component 
+        :is="stat.icon" 
+        :class="['absolute -right-4 -bottom-4 size-24 opacity-[0.04] rotate-12 transition-transform duration-300 group-hover:scale-110', stat.color]" 
+      />
+
+      <CardHeader class="pb-2 relative z-10">
         <div class="flex items-center justify-between">
           <CardDescription class="text-sm font-medium">{{ stat.label }}</CardDescription>
-          <div :class="['rounded-lg p-2', stat.bg]">
-            <component :is="stat.icon" :class="['size-4', stat.color]" />
+          <div :class="['rounded-xl p-2.5 backdrop-blur-md shadow-lg border border-white/10 transition-colors', stat.bg]">
+            <component :is="stat.icon" :class="['size-4 drop-shadow-md', stat.color]" />
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <div class="text-3xl font-bold tracking-tight">{{ stat.value }}</div>
+      <CardContent class="relative z-10">
+        <div class="text-3xl font-bold tracking-tight drop-shadow-sm">{{ stat.value }}</div>
         <div class="mt-1 flex items-center gap-1.5">
-          <span class="flex items-center gap-0.5 text-xs font-semibold text-emerald-500">
+          <span class="flex items-center gap-0.5 text-xs font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded-md backdrop-blur-sm">
             <TrendingUp class="size-3" />
             {{ stat.trend }}
           </span>

@@ -4,6 +4,19 @@ import { Toaster } from '@/components/ui/sonner'
 </script>
 
 <template>
+  <ul class="background-squares">
+    <li></li><li></li><li></li><li></li><li></li>
+    <li></li><li></li><li></li><li></li><li></li>
+    <li></li><li></li><li></li><li></li><li></li>
+    <li></li><li></li><li></li><li></li><li></li>
+  </ul>
+  <ul class="background-squares-static">
+    <li></li><li></li><li></li><li></li><li></li>
+    <li></li><li></li><li></li><li></li><li></li>
+    <li></li><li></li><li></li><li></li><li></li>
+    <li></li><li></li><li></li><li></li><li></li>
+  </ul>
+  <div class="apple-glass-background"></div>
   <router-view />
   <Toaster position="top-center" />
 </template>

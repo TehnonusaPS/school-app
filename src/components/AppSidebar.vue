@@ -186,11 +186,11 @@ const data = {
 </script>
 
 <template>
-  <Sidebar collapsible="icon">
+  <Sidebar collapsible="icon" variant="floating">
     <SidebarHeader class="sidebar-brand-header">
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton size="lg" as-child class="sidebar-brand-btn bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/80">
+          <SidebarMenuButton size="lg" as-child class="glass-mini sidebar-brand-btn text-sidebar-accent-foreground hover:bg-sidebar-accent/50 transition-all duration-300">
             <a href="/dashboard">
               <div class="sidebar-brand-icon">
                 <School class="size-5" />

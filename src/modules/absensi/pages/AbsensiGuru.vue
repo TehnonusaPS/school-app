@@ -9,6 +9,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import {
   CalendarDays,
   MapPin,
@@ -26,6 +28,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Skeleton } from '@/components/ui/skeleton'
+import { postGuruScan } from '@/services/api/absensi'
 
 // ─── STATE ──────────────────────────────────────────────────
 const currentTime = ref('')
@@ -37,13 +41,9 @@ const hasClockedOut = ref(false)
 const clockInTime = ref(null)
 const clockOutTime = ref(null)
 
-const recentLogs = ref([
-  { id: 1, tanggal: '20 Mei 2026', jamMasuk: '07:15', jamKeluar: '16:05', status: 'Hadir', durasi: '8j 50m' },
-  { id: 2, tanggal: '19 Mei 2026', jamMasuk: '07:20', jamKeluar: '16:00', status: 'Hadir', durasi: '8j 40m' },
-  { id: 3, tanggal: '18 Mei 2026', jamMasuk: '07:45', jamKeluar: '16:15', status: 'Terlambat', durasi: '8j 30m' },
-  { id: 4, tanggal: '17 Mei 2026', jamMasuk: '-', jamKeluar: '-', status: 'Izin', durasi: '-' },
-  { id: 5, tanggal: '16 Mei 2026', jamMasuk: '07:10', jamKeluar: '16:00', status: 'Hadir', durasi: '8j 50m' },
-])
+const isPageLoading = ref(true)
+
+const recentLogs = ref([])
 
 // ─── CAMERA STATE ───────────────────────────────────────────
 const isScanning = ref(false)
@@ -63,11 +63,36 @@ function updateClock() {
 async function openCamera(type) {
   scanType.value = type
   isScanning.value = true
-  cameraStatus.value = 'active'
+  cameraStatus.value = 'loading'
   cameraError.value = ''
-  
-  // Kamera disimulasikan aktif (hardware kamera tidak diakses 
-  // agar laptop tidak restart secara otomatis)
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: 'user',
+        width: { ideal: 640 },
+        height: { ideal: 480 },
+      },
+      audio: false,
+    })
+    mediaStream.value = stream
+    cameraStatus.value = 'active'
+    await nextTick()
+    if (videoRef.value) {
+      videoRef.value.srcObject = stream
+      videoRef.value.play()
+    }
+  } catch (err) {
+    mediaStream.value = null
+    cameraStatus.value = 'error'
+    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+      cameraError.value = 'Akses kamera ditolak. Mohon aktifkan izin kamera di browser Anda.'
+    } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+      cameraError.value = 'Kamera tidak ditemukan pada perangkat Anda.'
+    } else {
+      cameraError.value = `Gagal memuat kamera: ${err.message}`
+    }
+  }
 }
 
 function stopCamera() {
@@ -80,38 +105,56 @@ function stopCamera() {
   cameraStatus.value = 'idle'
 }
 
-function takePhotoAndSubmit() {
-  // Simulasi proses pengenalan wajah berhasil
-  const now = new Date()
-  const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+const isSubmitting = ref(false)
+
+async function takePhotoAndSubmit() {
+  if (isSubmitting.value) return
+  isSubmitting.value = true
   
-  if (scanType.value === 'in') {
-    hasClockedIn.value = true
-    clockInTime.value = timeStr
-    recentLogs.value.unshift({
-      id: Date.now(),
-      tanggal: now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
-      jamMasuk: clockInTime.value,
-      jamKeluar: '-',
-      status: 'Hadir',
-      durasi: 'Sedang berjalan'
-    })
-  } else if (scanType.value === 'out') {
-    hasClockedOut.value = true
-    clockOutTime.value = timeStr
-    if (recentLogs.value.length > 0 && recentLogs.value[0].jamKeluar === '-') {
-      recentLogs.value[0].jamKeluar = clockOutTime.value
-      recentLogs.value[0].durasi = 'Selesai'
+  try {
+    const result = await postGuruScan(scanType.value)
+    
+    if (result.type === 'in') {
+      hasClockedIn.value = true
+      clockInTime.value = result.time
+      recentLogs.value.unshift({
+        id: Date.now(),
+        tanggal: result.date,
+        jamMasuk: result.time,
+        jamKeluar: '-',
+        status: 'Hadir',
+        durasi: 'Sedang berjalan'
+      })
+    } else if (result.type === 'out') {
+      hasClockedOut.value = true
+      clockOutTime.value = result.time
+      if (recentLogs.value.length > 0 && recentLogs.value[0].jamKeluar === '-') {
+        recentLogs.value[0].jamKeluar = result.time
+        recentLogs.value[0].durasi = 'Selesai'
+      }
     }
+  } catch (error) {
+    console.error(error)
+  } finally {
+    isSubmitting.value = false
+    stopCamera()
   }
-  
-  stopCamera()
 }
 
 // ─── LIFECYCLE ──────────────────────────────────────────────
 onMounted(() => {
   updateClock()
   clockInterval = setInterval(updateClock, 1000)
+  
+  // Simulate page load
+  setTimeout(() => {
+    recentLogs.value = [
+      { id: 1, tanggal: '20 Mei 2026', jamMasuk: '07:15', jamKeluar: '16:05', status: 'Hadir', durasi: '8j 50m' },
+      { id: 2, tanggal: '19 Mei 2026', jamMasuk: '07:20', jamKeluar: '16:00', status: 'Hadir', durasi: '8j 40m' },
+      { id: 3, tanggal: '18 Mei 2026', jamMasuk: '07:45', jamKeluar: '16:15', status: 'Terlambat', durasi: '8j 30m' },
+    ]
+    isPageLoading.value = false
+  }, 1000)
 })
 
 onUnmounted(() => {
@@ -139,7 +182,7 @@ onUnmounted(() => {
       <div class="md:col-span-1 space-y-6">
         
         <!-- Action Card -->
-        <div class="rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden relative min-h-[380px] flex flex-col justify-center">
+        <Card class="overflow-hidden relative min-h-[380px] flex flex-col justify-center">
           <!-- decorative bg -->
           <div class="absolute inset-0 bg-gradient-to-br from-indigo-50/50 to-white dark:from-indigo-950/20 dark:to-transparent pointer-events-none"></div>
           
@@ -191,12 +234,14 @@ onUnmounted(() => {
               </div>
             </div>
           </div>
-        </div>
+        </Card>
 
         <!-- Quick Stats List -->
-        <div class="rounded-xl border bg-card p-5 shadow-sm">
-          <h3 class="font-semibold mb-4 text-sm uppercase tracking-wider text-muted-foreground">Ringkasan Bulan Ini</h3>
-          <div class="space-y-4">
+        <Card>
+          <CardHeader class="pb-2">
+            <CardTitle class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Ringkasan Bulan Ini</CardTitle>
+          </CardHeader>
+          <CardContent class="space-y-4">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
                 <div class="p-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg">
@@ -204,7 +249,8 @@ onUnmounted(() => {
                 </div>
                 <span class="text-sm font-medium">Hadir</span>
               </div>
-              <span class="font-bold text-lg">18</span>
+              <Skeleton v-if="isPageLoading" class="h-6 w-8" />
+              <span v-else class="font-bold text-lg">18</span>
             </div>
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
@@ -213,7 +259,8 @@ onUnmounted(() => {
                 </div>
                 <span class="text-sm font-medium">Terlambat</span>
               </div>
-              <span class="font-bold text-lg">2</span>
+              <Skeleton v-if="isPageLoading" class="h-6 w-8" />
+              <span v-else class="font-bold text-lg">2</span>
             </div>
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
@@ -222,11 +269,11 @@ onUnmounted(() => {
                 </div>
                 <span class="text-sm font-medium">Izin / Cuti</span>
               </div>
-              <span class="font-bold text-lg">1</span>
+              <Skeleton v-if="isPageLoading" class="h-6 w-8" />
+              <span v-else class="font-bold text-lg">1</span>
             </div>
-          </div>
-        </div>
-
+          </CardContent>
+        </Card>
       </div>
 
       <!-- ── Right Column: Table History ── -->
@@ -234,33 +281,35 @@ onUnmounted(() => {
         
         <!-- Top stat cards (Horizontal) -->
         <div class="grid grid-cols-2 gap-4">
-          <div class="rounded-xl border bg-card p-4 shadow-sm flex items-center gap-4">
+          <Card class="p-4 flex items-center gap-4">
             <div class="p-3 bg-primary/10 text-primary rounded-xl">
               <Briefcase class="size-5" />
             </div>
             <div>
               <p class="text-sm text-muted-foreground font-medium">Total Jam Kerja</p>
-              <p class="text-2xl font-bold">148<span class="text-sm font-normal text-muted-foreground ml-1">Jam</span></p>
+              <Skeleton v-if="isPageLoading" class="h-8 w-20 mt-1" />
+              <p v-else class="text-2xl font-bold">148<span class="text-sm font-normal text-muted-foreground ml-1">Jam</span></p>
             </div>
-          </div>
-          <div class="rounded-xl border bg-card p-4 shadow-sm flex items-center gap-4">
+          </Card>
+          <Card class="p-4 flex items-center gap-4">
             <div class="p-3 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
               <CalendarDays class="size-5" />
             </div>
             <div>
               <p class="text-sm text-muted-foreground font-medium">Sisa Cuti Tahunan</p>
-              <p class="text-2xl font-bold">10<span class="text-sm font-normal text-muted-foreground ml-1">Hari</span></p>
+              <Skeleton v-if="isPageLoading" class="h-8 w-20 mt-1" />
+              <p v-else class="text-2xl font-bold">10<span class="text-sm font-normal text-muted-foreground ml-1">Hari</span></p>
             </div>
-          </div>
+          </Card>
         </div>
 
         <!-- History Table -->
-        <div class="rounded-xl border bg-card shadow-sm overflow-hidden flex flex-col h-full max-h-[500px]">
+        <Card class="overflow-hidden flex flex-col h-full max-h-[500px]">
           <div class="p-4 border-b bg-muted/20 flex items-center justify-between">
             <h2 class="font-semibold">Riwayat Absensi Terakhir</h2>
             <Button variant="outline" size="sm" class="h-8 text-xs">Lihat Semua</Button>
           </div>
-          <div class="overflow-auto flex-1 p-0">
+          <CardContent class="overflow-auto flex-1 p-0">
             <Table>
               <TableHeader>
                 <TableRow class="bg-muted/50 hover:bg-muted/50">
@@ -272,38 +321,49 @@ onUnmounted(() => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow 
-                  v-for="log in recentLogs" 
-                  :key="log.id"
-                  class="hover:bg-muted/30 transition-colors"
-                >
-                  <TableCell class="font-medium">{{ log.tanggal }}</TableCell>
-                  <TableCell class="font-mono text-sm">{{ log.jamMasuk }}</TableCell>
-                  <TableCell class="font-mono text-sm">{{ log.jamKeluar }}</TableCell>
-                  <TableCell class="text-muted-foreground text-sm">{{ log.durasi }}</TableCell>
-                  <TableCell>
-                    <span
-                      class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
-                      :class="{
-                        'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400': log.status === 'Hadir',
-                        'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400': log.status === 'Terlambat',
-                        'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400': log.status === 'Izin',
-                      }"
-                    >
-                      {{ log.status }}
-                    </span>
-                  </TableCell>
-                </TableRow>
-                
-                <TableRow v-if="recentLogs.length === 0">
-                  <TableCell colspan="5" class="h-24 text-center text-muted-foreground">
-                    Belum ada riwayat absensi.
-                  </TableCell>
-                </TableRow>
+                <template v-if="isPageLoading">
+                  <TableRow v-for="i in 3" :key="`skel-log-${i}`">
+                    <TableCell><Skeleton class="h-5 w-24" /></TableCell>
+                    <TableCell><Skeleton class="h-5 w-12" /></TableCell>
+                    <TableCell><Skeleton class="h-5 w-12" /></TableCell>
+                    <TableCell><Skeleton class="h-5 w-16" /></TableCell>
+                    <TableCell><Skeleton class="h-6 w-20 rounded-full" /></TableCell>
+                  </TableRow>
+                </template>
+                <template v-else>
+                  <TableRow 
+                    v-for="log in recentLogs" 
+                    :key="log.id"
+                    class="hover:bg-muted/30 transition-colors"
+                  >
+                    <TableCell class="font-medium">{{ log.tanggal }}</TableCell>
+                    <TableCell class="font-mono text-sm">{{ log.jamMasuk }}</TableCell>
+                    <TableCell class="font-mono text-sm">{{ log.jamKeluar }}</TableCell>
+                    <TableCell class="text-muted-foreground text-sm">{{ log.durasi }}</TableCell>
+                    <TableCell>
+                      <Badge
+                        :variant="log.status === 'Hadir' ? 'default' : log.status === 'Terlambat' ? 'destructive' : 'secondary'"
+                        :class="{
+                          'bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/40 dark:text-green-400': log.status === 'Hadir',
+                          'bg-amber-100 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/40 dark:text-amber-400': log.status === 'Terlambat',
+                          'bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/40 dark:text-blue-400': log.status === 'Izin',
+                        }"
+                      >
+                        {{ log.status }}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                  
+                  <TableRow v-if="recentLogs.length === 0">
+                    <TableCell colspan="5" class="h-24 text-center text-muted-foreground">
+                      Belum ada riwayat absensi.
+                    </TableCell>
+                  </TableRow>
+                </template>
               </TableBody>
             </Table>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
       </div>
     </div>
@@ -312,7 +372,7 @@ onUnmounted(() => {
 
     <!-- Modal Scan Wajah -->
     <Dialog :open="isScanning" @update:open="(val) => { if(!val) stopCamera() }">
-      <DialogContent class="sm:max-w-md p-0 overflow-hidden bg-black border-border shadow-2xl">
+      <DialogContent class="sm:max-w-3xl p-0 overflow-hidden bg-black border-border shadow-2xl">
         <DialogHeader class="sr-only">
           <DialogTitle>Scan Wajah</DialogTitle>
           <DialogDescription>Posisikan wajah Anda pada area pemindaian</DialogDescription>
@@ -348,10 +408,19 @@ onUnmounted(() => {
               <!-- Close handled by dialog outside -->
             </div>
 
-            <!-- Face Guide Box -->
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 sm:w-56 sm:h-56 border-2 border-white/30 rounded-full border-dashed shadow-[0_0_0_9999px_rgba(0,0,0,0.4)]"></div>
+            <!-- Face Guide Box (Rectangular Scanner) -->
+            <div class="absolute inset-0 pointer-events-none z-10">
+              <!-- Corners -->
+              <span class="absolute top-[10%] left-[20%] w-10 h-10 border-t-[3px] border-l-[3px] border-primary rounded-tl-[16px]"></span>
+              <span class="absolute top-[10%] right-[20%] w-10 h-10 border-t-[3px] border-r-[3px] border-primary rounded-tr-[16px]"></span>
+              <span class="absolute bottom-[35%] left-[20%] w-10 h-10 border-b-[3px] border-l-[3px] border-primary rounded-bl-[16px]"></span>
+              <span class="absolute bottom-[35%] right-[20%] w-10 h-10 border-b-[3px] border-r-[3px] border-primary rounded-br-[16px]"></span>
+              
+              <!-- Scan Line -->
+              <div class="cam-scan-line"></div>
+            </div>
             
-            <div class="flex flex-col gap-3 p-4">
+            <div class="flex flex-col gap-3 p-4 z-20">
               <!-- Watermark Box -->
               <div class="bg-black/50 backdrop-blur-md rounded-lg p-3 text-white border border-white/10 shadow-lg">
                 <p class="text-sm font-bold text-blue-400">{{ currentDate }} {{ currentTime }}</p>
@@ -373,10 +442,12 @@ onUnmounted(() => {
               <div class="flex justify-center pointer-events-auto pb-2">
                 <Button 
                   @click="takePhotoAndSubmit"
+                  :disabled="isSubmitting"
                   class="rounded-full shadow-xl shadow-black/50 bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 h-12"
                 >
-                  <Camera class="size-4 mr-2" />
-                  {{ scanType === 'in' ? 'Scan Wajah Masuk' : 'Scan Wajah Keluar' }}
+                  <div v-if="isSubmitting" class="w-4 h-4 border-2 border-white/20 border-t-white/80 rounded-full animate-spin mr-2"></div>
+                  <Camera v-else class="size-4 mr-2" />
+                  {{ isSubmitting ? 'Menyimpan...' : (scanType === 'in' ? 'Scan Wajah Masuk' : 'Scan Wajah Keluar') }}
                 </Button>
               </div>
             </div>
@@ -385,3 +456,20 @@ onUnmounted(() => {
       </DialogContent>
     </Dialog>
 </template>
+
+<style scoped>
+.cam-scan-line {
+  position: absolute; left: 20%; right: 20%; height: 3px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  animation: kscanGuru 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  box-shadow: 0 0 12px var(--primary);
+  border-radius: 999px;
+  z-index: 20;
+}
+@keyframes kscanGuru {
+  0% { top: 10%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 65%; opacity: 0; }
+}
+</style>

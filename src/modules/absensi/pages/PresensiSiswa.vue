@@ -13,12 +13,18 @@ import {
   CalendarDays,
   Wifi,
   ShieldCheck,
+  LogIn,
+  LogOut,
 } from 'lucide-vue-next'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { getStudents, getLogs, postScan } from '@/services/api/absensi'
 
 const router = useRouter()
 
 // ─── State ──────────────────────────────────────────────
 const activeMode = ref('fingerprint') // 'kamera' | 'fingerprint' | 'rfid'
+const scanType = ref('Otomatis') // 'Otomatis' | 'Masuk' | 'Keluar'
 const absensiData = ref([])
 const scanResults = ref([])
 
@@ -44,17 +50,28 @@ const mediaStream = ref(null)
 const cameraStatus = ref('idle') // idle | loading | active | error
 const cameraError = ref('')
 
-// ─── LocalStorage Persistence ───────────────────────────
-function loadData() {
-  const data = localStorage.getItem('absensiData')
-  const logs = localStorage.getItem('scanResults')
-  if (data) absensiData.value = JSON.parse(data)
-  if (logs) scanResults.value = JSON.parse(logs)
+// ─── LocalStorage Persistence & API Mock ─────────────────
+let logPollInterval = null
+
+async function loadData() {
+  try {
+    const [students, logs] = await Promise.all([
+      getStudents(),
+      getLogs()
+    ])
+    absensiData.value = students
+    scanResults.value = logs
+  } catch (error) {
+    console.error('Failed to load data:', error)
+  }
 }
 
-function saveData() {
-  localStorage.setItem('absensiData', JSON.stringify(absensiData.value))
-  localStorage.setItem('scanResults', JSON.stringify(scanResults.value))
+async function fetchLogsOnly() {
+  try {
+    scanResults.value = await getLogs()
+  } catch (error) {
+    // silently fail for background polling
+  }
 }
 
 // ─── Initials Helper ────────────────────────────────────
@@ -72,10 +89,21 @@ function startFaceScanSimulation() {
   if (faceScanInterval) clearInterval(faceScanInterval)
   faceScanInterval = setInterval(() => {
     if (activeMode.value !== 'kamera' || cameraStatus.value !== 'active') return
-    const unscanned = absensiData.value.filter(s => s.status === 'belum_absen')
-    if (unscanned.length === 0) return
-    const randomSiswa = unscanned[Math.floor(Math.random() * unscanned.length)]
-    executeSuccessfulScan(randomSiswa.id, 'wajah')
+    
+    let pool = [];
+    if (scanType.value === 'Otomatis') {
+      pool = absensiData.value.filter(s => s.status === 'belum_absen' || (s.status !== 'belum_absen' && !s.jamKeluar));
+    } else if (scanType.value === 'Masuk') {
+      pool = absensiData.value.filter(s => s.status === 'belum_absen');
+    } else if (scanType.value === 'Keluar') {
+      pool = absensiData.value.filter(s => s.status !== 'belum_absen' && !s.jamKeluar);
+    }
+    
+    if (pool.length === 0) return
+    const randomSiswa = pool[Math.floor(Math.random() * pool.length)]
+    
+    // Attempt scan for random student
+    executeSuccessfulScan(randomSiswa.id, 'kamera')
   }, 8000)
 }
 
@@ -136,38 +164,39 @@ async function triggerSensorScan(siswaId, type) {
 }
 
 function executeSuccessfulScan(siswaId, type) {
-  const student = absensiData.value.find(s => s.id === siswaId)
-  if (!student) return
-  const now = new Date()
-  const timeStr = now.toTimeString().split(' ')[0]
-  let scanType = 'Masuk'
-  if (!student.jamMasuk) {
-    student.jamMasuk = timeStr
-    const [h, m] = timeStr.split(':').map(Number)
-    student.status = (h > 7 || (h === 7 && m > 20)) ? 'terlambat' : 'hadir'
-    scanType = 'Masuk'
-  } else if (!student.jamKeluar) {
-    student.jamKeluar = timeStr
-    scanType = 'Keluar'
-  } else {
-    student.jamKeluar = timeStr
-    scanType = 'Keluar'
+  const student = absensiData.value.find(s => s.id === siswaId);
+  let actualScanType = scanType.value;
+  
+  if (actualScanType === 'Otomatis') {
+    if (!student || student.status === 'belum_absen') {
+      actualScanType = 'Masuk';
+    } else {
+      actualScanType = 'Keluar';
+    }
   }
-  activeScannedSiswa.value = student
-  scanSuccessMsg.value = `Absen ${scanType} Berhasil!`
-  scanResults.value.unshift({
-    id: Date.now(),
-    nama: student.nama,
-    inisial: getInitials(student.nama),
-    kelas: student.kelas,
-    waktu: timeStr,
-    tipe: scanType,
-    metode: type
-  })
-  saveData()
-  setTimeout(() => {
-    if (activeScannedSiswa.value?.id === student.id) activeScannedSiswa.value = null
-  }, 3500)
+
+  // Use postScan API Mock to simulate scan
+  postScan(siswaId, actualScanType)
+    .then(newLog => {
+      activeScannedSiswa.value = {
+        nama: newLog.nama,
+        kelas: newLog.kelas,
+        nisn: newLog.nisn,
+        jamMasuk: actualScanType === 'Masuk' ? newLog.waktu : (student?.jamMasuk || '-'),
+        jamKeluar: actualScanType === 'Keluar' ? newLog.waktu : null
+      }
+      scanSuccessMsg.value = `Absen ${actualScanType} Berhasil!`
+      scanResults.value.unshift(newLog)
+      // refresh absensiData behind the scenes
+      getStudents().then(data => absensiData.value = data)
+      
+      setTimeout(() => {
+        if (activeScannedSiswa.value?.nama === newLog.nama) activeScannedSiswa.value = null
+      }, 3500)
+    })
+    .catch(err => {
+      console.error(err)
+    })
 }
 
 // ─── Lifecycle & Watchers ──────────────────────────────
@@ -203,11 +232,14 @@ onMounted(() => {
   if (savedThemeStyle !== 'tahoe') {
     document.body.classList.add(`theme-${savedThemeStyle}`)
   }
+
+  logPollInterval = setInterval(fetchLogsOnly, 5000)
 })
 
 onUnmounted(() => {
   stopCamera()
   if (clockInterval) clearInterval(clockInterval)
+  if (logPollInterval) clearInterval(logPollInterval)
 })
 
 const filteredStudents = computed(() => absensiData.value)
@@ -238,7 +270,7 @@ const filteredStudents = computed(() => absensiData.value)
 
       <!-- LEFT: Scanner Viewport -->
       <section class="right-panel">
-        <div class="scanner-card">
+        <Card class="scanner-card">
 
           <!-- Scanner Header -->
           <div class="scanner-topbar">
@@ -272,7 +304,7 @@ const filteredStudents = computed(() => absensiData.value)
                 </div>
                 <p class="success-msg">{{ scanSuccessMsg }}</p>
                 <p class="success-name">{{ activeScannedSiswa.nama }}</p>
-                <p class="success-meta">{{ activeScannedSiswa.kelas }}</p>
+                <p class="success-meta">{{ activeScannedSiswa.kelas }} &bull; NISN: {{ activeScannedSiswa.nisn }}</p>
                 <div class="success-time-row">
                   <Clock class="size-3" />
                   {{ activeScannedSiswa.jamKeluar ? 'Keluar' : 'Masuk' }}: {{ activeScannedSiswa.jamKeluar || activeScannedSiswa.jamMasuk }}
@@ -306,7 +338,7 @@ const filteredStudents = computed(() => absensiData.value)
                 </div>
                 <p class="success-msg">{{ scanSuccessMsg }}</p>
                 <p class="success-name">{{ activeScannedSiswa.nama }}</p>
-                <p class="success-meta">{{ activeScannedSiswa.kelas }}</p>
+                <p class="success-meta">{{ activeScannedSiswa.kelas }} &bull; NISN: {{ activeScannedSiswa.nisn }}</p>
                 <div class="success-time-row">
                   <Clock class="size-3" />
                   {{ activeScannedSiswa.jamKeluar ? 'Keluar' : 'Masuk' }}: {{ activeScannedSiswa.jamKeluar || activeScannedSiswa.jamMasuk }}
@@ -351,7 +383,7 @@ const filteredStudents = computed(() => absensiData.value)
               <div v-if="cameraStatus === 'idle'" class="cam-state-wrap">
                 <div class="cam-idle-icon"><Camera class="size-10" style="color: var(--muted-foreground)" /></div>
                 <p class="cam-idle-text">Kamera siap dinyalakan</p>
-                <button class="cam-start-btn" @click="startCamera" disabled>
+                <button class="cam-start-btn" @click="startCamera">
                   <Camera class="size-4" />
                   Nyalakan Kamera
                 </button>
@@ -361,7 +393,7 @@ const filteredStudents = computed(() => absensiData.value)
                   <div class="success-icon"><CheckCircle class="size-8" style="color: var(--primary)" /></div>
                   <p class="success-msg">{{ scanSuccessMsg }}</p>
                   <p class="success-name">{{ activeScannedSiswa.nama }}</p>
-                  <p class="success-meta">{{ activeScannedSiswa.kelas }}</p>
+                  <p class="success-meta">{{ activeScannedSiswa.kelas }} &bull; NISN: {{ activeScannedSiswa.nisn }}</p>
                   <span class="success-chip">FACE SCAN VERIFIED</span>
                 </div>
               </div>
@@ -379,21 +411,47 @@ const filteredStudents = computed(() => absensiData.value)
             </span>
           </div>
 
-        </div>
+        </Card>
       </section>
 
       <!-- RIGHT: Clock + Student List -->
       <section class="left-panel">
 
         <!-- Clock Card -->
-        <div class="clock-card">
+        <Card class="clock-card">
           <div class="clock-time">{{ currentTime }}</div>
           <div class="clock-date">
             <CalendarDays class="size-4" style="color: var(--muted-foreground)" />
             <span>{{ currentDate }}</span>
           </div>
           <div class="divider" />
-          <!-- Mode Switcher -->
+          
+          <!-- Scan Type Switcher -->
+          <div class="type-tabs mb-4">
+            <button
+              @click="scanType = 'Otomatis'"
+              :class="['type-tab', scanType === 'Otomatis' ? 'type-tab--active type-tab--otomatis' : '']"
+            >
+              <ShieldCheck class="size-4" />
+              <span>Otomatis</span>
+            </button>
+            <button
+              @click="scanType = 'Masuk'"
+              :class="['type-tab', scanType === 'Masuk' ? 'type-tab--active type-tab--masuk' : '']"
+            >
+              <LogIn class="size-4" />
+              <span>Masuk</span>
+            </button>
+            <button
+              @click="scanType = 'Keluar'"
+              :class="['type-tab', scanType === 'Keluar' ? 'type-tab--active type-tab--keluar' : '']"
+            >
+              <LogOut class="size-4" />
+              <span>Pulang</span>
+            </button>
+          </div>
+          
+          <!-- Module Switcher -->
           <div class="mode-tabs">
             <button
               @click="activeMode = 'fingerprint'"
@@ -417,14 +475,14 @@ const filteredStudents = computed(() => absensiData.value)
               Kamera
             </button>
           </div>
-        </div>
+        </Card>
 
         <!-- Scan Log List -->
-        <div class="log-card">
+        <Card class="log-card">
           <div class="log-header">
             <UserCheck class="size-4" style="color: var(--primary)" />
             <span class="log-title">Riwayat Scan</span>
-            <span class="log-badge">{{ scanResults.length }}</span>
+            <Badge variant="secondary" class="log-badge">{{ scanResults.length }}</Badge>
           </div>
           <div class="log-list">
             <div v-if="scanResults.length === 0" class="log-empty">
@@ -441,12 +499,12 @@ const filteredStudents = computed(() => absensiData.value)
                 <p class="log-name">{{ log.nama }}</p>
                 <p class="log-meta">{{ log.kelas }} · {{ log.tipe }} · {{ log.waktu }}</p>
               </div>
-              <span :class="['log-badge-type', log.tipe === 'Masuk' ? 'badge-masuk' : 'badge-keluar']">
+              <Badge variant="outline" :class="['log-badge-type', log.tipe === 'Masuk' ? 'badge-masuk' : 'badge-keluar']">
                 {{ log.tipe }}
-              </span>
+              </Badge>
             </div>
           </div>
-        </div>
+        </Card>
 
       </section>
     </main>
@@ -584,6 +642,60 @@ const filteredStudents = computed(() => absensiData.value)
   background: var(--border);
   margin: 1.125rem 0;
 }
+
+/* Type Tabs */
+.type-tabs {
+  display: flex;
+  gap: 0.375rem;
+  padding: 0.375rem;
+  background: var(--muted);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+.type-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.6rem 0.25rem;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.type-tab:hover:not(.type-tab--active) {
+  color: var(--foreground);
+  background: var(--accent);
+}
+
+.type-tab--active {
+  background: var(--background);
+}
+.type-tab--otomatis {
+  color: #3b82f6; /* blue-500 */
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+.dark .type-tab--otomatis { color: #60a5fa; }
+
+.type-tab--masuk {
+  color: #10b981; /* emerald-500 */
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+.dark .type-tab--masuk { color: #34d399; }
+
+.type-tab--keluar {
+  color: #f59e0b; /* amber-500 */
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+.dark .type-tab--keluar { color: #fbbf24; }
 
 /* Mode Tabs */
 .mode-tabs {

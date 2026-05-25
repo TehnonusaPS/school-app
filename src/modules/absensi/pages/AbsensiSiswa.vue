@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   Camera,
@@ -8,8 +8,22 @@ import {
   Download,
   Printer,
   Info,
+  AlertCircle,
 } from 'lucide-vue-next'
+import { getStudents, getPersonalHistory, updateStudentStatus } from '@/services/api/absensi'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { useAuthStore } from '@/stores/authStore'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { MoreVertical } from 'lucide-vue-next'
 import {
   Table,
   TableBody,
@@ -18,59 +32,73 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 const router = useRouter()
+const auth = useAuthStore()
 
 // ─── State ──────────────────────────────────────────────
-const selectedKelas = ref('')
-const selectedMapel = ref('')
+const isPersonalView = computed(() => ['siswa', 'orang_tua'].includes(auth.user?.role))
+
+const selectedKelas = ref('semua')
+const selectedMapel = ref('semua')
 const searchQuery = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 6
 
-// ─── Mock data & LocalStorage Sync ─────────────────────
-const kelasList = ['XI IPA 1', 'XI IPA 2', 'XI IPS 1', 'XII IPA 1']
-const mapelList = ['Biologi', 'Matematika', 'Fisika', 'Kimia', 'Bahasa Indonesia']
-
 const absensiData = ref([])
-const scanResults = ref([])
+const isLoading = ref(true)
+const isError = ref(false)
+const errorMessage = ref('')
+let pollInterval = null
 
-const initialData = [
-  { id: 1, nama: 'Ahmad Fadil', kelas: 'XI IPA 1', mapel: 'Biologi', jamMasuk: '07:12:45', jamKeluar: '10:15:20', status: 'hadir' },
-  { id: 2, nama: 'Bunga Citra', kelas: 'XI IPA 1', mapel: 'Biologi', jamMasuk: '07:25:10', jamKeluar: null, status: 'terlambat' },
-  { id: 3, nama: 'Cakra Khan', kelas: 'XI IPA 1', mapel: 'Biologi', jamMasuk: null, jamKeluar: null, status: 'belum_absen' },
-  { id: 4, nama: 'Dian Sastro', kelas: 'XI IPA 1', mapel: 'Biologi', jamMasuk: '07:10:05', jamKeluar: '10:15:33', status: 'hadir' },
-  { id: 5, nama: 'Elsa Novita', kelas: 'XI IPA 2', mapel: 'Biologi', jamMasuk: '07:05:22', jamKeluar: '10:14:10', status: 'hadir' },
-  { id: 6, nama: 'Farhan Ramdan', kelas: 'XI IPA 2', mapel: 'Biologi', jamMasuk: '07:30:00', jamKeluar: null, status: 'terlambat' },
-  { id: 7, nama: 'Gita Nirmala', kelas: 'XI IPA 1', mapel: 'Biologi', jamMasuk: null, jamKeluar: null, status: 'belum_absen' },
-  { id: 8, nama: 'Hendra Saputra', kelas: 'XI IPA 1', mapel: 'Biologi', jamMasuk: '07:08:11', jamKeluar: '10:15:00', status: 'hadir' },
-]
-
-const initialLogs = [
-  { id: 1, nama: 'Ahmad Fadil', inisial: 'AF', waktu: '07:12:45', tipe: 'Masuk' },
-  { id: 2, nama: 'Dian Sastro', inisial: 'DS', waktu: '07:10:05', tipe: 'Masuk' },
-]
-
-function loadData() {
-  if (!localStorage.getItem('absensiData')) {
-    localStorage.setItem('absensiData', JSON.stringify(initialData))
+async function loadData(isPolling = false) {
+  if (!isPolling) {
+    isLoading.value = true
+    isError.value = false
   }
-  if (!localStorage.getItem('scanResults')) {
-    localStorage.setItem('scanResults', JSON.stringify(initialLogs))
+  try {
+    if (isPersonalView.value) {
+      const data = await getPersonalHistory(auth.user?.id)
+      absensiData.value = data
+    } else {
+      const data = await getStudents()
+      absensiData.value = data
+    }
+    isError.value = false
+  } catch (err) {
+    isError.value = true
+    errorMessage.value = err.message || 'Terjadi kesalahan sistem'
+  } finally {
+    if (!isPolling) isLoading.value = false
   }
-  absensiData.value = JSON.parse(localStorage.getItem('absensiData'))
-  scanResults.value = JSON.parse(localStorage.getItem('scanResults'))
 }
 
 onMounted(() => {
   loadData()
+  // Background polling every 10s
+  pollInterval = setInterval(() => loadData(true), 10000)
+})
+
+onUnmounted(() => {
+  if (pollInterval) clearInterval(pollInterval)
 })
 
 // ─── Computed ────────────────────────────────────────────
 const filteredData = computed(() => {
   return absensiData.value.filter(item => {
-    const matchKelas = !selectedKelas.value || item.kelas === selectedKelas.value
-    const matchMapel = !selectedMapel.value || item.mapel === selectedMapel.value
+    const matchKelas = selectedKelas.value === 'semua' || item.kelas === selectedKelas.value
+    const matchMapel = selectedMapel.value === 'semua' || item.mapel === selectedMapel.value
     const matchSearch =
       !searchQuery.value ||
       item.nama.toLowerCase().includes(searchQuery.value.toLowerCase())
@@ -83,6 +111,12 @@ const sudahHadir = computed(() => absensiData.value.filter(d => d.status === 'ha
 const belumScan = computed(() => absensiData.value.filter(d => d.status === 'belum_absen').length)
 const terlambat = computed(() => absensiData.value.filter(d => d.status === 'terlambat').length)
 
+// Personal Stats
+const totalPersonalHadir = computed(() => absensiData.value.filter(d => ['hadir', 'terlambat'].includes(d.status)).length)
+const totalPersonalIzin = computed(() => absensiData.value.filter(d => d.status === 'izin').length)
+const totalPersonalSakit = computed(() => absensiData.value.filter(d => d.status === 'sakit').length)
+const totalPersonalAlpa = computed(() => absensiData.value.filter(d => d.status === 'alpa').length)
+
 const totalPages = computed(() => Math.ceil(filteredData.value.length / itemsPerPage))
 const paginatedData = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
@@ -93,6 +127,9 @@ const paginatedData = computed(() => {
 function getStatusLabel(status) {
   if (status === 'hadir') return 'Hadir'
   if (status === 'terlambat') return 'Terlambat'
+  if (status === 'izin') return 'Izin'
+  if (status === 'sakit') return 'Sakit'
+  if (status === 'alpa') return 'Tanpa Keterangan'
   return 'Belum Absen'
 }
 
@@ -103,6 +140,15 @@ function openScanTab() {
   const route = router.resolve('/absensi/siswa/scan')
   window.open(route.href, '_blank')
 }
+
+async function changeStatus(studentId, newStatus) {
+  try {
+    await updateStudentStatus(studentId, newStatus)
+    await loadData() // reload to get new status
+  } catch (err) {
+    alert(err.message || 'Gagal mengubah status')
+  }
+}
 </script>
 
 <template>
@@ -111,14 +157,14 @@ function openScanTab() {
     <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between border-b pb-4">
       <div>
         <h1 class="text-2xl font-bold tracking-tight text-foreground">
-          Dashboard Absensi Siswa
+          {{ isPersonalView ? 'Rekap Absensi Pribadi' : 'Dashboard Absensi Siswa' }}
         </h1>
         <p class="text-muted-foreground mt-1 text-sm">
-          Pantau rekapitulasi kehadiran siswa secara real-time dari pemindai Kiosk Sekolah.
+          {{ isPersonalView ? 'Pantau riwayat kehadiran Anda di setiap mata pelajaran.' : 'Pantau rekapitulasi kehadiran siswa secara real-time dari pemindai Kiosk Sekolah.' }}
         </p>
       </div>
       
-      <div class="flex items-center gap-2 shrink-0">
+      <div v-if="!isPersonalView" class="flex items-center gap-2 shrink-0">
         <Button 
           id="btn-buka-kiosk" 
           class="gap-2" 
@@ -132,6 +178,7 @@ function openScanTab() {
 
     <!-- ── Info Banner ── -->
     <div 
+      v-if="!isPersonalView"
       class="flex items-start gap-3 rounded-xl border border-indigo-100 bg-indigo-50/50 px-4 py-3.5 text-sm text-indigo-700 dark:border-indigo-900/30 dark:bg-indigo-950/20 dark:text-indigo-400 animate-in fade-in duration-200"
     >
       <Info class="size-4 mt-0.5 shrink-0" />
@@ -142,115 +189,171 @@ function openScanTab() {
 
     <!-- ── Stat Cards ── -->
     <div class="grid gap-4 grid-cols-2 lg:grid-cols-4">
-      <!-- Total Siswa -->
-      <div class="rounded-xl border bg-card p-5 shadow-sm hover:shadow transition-shadow">
+      <!-- Card 1 -->
+      <Card class="p-5 hover:shadow transition-shadow">
         <div class="flex items-center justify-between mb-3">
-          <span class="text-sm font-medium text-muted-foreground text-xs uppercase tracking-wider">Total Siswa</span>
-          <div class="p-1.5 bg-muted rounded-lg">
-            <Database class="size-4 text-muted-foreground" />
+          <span class="text-sm font-medium text-muted-foreground text-xs uppercase tracking-wider">
+            {{ isPersonalView ? 'Total Hadir' : 'Total Siswa' }}
+          </span>
+          <div :class="[isPersonalView ? 'bg-green-50 dark:bg-green-950/40' : 'bg-muted', 'p-1.5 rounded-lg']">
+            <Database :class="['size-4', isPersonalView ? 'text-green-500' : 'text-muted-foreground']" />
           </div>
         </div>
-        <div class="text-3xl font-bold tracking-tight text-foreground">{{ totalSiswa }}</div>
-      </div>
-      <!-- Sudah Hadir -->
-      <div class="rounded-xl border bg-card p-5 shadow-sm hover:shadow transition-shadow">
+        <Skeleton v-if="isLoading" class="h-9 w-20" />
+        <div v-else :class="['text-3xl font-bold tracking-tight', isPersonalView ? 'text-green-600 dark:text-green-400' : 'text-foreground']">
+          {{ isPersonalView ? totalPersonalHadir : totalSiswa }}
+        </div>
+      </Card>
+      
+      <!-- Card 2 -->
+      <Card class="p-5 hover:shadow transition-shadow">
         <div class="flex items-center justify-between mb-3">
-          <span class="text-sm font-medium text-muted-foreground text-xs uppercase tracking-wider">Sudah Hadir</span>
-          <div class="p-1.5 bg-green-50 dark:bg-green-950/40 rounded-lg">
-            <Database class="size-4 text-green-500" />
+          <span class="text-sm font-medium text-muted-foreground text-xs uppercase tracking-wider">
+            {{ isPersonalView ? 'Sakit' : 'Sudah Hadir' }}
+          </span>
+          <div :class="[isPersonalView ? 'bg-blue-50 dark:bg-blue-950/40' : 'bg-green-50 dark:bg-green-950/40', 'p-1.5 rounded-lg']">
+            <Database :class="['size-4', isPersonalView ? 'text-blue-500' : 'text-green-500']" />
           </div>
         </div>
-        <div class="text-3xl font-bold tracking-tight text-green-600 dark:text-green-400">{{ sudahHadir }}</div>
-      </div>
-      <!-- Belum Scan -->
-      <div class="rounded-xl border bg-card p-5 shadow-sm hover:shadow transition-shadow">
+        <Skeleton v-if="isLoading" class="h-9 w-20" />
+        <div v-else :class="['text-3xl font-bold tracking-tight', isPersonalView ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400']">
+          {{ isPersonalView ? totalPersonalSakit : sudahHadir }}
+        </div>
+      </Card>
+
+      <!-- Card 3 -->
+      <Card class="p-5 hover:shadow transition-shadow">
         <div class="flex items-center justify-between mb-3">
-          <span class="text-sm font-medium text-muted-foreground text-xs uppercase tracking-wider">Belum Scan</span>
-          <div class="p-1.5 bg-yellow-50 dark:bg-yellow-950/40 rounded-lg">
-            <Database class="size-4 text-yellow-600 dark:text-yellow-400" />
+          <span class="text-sm font-medium text-muted-foreground text-xs uppercase tracking-wider">
+            {{ isPersonalView ? 'Izin' : 'Belum Scan' }}
+          </span>
+          <div :class="['p-1.5 rounded-lg', isPersonalView ? 'bg-indigo-50 dark:bg-indigo-950/40' : 'bg-yellow-50 dark:bg-yellow-950/40']">
+            <Database :class="['size-4', isPersonalView ? 'text-indigo-600 dark:text-indigo-400' : 'text-yellow-600 dark:text-yellow-400']" />
           </div>
         </div>
-        <div class="text-3xl font-bold tracking-tight text-yellow-600 dark:text-yellow-400">{{ belumScan }}</div>
-      </div>
-      <!-- Terlambat -->
-      <div class="rounded-xl border bg-card p-5 shadow-sm hover:shadow transition-shadow">
+        <Skeleton v-if="isLoading" class="h-9 w-20" />
+        <div v-else :class="['text-3xl font-bold tracking-tight', isPersonalView ? 'text-indigo-600 dark:text-indigo-400' : 'text-yellow-600 dark:text-yellow-400']">
+          {{ isPersonalView ? totalPersonalIzin : belumScan }}
+        </div>
+      </Card>
+
+      <!-- Card 4 -->
+      <Card class="p-5 hover:shadow transition-shadow">
         <div class="flex items-center justify-between mb-3">
-          <span class="text-sm font-medium text-muted-foreground text-xs uppercase tracking-wider">Terlambat</span>
+          <span class="text-sm font-medium text-muted-foreground text-xs uppercase tracking-wider">
+            {{ isPersonalView ? 'Tanpa Keterangan' : 'Terlambat' }}
+          </span>
           <div class="p-1.5 bg-red-50 dark:bg-red-950/40 rounded-lg">
             <Database class="size-4 text-red-500" />
           </div>
         </div>
-        <div class="text-3xl font-bold tracking-tight text-red-600 dark:text-red-400">{{ terlambat }}</div>
-      </div>
+        <Skeleton v-if="isLoading" class="h-9 w-20" />
+        <div v-else class="text-3xl font-bold tracking-tight text-red-600 dark:text-red-400">
+          {{ isPersonalView ? totalPersonalAlpa : terlambat }}
+        </div>
+      </Card>
     </div>
 
     <!-- ── Filter & Search Bar ── -->
     <div class="flex flex-wrap items-center gap-3">
-      <select
-        v-model="selectedKelas"
-        id="filter-kelas"
-        class="h-9 rounded-lg border border-input bg-background px-3 py-1.5 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 min-w-[130px]"
-      >
-        <option value="">Pilih Kelas</option>
-        <option v-for="k in kelasList" :key="k" :value="k">{{ k }}</option>
-      </select>
+      <Select v-model="selectedKelas">
+        <SelectTrigger class="w-[140px]">
+          <SelectValue placeholder="Pilih Kelas" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="semua">Semua Kelas</SelectItem>
+          <SelectItem v-for="k in kelasList" :key="k" :value="k">{{ k }}</SelectItem>
+        </SelectContent>
+      </Select>
 
-      <select
-        v-model="selectedMapel"
-        id="filter-mapel"
-        class="h-9 rounded-lg border border-input bg-background px-3 py-1.5 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 min-w-[140px]"
-      >
-        <option value="">Mata Pelajaran</option>
-        <option v-for="m in mapelList" :key="m" :value="m">{{ m }}</option>
-      </select>
+      <Select v-model="selectedMapel">
+        <SelectTrigger class="w-[160px]">
+          <SelectValue placeholder="Mata Pelajaran" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="semua">Semua Mapel</SelectItem>
+          <SelectItem v-for="m in mapelList" :key="m" :value="m">{{ m }}</SelectItem>
+        </SelectContent>
+      </Select>
 
       <div class="flex-1 min-w-[180px] relative">
         <Search class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
-        <input
+        <Input
           v-model="searchQuery"
           id="search-siswa"
           type="text"
           placeholder="Cari siswa..."
-          class="h-9 w-full rounded-lg border border-input bg-background pl-9 pr-3 py-1.5 text-sm text-foreground shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
+          class="pl-9"
         />
       </div>
 
-      <button
+      <Button
         id="btn-download"
-        class="h-9 w-9 inline-flex items-center justify-center rounded-lg border border-input bg-background text-muted-foreground shadow-sm hover:bg-muted transition-colors"
+        variant="outline"
+        size="icon"
         title="Download"
       >
         <Download class="size-4" />
-      </button>
-      <button
+      </Button>
+      <Button
         id="btn-print"
-        class="h-9 w-9 inline-flex items-center justify-center rounded-lg border border-input bg-background text-muted-foreground shadow-sm hover:bg-muted transition-colors"
+        variant="outline"
+        size="icon"
         title="Cetak"
       >
         <Printer class="size-4" />
-      </button>
+      </Button>
     </div>
 
     <!-- ── Table ── -->
-    <div class="rounded-xl border shadow-sm overflow-hidden bg-card">
+    <Card class="overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow class="bg-muted/50">
-            <TableHead class="font-semibold">Nama Siswa &amp; Kelas</TableHead>
+            <TableHead v-if="!isPersonalView" class="font-semibold">Nama Siswa &amp; Kelas</TableHead>
+            <TableHead v-if="isPersonalView" class="font-semibold">Tanggal</TableHead>
             <TableHead class="font-semibold">Mata Pelajaran</TableHead>
             <TableHead class="font-semibold">Jam Masuk</TableHead>
             <TableHead class="font-semibold">Jam Keluar</TableHead>
             <TableHead class="font-semibold">Status</TableHead>
+            <TableHead v-if="!isPersonalView" class="font-semibold w-[80px]">Aksi</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow
-            v-for="siswa in paginatedData"
-            :key="siswa.id"
-            class="hover:bg-muted/30 transition-colors"
-          >
-            <TableCell>
+          <template v-if="isLoading">
+            <TableRow v-for="i in 6" :key="`skel-${i}`">
+              <TableCell><Skeleton class="h-5 w-32" /></TableCell>
+              <TableCell><Skeleton class="h-5 w-24" /></TableCell>
+              <TableCell><Skeleton class="h-5 w-16" /></TableCell>
+              <TableCell><Skeleton class="h-5 w-16" /></TableCell>
+              <TableCell><Skeleton class="h-6 w-20 rounded-full" /></TableCell>
+              <TableCell v-if="!isPersonalView"><Skeleton class="h-8 w-8 rounded-full" /></TableCell>
+            </TableRow>
+          </template>
+          
+          <template v-else-if="isError">
+            <TableRow>
+              <TableCell colspan="5" class="h-32 text-center">
+                <Alert variant="destructive" class="max-w-md mx-auto text-left">
+                  <AlertCircle class="w-4 h-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{{ errorMessage }}</AlertDescription>
+                </Alert>
+              </TableCell>
+            </TableRow>
+          </template>
+          
+          <template v-else>
+            <TableRow
+              v-for="siswa in paginatedData"
+              :key="siswa.id"
+              class="hover:bg-muted/30 transition-colors"
+            >
+            <TableCell v-if="!isPersonalView">
               <div class="font-semibold text-sm">{{ siswa.nama }} <span class="text-muted-foreground font-normal">({{ siswa.kelas }})</span></div>
+            </TableCell>
+            <TableCell v-if="isPersonalView">
+              <div class="font-semibold text-sm">{{ siswa.tanggal }}</div>
             </TableCell>
             <TableCell>
               <span class="text-primary font-medium text-sm">{{ siswa.mapel }}</span>
@@ -258,65 +361,84 @@ function openScanTab() {
             <TableCell class="text-sm font-mono">{{ siswa.jamMasuk ?? '-' }}</TableCell>
             <TableCell class="text-sm font-mono">{{ siswa.jamKeluar ?? '-' }}</TableCell>
             <TableCell>
-              <span
-                class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold"
+              <Badge
+                :variant="siswa.status === 'hadir' ? 'default' : siswa.status === 'terlambat' ? 'destructive' : 'secondary'"
                 :class="{
-                  'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400': siswa.status === 'hadir',
-                  'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400': siswa.status === 'terlambat',
+                  'bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/40 dark:text-green-400': siswa.status === 'hadir',
+                  'bg-yellow-100 text-yellow-700 hover:bg-yellow-100 dark:bg-yellow-900/40 dark:text-yellow-400': siswa.status === 'terlambat',
+                  'bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/40 dark:text-blue-400': siswa.status === 'sakit',
+                  'bg-indigo-100 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/40 dark:text-indigo-400': siswa.status === 'izin',
+                  'bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-900/40 dark:text-red-400': siswa.status === 'alpa',
                   'bg-muted text-muted-foreground': siswa.status === 'belum_absen',
                 }"
               >
-                <span
-                  class="size-1.5 rounded-full"
-                  :class="{
-                    'bg-green-500': siswa.status === 'hadir',
-                    'bg-yellow-500': siswa.status === 'terlambat',
-                    'bg-gray-400': siswa.status === 'belum_absen',
-                  }"
-                />
                 {{ getStatusLabel(siswa.status) }}
-              </span>
+              </Badge>
             </TableCell>
-          </TableRow>
+            <TableCell v-if="!isPersonalView">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" class="h-8 w-8 p-0">
+                    <span class="sr-only">Buka menu</span>
+                    <MoreVertical class="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Ubah Status</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem @click="changeStatus(siswa.id, 'hadir')">Hadir</DropdownMenuItem>
+                  <DropdownMenuItem @click="changeStatus(siswa.id, 'sakit')">Sakit</DropdownMenuItem>
+                  <DropdownMenuItem @click="changeStatus(siswa.id, 'izin')">Izin</DropdownMenuItem>
+                  <DropdownMenuItem @click="changeStatus(siswa.id, 'alpa')">Tanpa Keterangan</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </TableCell>
+            </TableRow>
 
-          <TableRow v-if="paginatedData.length === 0">
-            <TableCell colspan="5" class="h-24 text-center text-muted-foreground text-sm">
-              Tidak ada data siswa ditemukan.
-            </TableCell>
-          </TableRow>
+            <TableRow v-if="paginatedData.length === 0">
+              <TableCell :colspan="isPersonalView ? 5 : 6" class="h-32 text-center text-muted-foreground flex-col items-center justify-center">
+                <div class="flex flex-col items-center justify-center gap-2">
+                  <Search class="size-8 text-muted-foreground/50" />
+                  <p class="text-sm">Tidak ada data siswa ditemukan.</p>
+                </div>
+              </TableCell>
+            </TableRow>
+          </template>
         </TableBody>
       </Table>
-    </div>
+    </Card>
 
     <!-- ── Pagination ── -->
     <div class="flex items-center justify-between text-sm text-muted-foreground" v-if="filteredData.length > 0">
       <span>Menampilkan {{ paginatedData.length }} dari {{ filteredData.length }} data</span>
       <div class="flex items-center gap-1">
-        <button
+        <Button
           id="btn-prev-page"
-          class="h-8 px-3 rounded-md border border-input bg-background text-sm font-medium hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          variant="outline"
+          size="sm"
           :disabled="currentPage === 1"
           @click="prevPage"
         >
           Prev
-        </button>
-        <button
+        </Button>
+        <Button
           v-for="p in totalPages"
           :key="p"
-          class="h-8 w-8 rounded-md border text-sm font-medium transition-colors"
-          :class="p === currentPage ? 'bg-primary text-primary-foreground border-primary' : 'border-input bg-background hover:bg-muted'"
+          :variant="p === currentPage ? 'default' : 'outline'"
+          size="sm"
           @click="currentPage = p"
         >
           {{ p }}
-        </button>
-        <button
+        </Button>
+        <Button
           id="btn-next-page"
-          class="h-8 px-3 rounded-md border border-input bg-background text-sm font-medium hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          variant="outline"
+          size="sm"
           :disabled="currentPage === totalPages"
           @click="nextPage"
         >
           Next
-        </button>
+        </Button>
       </div>
     </div>
   </div>

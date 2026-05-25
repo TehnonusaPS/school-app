@@ -11,10 +11,16 @@ import LandingChatWidget from '@/components/landing/LandingChatWidget.vue'
 import WaveSection from '@/components/landing/WaveSection.vue'
 import { onMounted } from 'vue'
 
-onMounted(() => {
-  // Paksa halaman landing selalu dalam light mode
-  document.documentElement.classList.remove('dark')
-})
+function useForceLightModeOnRoute() {
+  onMounted(() => {
+    // Paksa halaman landing selalu dalam light mode
+    if (typeof document !== 'undefined') {
+      document.documentElement.classList.remove('dark')
+    }
+  })
+}
+
+useForceLightModeOnRoute()
 </script>
 
 <template>

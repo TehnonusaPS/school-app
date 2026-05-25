@@ -171,7 +171,10 @@ const data = {
       items: [
         { title: 'Pengaturan Sekolah', url: '/lainnya/pengaturan' },
         { title: 'Manajemen Pengguna', url: '/lainnya/pengguna' },
-        { title: 'Backup & Restore', url: '/lainnya/backup' }
+        { title: 'Backup & Restore', url: '/lainnya/backup' },
+        { title: 'Manajemen Ruangan', url: '/lainnya/ruangan' },
+        { title: 'Manajemen Aset', url: '/lainnya/aset' },
+        { title: 'Manajemen Perpustakaan', url: '/lainnya/perpustakaan' },
       ]
     },
     {

@@ -98,12 +98,12 @@ const notifications = [
     <AppSidebar />
     <SidebarInset>
       <header
-        class="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b justify-between"
+        class="sticky top-2 z-10 flex h-14 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 glass-mini mx-2 mt-2 px-4 justify-between"
       >
         <!-- SISI KIRI: Sidebar Trigger & Breadcrumb -->
-        <div class="flex items-center gap-2 px-4">
+        <div class="flex items-center gap-2">
           <SidebarTrigger class="-ml-1" />
-          <Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />
+          <Separator orientation="vertical" class="mr-2 h-4 my-auto !self-center" />
           <Breadcrumb>
             <BreadcrumbList>
               <template v-for="(crumb, index) in breadcrumbs" :key="index">
@@ -122,7 +122,7 @@ const notifications = [
         </div>
 
         <!-- SISI KANAN: Search & Notifications -->
-        <div class="flex items-center gap-4 px-4">
+        <div class="flex items-center gap-4">
           <div class="relative hidden md:block w-64">
             <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input

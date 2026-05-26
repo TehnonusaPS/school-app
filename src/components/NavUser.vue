@@ -7,8 +7,7 @@ import {
   Sun,
   Moon,
   Palette,
-  Sparkles,
-  Square
+  Layers
 } from 'lucide-vue-next'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -64,8 +63,6 @@ const confirmLogout = () => {
 const isDark = ref(false)
 // Nama tema: 'blue' | 'emerald' | 'indigo' | 'bronze' | 'navy' | 'zinc'
 const activeThemeStyle = ref('blue')
-// Finish: 'glossy' | 'solid' (berlaku untuk semua tema)
-const themeFinish = ref('glossy')
 
 const toggleTheme = () => {
   isDark.value = !isDark.value
@@ -87,31 +84,16 @@ const clearThemeClasses = () => {
   })
 }
 
-/**
- * Terapkan class tema ke body:
- * - semua tema glossy → theme-{name}
- * - semua tema solid  → theme-{name} finish-solid
- */
-const applyThemeClass = (styleName, finish) => {
+/** Terapkan class tema ke body */
+const applyThemeClass = (styleName) => {
   clearThemeClasses()
-  document.body.classList.remove('finish-solid')
   document.body.classList.add(`theme-${styleName}`)
-  if (finish === 'solid') {
-    document.body.classList.add('finish-solid')
-  }
 }
 
 const setThemeStyle = styleName => {
   activeThemeStyle.value = styleName
-  // Pertahankan finish saat pindah tema agar konsisten
-  applyThemeClass(styleName, themeFinish.value)
+  applyThemeClass(styleName)
   localStorage.setItem('themeStyle', styleName)
-}
-
-const toggleThemeFinish = () => {
-  themeFinish.value = themeFinish.value === 'glossy' ? 'solid' : 'glossy'
-  applyThemeClass(activeThemeStyle.value, themeFinish.value)
-  localStorage.setItem('themeFinish', themeFinish.value)
 }
 
 const cycleThemeStyle = () => {
@@ -130,6 +112,30 @@ const themeNames = {
   zinc: 'Zinc'
 }
 
+// --- Background Style Logic ---
+const activeBackgroundStyle = ref('animated')
+
+const setBackgroundStyle = styleName => {
+  activeBackgroundStyle.value = styleName
+  document.body.classList.remove('bg-animated', 'bg-static_squares', 'bg-glass', 'bg-solid')
+  document.body.classList.add(`bg-${styleName}`)
+  localStorage.setItem('backgroundStyle', styleName)
+}
+
+const cycleBackgroundStyle = () => {
+  const styles = ['animated', 'static_squares', 'glass', 'solid']
+  const currentIndex = styles.indexOf(activeBackgroundStyle.value)
+  const newStyle = styles[(currentIndex + 1) % styles.length]
+  setBackgroundStyle(newStyle)
+}
+
+const backgroundNames = {
+  animated: 'Animasi Kotak',
+  static_squares: 'Kotak Statis',
+  glass: 'Apple Glass Image',
+  solid: 'Solid Polos'
+}
+
 onMounted(() => {
   const savedTheme = localStorage.getItem('theme')
   if (
@@ -145,13 +151,13 @@ onMounted(() => {
   const mappedStyle = savedThemeStyle === 'tahoe' ? 'blue' : savedThemeStyle
   activeThemeStyle.value = mappedStyle
 
-  // Restore finish (berlaku untuk semua tema)
-  const savedFinish = localStorage.getItem('themeFinish') || 'glossy'
-  themeFinish.value = savedFinish
-
-  applyThemeClass(mappedStyle, savedFinish)
+  applyThemeClass(mappedStyle)
   // Simpan ulang jika ada konversi dari 'tahoe'
   if (savedThemeStyle === 'tahoe') localStorage.setItem('themeStyle', 'blue')
+
+  // Restore background style
+  const savedBgStyle = localStorage.getItem('backgroundStyle') || 'animated'
+  setBackgroundStyle(savedBgStyle)
 })
 </script>
 
@@ -162,7 +168,7 @@ onMounted(() => {
         <DropdownMenuTrigger as-child>
           <SidebarMenuButton
             size="lg"
-            class="bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/80 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+            class="glass-mini text-sidebar-accent-foreground hover:bg-sidebar-accent/50 data-[state=open]:bg-sidebar-accent/50 data-[state=open]:text-sidebar-accent-foreground transition-all duration-300"
           >
             <Avatar class="h-8 w-8 rounded-lg">
               <AvatarImage :src="user.avatar" :alt="user.name" />
@@ -219,15 +225,14 @@ onMounted(() => {
               </div>
             </DropdownMenuItem>
 
-            <!-- Glossy / Solid Toggle — tampil untuk semua tema -->
-            <DropdownMenuItem @select.prevent="toggleThemeFinish" class="cursor-pointer">
-              <Sparkles v-if="themeFinish === 'glossy'" class="size-4" />
-              <Square v-else class="size-4" />
+            <!-- Background Style Cycle -->
+            <DropdownMenuItem @select.prevent="cycleBackgroundStyle" class="cursor-pointer">
+              <Layers class="size-4" />
               <div class="truncate">
-                Gaya Tema:
-                <span class="font-semibold text-primary ml-1">
-                  {{ themeFinish === 'glossy' ? 'Glossy' : 'Solid' }}
-                </span>
+                Latar:
+                <span class="font-semibold text-primary ml-1">{{
+                  backgroundNames[activeBackgroundStyle] || 'Animasi Kotak'
+                }}</span>
               </div>
             </DropdownMenuItem>
           </DropdownMenuGroup>

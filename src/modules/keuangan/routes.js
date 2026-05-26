@@ -34,5 +34,14 @@ export default [
       parent: 'Keuangan',
       description: 'Laporan keuangan bulanan dan tahunan.'
     }
+  },
+  {
+    path: 'keuangan/cetak-kwitansi',
+    component: () => import('./pages/CetakKwitansi.vue'),
+    meta: {
+      title: 'Cetak Kwitansi',
+      parent: 'Keuangan',
+      description: 'Cetak kwitansi pembayaran SPP dan pengeluaran.'
   }
+}
 ]

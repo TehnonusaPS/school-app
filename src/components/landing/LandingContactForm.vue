@@ -41,7 +41,7 @@ function handleSubmit() {
 </script>
 
 <template>
-  <Card class="rounded-3xl border-slate-100 bg-white/70 p-6 sm:p-8 shadow-xl shadow-slate-100/50 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/40 dark:shadow-none">
+  <Card class="rounded-3xl border-slate-100  p-6 sm:p-8 shadow-xl shadow-slate-100/50  dark:border-slate-800/80 dark:bg-slate-900/40 dark:shadow-none">
     <CardContent class="p-0 space-y-5">
       <form @submit.prevent="handleSubmit" class="space-y-5">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

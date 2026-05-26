@@ -23,10 +23,13 @@ import {
   School,
   UserCog,
   Settings,
-  Palette
+  Palette,
+  ChevronsUpDown
 } from 'lucide-vue-next'
 import NavMain from '@/components/NavMain.vue'
 import NavUser from '@/components/NavUser.vue'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { computed } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import {
@@ -130,7 +133,7 @@ const data = {
       url: '/keuangan',
       icon: Wallet,
       items: [
-        { title: 'SPP Siswa', url: '/keuangan/spp' },
+        { title: 'SPP Siswa', url: '/keuangan/spp', roles : ['admin_sekolah','siswa','orang_tua'] },
         { title: 'Tagihan & Pembayaran', url: '/keuangan/tagihan' },
         { title: 'Pengeluaran', url: '/keuangan/pengeluaran' },
         { title: 'Laporan Keuangan', url: '/keuangan/laporan' }
@@ -210,31 +213,28 @@ const data = {
 </script>
 
 <template>
-  <Sidebar collapsible="icon">
-    <SidebarHeader class="sidebar-brand-header">
+  <Sidebar collapsible="icon" variant="floating">
+    <SidebarHeader>
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton
-            size="lg"
-            as-child
-            class="sidebar-brand-btn bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/80"
-          >
-            <a href="/dashboard">
-              <div class="sidebar-brand-icon">
-                <School class="size-5" />
-              </div>
-              <div class="grid flex-1 text-left text-sm leading-tight">
-                <span class="truncate font-extrabold text-sidebar-foreground tracking-tight"
-                  >CerdasBangsa</span
-                >
-                <span
-                  class="truncate text-[10px] capitalize text-sidebar-foreground/70 font-medium"
-                >
-                  {{ auth.user?.roleLabel || auth.user?.role || 'guest' }}
-                </span>
-              </div>
-            </a>
-          </SidebarMenuButton>
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <SidebarMenuButton size="lg"
+                class="glass-mini text-sidebar-accent-foreground cursor-default hover:bg-transparent active:bg-transparent data-[state=open]:bg-transparent transition-all duration-300">
+                <Avatar class="h-8 w-8 rounded-lg">
+                  <AvatarFallback class="rounded-lg bg-primary text-primary-foreground">
+                    <School class="size-5" />
+                  </AvatarFallback>
+                </Avatar>
+                <div class="grid flex-1 text-left text-sm leading-tight">
+                  <span class="truncate font-extrabold text-sidebar-foreground tracking-tight">CerdasBangsa</span>
+                  <span class="truncate text-[10px] capitalize text-sidebar-foreground/70 font-medium">
+                    {{ auth.user?.roleLabel || auth.user?.role || 'guest' }}
+                  </span>
+                </div>
+              </SidebarMenuButton>
+            </DropdownMenuTrigger>
+          </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarHeader>

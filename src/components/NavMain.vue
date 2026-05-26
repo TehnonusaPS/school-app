@@ -4,6 +4,11 @@ import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import {
+  HoverCard,
+  HoverCardTrigger,
+  HoverCardContent
+} from '@/components/ui/hover-card'
+import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
@@ -51,17 +56,14 @@ const isParentActive = items => {
     <SidebarMenu class="gap-1.5 px-2 group-data-[collapsible=icon]:px-0">
       <template v-for="item in items" :key="item.title">
         <!-- CASE 1: MENU DENGAN SUB-ITEMS -->
-        <Collapsible
-          v-if="item.items && item.items.length > 0"
-          as-child
-          :default-open="isParentActive(item.items)"
-          class="group/collapsible"
-        >
-          <SidebarMenuItem>
-            <CollapsibleTrigger as-child>
+        <SidebarMenuItem v-if="item.items && item.items.length > 0">
+          
+          <!-- HOVERCARD UNTUK MODE COLLAPSED (ICON) -->
+          <HoverCard :open-delay="100" :close-delay="100">
+            <HoverCardTrigger as-child>
+              <!-- Tombol ini HANYA tampil saat mode collapsed -->
               <SidebarMenuButton
-                :tooltip="item.title"
-                class="!h-11 px-3 text-sm transition-colors duration-200 group-data-[collapsible=icon]:!h-10 group-data-[collapsible=icon]:!px-0 group-data-[collapsible=icon]:justify-center"
+                class="hidden group-data-[collapsible=icon]:flex !h-10 !px-0 justify-center text-sm transition-colors duration-200"
                 :class="[
                   isParentActive(item.items)
                     ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold'
@@ -69,13 +71,46 @@ const isParentActive = items => {
                 ]"
               >
                 <component :is="item.icon" v-if="item.icon" class="!size-5 shrink-0" />
-                <span class="group-data-[collapsible=icon]:hidden">{{ item.title }}</span>
+              </SidebarMenuButton>
+            </HoverCardTrigger>
+            <HoverCardContent side="right" align="start" :side-offset="8" class="w-56 p-2 rounded-lg flex flex-col gap-1">
+              <div class="px-2 py-1.5 font-bold text-sm text-foreground">{{ item.title }}</div>
+              <div class="h-px bg-border my-1 -mx-2"></div>
+              <router-link
+                v-for="subItem in item.items" 
+                :key="subItem.title" 
+                :to="subItem.url"
+                class="flex items-center px-2 py-1.5 text-sm rounded-md transition-colors hover:bg-muted hover:text-foreground outline-none focus:outline-none focus:ring-0"
+                :class="[isPageActive(subItem.url) ? 'bg-primary/10 text-primary font-bold' : 'text-muted-foreground']"
+              >
+                {{ subItem.title }}
+              </router-link>
+            </HoverCardContent>
+          </HoverCard>
+
+          <!-- COLLAPSIBLE UNTUK MODE EXPANDED -->
+          <Collapsible
+            :default-open="isParentActive(item.items)"
+            class="group/collapsible group-data-[collapsible=icon]:hidden w-full"
+          >
+            <CollapsibleTrigger as-child>
+              <SidebarMenuButton
+                :tooltip="item.title"
+                class="!h-11 px-3 text-sm transition-colors duration-200 w-full"
+                :class="[
+                  isParentActive(item.items)
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold'
+                    : '!bg-transparent text-sidebar-foreground/70 hover:!bg-sidebar-accent hover:!text-sidebar-foreground font-medium'
+                ]"
+              >
+                <component :is="item.icon" v-if="item.icon" class="!size-5 shrink-0" />
+                <span>{{ item.title }}</span>
                 <ChevronRight
-                  class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 !size-4 group-data-[collapsible=icon]:hidden"
+                  class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 !size-4"
                 />
               </SidebarMenuButton>
             </CollapsibleTrigger>
-            <CollapsibleContent class="mt-1 group-data-[collapsible=icon]:hidden">
+            <CollapsibleContent class="mt-1">
               <SidebarMenuSub class="ml-4 border-l-2 border-primary/10 pl-2">
                 <SidebarMenuSubItem v-for="subItem in item.items" :key="subItem.title">
                   <!-- Jika subItem punya anak lagi (Level 3) -->
@@ -125,22 +160,22 @@ const isParentActive = items => {
                     v-else
                     as-child
                     :is-active="isPageActive(subItem.url)"
-                    class="!h-9 px-3 text-xs transition-all duration-200"
+                    class="!h-9 px-3 text-xs transition-colors duration-200"
                     :class="[
                       isPageActive(subItem.url)
                         ? 'glossy-active font-semibold'
                         : '!bg-transparent text-sidebar-foreground/70 hover:!bg-sidebar-accent hover:!text-sidebar-foreground font-medium'
                     ]"
                   >
-                    <router-link :to="subItem.url">
+                    <router-link :to="subItem.url" class="outline-none focus:outline-none focus:ring-0">
                       <span>{{ subItem.title }}</span>
                     </router-link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
               </SidebarMenuSub>
             </CollapsibleContent>
-          </SidebarMenuItem>
-        </Collapsible>
+          </Collapsible>
+        </SidebarMenuItem>
 
         <!-- CASE 2: MENU TUNGGAL (DASHBOARD) -->
         <SidebarMenuItem>
@@ -155,7 +190,7 @@ const isParentActive = items => {
                 : '!bg-transparent text-sidebar-foreground/70 hover:!bg-sidebar-accent hover:!text-sidebar-foreground font-medium'
             ]"
           >
-            <router-link :to="item.url">
+            <router-link :to="item.url" class="outline-none focus:outline-none focus:ring-0">
               <component :is="item.icon" v-if="item.icon" class="!size-5 shrink-0" />
               <span class="group-data-[collapsible=icon]:hidden">{{ item.title }}</span>
             </router-link>

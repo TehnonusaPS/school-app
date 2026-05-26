@@ -20,7 +20,7 @@ const scrollTo = (id) => emit('scrollTo', id)
     <!-- Content -->
     <div class="relative z-10 max-w-7xl mx-auto px-6 py-36 lg:py-44">
       <div class="max-w-2xl">
-        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-sm font-medium mb-6 backdrop-blur-sm">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full  border border-white/20 text-white text-sm font-medium mb-6 ">
           <Star class="w-4 h-4 text-yellow-400" />
           Platform Manajemen Yayasan & Unit Sekolah #1 di Indonesia
         </div>
@@ -40,7 +40,7 @@ const scrollTo = (id) => emit('scrollTo', id)
             Lihat Fitur Lengkap <ArrowRight class="w-4 h-4" />
           </button>
           <button @click="scrollTo('kontak')"
-            class="px-7 py-3.5 rounded-xl bg-white/10 text-white border border-white/30 font-semibold text-sm hover:bg-white/20 transition-all backdrop-blur-sm">
+            class="px-7 py-3.5 rounded-xl  text-white border border-white/30 font-semibold text-sm hover: transition-all ">
             Jadwalkan Demo
           </button>
         </div>

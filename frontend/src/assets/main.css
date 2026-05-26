@@ -219,142 +219,119 @@
 
 
   /* ══ GLOBAL GLASS COMPONENTS ══ */
-  /* Card, Calendar & Alert (PERFECT GLASS + BLOB BACKGROUND) */
+  /* Card, Calendar & Alert - backdrop-filter langsung di elemen agar production-safe */
   [data-slot="card"],
   [data-slot="calendar"],
   [data-slot="range-calendar"],
   [data-slot="alert"],
   [data-slot="sidebar-inner"] {
     position: relative;
-    overflow: hidden;
     z-index: 1;
-    background: transparent !important;
-    border: none !important;
+    /* backdrop-filter langsung di elemen, bukan ::after — fix overflow:hidden blocking */
+    background: rgba(255, 255, 255, 0.18) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border-top: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+    border-left: 1.5px solid rgba(255, 255, 255, 0.4) !important;
     border-radius: 32px !important;
-    box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.1) !important;
+    box-shadow:
+      0 4px 16px -4px rgba(0, 0, 0, 0.12),
+      inset 0px 0px 12px 0px rgba(255, 255, 255, 0.4),
+      inset 1px 1px 1px -1px rgba(255, 255, 255, 0.6) !important;
   }
 
-  /* Popups use a slightly smaller radius to look natural */
-  .glass-popup {
-    position: relative;
-    overflow: hidden;
-    z-index: 50;
-    background: transparent !important;
-    border: none !important;
-    border-radius: var(--radius) !important;
-    box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.15) !important;
+  .dark [data-slot="card"],
+  .dark [data-slot="calendar"],
+  .dark [data-slot="range-calendar"],
+  .dark [data-slot="alert"],
+  .dark [data-slot="sidebar-inner"] {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-top: 1.5px solid rgba(255, 255, 255, 0.18) !important;
+    border-left: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow:
+      0 4px 16px -4px rgba(0, 0, 0, 0.35),
+      inset 0px 0px 12px 0px rgba(255, 255, 255, 0.06),
+      inset 1px 1px 1px -1px rgba(255, 255, 255, 0.12) !important;
   }
 
-  /* The Glass Surface (Figma Style) */
+  /* Dekoratif highlight-only ::after — TANPA backdrop-filter */
   [data-slot="card"]::after,
   [data-slot="calendar"]::after,
   [data-slot="range-calendar"]::after,
   [data-slot="alert"]::after,
-  [data-slot="sidebar-inner"]::after,
-  .glass-popup::after {
+  [data-slot="sidebar-inner"]::after {
     content: " ";
     position: absolute;
     inset: 0;
-
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 32.69%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.05) 100%),
-      rgba(255, 255, 255, 0.03);
-
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-
-    border-radius: inherit;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-top: 1.5px solid rgba(255, 255, 255, 0.6);
-    border-left: 1.5px solid rgba(255, 255, 255, 0.5);
-
-    box-shadow:
-      inset 0px 0px 12px 0px rgba(255, 255, 255, 0.5),
-      inset 1px 1px 1px -1px rgba(255, 255, 255, 0.6),
-      inset -6px -6px 4px -7px rgba(255, 255, 255, 0.3),
-      inset 8px 8px 5px -9px rgba(255, 255, 255, 0.9);
-
-    z-index: -1;
     pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(
+      160deg,
+      rgba(255, 255, 255, 0.22) 0%,
+      rgba(255, 255, 255, 0.06) 30%,
+      rgba(255, 255, 255, 0) 60%
+    );
+    z-index: 0;
   }
 
   .dark [data-slot="card"]::after,
   .dark [data-slot="calendar"]::after,
   .dark [data-slot="range-calendar"]::after,
   .dark [data-slot="alert"]::after,
-  .dark [data-slot="sidebar-inner"]::after,
-  .dark .glass-popup::after {
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 32.69%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.02) 100%),
-      rgba(0, 0, 0, 0.1);
-
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-top: 1.5px solid rgba(255, 255, 255, 0.2);
-    border-left: 1.5px solid rgba(255, 255, 255, 0.15);
-
-    box-shadow:
-      inset 0px 0px 12px 0px rgba(255, 255, 255, 0.1),
-      inset 1px 1px 1px -1px rgba(255, 255, 255, 0.15),
-      inset -6px -6px 4px -7px rgba(255, 255, 255, 0.05),
-      inset 8px 8px 5px -9px rgba(255, 255, 255, 0.2);
+  .dark [data-slot="sidebar-inner"]::after {
+    background: linear-gradient(
+      160deg,
+      rgba(255, 255, 255, 0.07) 0%,
+      rgba(255, 255, 255, 0.02) 30%,
+      rgba(255, 255, 255, 0) 60%
+    );
   }
 
-  /* Glass Mini (For smaller panels, buttons, headers) */
+  /* Popups use a slightly smaller radius to look natural */
+  .glass-popup {
+    position: relative;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.18) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border-top: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+    border-radius: var(--radius) !important;
+    box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .dark .glass-popup {
+    background: rgba(0, 0, 0, 0.25) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-top: 1.5px solid rgba(255, 255, 255, 0.15) !important;
+  }
+
+  /* Glass Mini (For smaller panels, buttons, headers) - production-safe */
   .glass-mini {
     position: relative;
-    overflow: hidden;
     z-index: 1;
-    background: transparent;
-    border: none !important;
-    border-radius: 32px !important;
-    box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.1) !important;
-  }
-
-  .glass-mini::after {
-    content: " ";
-    position: absolute;
-    inset: 0;
-
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 32.69%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.05) 100%),
-      rgba(255, 255, 255, 0.03);
-
+    background: rgba(255, 255, 255, 0.18);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-
-    border-radius: 32px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-top: 1.5px solid rgba(255, 255, 255, 0.6);
-    border-left: 1.5px solid rgba(255, 255, 255, 0.5);
-
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border-top: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+    border-left: 1.5px solid rgba(255, 255, 255, 0.4) !important;
+    border-radius: 32px !important;
     box-shadow:
-      inset 0px 0px 12px 0px rgba(255, 255, 255, 0.5),
-      inset 1px 1px 1px -1px rgba(255, 255, 255, 0.6),
-      inset -6px -6px 4px -7px rgba(255, 255, 255, 0.3),
-      inset 8px 8px 5px -9px rgba(255, 255, 255, 0.9);
-
-    z-index: -1;
-    pointer-events: none;
+      0 4px 16px -4px rgba(0, 0, 0, 0.1),
+      inset 0px 0px 10px 0px rgba(255, 255, 255, 0.4) !important;
   }
 
-  .dark .glass-mini::after {
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 32.69%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.02) 100%),
-      rgba(0, 0, 0, 0.1);
-
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-top: 1.5px solid rgba(255, 255, 255, 0.2);
-    border-left: 1.5px solid rgba(255, 255, 255, 0.15);
-
+  .dark .glass-mini {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-top: 1.5px solid rgba(255, 255, 255, 0.18) !important;
+    border-left: 1.5px solid rgba(255, 255, 255, 0.12) !important;
     box-shadow:
-      inset 0px 0px 12px 0px rgba(255, 255, 255, 0.1),
-      inset 1px 1px 1px -1px rgba(255, 255, 255, 0.15),
-      inset -6px -6px 4px -7px rgba(255, 255, 255, 0.05),
-      inset 8px 8px 5px -9px rgba(255, 255, 255, 0.2);
+      0 4px 16px -4px rgba(0, 0, 0, 0.35),
+      inset 0px 0px 10px 0px rgba(255, 255, 255, 0.05) !important;
   }
 
   /* Glass Header (For top sticky bars) */

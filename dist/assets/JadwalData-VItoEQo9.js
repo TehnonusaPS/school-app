@@ -1,0 +1,1 @@
+import{L as e,g as t,yt as n}from"./createLucideIcon-Bva5QUpR.js";import{t as r}from"./calendar-days-Cs2Xp0k5.js";import{t as i}from"./PlaceholderPage-BmRzUDF4.js";var a={__name:`JadwalData`,setup(a){return(a,o)=>(e(),t(i,{icon:n(r)},null,8,[`icon`]))}};export{a as default};

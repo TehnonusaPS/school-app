@@ -34,5 +34,14 @@ export default [
       parent: 'Absensi',
       description: 'Rekap kehadiran bulanan seluruh civitas.'
     }
+  },
+  {
+    path: 'absensi/input',
+    component: () => import('./pages/InputKehadiran.vue'),
+    meta: {
+      title: 'Input Kehadiran Siswa',
+      parent: 'Absensi',
+      description: 'Isi lembar kehadiran siswa secara harian dan periodik.'
+    }
   }
 ]

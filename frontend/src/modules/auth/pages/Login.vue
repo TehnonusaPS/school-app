@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { GraduationCap, Eye, EyeOff } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
@@ -22,10 +22,20 @@ const demoAccounts = [
   { role: 'Orang Tua / Wali', email: 'orangtua@mail.com' }
 ]
 
+const isDemoDropdownOpen = ref(false)
+const selectedDemoRole = ref('')
+
+const toggleDemoDropdown = () => {
+  isDemoDropdownOpen.value = !isDemoDropdownOpen.value
+}
+
 const selectDemoAccount = (acc) => {
   email.value = acc.email
   password.value = '123456'
+  selectedDemoRole.value = acc.role
+  isDemoDropdownOpen.value = false
 }
+
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
@@ -54,6 +64,9 @@ const handleLogin = async () => {
   }
 }
 
+// Close dropdown if clicked outside
+let handleOutsideClick = null
+
 onMounted(() => {
   // Paksa halaman login selalu dalam light mode
   document.documentElement.classList.remove('dark')
@@ -67,6 +80,20 @@ onMounted(() => {
 
   // Pastikan tema bawaan (emerald/green) diterapkan
   document.body.classList.add('theme-emerald')
+
+  handleOutsideClick = (e) => {
+    const dropdownContainer = document.getElementById('demo-dropdown-container')
+    if (dropdownContainer && !dropdownContainer.contains(e.target)) {
+      isDemoDropdownOpen.value = false
+    }
+  }
+  document.addEventListener('click', handleOutsideClick)
+})
+
+onUnmounted(() => {
+  if (handleOutsideClick) {
+    document.removeEventListener('click', handleOutsideClick)
+  }
 })
 </script>
 
@@ -155,23 +182,38 @@ onMounted(() => {
               </div>
 
               <!-- Akun Demo Quick Fill -->
-              <div class="grid gap-2 text-left">
-                <label for="demo-account" class="text-sm font-medium leading-none text-emerald-200/90 lg:text-muted-foreground">
+              <div id="demo-dropdown-container" class="grid gap-2 text-left relative">
+                <label class="text-sm font-medium leading-none text-emerald-200/90 lg:text-muted-foreground">
                   Uji Coba dengan Akun Demo
                 </label>
-                <select
-                  id="demo-account"
-                  @change="(e) => {
-                    const acc = demoAccounts.find(a => a.email === e.target.value);
-                    if (acc) selectDemoAccount(acc);
-                  }"
-                  class="flex h-10 w-full rounded-md border border-white/10 bg-white/90 text-slate-900 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50 lg:border-input lg:bg-background lg:text-foreground"
-                >
-                  <option value="" disabled selected>-- Pilih Akun Demo --</option>
-                  <option v-for="acc in demoAccounts" :key="acc.email" :value="acc.email">
-                    {{ acc.role }}
-                  </option>
-                </select>
+                <div class="relative">
+                  <button
+                    type="button"
+                    @click="toggleDemoDropdown"
+                    class="flex h-10 w-full items-center justify-between rounded-md border border-white/10 bg-white/95 text-slate-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50 lg:border-input lg:bg-background lg:text-foreground transition-all cursor-pointer shadow-sm"
+                  >
+                    <span class="truncate font-medium">{{ selectedDemoRole || '-- Pilih Akun Demo --' }}</span>
+                    <span class="text-slate-500 pointer-events-none ml-2 text-xs">▼</span>
+                  </button>
+                  
+                  <!-- Custom Dropdown Options Menu -->
+                  <div
+                    v-if="isDemoDropdownOpen"
+                    class="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-md border border-slate-200/80 bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+                  >
+                    <div class="py-1">
+                      <button
+                        type="button"
+                        v-for="acc in demoAccounts"
+                        :key="acc.email"
+                        @click="selectDemoAccount(acc)"
+                        class="flex w-full items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-900 font-semibold transition-colors text-left cursor-pointer border-b border-slate-100 last:border-0"
+                      >
+                        {{ acc.role }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <p v-if="error" class="text-sm text-red-200 lg:text-destructive font-medium break-words">

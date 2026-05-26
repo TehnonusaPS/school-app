@@ -18,11 +18,11 @@ const width = computed(() => {
   <div
     data-slot="sidebar-menu-skeleton"
     data-sidebar="menu-skeleton"
-    :class="cn('h-8 gap-2 rounded-md px-2 flex items-center', props.class)"
+    :class="cn('h-8 gap-2 rounded-[var(--radius)] px-2 flex items-center', props.class)"
   >
     <Skeleton
       v-if="showIcon"
-      class="size-4 rounded-md"
+      class="size-4 rounded-[var(--radius)]"
       data-sidebar="menu-skeleton-icon"
     />
 

@@ -23,10 +23,13 @@ import {
   School,
   UserCog,
   Settings,
-  Palette
+  Palette,
+  ChevronsUpDown
 } from 'lucide-vue-next'
 import NavMain from '@/components/NavMain.vue'
 import NavUser from '@/components/NavUser.vue'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { computed } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import {
@@ -211,30 +214,27 @@ const data = {
 
 <template>
   <Sidebar collapsible="icon" variant="floating">
-    <SidebarHeader class="sidebar-brand-header">
+    <SidebarHeader>
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton
-            size="lg"
-            as-child
-            class="sidebar-brand-btn glass-mini text-sidebar-accent-foreground hover:bg-sidebar-accent/50 transition-colors duration-300"
-          >
-            <a href="/dashboard">
-              <div class="sidebar-brand-icon">
-                <School class="size-5" />
-              </div>
-              <div class="grid flex-1 text-left text-sm leading-tight">
-                <span class="truncate font-extrabold text-sidebar-foreground tracking-tight"
-                  >CerdasBangsa</span
-                >
-                <span
-                  class="truncate text-[10px] capitalize text-sidebar-foreground/70 font-medium"
-                >
-                  {{ auth.user?.roleLabel || auth.user?.role || 'guest' }}
-                </span>
-              </div>
-            </a>
-          </SidebarMenuButton>
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <SidebarMenuButton size="lg"
+                class="glass-mini text-sidebar-accent-foreground cursor-default hover:bg-transparent active:bg-transparent data-[state=open]:bg-transparent transition-colors duration-300">
+                <Avatar class="h-8 w-8 rounded-lg">
+                  <AvatarFallback class="rounded-lg bg-primary text-primary-foreground">
+                    <School class="size-5" />
+                  </AvatarFallback>
+                </Avatar>
+                <div class="grid flex-1 text-left text-sm leading-tight">
+                  <span class="truncate font-extrabold text-sidebar-foreground tracking-tight">CerdasBangsa</span>
+                  <span class="truncate text-[10px] capitalize text-sidebar-foreground/70 font-medium">
+                    {{ auth.user?.roleLabel || auth.user?.role || 'guest' }}
+                  </span>
+                </div>
+              </SidebarMenuButton>
+            </DropdownMenuTrigger>
+          </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarHeader>

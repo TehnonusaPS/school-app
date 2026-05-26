@@ -124,7 +124,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Main Login Card / Form Container -->
-      <div class="flex flex-1 items-center justify-center min-w-0 py-6 sm:py-8 z-10">
+      <div class="flex flex-1 items-center justify-center min-w-0 py-6 sm:py-8 z-20">
         <div class="w-full max-w-sm p-6 sm:p-8 rounded-2xl border border-white/10 bg-white/10 backdrop-blur-md shadow-2xl lg:border-none lg:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:p-0 transition-all duration-300">
           <form @submit.prevent="handleLogin" class="flex flex-col gap-5 sm:gap-6">
             <div class="flex flex-col items-center gap-2 text-center px-1 sm:px-2">

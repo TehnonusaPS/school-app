@@ -68,7 +68,24 @@ const marqueeItems = [...yayasan, ...yayasan]
         unit sekolah di bawah yayasan Anda - modern, aman, dan mudah dipakai guru.
       </p>
 
-      <div class="mt-28 space-y-4">
+      <!-- Premium Responsive Action Buttons -->
+      <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a
+          href="#kontak"
+          class="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 shadow-lg shadow-primary/25 cursor-pointer w-full sm:w-auto justify-center"
+        >
+          Coba Demo Gratis
+          <ArrowRight class="h-4 w-4" />
+        </a>
+        <router-link
+          to="/login"
+          class="inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3.5 text-sm font-semibold text-foreground transition hover:bg-muted/50 cursor-pointer w-full sm:w-auto"
+        >
+          Masuk ke Portal
+        </router-link>
+      </div>
+
+      <div class="mt-20 space-y-4">
         <p class="text-center text-xs uppercase tracking-[0.25em] text-muted-foreground">
           Dipercaya oleh yayasan di Indonesia
         </p>

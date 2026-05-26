@@ -128,7 +128,7 @@ const data = {
       url: '/keuangan',
       icon: Wallet,
       items: [
-        { title: 'SPP Siswa', url: '/keuangan/spp' },
+        { title: 'SPP Siswa', url: '/keuangan/spp', roles : ['admin_sekolah','siswa','orang_tua'] },
         { title: 'Tagihan & Pembayaran', url: '/keuangan/tagihan' },
         { title: 'Pengeluaran', url: '/keuangan/pengeluaran' },
         { title: 'Laporan Keuangan', url: '/keuangan/laporan' }

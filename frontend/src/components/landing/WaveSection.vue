@@ -23,11 +23,13 @@ const yellowList = [
   'Notifikasi orang tua real-time',
   'Dashboard yayasan multi-sekolah'
 ]
+
+const waveClip =
+  'polygon(0% 15%, 4% 5%, 8% 15%, 12% 5%, 16% 15%, 20% 5%, 24% 15%, 28% 5%, 32% 15%, 36% 5%, 40% 15%, 44% 5%, 48% 15%, 52% 5%, 56% 15%, 60% 5%, 64% 15%, 68% 5%, 72% 15%, 76% 5%, 80% 15%, 84% 5%, 88% 15%, 92% 5%, 96% 15%, 100% 5%, 100% 85%, 96% 95%, 92% 85%, 88% 95%, 84% 85%, 80% 95%, 76% 85%, 72% 95%, 68% 85%, 64% 95%, 60% 85%, 56% 95%, 52% 85%, 48% 95%, 44% 85%, 40% 95%, 36% 85%, 32% 95%, 28% 85%, 24% 95%, 20% 85%, 16% 95%, 12% 85%, 8% 95%, 4% 85%, 0% 95%)'
 </script>
 
 <template>
-  <section class="relative w-full">
-    <!-- Wave top SVG -->
+  <section class="relative">
     <svg
       viewBox="0 0 1440 80"
       preserveAspectRatio="none"
@@ -41,47 +43,41 @@ const yellowList = [
     </svg>
 
     <div class="bg-[oklch(0.92_0.13_95)] pb-20 pt-10">
-      <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6">
         <div class="grid items-center gap-10 lg:grid-cols-2">
-
-          <!-- Left: Text content -->
-          <div class="w-full min-w-0">
+          <div class="min-w-0">
             <span
               class="inline-flex items-center gap-2 rounded-full bg-foreground/10 px-3 py-1 text-xs font-semibold text-foreground"
             >
-              <Sparkles class="h-3.5 w-3.5 shrink-0" /> Untuk siswa &amp; guru
+              <Sparkles class="h-3.5 w-3.5" /> Untuk siswa & guru
             </span>
-
-            <h2 class="mt-4 text-2xl font-bold tracking-tight text-foreground break-words sm:text-4xl md:text-5xl">
+            <h2 class="mt-4 text-2xl sm:text-4xl font-bold tracking-tight text-foreground md:text-5xl">
               Pengalaman sekolah yang menyenangkan, dari hari pertama.
             </h2>
-
-            <p class="mt-4 text-sm leading-relaxed text-foreground/70 sm:text-base">
-              Sekolahku dirancang agar guru fokus mengajar dan orang tua tenang memantau,
-              sementara yayasan punya kontrol penuh.
+            <p class="mt-4 text-sm sm:text-base text-foreground/70">
+              Sekolahku dirancang agar guru fokus mengajar dan orang tua tenang memantau, sementara
+              yayasan punya kontrol penuh.
             </p>
 
-            <!-- Wave list items — wave shape via CSS mask on desktop -->
-            <ul class="mt-7 space-y-3">
+            <ul class="mt-7 space-y-4">
               <li
                 v-for="(item, index) in yellowList"
                 :key="item"
-                class="wave-item flex items-center gap-3 bg-background/70 px-4 py-3 text-foreground shadow-sm sm:px-5"
+                class="relative flex items-center gap-3 sm:gap-4 bg-background/70 px-4 sm:px-6 py-4 sm:py-5 text-foreground shadow-sm"
+                :style="{ clipPath: waveClip }"
               >
                 <span
-                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground sm:h-8 sm:w-8 sm:text-sm"
+                  class="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs sm:text-sm font-bold text-primary-foreground"
                 >
                   {{ index + 1 }}
                 </span>
-                <span class="min-w-0 break-words text-sm font-medium sm:text-base">{{ item }}</span>
+                <span class="font-medium text-sm sm:text-base">{{ item }}</span>
               </li>
             </ul>
           </div>
 
-          <!-- Right: Carousel -->
-          <div class="relative w-full">
-            <!-- SVG clip def for wave-shaped cards -->
-            <svg width="0" height="0" class="absolute" aria-hidden="true">
+          <div class="relative min-w-0">
+            <svg width="0" height="0" class="absolute">
               <defs>
                 <clipPath id="waveCard" clipPathUnits="objectBoundingBox">
                   <path
@@ -95,17 +91,17 @@ const yellowList = [
               <div class="marquee-mask overflow-hidden">
                 <div class="animate-carousel flex w-max gap-5">
                   <figure
-                    v-for="(slide, i) in items"
-                    :key="i"
-                    class="relative h-[280px] w-[220px] shrink-0 sm:h-[320px] sm:w-[260px]"
+                    v-for="(slide, index) in items"
+                    :key="index"
+                    class="relative h-[320px] w-[260px] shrink-0"
                   >
                     <div
                       class="absolute inset-0 bg-primary"
-                      style="clip-path: url(#waveCard)"
+                      :style="{ clipPath: 'url(#waveCard)' }"
                     />
                     <div
                       class="absolute inset-[6px] overflow-hidden"
-                      style="clip-path: url(#waveCard)"
+                      :style="{ clipPath: 'url(#waveCard)' }"
                     >
                       <img
                         :src="slide.src"
@@ -117,7 +113,7 @@ const yellowList = [
                       />
                     </div>
                     <figcaption
-                      class="absolute inset-x-4 bottom-6 z-10 rounded-full bg-background/85 px-3 py-1.5 text-center text-xs font-semibold text-foreground"
+                      class="absolute inset-x-4 bottom-6 z-10 rounded-full bg-background/85 px-3 py-1.5 text-center text-xs font-semibold text-foreground "
                     >
                       {{ slide.label }}
                     </figcaption>
@@ -126,12 +122,10 @@ const yellowList = [
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
 
-    <!-- Wave bottom SVG -->
     <div class="-mt-px">
       <svg
         viewBox="0 0 1440 80"
@@ -147,37 +141,3 @@ const yellowList = [
     </div>
   </section>
 </template>
-
-<style scoped>
-/*
-  Wave list items:
-  - Mobile (default): simple rounded rectangle
-  - sm+ (640px): scalloped / wave shape using clip-path polygon
-    The polygon has 5% inset on top and bottom so text never clips
-*/
-.wave-item {
-  border-radius: 0.5rem;
-  position: relative;
-}
-
-@media (min-width: 640px) {
-  .wave-item {
-    border-radius: 0;
-    clip-path: polygon(
-      0% 20%,   3% 5%,   6% 20%,  9% 5%,  12% 20%, 15% 5%,  18% 20%, 21% 5%,
-      24% 20%, 27% 5%,  30% 20%, 33% 5%,  36% 20%, 39% 5%,  42% 20%, 45% 5%,
-      48% 20%, 51% 5%,  54% 20%, 57% 5%,  60% 20%, 63% 5%,  66% 20%, 69% 5%,
-      72% 20%, 75% 5%,  78% 20%, 81% 5%,  84% 20%, 87% 5%,  90% 20%, 93% 5%,
-      96% 20%, 99% 5%,  100% 10%,
-      100% 80%, 99% 95%, 96% 80%, 93% 95%, 90% 80%, 87% 95%, 84% 80%, 81% 95%,
-      78% 80%, 75% 95%, 72% 80%, 69% 95%, 66% 80%, 63% 95%, 60% 80%, 57% 95%,
-      54% 80%, 51% 95%, 48% 80%, 45% 95%, 42% 80%, 39% 95%, 36% 80%, 33% 95%,
-      30% 80%, 27% 95%, 24% 80%, 21% 95%, 18% 80%, 15% 95%, 12% 80%,  9% 95%,
-       6% 80%,  3% 95%,  0% 80%
-    );
-    /* Add vertical padding so text stays within the safe (non-clipped) zone */
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-  }
-}
-</style>

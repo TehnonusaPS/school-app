@@ -216,22 +216,6 @@
     letter-spacing: 0.02em;
   }
 
-  /* ══ BUTTON OVERRIDES (GLOBAL GLASS) ══ */
-  [data-slot="button"]:not([variant="ghost"]):not([variant="link"]),
-  [data-slot="badge"] {
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  }
-
-  [data-slot="button"]:not([variant="ghost"]):not([variant="link"])::before,
-  [data-slot="badge"]::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 100%);
-  }
 
   /* ══ GLOBAL GLASS COMPONENTS ══ */
   /* Card, Calendar & Alert (PERFECT GLASS + BLOB BACKGROUND) */
@@ -375,6 +359,40 @@
     border: none !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Glass Buttons & Badges */
+  .glass-btn {
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.1) !important;
+    border: none !important;
+  }
+  
+  .glass-btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 100%),
+      rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1.5px solid rgba(255, 255, 255, 0.4);
+    border-left: 1.5px solid rgba(255, 255, 255, 0.2);
+    /* No z-index means it will render on top of the button background and text, adding a true glass layer */
+  }
+
+  .dark .glass-btn::after {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 100%),
+      rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1.5px solid rgba(255, 255, 255, 0.15);
+    border-left: 1.5px solid rgba(255, 255, 255, 0.08);
   }
 
   .glass-header::after {

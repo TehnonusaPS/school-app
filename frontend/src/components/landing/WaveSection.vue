@@ -4,6 +4,7 @@ import s2 from '@/assets/images/students-2.jpg'
 import s3 from '@/assets/images/students-3.jpg'
 import s4 from '@/assets/images/students-4.jpg'
 import s5 from '@/assets/images/students-5.jpg'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { Sparkles } from 'lucide-vue-next'
 
 const slides = [
@@ -26,6 +27,17 @@ const yellowList = [
 
 const waveClip =
   'polygon(0% 30%, 4% 10%, 8% 30%, 12% 10%, 16% 30%, 20% 10%, 24% 30%, 28% 10%, 32% 30%, 36% 10%, 40% 30%, 44% 10%, 48% 30%, 52% 10%, 56% 30%, 60% 10%, 64% 30%, 68% 10%, 72% 30%, 76% 10%, 80% 30%, 84% 10%, 88% 30%, 92% 10%, 96% 30%, 100% 10%, 100% 70%, 96% 90%, 92% 70%, 88% 90%, 84% 70%, 80% 90%, 76% 70%, 72% 90%, 68% 70%, 64% 90%, 60% 70%, 56% 90%, 52% 70%, 48% 90%, 44% 70%, 40% 90%, 36% 70%, 32% 90%, 28% 70%, 24% 90%, 20% 70%, 16% 90%, 12% 70%, 8% 90%, 4% 70%, 0% 90%)'
+
+const isMobile = ref(true)
+const checkMobile = () => { isMobile.value = window.innerWidth < 640 }
+
+onMounted(() => {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+})
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile)
+})
 </script>
 
 <template>
@@ -43,7 +55,7 @@ const waveClip =
     </svg>
 
     <div class="bg-[oklch(0.92_0.13_95)] pb-20 pt-10">
-      <div class="mx-auto max-w-6xl px-6">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6">
         <div class="grid items-center gap-10 lg:grid-cols-2">
           <div>
             <span
@@ -51,10 +63,10 @@ const waveClip =
             >
               <Sparkles class="h-3.5 w-3.5" /> Untuk siswa & guru
             </span>
-            <h2 class="mt-4 text-4xl font-bold tracking-tight text-foreground md:text-5xl">
+            <h2 class="mt-4 text-2xl sm:text-4xl font-bold tracking-tight text-foreground md:text-5xl">
               Pengalaman sekolah yang menyenangkan, dari hari pertama.
             </h2>
-            <p class="mt-4 text-foreground/70">
+            <p class="mt-4 text-sm sm:text-base text-foreground/70">
               Sekolahku dirancang agar guru fokus mengajar dan orang tua tenang memantau, sementara
               yayasan punya kontrol penuh.
             </p>
@@ -63,15 +75,15 @@ const waveClip =
               <li
                 v-for="(item, index) in yellowList"
                 :key="item"
-                class="relative flex items-center gap-4 bg-background/70 px-5 py-3 text-foreground shadow-sm"
-                :style="{ clipPath: waveClip }"
+                class="relative flex items-center gap-3 sm:gap-4 rounded-lg sm:rounded-none bg-background/70 px-3 sm:px-5 py-2.5 sm:py-3 text-foreground shadow-sm"
+                :style="{ clipPath: isMobile ? 'none' : waveClip }"
               >
                 <span
-                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground"
+                  class="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs sm:text-sm font-bold text-primary-foreground"
                 >
                   {{ index + 1 }}
                 </span>
-                <span class="font-medium">{{ item }}</span>
+                <span class="font-medium text-sm sm:text-base">{{ item }}</span>
               </li>
             </ul>
           </div>

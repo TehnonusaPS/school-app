@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 export default [
   {
     path: 'lainnya/pengaturan',
@@ -25,5 +27,31 @@ export default [
       parent: 'Lainnya',
       description: 'Backup dan pemulihan data aplikasi.'
     }
-  }
-]
+  },
+  {
+    path: 'lainnya/ruangan',
+    component: () => import('./pages/Ruangan.vue'),
+    meta:{
+      title: 'Manajemen Ruangan',
+      parent: 'Lainnya',
+      description: 'Pengelolaan data ruangan sekolah.'
+    }
+  },
+  {
+    path: 'lainnya/aset',
+    component: () => import('./pages/Aset.vue'),
+    meta:{
+      title: 'Manajemen Aset',
+      parent: 'Lainnya',
+      description: 'Pengelolaan data aset sekolah.'
+    }
+  },
+  {
+    path: 'lainnya/perpustakaan',
+    component: () => import('./pages/Perpustakaan.vue'),
+    meta:{
+      title: 'Manajemen Perpustakaan',
+      parent: 'Lainnya',
+      description: 'Pengelolaan data perpustakaan sekolah.'
+    }
+  }]

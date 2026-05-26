@@ -9,6 +9,18 @@ import LandingPricingSection from '@/components/landing/LandingPricingSection.vu
 import LandingCtaSection from '@/components/landing/LandingCtaSection.vue'
 import LandingChatWidget from '@/components/landing/LandingChatWidget.vue'
 import WaveSection from '@/components/landing/WaveSection.vue'
+import { onMounted } from 'vue'
+
+function useForceLightModeOnRoute() {
+  onMounted(() => {
+    // Paksa halaman landing selalu dalam light mode
+    if (typeof document !== 'undefined') {
+      document.documentElement.classList.remove('dark')
+    }
+  })
+}
+
+useForceLightModeOnRoute()
 </script>
 
 <template>

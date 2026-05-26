@@ -252,7 +252,7 @@
   [data-slot="alert"]::after,
   [data-slot="sidebar-inner"]::after,
   .glass-popup::after {
-    content: "";
+    content: " ";
     position: absolute;
     inset: 0;
 
@@ -313,7 +313,7 @@
   }
 
   .glass-mini::after {
-    content: "";
+    content: " ";
     position: absolute;
     inset: 0;
 
@@ -379,7 +379,7 @@
   }
   
   .glass-btn::after {
-    content: "";
+    content: " ";
     position: absolute;
     inset: 0;
     border-radius: inherit;
@@ -403,7 +403,7 @@
   }
 
   .glass-header::after {
-    content: "";
+    content: " ";
     position: absolute;
     inset: 0;
 
@@ -506,7 +506,7 @@
   }
 
   .glossy-active::after {
-    content: "";
+    content: " ";
     position: absolute;
     inset: 0;
 

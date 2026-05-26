@@ -36,6 +36,15 @@ export default [
     }
   },
   {
+    path: 'akademik/mapel',
+    component: () => import('./pages/MataPelajaran.vue'),
+    meta: {
+      title: 'Mata Pelajaran',
+      parent: 'Akademik',
+      description: 'Lihat Detail Mata Pelajaran.'
+    }
+  },
+  {
     path: 'akademik/ekskul',
     component: () => import('./pages/Ekskul.vue'),
     meta: {

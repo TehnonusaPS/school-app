@@ -52,11 +52,11 @@ const plans = [
         <div
           v-for="plan in plans"
           :key="plan.name"
-          class="relative rounded-3xl p-7"
+          class="relative rounded-3xl p-7 glass"
           :class="
             plan.featured
-              ? 'glass-dark text-background ring-2 ring-primary/40 shadow-2xl shadow-primary/20'
-              : 'glass'
+              ? 'ring-2 ring-primary/40 shadow-2xl shadow-primary/20'
+              : ''
           "
         >
           <span
@@ -71,27 +71,17 @@ const plans = [
           >
             <ShieldCheck class="h-5 w-5" />
           </div>
-          <h3 class="text-xl font-bold">{{ plan.name }}</h3>
-          <p
-            class="mt-1 text-sm"
-            :class="plan.featured ? 'text-background/70' : 'text-muted-foreground'"
-          >
+          <h3 class="text-xl font-bold text-foreground">{{ plan.name }}</h3>
+          <p class="mt-1 text-sm text-muted-foreground">
             {{ plan.desc }}
           </p>
           <div class="mt-5 flex items-baseline gap-1">
-            <span class="text-4xl font-bold">{{ plan.price }}</span>
-            <span
-              class="text-sm"
-              :class="plan.featured ? 'text-background/60' : 'text-muted-foreground'"
-              >/bulan</span
-            >
+            <span class="text-4xl font-bold text-foreground">{{ plan.price }}</span>
+            <span class="text-sm text-muted-foreground">/bulan</span>
           </div>
-          <ul class="mt-6 space-y-3 text-sm">
+          <ul class="mt-6 space-y-3 text-sm text-foreground">
             <li v-for="feature in plan.features" :key="feature" class="flex items-start gap-2">
-              <Check
-                class="mt-0.5 h-4 w-4 shrink-0"
-                :class="plan.featured ? 'text-secondary' : 'text-primary'"
-              />
+              <Check class="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               {{ feature }}
             </li>
           </ul>

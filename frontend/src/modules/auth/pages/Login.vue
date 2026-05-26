@@ -65,8 +65,8 @@ onMounted(() => {
     }
   })
 
-  // Pastikan tema bawaan (blue) diterapkan
-  document.body.classList.add('theme-blue')
+  // Pastikan tema bawaan (emerald/green) diterapkan
+  document.body.classList.add('theme-emerald')
 })
 </script>
 

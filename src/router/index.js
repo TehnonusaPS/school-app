@@ -30,6 +30,16 @@ const routes = [
     meta: { requiresAuth: false }
   },
 
+  // ─── Halaman Presensi (Fullscreen, tanpa Sidebar) ───
+  {
+    path: '/absensi/siswa/scan',
+    component: () => import('../modules/absensi/pages/PresensiSiswa.vue'),
+    meta: {
+      requiresAuth: true,
+      title: 'Kiosk Presensi Siswa'
+    }
+  },
+
   // Semua rute aplikasi yang pakai Sidebar
   {
     path: '/',

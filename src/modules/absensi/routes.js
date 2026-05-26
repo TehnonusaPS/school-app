@@ -9,6 +9,15 @@ export default [
     }
   },
   {
+    path: 'absensi/siswa/scan',
+    component: () => import('./pages/PresensiSiswa.vue'),
+    meta: {
+      title: 'Mulai Presensi Siswa',
+      parent: 'Absensi',
+      description: 'Halaman pemindai absensi siswa (Wajah, Fingerprint, RFID).'
+    }
+  },
+  {
     path: 'absensi/guru-staff',
     component: () => import('./pages/AbsensiGuru.vue'),
     meta: {

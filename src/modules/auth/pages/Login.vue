@@ -8,6 +8,24 @@ import { useAuthStore } from '@/stores/authStore'
 
 const auth = useAuthStore()
 const router = useRouter()
+
+// 🔥 Akun Demo Quick Fill (boleh dihapus)
+const demoAccounts = [
+  { role: 'Super Admin', email: 'superadmin@mail.com' },
+  { role: 'Admin Yayasan', email: 'adminyayasan@mail.com' },
+  { role: 'Kepala Sekolah', email: 'kepalasekolah@mail.com' },
+  { role: 'Admin Sekolah', email: 'adminsekolah@mail.com' },
+  { role: 'Tata Usaha', email: 'tatausaha@mail.com' },
+  { role: 'Guru Pengajar', email: 'guru@mail.com' },
+  { role: 'Wali Kelas', email: 'walikelas@mail.com' },
+  { role: 'Siswa', email: 'siswa@mail.com' },
+  { role: 'Orang Tua / Wali', email: 'orangtua@mail.com' }
+]
+
+const selectDemoAccount = (acc) => {
+  email.value = acc.email
+  password.value = '123456'
+}
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
@@ -104,6 +122,26 @@ const handleLogin = async () => {
                     <EyeOff v-else class="size-4" />
                   </button>
                 </div>
+              </div>
+
+              <!-- Akun Demo Quick Fill (boleh dihapus) -->
+              <div class="grid gap-2 text-left">
+                <label for="demo-account" class="text-sm font-medium leading-none text-muted-foreground">
+                  Uji Coba dengan Akun Demo
+                </label>
+                <select
+                  id="demo-account"
+                  @change="(e) => {
+                    const acc = demoAccounts.find(a => a.email === e.target.value);
+                    if (acc) selectDemoAccount(acc);
+                  }"
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="" disabled selected>-- Pilih Akun Demo --</option>
+                  <option v-for="acc in demoAccounts" :key="acc.email" :value="acc.email">
+                    {{ acc.role }}
+                  </option>
+                </select>
               </div>
 
               <p v-if="error" class="text-sm text-destructive font-medium">

@@ -58,32 +58,34 @@ const currentUser = computed(() => ({
 const filteredNavMain = computed(() => {
   const currentRole = auth.user?.role
 
-  return data.navMain
-    // 1. Filter parent menu
-    .filter(item => {
-      if (item.excludeRoles && item.excludeRoles.includes(currentRole)) return false
-      if (!item.roles) return true // Terbuka untuk semua jika tidak ada pembatasan
-      return item.roles.includes(currentRole)
-    })
-    // 2. Filter children menu (jika ada)
-    .map(item => {
-      if (item.items) {
-        return {
-          ...item,
-          items: item.items.filter(sub => {
-            if (sub.excludeRoles && sub.excludeRoles.includes(currentRole)) return false
-            if (!sub.roles) return true
-            return sub.roles.includes(currentRole)
-          })
+  return (
+    data.navMain
+      // 1. Filter parent menu
+      .filter(item => {
+        if (item.excludeRoles && item.excludeRoles.includes(currentRole)) return false
+        if (!item.roles) return true // Terbuka untuk semua jika tidak ada pembatasan
+        return item.roles.includes(currentRole)
+      })
+      // 2. Filter children menu (jika ada)
+      .map(item => {
+        if (item.items) {
+          return {
+            ...item,
+            items: item.items.filter(sub => {
+              if (sub.excludeRoles && sub.excludeRoles.includes(currentRole)) return false
+              if (!sub.roles) return true
+              return sub.roles.includes(currentRole)
+            })
+          }
         }
-      }
-      return item
-    })
-    // 3. Sembunyikan parent jika semua childnya tersembunyi (opsional, tapi disarankan)
-    .filter(item => {
-      if (item.items && item.items.length === 0) return false
-      return true
-    })
+        return item
+      })
+      // 3. Sembunyikan parent jika semua childnya tersembunyi (opsional, tapi disarankan)
+      .filter(item => {
+        if (item.items && item.items.length === 0) return false
+        return true
+      })
+  )
 })
 
 const data = {
@@ -99,8 +101,8 @@ const data = {
       url: '/manajemen-data',
       icon: Database,
       items: [
-        { 
-          title: 'Data Siswa', 
+        {
+          title: 'Data Siswa',
           url: '/manajemen-data/siswa'
           // roles: ['superadmin', 'admin_sekolah'] <-- Contoh membatasi sub-menu
         },
@@ -119,6 +121,7 @@ const data = {
         { title: 'Nilai & Rapor', url: '/akademik/nilai' },
         { title: 'Ujian & Penilaian', url: '/akademik/ujian' },
         { title: 'Kurikulum', url: '/akademik/kurikulum' },
+        { title: 'Mata Pelajaran', url: '/akademik/mapel' },
         { title: 'Ekstrakurikuler', url: '/akademik/ekskul' }
       ]
     },
@@ -149,14 +152,26 @@ const data = {
       icon: MessageSquare,
       items: [
         { title: 'Pengumuman', url: '/komunikasi/pengumuman', excludeRoles: ['tata_usaha'] },
-        { title: 'Berita Kegiatan', url: '/komunikasi/berita-kegiatan', excludeRoles: ['tata_usaha'] },
+        {
+          title: 'Berita Kegiatan',
+          url: '/komunikasi/berita-kegiatan',
+          excludeRoles: ['tata_usaha']
+        },
         { title: 'Feedback Orang Tua', url: '/komunikasi/feedback', excludeRoles: ['tata_usaha'] },
         { title: 'Pesan Internal', url: '/komunikasi/pesan', excludeRoles: ['tata_usaha'] },
         { title: 'Notifikasi', url: '/komunikasi/notifikasi', excludeRoles: ['tata_usaha'] },
         { title: 'Keterangan Aktif', url: '/komunikasi/persuratan/aktif', roles: ['tata_usaha'] },
-        { title: 'Surat Dispensasi', url: '/komunikasi/persuratan/dispensasi', roles: ['tata_usaha'] },
+        {
+          title: 'Surat Dispensasi',
+          url: '/komunikasi/persuratan/dispensasi',
+          roles: ['tata_usaha']
+        },
         { title: 'Keterangan Lulus', url: '/komunikasi/persuratan/lulus', roles: ['tata_usaha'] },
-        { title: 'Peringatan/Tunggakan', url: '/komunikasi/persuratan/peringatan', roles: ['tata_usaha'] }
+        {
+          title: 'Peringatan/Tunggakan',
+          url: '/komunikasi/persuratan/peringatan',
+          roles: ['tata_usaha']
+        }
       ]
     },
     {
@@ -180,7 +195,7 @@ const data = {
         { title: 'Backup & Restore', url: '/lainnya/backup' },
         { title: 'Manajemen Ruangan', url: '/lainnya/ruangan' },
         { title: 'Manajemen Aset', url: '/lainnya/aset' },
-        { title: 'Manajemen Perpustakaan', url: '/lainnya/perpustakaan' },
+        { title: 'Manajemen Perpustakaan', url: '/lainnya/perpustakaan' }
       ]
     },
     {
@@ -199,14 +214,22 @@ const data = {
     <SidebarHeader class="sidebar-brand-header">
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton size="lg" as-child class="sidebar-brand-btn bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/80">
+          <SidebarMenuButton
+            size="lg"
+            as-child
+            class="sidebar-brand-btn bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/80"
+          >
             <a href="/dashboard">
               <div class="sidebar-brand-icon">
                 <School class="size-5" />
               </div>
               <div class="grid flex-1 text-left text-sm leading-tight">
-                <span class="truncate font-extrabold text-sidebar-foreground tracking-tight">CerdasBangsa</span>
-                <span class="truncate text-[10px] capitalize text-sidebar-foreground/70 font-medium">
+                <span class="truncate font-extrabold text-sidebar-foreground tracking-tight"
+                  >CerdasBangsa</span
+                >
+                <span
+                  class="truncate text-[10px] capitalize text-sidebar-foreground/70 font-medium"
+                >
                   {{ auth.user?.roleLabel || auth.user?.role || 'guest' }}
                 </span>
               </div>

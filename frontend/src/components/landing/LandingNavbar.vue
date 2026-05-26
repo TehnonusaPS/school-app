@@ -36,18 +36,18 @@ const closeMobileMenu = () => {
 
 <template>
   <header 
-    class="fixed top-0 left-0 right-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md transition-all duration-300"
+    class="fixed top-0 left-0 right-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md transition-all duration-300 overflow-hidden"
   >
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="flex h-16 items-center justify-between">
+    <div class="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
+      <div class="flex h-14 sm:h-16 items-center justify-between gap-2">
         <!-- Logo -->
-        <router-link to="/" class="flex items-center gap-2.5 shrink-0" @click="closeMobileMenu">
+        <router-link to="/" class="flex items-center gap-2 min-w-0 shrink" @click="closeMobileMenu">
           <div
-            class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm"
+            class="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm shrink-0"
           >
-            <School class="h-5 w-5" />
+            <School class="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
-          <span class="font-display text-lg font-bold tracking-tight text-foreground">{{ brandName }}</span>
+          <span class="font-display text-base sm:text-lg font-bold tracking-tight text-foreground truncate">{{ brandName }}</span>
         </router-link>
 
         <!-- Desktop Navigation Links -->
@@ -63,11 +63,11 @@ const closeMobileMenu = () => {
         </nav>
 
         <!-- Actions -->
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 shrink-0">
           <!-- "Masuk" Button - Always visible -->
           <router-link
             :to="loginPath"
-            class="rounded-full bg-secondary px-5 py-2 text-sm font-semibold text-secondary-foreground shadow-sm hover:bg-secondary/90 transition duration-200"
+            class="rounded-full bg-secondary px-3.5 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-secondary-foreground shadow-sm hover:bg-secondary/90 transition duration-200 whitespace-nowrap"
             @click="closeMobileMenu"
           >
             Masuk
@@ -75,7 +75,7 @@ const closeMobileMenu = () => {
 
           <!-- Mobile Toggle Button -->
           <button
-            class="inline-flex md:hidden h-9 w-9 items-center justify-center rounded-lg border border-border/40 hover:bg-muted/50 transition focus:outline-none"
+            class="inline-flex md:hidden h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg border border-border/40 hover:bg-muted/50 transition focus:outline-none shrink-0"
             aria-label="Toggle Menu"
             @click="toggleMobileMenu"
           >

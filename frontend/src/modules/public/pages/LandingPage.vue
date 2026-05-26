@@ -24,7 +24,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="font-sans antialiased text-foreground bg-background">
+  <div class="font-sans antialiased text-foreground bg-background overflow-x-hidden">
     <!-- Navbar (floating glass) -->
     <LandingNavbar brandName="Sekolahku ERP" loginPath="/login" />
 

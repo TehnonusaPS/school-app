@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { GraduationCap, Eye, EyeOff } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
@@ -53,6 +53,21 @@ const handleLogin = async () => {
     isLoading.value = false
   }
 }
+
+onMounted(() => {
+  // Paksa halaman login selalu dalam light mode
+  document.documentElement.classList.remove('dark')
+
+  // Bersihkan class tema/background yang mungkin terbawa dari halaman lain
+  document.body.classList.forEach(cls => {
+    if (cls.startsWith('theme-') || ['bg-animated', 'bg-static_squares', 'bg-glass', 'bg-solid'].includes(cls)) {
+      document.body.classList.remove(cls)
+    }
+  })
+
+  // Pastikan tema bawaan (blue) diterapkan
+  document.body.classList.add('theme-blue')
+})
 </script>
 
 <template>

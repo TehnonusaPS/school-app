@@ -16,10 +16,15 @@ onMounted(() => {
   // Paksa halaman landing selalu dalam light mode
   document.documentElement.classList.remove('dark')
 
+  // Bersihkan semua class tema atau background yang mungkin terbawa dari dashboard
+  document.body.classList.forEach(cls => {
+    if (cls.startsWith('theme-') || ['bg-animated', 'bg-static_squares', 'bg-glass', 'bg-solid'].includes(cls)) {
+      document.body.classList.remove(cls)
+    }
+  })
+
   // Pastikan class theme-emerald ada di body agar ambient gradients dan styles menyala indah
-  if (!document.body.classList.contains('theme-emerald')) {
-    document.body.classList.add('theme-emerald')
-  }
+  document.body.classList.add('theme-emerald')
 })
 </script>
 

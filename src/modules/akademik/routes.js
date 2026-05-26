@@ -52,5 +52,50 @@ export default [
       parent: 'Akademik',
       description: 'Manajemen kegiatan ekstrakurikuler siswa.'
     }
+  },
+  {
+    path: 'akademik/kalender',
+    component: () => import('./pages/KalenderAkademik.vue'),
+    meta: {
+      title: 'Kalender Akademik',
+      parent: 'Akademik',
+      description: 'Kalender kegiatan pembelajaran dan hari libur sekolah.'
+    }
+  },
+  {
+    path: 'akademik/kegiatan',
+    component: () => import('./pages/KegiatanAkademik.vue'),
+    meta: {
+      title: 'Kegiatan akademik sekolah',
+      parent: 'Akademik',
+      description: 'Daftar rincian kegiatan pembelajaran dan ujian sekolah.'
+    }
+  },
+  {
+    path: 'akademik/materi',
+    component: () => import('./pages/KelolaMateri.vue'),
+    meta: {
+      title: 'Kelola Materi',
+      parent: 'Akademik',
+      description: 'Unggah, sunting, dan bagikan materi ajar interaktif.'
+    }
+  },
+  {
+    path: 'akademik/tugas',
+    component: () => import('./pages/KelolaTugas.vue'),
+    meta: {
+      title: 'Kelola Tugas',
+      parent: 'Akademik',
+      description: 'Buat tugas baru dan pantau pengumpulan tugas siswa.'
+    }
+  },
+  {
+    path: 'akademik/input-nilai',
+    component: () => import('./pages/InputNilai.vue'),
+    meta: {
+      title: 'Input Nilai',
+      parent: 'Akademik',
+      description: 'Lakukan penginputan nilai harian, UTS, UAS, dan rapor.'
+    }
   }
 ]

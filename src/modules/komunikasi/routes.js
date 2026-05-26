@@ -160,6 +160,28 @@ export default [
     }
   },
   {
+    path: 'komunikasi/persuratan/lulus/buat',
+    component: () => import('./pages/BuatSuratLulus.vue'),
+    meta: {
+      title: 'Buat Surat Keterangan Lulus',
+      parent: 'Komunikasi',
+      description: 'Form pembuatan Surat Keterangan Lulus (SKL) sementara.',
+      requiresAuth: true,
+      roles: ['tata_usaha']
+    }
+  },
+  {
+    path: 'komunikasi/persuratan/lulus/edit/:id',
+    component: () => import('./pages/EditSuratLulus.vue'),
+    meta: {
+      title: 'Edit Surat Keterangan Lulus',
+      parent: 'Komunikasi',
+      description: 'Form edit Surat Keterangan Lulus (SKL) sementara.',
+      requiresAuth: true,
+      roles: ['tata_usaha']
+    }
+  },
+  {
     path: 'komunikasi/persuratan/peringatan',
     component: () => import('./pages/SuratPeringatan.vue'),
     meta: {

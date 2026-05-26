@@ -220,7 +220,7 @@ const data = {
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
               <SidebarMenuButton size="lg"
-                class="glass-mini text-sidebar-accent-foreground cursor-default hover:bg-transparent active:bg-transparent data-[state=open]:bg-transparent transition-all duration-300">
+                class="glass-mini text-sidebar-accent-foreground cursor-default hover:bg-transparent active:bg-transparent data-[state=open]:bg-transparent transition-colors duration-300">
                 <Avatar class="h-8 w-8 rounded-lg">
                   <AvatarFallback class="rounded-lg bg-primary text-primary-foreground">
                     <School class="size-5" />

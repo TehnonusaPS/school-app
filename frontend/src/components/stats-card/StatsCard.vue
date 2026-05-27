@@ -27,7 +27,7 @@ function getTrendIcon(direction) {
 }
 
 function getTrendColor(direction) {
-  return direction === 'down' ? 'text-red-500' : 'text-emerald-500'
+  return direction === 'down' ? 'text-destructive' : 'text-primary'
 }
 </script>
 
@@ -41,25 +41,30 @@ function getTrendColor(direction) {
       <CardHeader class="pb-2">
         <div class="flex items-center justify-between">
           <CardDescription class="text-sm font-medium">{{ stat.label }}</CardDescription>
-          <div v-if="stat.icon" :class="['rounded-lg p-2', stat.bg ?? 'bg-blue-500/10']">
-            <component :is="stat.icon" :class="['size-4', stat.color ?? 'text-blue-500']" />
+          <div v-if="stat.icon" :class="['rounded-lg p-2', stat.bg ?? 'bg-primary/10']">
+            <component :is="stat.icon" :class="['size-4', stat.color ?? 'text-primary']" />
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div class="text-3xl font-bold tracking-tight">{{ stat.value }}</div>
+        <div :class="['text-3xl font-bold tracking-tight', stat.valueColor]">
+          {{ stat.value }}
+        </div>
         <div v-if="stat.trend || stat.sub" class="mt-1 flex items-center gap-1.5">
           <span
             v-if="stat.trend"
             :class="[
               'flex items-center gap-0.5 text-xs font-semibold',
-              getTrendColor(stat.trendDirection)
+              stat.trendColor || getTrendColor(stat.trendDirection)
             ]"
           >
-            <component :is="getTrendIcon(stat.trendDirection)" class="size-3" />
+            <component v-if="stat.trendIcon || stat.trendDirection" :is="stat.trendIcon || getTrendIcon(stat.trendDirection)" class="size-3" />
             {{ stat.trend }}
           </span>
           <span v-if="stat.sub" class="text-xs text-muted-foreground">{{ stat.sub }}</span>
+        </div>
+        <div v-if="stat.progress !== undefined" class="mt-4 h-1 w-full bg-secondary rounded-full overflow-hidden">
+          <div class="h-full bg-primary" :style="{ width: stat.progress + '%' }"></div>
         </div>
       </CardContent>
     </Card>

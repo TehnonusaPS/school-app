@@ -1,0 +1,1 @@
+async function e(){let e=await fetch(`https://jsonplaceholder.typicode.com/users`);if(!e.ok)throw Error(`Gagal mengambil data dari server`);return e.json()}export{e as t};

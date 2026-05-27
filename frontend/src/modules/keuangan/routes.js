@@ -42,6 +42,42 @@ export default [
       title: 'Cetak Kwitansi',
       parent: 'Keuangan',
       description: 'Cetak kwitansi pembayaran SPP dan pengeluaran.'
+    }
+  },
+  {
+    path: 'keuangan/subscription',
+    component: () => import('./pages/Subscription.vue'),
+    meta: {
+      title: 'Monitoring Subscription',
+      parent: 'Keuangan',
+      description: 'Pantau status langganan dan tagihan lisensi sekolah.'
+    }
+  },
+  {
+    path: 'keuangan/monitoring-yayasan',
+    component: () => import('./pages/MonitoringYayasan.vue'),
+    meta: {
+      title: 'Halaman Monitoring Keuangan Yayasan',
+      parent: 'Keuangan',
+      description: 'Pantau rekap dan arus kas keuangan seluruh unit sekolah di bawah yayasan.'
+    }
+  },
+  {
+    path: 'keuangan/paket-subscription',
+    component: () => import('./pages/PaketSubscription.vue'),
+    meta: {
+      title: 'Halaman Menu Paket Subcription',
+      parent: 'Keuangan',
+      description: 'Kelola paket langganan dan tagihan lisensi aplikasi CerdasBangsa.'
+    }
+  },
+  {
+    path: 'keuangan/kelola-dana-yayasan',
+    component: () => import('./pages/MengelolaDanaYayasan.vue'),
+    meta: {
+      title: 'Mengelola Dana Yayasan',
+      parent: 'Keuangan',
+      description: 'Manajemen alokasi dan penggunaan dana hibah yayasan.'
+    }
   }
-}
 ]

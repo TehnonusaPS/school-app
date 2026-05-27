@@ -1,0 +1,1 @@
+import{L as e,g as t,yt as n}from"./createLucideIcon-Bva5QUpR.js";import{t as r}from"./bell-ring-BJtFFQqk.js";import{t as i}from"./PlaceholderPage-BmRzUDF4.js";var a={__name:`Subscription`,setup(a){return(a,o)=>(e(),t(i,{icon:n(r)},null,8,[`icon`]))}};export{a as default};

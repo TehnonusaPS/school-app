@@ -1,0 +1,1 @@
+import{L as e,g as t,t as n,yt as r}from"./createLucideIcon-Bva5QUpR.js";import{t as i}from"./PlaceholderPage-BmRzUDF4.js";var a=n(`tv`,[[`path`,{d:`m17 2-5 5-5-5`,key:`16satq`}],[`rect`,{width:`20`,height:`15`,x:`2`,y:`7`,rx:`2`,key:`1e6viu`}]]),o={__name:`MonitoringKelas`,setup(n){return(n,o)=>(e(),t(i,{icon:r(a)},null,8,[`icon`]))}};export{o as default};

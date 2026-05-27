@@ -54,4 +54,23 @@ export default [
       parent: 'Lainnya',
       description: 'Pengelolaan data perpustakaan sekolah.'
     }
-  }]
+  },
+  {
+    path: 'lainnya/konfigurasi-global',
+    component: () => import('./pages/KonfigurasiGlobal.vue'),
+    meta: {
+      title: 'Konfigurasi Sistem Global',
+      parent: 'Lainnya',
+      description: 'Pengaturan lisensi, audit sistem, dan konfigurasi global dasbor.'
+    }
+  },
+  {
+    path: 'lainnya/informasi-sekolah',
+    component: () => import('./pages/InformasiSekolah.vue'),
+    meta: {
+      title: 'Informasi Sekolah',
+      parent: 'Lainnya',
+      description: 'Detail dan informasi umum mengenai unit-unit sekolah terdaftar.'
+    }
+  }
+]

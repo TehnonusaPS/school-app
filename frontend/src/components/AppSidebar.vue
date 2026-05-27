@@ -103,66 +103,247 @@ const data = {
       title: 'Manajemen Data',
       url: '/manajemen-data',
       icon: Database,
+      excludeRoles: ['guru', 'siswa', 'orang_tua'],
       items: [
-        {
-          title: 'Data Siswa',
-          url: '/manajemen-data/siswa'
-          // roles: ['superadmin', 'admin_sekolah'] <-- Contoh membatasi sub-menu
+        { 
+          title: 'Data Siswa', 
+          url: '/manajemen-data/siswa',
+          excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'wali_kelas']
         },
-        { title: 'Data Guru & Staff', url: '/manajemen-data/guru-staff' },
-        { title: 'Data Kelas', url: '/manajemen-data/kelas' },
-        { title: 'Data Mata Pelajaran', url: '/manajemen-data/mata-pelajaran' },
-        { title: 'Tahun Ajaran', url: '/manajemen-data/tahun-ajaran' }
+        { 
+          title: 'Mengelola Data Siswa', 
+          url: '/manajemen-data/siswa',
+          roles: ['wali_kelas']
+        },
+        { 
+          title: 'Mengelola Pendaftaran Siswa', 
+          url: '/manajemen-data/siswa',
+          roles: ['tata_usaha']
+        },
+        { 
+          title: 'Kelola Data Yayasan', 
+          url: '/manajemen-data/yayasan',
+          roles: ['superadmin']
+        },
+        { 
+          title: 'Kelola Data Sekolah dibawah Yayasan', 
+          url: '/manajemen-data/sekolah',
+          roles: ['superadmin']
+        },
+        { 
+          title: 'Kelola Hak Akses Pengguna', 
+          url: '/manajemen-data/hak-akses',
+          roles: ['superadmin']
+        },
+        { 
+          title: 'Mengelola Data Sekolah dalam Yayasan', 
+          url: '/manajemen-data/sekolah-yayasan',
+          roles: ['admin_yayasan']
+        },
+        { 
+          title: 'Mengelola Data Guru dan Staff Yayasan', 
+          url: '/manajemen-data/guru-staff-yayasan',
+          roles: ['admin_yayasan']
+        },
+        { 
+          title: 'Monitoring Kelas', 
+          url: '/manajemen-data/monitoring-kelas',
+          roles: ['kepala_sekolah']
+        },
+        { 
+          title: 'Ekstrakulikuler', 
+          url: '/manajemen-data/ekskul',
+          roles: ['kepala_sekolah', 'admin_sekolah']
+        },
+        { 
+          title: 'Jadwal Pelajaran', 
+          url: '/manajemen-data/jadwal',
+          roles: ['kepala_sekolah']
+        },
+        { 
+          title: 'Manajemen Kelas', 
+          url: '/manajemen-data/manajemen-kelas',
+          roles: ['admin_sekolah']
+        },
+        { title: 'Data Guru dan Staff', url: '/manajemen-data/guru-staff', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'wali_kelas'] },
+        { title: 'Data Kelas', url: '/manajemen-data/kelas', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'kepala_sekolah', 'wali_kelas'] },
+        { title: 'Mata Pelajaran', url: '/manajemen-data/mata-pelajaran', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'wali_kelas'] },
+        { 
+          title: 'Tahun Ajaran Bedasarkan Siswa/Kelas', 
+          url: '/manajemen-data/tahun-ajaran',
+          roles: ['admin_sekolah']
+        },
+        { title: 'Tahun Ajaran', url: '/manajemen-data/tahun-ajaran', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'wali_kelas'] }
       ]
     },
     {
       title: 'Akademik',
       url: '/akademik',
       icon: GraduationCap,
+      excludeRoles: ['superadmin', 'admin_yayasan', 'tata_usaha'],
       items: [
-        { title: 'Jadwal Pelajaran', url: '/akademik/jadwal' },
-        { title: 'Nilai & Rapor', url: '/akademik/nilai' },
-        { title: 'Ujian & Penilaian', url: '/akademik/ujian' },
-        { title: 'Kurikulum', url: '/akademik/kurikulum' },
-        { title: 'Mata Pelajaran', url: '/akademik/mapel' },
-        { title: 'Ekstrakurikuler', url: '/akademik/ekskul' }
+        { title: 'Jadwal Pelajaran', url: '/akademik/jadwal', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'orang_tua'] },
+        { title: 'Nilai & Rapor', url: '/akademik/nilai', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'siswa', 'orang_tua'] },
+        { title: 'Ujian & Penilaian', url: '/akademik/ujian', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'siswa', 'orang_tua'] },
+        { title: 'Kurikulum', url: '/akademik/kurikulum', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'siswa', 'orang_tua'] },
+        { title: 'Mata Pelajaran', url: '/akademik/mapel', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'siswa', 'orang_tua'] },
+        { title: 'Ekstrakurikuler', url: '/akademik/ekskul', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'siswa', 'orang_tua'] },
+        {
+          title: 'Kalender Akademik',
+          url: '/akademik/kalender',
+          roles: ['kepala_sekolah', 'admin_sekolah']
+        },
+        {
+          title: 'Kegiatan akademik sekolah',
+          url: '/akademik/kegiatan',
+          roles: ['kepala_sekolah', 'admin_sekolah']
+        },
+        {
+          title: 'Kelola Materi',
+          url: '/akademik/materi',
+          roles: ['guru', 'wali_kelas']
+        },
+        {
+          title: 'Kelola Tugas',
+          url: '/akademik/tugas',
+          roles: ['guru', 'wali_kelas']
+        },
+        {
+          title: 'Input Nilai',
+          url: '/akademik/input-nilai',
+          roles: ['guru', 'wali_kelas']
+        },
+        {
+          title: 'Nilai dan Raport',
+          url: '/akademik/nilai',
+          roles: ['siswa']
+        },
+        {
+          title: 'Materi Pembelajaran',
+          url: '/akademik/materi',
+          roles: ['siswa']
+        },
+        {
+          title: 'Mata Pelajaran',
+          url: '/akademik/mapel',
+          roles: ['siswa']
+        },
+        {
+          title: 'Tugas',
+          url: '/akademik/tugas',
+          roles: ['siswa']
+        },
+        {
+          title: 'Ujian',
+          url: '/akademik/ujian',
+          roles: ['siswa']
+        },
+        {
+          title: 'Nilai dan Raport Anak',
+          url: '/akademik/nilai',
+          roles: ['orang_tua']
+        },
+        {
+          title: 'Jadwal Pelajaran Anak',
+          url: '/akademik/jadwal',
+          roles: ['orang_tua']
+        }
       ]
     },
     {
       title: 'Keuangan',
       url: '/keuangan',
       icon: Wallet,
+      excludeRoles: ['kepala_sekolah', 'guru', 'wali_kelas'],
       items: [
-        { title: 'SPP Siswa', url: '/keuangan/spp', roles : ['admin_sekolah','siswa','orang_tua'] },
-        { title: 'Tagihan & Pembayaran', url: '/keuangan/tagihan' },
-        { title: 'Pengeluaran', url: '/keuangan/pengeluaran' },
-        { title: 'Laporan Keuangan', url: '/keuangan/laporan' }
+        { title: 'SPP Siswa', url: '/keuangan/spp', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'admin_sekolah', 'siswa', 'orang_tua'] },
+        { 
+          title: 'Daftar Siswa yang Blom Bayar SPP', 
+          url: '/keuangan/spp',
+          roles: ['tata_usaha']
+        },
+        { title: 'Tagihan & Pembayaran', url: '/keuangan/tagihan', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'admin_sekolah', 'siswa', 'orang_tua'] },
+        { 
+          title: 'History Transaksi Keuangan', 
+          url: '/keuangan/tagihan',
+          roles: ['tata_usaha']
+        },
+        { title: 'Pengeluaran', url: '/keuangan/pengeluaran', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'admin_sekolah', 'siswa', 'orang_tua'] },
+        { title: 'Laporan Keuangan', url: '/keuangan/laporan', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'admin_sekolah', 'siswa', 'orang_tua'] },
+        {
+          title: 'Monitoring Subscribtion',
+          url: '/keuangan/subscription',
+          roles: ['superadmin']
+        },
+        {
+          title: 'Halaman Monitoring Keuangan Yayasan',
+          url: '/keuangan/monitoring-yayasan',
+          roles: ['admin_yayasan']
+        },
+        {
+          title: 'Halaman Menu Paket Subcription',
+          url: '/keuangan/paket-subscription',
+          roles: ['admin_yayasan']
+        },
+        {
+          title: 'Mengelola Dana Yayasan',
+          url: '/keuangan/kelola-dana-yayasan',
+          roles: ['admin_sekolah']
+        },
+        {
+          title: 'Pembayaran SPP',
+          url: '/keuangan/spp',
+          roles: ['siswa']
+        },
+        {
+          title: 'Pembayaran SPP',
+          url: '/keuangan/spp',
+          roles: ['orang_tua']
+        },
+        {
+          title: 'Riwayat Pembayaran SPP',
+          url: '/keuangan/tagihan',
+          roles: ['orang_tua']
+        }
       ]
     },
     {
       title: 'Absensi',
       url: '/absensi',
       icon: ClipboardList,
+      excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'tata_usaha', 'orang_tua'],
       items: [
-        { title: 'Absensi Siswa', url: '/absensi/siswa' },
-        { title: 'Absensi Guru & Staff', url: '/absensi/guru-staff' },
-        { title: 'Rekap Bulanan', url: '/absensi/rekap' }
+        { title: 'Absensi Siswa', url: '/absensi/siswa', excludeRoles: ['guru', 'wali_kelas', 'siswa'] },
+        { title: 'Absensi Guru & Staff', url: '/absensi/guru-staff', excludeRoles: ['guru', 'wali_kelas', 'siswa'] },
+        { title: 'Rekap Bulanan', url: '/absensi/rekap', excludeRoles: ['guru', 'wali_kelas', 'siswa'] },
+        {
+          title: 'Absensi',
+          url: '/absensi/siswa',
+          roles: ['guru', 'wali_kelas']
+        },
+        {
+          title: 'Input Kehadiran Siswa',
+          url: '/absensi/input',
+          roles: ['guru', 'wali_kelas']
+        },
+        {
+          title: 'Rekap Absensi',
+          url: '/absensi/rekap',
+          roles: ['siswa']
+        }
       ]
     },
     {
       title: 'Komunikasi',
       url: '/komunikasi',
       icon: MessageSquare,
+      excludeRoles: ['superadmin', 'guru', 'wali_kelas', 'siswa', 'orang_tua'],
       items: [
-        { title: 'Pengumuman', url: '/komunikasi/pengumuman', excludeRoles: ['tata_usaha'] },
-        {
-          title: 'Berita Kegiatan',
-          url: '/komunikasi/berita-kegiatan',
-          excludeRoles: ['tata_usaha']
-        },
-        { title: 'Feedback Orang Tua', url: '/komunikasi/feedback', excludeRoles: ['tata_usaha'] },
-        { title: 'Pesan Internal', url: '/komunikasi/pesan', excludeRoles: ['tata_usaha'] },
-        { title: 'Notifikasi', url: '/komunikasi/notifikasi', excludeRoles: ['tata_usaha'] },
+        { title: 'Pengumuman', url: '/komunikasi/pengumuman', excludeRoles: ['tata_usaha', 'kepala_sekolah', 'admin_sekolah'] },
+        { title: 'Berita Kegiatan', url: '/komunikasi/berita-kegiatan', excludeRoles: ['tata_usaha', 'admin_yayasan'] },
+        { title: 'Feedback Orang Tua', url: '/komunikasi/feedback', excludeRoles: ['tata_usaha', 'admin_yayasan'] },
+        { title: 'Pesan Internal', url: '/komunikasi/pesan', excludeRoles: ['tata_usaha', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah'] },
+        { title: 'Notifikasi', url: '/komunikasi/notifikasi', excludeRoles: ['tata_usaha', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah'] },
         { title: 'Keterangan Aktif', url: '/komunikasi/persuratan/aktif', roles: ['tata_usaha'] },
         {
           title: 'Surat Dispensasi',
@@ -181,24 +362,121 @@ const data = {
       title: 'Laporan',
       url: '/laporan',
       icon: FileBarChart,
+      excludeRoles: ['siswa'],
       items: [
-        { title: 'Laporan Akademik', url: '/laporan/akademik' },
-        { title: 'Laporan Keuangan', url: '/laporan/keuangan' },
-        { title: 'Laporan Absensi', url: '/laporan/absensi' },
-        { title: 'Ekspor Data', url: '/laporan/ekspor' }
+        { title: 'Laporan Akademik', url: '/laporan/akademik', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'orang_tua'] },
+        { 
+          title: 'Laporan Akademik Perkelas', 
+          url: '/laporan/akademik',
+          roles: ['tata_usaha']
+        },
+        { 
+          title: 'Akademik Perkelas', 
+          url: '/laporan/akademik',
+          roles: ['kepala_sekolah', 'admin_sekolah']
+        },
+        { title: 'Laporan Keuangan', url: '/laporan/keuangan', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'orang_tua'] },
+        { 
+          title: 'Laporan Keuangan SPP dan Pendapatan Sekolah', 
+          url: '/laporan/keuangan',
+          roles: ['tata_usaha']
+        },
+        { 
+          title: 'Keuangan SPP dan Pendapatan Sekolah', 
+          url: '/laporan/keuangan',
+          roles: ['kepala_sekolah', 'admin_sekolah']
+        },
+        { title: 'Laporan Absensi', url: '/laporan/absensi', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'orang_tua'] },
+        { 
+          title: 'Laporan Absensi Kepegawaian', 
+          url: '/laporan/absensi',
+          roles: ['tata_usaha']
+        },
+        { title: 'Ekspor Data', url: '/laporan/ekspor', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'orang_tua'] },
+        {
+          title: 'Laporan Nilai',
+          url: '/laporan/nilai',
+          roles: ['guru', 'wali_kelas']
+        },
+        {
+          title: 'Laporan Kehadiran Siswa',
+          url: '/laporan/kehadiran-siswa',
+          roles: ['guru', 'wali_kelas']
+        },
+        {
+          title: 'Laporan Raport Siswa',
+          url: '/laporan/raport',
+          roles: ['wali_kelas']
+        },
+        {
+          title: 'Perkembangan Anak',
+          url: '/laporan/perkembangan',
+          roles: ['orang_tua']
+        },
+        {
+          title: 'Mengakses laporan konsolidasi seluruh yayasan',
+          url: '/laporan/konsolidasi',
+          roles: ['superadmin']
+        },
+        {
+          title: 'Data siswa',
+          url: '/laporan/siswa-yayasan',
+          roles: ['admin_yayasan']
+        },
+        {
+          title: 'Keuangan',
+          url: '/laporan/keuangan-yayasan',
+          roles: ['admin_yayasan']
+        },
+        {
+          title: 'Akademik',
+          url: '/laporan/akademik-yayasan',
+          roles: ['admin_yayasan']
+        },
+        {
+          title: 'SDM',
+          url: '/laporan/sdm-yayasan',
+          roles: ['admin_yayasan']
+        },
+        {
+          title: 'Infrastruktur',
+          url: '/laporan/infrastruktur-yayasan',
+          roles: ['admin_yayasan']
+        },
+        {
+          title: 'Kepegawaian',
+          url: '/laporan/kepegawaian',
+          roles: ['kepala_sekolah', 'admin_sekolah']
+        },
+        {
+          title: 'Laporan pertanggung Jawaban',
+          url: '/laporan/pertanggung-jawaban',
+          roles: ['kepala_sekolah']
+        }
       ]
     },
     {
       title: 'Lainnya',
       url: '/lainnya',
       icon: MoreHorizontal,
+      excludeRoles: ['tata_usaha', 'guru', 'wali_kelas', 'siswa', 'orang_tua'],
       items: [
-        { title: 'Pengaturan Sekolah', url: '/lainnya/pengaturan' },
-        { title: 'Manajemen Pengguna', url: '/lainnya/pengguna' },
-        { title: 'Backup & Restore', url: '/lainnya/backup' },
-        { title: 'Manajemen Ruangan', url: '/lainnya/ruangan' },
-        { title: 'Manajemen Aset', url: '/lainnya/aset' },
-        { title: 'Manajemen Perpustakaan', url: '/lainnya/perpustakaan' }
+        { title: 'Pengaturan Sekolah', url: '/lainnya/pengaturan', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah'] },
+        { title: 'Manajemen Pengguna', url: '/lainnya/pengguna', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah'] },
+        { title: 'Backup & Restore', url: '/lainnya/backup', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah'] },
+        { title: 'Manajemen Ruangan', url: '/lainnya/ruangan', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah'] },
+        { title: 'Manajemen Aset', url: '/lainnya/aset', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah'] },
+        { title: 'Manajemen Perpustakaan', url: '/lainnya/perpustakaan', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah'] },
+        {
+          title: 'Konfigurasi sistem global',
+          url: '/lainnya/konfigurasi-global',
+          roles: ['superadmin']
+        },
+        {
+          title: 'Informasi Sekolah',
+          url: '/lainnya/informasi-sekolah',
+          roles: ['admin_yayasan', 'kepala_sekolah']
+        }
       ]
     },
     {

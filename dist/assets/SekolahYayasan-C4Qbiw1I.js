@@ -1,0 +1,1 @@
+import{L as e,g as t,yt as n}from"./createLucideIcon-Bva5QUpR.js";import{t as r}from"./PlaceholderPage-BmRzUDF4.js";import{Kn as i}from"./index-hYd8_IDz.js";var a={__name:`SekolahYayasan`,setup(a){return(a,o)=>(e(),t(r,{icon:n(i)},null,8,[`icon`]))}};export{a as default};

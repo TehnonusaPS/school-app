@@ -10,7 +10,7 @@ export default [
   },
   {
     path: 'keuangan/tagihan',
-    component: () => import('./pages/Tagihan.vue'),
+    component: () => import('./pages/RiwayatKeuangan.vue'),
     meta: {
       title: 'Tagihan & Pembayaran',
       parent: 'Keuangan',
@@ -78,6 +78,24 @@ export default [
       title: 'Mengelola Dana Yayasan',
       parent: 'Keuangan',
       description: 'Manajemen alokasi dan penggunaan dana hibah yayasan.'
+    }
+  },
+  {
+    path: 'keuangan/input-pengeluaran-kecil',
+    component: () => import('./pages/PengeluaranKecil.vue'),
+    meta: {
+      title: 'Input Pengeluaran Kecil',
+      parent: 'Keuangan',
+      description: 'Input pengeluaran kecil.'
+    }
+  },
+  {
+    path: 'keuangan/penerimaan-pembayaran',
+    component: () => import('./pages/PenerimaanPembayaran.vue'),
+    meta: {
+      title: 'Penerimaan Pembayaran',
+      parent: 'Keuangan',
+      description: 'Terima pembayaran SPP siswa.'
     }
   }
 ]

@@ -1,1 +1,0 @@
-import{L as e,S as t,v as n,xt as r,yt as i}from"./createLucideIcon-Bva5QUpR.js";import{zn as a}from"./index-hYd8_IDz.js";var o=t({__name:`Skeleton`,props:{class:{type:[Boolean,null,String,Object,Array]}},setup(t){let o=t;return(t,s)=>(e(),n(`div`,{"data-slot":`skeleton`,class:r(i(a)(`bg-muted rounded-md animate-pulse`,o.class))},null,2))}});export{o as t};

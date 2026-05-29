@@ -437,7 +437,9 @@
   [data-slot="select-content"],
   [data-slot="hover-card-content"],
   [data-slot="tooltip-content"],
-  [data-slot="command"] {
+  [data-slot="command"],
+  [data-slot="tabs-list"],
+  [data-sonner-toast] {
     background: color-mix(in oklch, var(--popover) 70%, transparent) !important;
     backdrop-filter: blur(24px) saturate(200%);
     -webkit-backdrop-filter: blur(24px) saturate(200%);
@@ -451,7 +453,9 @@
   .dark [data-slot="select-content"],
   .dark [data-slot="hover-card-content"],
   .dark [data-slot="tooltip-content"],
-  .dark [data-slot="command"] {
+  .dark [data-slot="command"],
+  .dark [data-slot="tabs-list"],
+  .dark [data-sonner-toast] {
     border-color: rgba(255, 255, 255, 0.1) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
   }

@@ -723,8 +723,7 @@ body.bg-static_squares .background-squares-static {
   animation: square-float 25s linear infinite;
   bottom: -150px;
   border-radius: 8px;
-  backdrop-filter: blur(2px);
-  /* GPU Hardware Acceleration to prevent scroll-freeze */
+  /* Dihapus backdrop-filter: blur(2px); karena menjadi penyebab utama lag saat GPU merender animasi di atas background yang sedang di-scroll */
   will-change: transform;
   backface-visibility: hidden;
   transform: translateZ(0);
@@ -917,9 +916,10 @@ body.bg-static_squares .background-squares-static {
   position: absolute;
   display: block;
   list-style: none;
-  background: color-mix(in oklch, var(--primary) 40%, transparent);
-  border: 1px solid color-mix(in oklch, var(--primary) 60%, transparent);
-  backdrop-filter: blur(2px);
+  background: color-mix(in oklch, var(--primary) 30%, transparent);
+  border: 1px solid color-mix(in oklch, var(--primary) 50%, transparent);
+  border-radius: 8px;
+  /* Dihapus backdrop-filter: blur(2px); agar lebih ringan */
 }
 
 /* Menyebar kotak secara statis ke seluruh layar dengan rotasi & lekukan layaknya berhenti di tengah animasi */

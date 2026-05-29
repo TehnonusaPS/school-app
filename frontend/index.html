@@ -27,6 +27,10 @@
           document.body.classList.add('theme-' + style)
           var finish = localStorage.getItem('themeFinish') || 'glossy'
           if (finish === 'solid') document.body.classList.add('finish-solid')
+          
+          // Background Style
+          var bgStyle = localStorage.getItem('backgroundStyle') || 'animated'
+          document.body.classList.add('bg-' + bgStyle)
         } catch (e) {}
       })()
     </script>

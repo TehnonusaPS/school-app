@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import { GraduationCap, Eye, EyeOff } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -53,6 +54,7 @@ const handleLogin = async () => {
   try {
     const user = await auth.login(email.value, password.value)
     if (user) {
+      toast.success(`Selamat datang, ${user.role}!`, { cancel: { label: 'Tutup', onClick: () => {} } })
       router.push('/dashboard')
     } else {
       error.value = 'Email atau password salah.'

@@ -1,1 +1,0 @@
-import{L as e,g as t}from"./createLucideIcon-Bva5QUpR.js";import{t as n}from"./PlaceholderPage-BmRzUDF4.js";var r={__name:`Ekskul`,setup(r){return(r,i)=>(e(),t(n))}};export{r as default};

@@ -14,7 +14,7 @@ import {
   AlertTriangle,
   ShieldCheck
 } from 'lucide-vue-next'
-import StatsCard from '@/components/stats-card/StatsCard.vue'
+import StatCard from '@/components/stat-card/StatCard.vue'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -26,30 +26,30 @@ const kpiData = [
     value: 'Rp 4.285.000.000',
     trend: '12.5% dari tahun lalu',
     trendDirection: 'up',
-    trendIcon: TrendingUp,
-    trendColor: 'text-primary'
+    icon: TrendingUp,
+    variant: 'blue'
   },
   {
     label: 'Total Beban Operasional',
     value: 'Rp 2.140.000.000',
     trend: '50% Rasio Pengeluaran',
     trendDirection: 'up',
-    trendIcon: FileText,
-    trendColor: 'text-muted-foreground'
+    icon: FileText,
+    variant: 'amber'
   },
   {
     label: 'Posisi Kas Bersih',
     value: 'Rp 2.145.000.000',
-    valueColor: 'text-primary',
     trend: 'Likuiditas Sehat',
     trendDirection: 'up',
-    trendIcon: CheckCircle2,
-    trendColor: 'text-primary'
+    icon: CheckCircle2,
+    variant: 'emerald'
   },
   {
     label: 'Rerata Penagihan SPP',
     value: '92.4%',
-    progress: 92.4
+    progress: 92.4,
+    variant: 'primary'
   }
 ]
 </script>
@@ -79,7 +79,19 @@ const kpiData = [
     </div>
 
     <!-- Stats -->
-    <StatsCard :stats="kpiData" />
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <StatCard
+        v-for="(stat, index) in kpiData"
+        :key="index"
+        :label="stat.label"
+        :value="stat.value"
+        :trend="stat.trend"
+        :trendDirection="stat.trendDirection"
+        :icon="stat.icon"
+        :progress="stat.progress"
+        :variant="stat.variant"
+      />
+    </div>
 
     <!-- Charts -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

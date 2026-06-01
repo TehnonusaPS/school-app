@@ -12,7 +12,7 @@ import {
   PlusCircle,
   TrendingDown
 } from 'lucide-vue-next'
-import StatsCard from '@/components/stats-card/StatsCard.vue'
+import StatCard from '@/components/stat-card/StatCard.vue'
 import DataTableCard from '@/components/data-table/DataTableCard.vue'
 import PageHeader from '@/components/page-header/PageHeader.vue'
 import { Badge } from '@/components/ui/badge'
@@ -20,51 +20,39 @@ import { statusConfig } from '@/constants/statusConfig'
 import { computed } from 'vue'
 import { usePagination } from '@/composables/usePagination'
 
-// Data for StatsCard
+// Data for StatCard
 const yayasanData = [
   {
     label: 'TOTAL YAYASAN',
     value: '123',
     trend: '+8.4% bln ini',
     trendDirection: 'up',
-    trendIcon: TrendingUp,
-    trendColor: 'text-emerald-500',
     icon: Building2,
-    color: 'text-emerald-500',
-    bg: 'bg-emerald-50'
+    variant: 'emerald'
   },
   {
     label: 'YAYASAN AKTIF',
     value: '112',
     trend: '+12 Baru',
     trendDirection: 'up',
-    trendIcon: PlusCircle,
-    trendColor: 'text-emerald-500',
     icon: ShieldCheck,
-    color: 'text-emerald-500',
-    bg: 'bg-emerald-50'
+    variant: 'emerald'
   },
   {
     label: 'YAYASAN SEDANG TRIAL',
     value: '8',
     trend: '-2 Yayasan',
     trendDirection: 'down',
-    trendIcon: TrendingDown,
-    trendColor: 'text-emerald-500',
     icon: ShieldAlert,
-    color: 'text-muted-foreground',
-    bg: 'bg-muted'
+    variant: 'amber'
   },
   {
     label: 'YAYASAN TIDAK AKTIF',
     value: '3',
     trend: '-1 Yayasan',
     trendDirection: 'up',
-    trendIcon: TrendingDown,
-    trendColor: 'text-emerald-500',
     icon: ShieldX,
-    color: 'text-red-500',
-    bg: 'bg-red-50'
+    variant: 'primary'
   }
 ]
 
@@ -158,7 +146,18 @@ const { currentPage, total, from, to, paginatedItems } = usePagination(items)
       title="Data Yayasan"
       description="Kelola informasi dan profil yayasan secara lengkap dan terstruktur di sini"
     />
-    <StatsCard :stats="yayasanData" />
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <StatCard
+        v-for="(stat, index) in yayasanData"
+        :key="index"
+        :label="stat.label"
+        :value="stat.value"
+        :trend="stat.trend"
+        :trendDirection="stat.trendDirection"
+        :icon="stat.icon"
+        :variant="stat.variant"
+      />
+    </div>
 
     <DataTableCard
       :columns="columns"

@@ -1,5 +1,3 @@
-import path from 'node:path';
-
 export default [
   {
     path: 'lainnya/pengaturan',

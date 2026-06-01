@@ -16,7 +16,7 @@ import {
   PlusCircle,
   TrendingDown
 } from 'lucide-vue-next'
-import StatsCard from '@/components/stats-card/StatsCard.vue'
+import StatCard from '@/components/stat-card/StatCard.vue'
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -24,55 +24,57 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-// Data for StatsCard
+// Data for StatCard
 const kpiData = [
   {
     label: 'TOTAL MRR',
     value: 'Rp 485.200k',
     trend: '+8.4% bln ini',
     trendDirection: 'up',
-    trendIcon: TrendingUp,
-    trendColor: 'text-emerald-500',
     icon: Banknote,
-    color: 'text-emerald-500',
-    bg: 'bg-emerald-50'
+    variant: 'emerald'
   },
   {
     label: 'TENANT AKTIF',
     value: '142 Institusi',
     trend: '+12 Baru',
     trendDirection: 'up',
-    trendIcon: PlusCircle,
-    trendColor: 'text-emerald-500',
     icon: Building2,
-    color: 'text-muted-foreground',
-    bg: 'bg-muted'
+    variant: 'blue'
   },
   {
     label: 'CHURN RATE',
     value: '1.2%',
     trend: '-0.5% (Sehat)',
     trendDirection: 'down',
-    trendIcon: TrendingDown,
-    trendColor: 'text-emerald-500',
     icon: UserMinus,
-    color: 'text-red-500',
-    bg: 'bg-red-50'
+    variant: 'amber'
   },
   {
     label: 'PLATFORM HEALTH',
     value: '99.9%',
     progress: 99.9,
     icon: Cloud,
-    color: 'text-primary',
-    bg: 'bg-primary/10'
+    variant: 'primary'
   }
 ]
 </script>
 
 <template>
   <div class="space-y-6 w-full mx-auto px-0">
-    <StatsCard :stats="kpiData" />
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <StatCard
+        v-for="(stat, index) in kpiData"
+        :key="index"
+        :label="stat.label"
+        :value="stat.value"
+        :trend="stat.trend"
+        :trendDirection="stat.trendDirection"
+        :icon="stat.icon"
+        :progress="stat.progress"
+        :variant="stat.variant"
+      />
+    </div>
     
     <Card>
       <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b gap-4">

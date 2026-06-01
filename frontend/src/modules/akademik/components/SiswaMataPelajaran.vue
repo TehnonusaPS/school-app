@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { FolderOpen } from 'lucide-vue-next'
+import { FolderOpen, Book } from 'lucide-vue-next'
 import {
   Select,
   SelectContent,
@@ -9,11 +9,12 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import AppCard from '@/components/app-card/AppCard.vue'
-import StatsCard from '@/components/stats-card/StatsCard.vue'
+import StatCard from '@/components/stat-card/StatCard.vue'
 import ActivityCard from '@/components/activity-card/ActivityCard.vue'
-import { mockStats } from '../data/mockSiswaStatCards'
+import { siswaStatsData } from '../data/mockSiswaStatCards'
 import { mockAktivitas } from '../data/mockSiswaAktivitas'
 import { mockMateriList } from '../data/mockSiswaMateri'
+import { formatNumber, formatDelta } from '@/utils/formatNumber'
 
 const selectedMapel = ref('matematika')
 const selectedSemester = ref('semester-1')
@@ -23,7 +24,27 @@ const selectedMateri = ref('')
 <template>
   <div class="space-y-6">
     <!-- Stats Cards -->
-    <StatsCard :stats="mockStats" />
+    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+      <StatCard label="Nilai Asal-asalan" :value="formatNumber(siswaStatsData.nilaiAsal.total)"
+        sub="naik dari semester sebelumnya" :trend="`${formatDelta(siswaStatsData.nilaiAsal.growthPercent)}%`"
+        :trendDirection="siswaStatsData.nilaiAsal.trendDirection" :icon="Book" variant="blue" />
+
+      <StatCard label="Jumlah Tugas Terselesaikan" :value="formatNumber(siswaStatsData.tugas.total)"
+        sub="turun dari semester sebelumnya" :trend="`${formatDelta(siswaStatsData.tugas.growthPercent)}%`"
+        :trendDirection="siswaStatsData.tugas.trendDirection" :icon="Book" variant="violet" />
+
+      <StatCard label="Nilai Ujian Matematika" :value="formatNumber(siswaStatsData.nilaiMtk.total)"
+        sub="naik dari semester sebelumnya" :trend="`${formatDelta(siswaStatsData.nilaiMtk.growthPercent)}%`"
+        :trendDirection="siswaStatsData.nilaiMtk.trendDirection" :icon="Book" variant="emerald" />
+
+      <StatCard label="Jumlah Ujian Terselesaikan" :value="formatNumber(siswaStatsData.ujian.total)"
+        sub="turun dari semester sebelumnya" :trend="`${formatDelta(siswaStatsData.ujian.growthPercent)}%`"
+        :trendDirection="siswaStatsData.ujian.trendDirection" :icon="Book" variant="amber" />
+
+      <StatCard label="Jumlah Kuis Terselesaikan" :value="formatNumber(siswaStatsData.kuis.total)"
+        sub="turun dari semester sebelumnya" :trend="`${formatDelta(siswaStatsData.kuis.growthPercent)}%`"
+        :trendDirection="siswaStatsData.kuis.trendDirection" :icon="Book" variant="primary" />
+    </div>
 
     <!-- Header: Mata Pelajaran + Filters -->
     <div class="flex flex-wrap items-center gap-4">

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import { GraduationCap, Eye, EyeOff } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -53,6 +54,7 @@ const handleLogin = async () => {
   try {
     const user = await auth.login(email.value, password.value)
     if (user) {
+      toast.success(`Selamat datang, ${user.role}!`, { cancel: { label: 'Tutup', onClick: () => {} } })
       router.push('/dashboard')
     } else {
       error.value = 'Email atau password salah.'
@@ -78,8 +80,14 @@ onMounted(() => {
     }
   })
 
-  // Pastikan tema bawaan (emerald/green) diterapkan
-  document.body.classList.add('theme-emerald')
+  // Gunakan tema yang tersimpan di localStorage (default biru)
+  const savedThemeStyle = localStorage.getItem('themeStyle') || 'blue'
+  const mappedStyle = savedThemeStyle === 'tahoe' ? 'blue' : savedThemeStyle
+  document.body.classList.add(`theme-${mappedStyle}`)
+
+  // Terapkan juga background style yang tersimpan
+  const savedBgStyle = localStorage.getItem('backgroundStyle') || 'animated'
+  document.body.classList.add(`bg-${savedBgStyle}`)
 
   handleOutsideClick = (e) => {
     const dropdownContainer = document.getElementById('demo-dropdown-container')
@@ -108,7 +116,7 @@ onUnmounted(() => {
           alt="Suasana Sekolah Indonesia"
           class="absolute inset-0 h-full w-full object-cover"
         />
-        <div class="absolute inset-0 bg-emerald-950/85 backdrop-blur-[3px]"></div>
+        <div class="absolute inset-0 bg-primary/80 backdrop-blur-[3px] mix-blend-multiply"></div>
       </div>
 
       <!-- Header Logo -->
@@ -129,7 +137,7 @@ onUnmounted(() => {
           <form @submit.prevent="handleLogin" class="flex flex-col gap-5 sm:gap-6">
             <div class="flex flex-col items-center gap-2 text-center px-1 sm:px-2">
               <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white lg:text-foreground">Sistem Informasi Sekolah</h1>
-              <p class="text-emerald-100/80 lg:text-muted-foreground text-xs sm:text-sm">
+              <p class="text-primary-foreground/80 lg:text-muted-foreground text-xs sm:text-sm">
                 Silakan masukkan akun Anda untuk mengelola data sekolah.
               </p>
             </div>
@@ -147,7 +155,7 @@ onUnmounted(() => {
                   v-model="email"
                   placeholder="Masukkan Email Anda"
                   required
-                  class="bg-white/95 text-slate-900 border-white/20 focus:ring-emerald-500 lg:bg-background lg:text-foreground"
+                  class="bg-white/95 text-slate-900 border-white/20 focus:ring-primary lg:bg-background lg:text-foreground"
                 />
               </div>
               <div class="grid gap-2 text-left">
@@ -157,7 +165,7 @@ onUnmounted(() => {
                     class="text-sm font-medium leading-none text-white lg:text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >Password</label
                   >
-                  <a href="#" class="text-xs sm:text-sm text-emerald-200 hover:text-white lg:text-primary lg:hover:underline shrink-0">
+                  <a href="#" class="text-xs sm:text-sm text-primary-foreground/90 hover:text-white lg:text-primary lg:hover:underline shrink-0">
                     Lupa sandi?
                   </a>
                 </div>
@@ -168,7 +176,7 @@ onUnmounted(() => {
                     placeholder="Masukkan Password Anda"
                     v-model="password"
                     required
-                    class="pr-10 bg-white/95 text-slate-900 border-white/20 focus:ring-emerald-500 lg:bg-background lg:text-foreground"
+                    class="pr-10 bg-white/95 text-slate-900 border-white/20 focus:ring-primary lg:bg-background lg:text-foreground"
                   />
                   <button
                     type="button"
@@ -183,14 +191,14 @@ onUnmounted(() => {
 
               <!-- Akun Demo Quick Fill -->
               <div id="demo-dropdown-container" class="grid gap-2 text-left relative">
-                <label class="text-sm font-medium leading-none text-emerald-200/90 lg:text-muted-foreground">
+                <label class="text-sm font-medium leading-none text-primary-foreground/90 lg:text-muted-foreground">
                   Uji Coba dengan Akun Demo
                 </label>
                 <div class="relative">
                   <button
                     type="button"
                     @click="toggleDemoDropdown"
-                    class="flex h-10 w-full items-center justify-between rounded-md border border-white/10 bg-white/95 text-slate-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50 lg:border-input lg:bg-background lg:text-foreground transition-all cursor-pointer shadow-sm"
+                    class="flex h-10 w-full items-center justify-between rounded-md border border-white/10 bg-white/95 text-slate-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50 lg:border-input lg:bg-background lg:text-foreground transition-all cursor-pointer shadow-sm"
                   >
                     <span class="truncate font-medium">{{ selectedDemoRole || '-- Pilih Akun Demo --' }}</span>
                     <span class="text-slate-500 pointer-events-none ml-2 text-xs">▼</span>
@@ -207,7 +215,7 @@ onUnmounted(() => {
                         v-for="acc in demoAccounts"
                         :key="acc.email"
                         @click="selectDemoAccount(acc)"
-                        class="flex w-full items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-900 font-semibold transition-colors text-left cursor-pointer border-b border-slate-100 last:border-0"
+                        class="flex w-full items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-primary/10 hover:text-primary font-semibold transition-colors text-left cursor-pointer border-b border-slate-100 last:border-0"
                       >
                         {{ acc.role }}
                       </button>
@@ -216,11 +224,11 @@ onUnmounted(() => {
                 </div>
               </div>
 
-              <p v-if="error" class="text-sm text-red-200 lg:text-destructive font-medium break-words">
+              <p v-if="error" class="text-sm text-destructive lg:text-destructive font-medium break-words bg-destructive/10 px-2 py-1 rounded">
                 {{ error }}
               </p>
 
-              <Button type="submit" class="w-full h-10 sm:h-11 text-sm sm:text-md font-semibold mt-2 bg-emerald-600 hover:bg-emerald-500 text-white lg:bg-primary lg:hover:bg-primary/95 lg:text-primary-foreground" :disabled="isLoading">
+              <Button type="submit" class="w-full h-10 sm:h-11 text-sm sm:text-md font-semibold mt-2 bg-primary hover:bg-primary/90 text-primary-foreground lg:bg-primary lg:hover:bg-primary/95 lg:text-primary-foreground" :disabled="isLoading">
                 {{ isLoading ? 'Memproses...' : 'Masuk Sekarang' }}
               </Button>
             </div>
@@ -229,7 +237,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Footer Copyright -->
-      <div class="text-center text-[10px] sm:text-xs text-emerald-100/60 lg:text-muted-foreground mt-auto px-4 z-10">
+      <div class="text-center text-[10px] sm:text-xs text-primary-foreground/70 lg:text-muted-foreground mt-auto px-4 z-10">
         &copy; {{ new Date().getFullYear() }} CerdasBangsa - Sistem Manajemen Sekolah Terintegrasi
       </div>
     </div>
@@ -242,9 +250,11 @@ onUnmounted(() => {
         alt="Suasana Sekolah Indonesia"
         class="absolute inset-0 h-full w-full object-cover"
       />
-      <div
-        class="absolute inset-0 bg-gradient-to-t from-emerald-950/90 via-emerald-900/40 to-transparent flex items-end p-8 xl:p-12"
-      >
+      <div class="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/70 to-transparent mix-blend-multiply"></div>
+      <!-- Additional normal gradient for text readability -->
+      <div class="absolute inset-0 bg-gradient-to-t from-primary/60 via-primary/20 to-transparent"></div>
+      
+      <div class="absolute inset-0 flex items-end p-8 xl:p-12 z-10">
         <div class="text-white max-w-lg min-w-0">
           <h2 class="text-3xl xl:text-4xl font-bold leading-tight drop-shadow-md">Membangun Masa Depan Melalui Teknologi</h2>
           <p class="mt-4 text-lg xl:text-xl text-white/90 drop-shadow-sm">

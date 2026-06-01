@@ -250,9 +250,11 @@ onUnmounted(() => {
         alt="Suasana Sekolah Indonesia"
         class="absolute inset-0 h-full w-full object-cover"
       />
-      <div
-        class="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/70 to-transparent flex items-end p-8 xl:p-12 mix-blend-multiply"
-      >
+      <div class="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/70 to-transparent mix-blend-multiply"></div>
+      <!-- Additional normal gradient for text readability -->
+      <div class="absolute inset-0 bg-gradient-to-t from-primary/60 via-primary/20 to-transparent"></div>
+      
+      <div class="absolute inset-0 flex items-end p-8 xl:p-12 z-10">
         <div class="text-white max-w-lg min-w-0">
           <h2 class="text-3xl xl:text-4xl font-bold leading-tight drop-shadow-md">Membangun Masa Depan Melalui Teknologi</h2>
           <p class="mt-4 text-lg xl:text-xl text-white/90 drop-shadow-sm">

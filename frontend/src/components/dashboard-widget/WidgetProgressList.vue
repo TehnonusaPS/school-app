@@ -1,0 +1,42 @@
+<script setup>
+import { Progress } from '@/components/ui/progress'
+import WidgetCard from './WidgetCard.vue'
+
+const props = defineProps({
+  title: { type: String, required: true },
+  description: { type: String, default: '' },
+  icon: { type: [Object, Function], required: false },
+  items: { type: Array, required: true },
+  cardClass: { type: String, default: '' },
+  contentClass: { type: String, default: 'space-y-4' }
+})
+</script>
+
+<template>
+  <WidgetCard
+    :title="title"
+    :description="description"
+    :icon="icon"
+    :cardClass="cardClass"
+    :contentClass="contentClass"
+  >
+    <div v-for="item in items" :key="item.label || item.id" class="space-y-1.5">
+      <div class="flex items-center justify-between text-sm">
+        <span class="font-medium">{{ item.label }}</span>
+        <span class="text-muted-foreground text-xs">
+          <slot name="value" :item="item">
+            {{ item.value }} &bull; {{ item.progress }}%
+          </slot>
+        </span>
+      </div>
+      <Progress :model-value="item.progress" class="h-2" :class="item.progressClass" />
+      <slot name="item-footer" :item="item" />
+    </div>
+    
+    <slot />
+    
+    <template v-if="$slots.footer" #footer>
+      <slot name="footer" />
+    </template>
+  </WidgetCard>
+</template>

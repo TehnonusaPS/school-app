@@ -26,23 +26,23 @@ const selectedMateri = ref('')
     <!-- Stats Cards -->
     <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
       <StatCard label="Nilai Asal-asalan" :value="formatNumber(siswaStatsData.nilaiAsal.total)"
-        :sub="siswaStatsData.nilaiAsal.subText" :trend="`${formatDelta(siswaStatsData.nilaiAsal.growthPercent)}%`"
+        sub="naik dari semester sebelumnya" :trend="`${formatDelta(siswaStatsData.nilaiAsal.growthPercent)}%`"
         :trendDirection="siswaStatsData.nilaiAsal.trendDirection" :icon="Book" variant="blue" />
 
       <StatCard label="Jumlah Tugas Terselesaikan" :value="formatNumber(siswaStatsData.tugas.total)"
-        :sub="siswaStatsData.tugas.subText" :trend="`${formatDelta(siswaStatsData.tugas.growthPercent)}%`"
+        sub="turun dari semester sebelumnya" :trend="`${formatDelta(siswaStatsData.tugas.growthPercent)}%`"
         :trendDirection="siswaStatsData.tugas.trendDirection" :icon="Book" variant="violet" />
 
       <StatCard label="Nilai Ujian Matematika" :value="formatNumber(siswaStatsData.nilaiMtk.total)"
-        :sub="siswaStatsData.nilaiMtk.subText" :trend="`${formatDelta(siswaStatsData.nilaiMtk.growthPercent)}%`"
+        sub="naik dari semester sebelumnya" :trend="`${formatDelta(siswaStatsData.nilaiMtk.growthPercent)}%`"
         :trendDirection="siswaStatsData.nilaiMtk.trendDirection" :icon="Book" variant="emerald" />
 
       <StatCard label="Jumlah Ujian Terselesaikan" :value="formatNumber(siswaStatsData.ujian.total)"
-        :sub="siswaStatsData.ujian.subText" :trend="`${formatDelta(siswaStatsData.ujian.growthPercent)}%`"
+        sub="turun dari semester sebelumnya" :trend="`${formatDelta(siswaStatsData.ujian.growthPercent)}%`"
         :trendDirection="siswaStatsData.ujian.trendDirection" :icon="Book" variant="amber" />
 
       <StatCard label="Jumlah Kuis Terselesaikan" :value="formatNumber(siswaStatsData.kuis.total)"
-        :sub="siswaStatsData.kuis.subText" :trend="`${formatDelta(siswaStatsData.kuis.growthPercent)}%`"
+        sub="turun dari semester sebelumnya" :trend="`${formatDelta(siswaStatsData.kuis.growthPercent)}%`"
         :trendDirection="siswaStatsData.kuis.trendDirection" :icon="Book" variant="primary" />
     </div>
 

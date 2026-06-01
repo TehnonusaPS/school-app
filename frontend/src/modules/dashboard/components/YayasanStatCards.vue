@@ -1,62 +1,22 @@
 <script setup lang="ts">
-import { School, Users, Wallet, TrendingUp } from 'lucide-vue-next'
+import { School, Users, Wallet } from 'lucide-vue-next'
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-
-const stats = [
-  {
-    label: 'Total Sekolah',
-    value: '10',
-    sub: 'di bawah yayasan',
-    trend: '+1 semester ini',
-    icon: School,
-    color: 'text-violet-500',
-    bg: 'bg-violet-500/10'
-  },
-  {
-    label: 'Total Guru & Staff',
-    value: '102',
-    sub: 'tenaga pendidik aktif',
-    trend: '+8 bulan ini',
-    icon: Users,
-    color: 'text-blue-500',
-    bg: 'bg-blue-500/10'
-  }
-]
-
-const anggaran = {
-  total: 'Rp 1,2M',
-  realisasi: 78.5
-}
+import StatCard from '@/components/stat-card/StatCard.vue'
+import { formatNumber, formatDelta } from '@/utils/formatNumber'
+import { yayasanStatsData } from '../data/yayasanStats'
 </script>
 
 <template>
   <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
     <!-- Stat Cards biasa -->
-    <Card
-      v-for="(stat, i) in stats"
-      :key="i"
-      class="transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
-    >
-      <CardHeader class="pb-2">
-        <div class="flex items-center justify-between">
-          <CardDescription class="text-sm font-medium">{{ stat.label }}</CardDescription>
-          <div :class="['rounded-lg p-2', stat.bg]">
-            <component :is="stat.icon" :class="['size-4', stat.color]" />
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div class="text-3xl font-bold tracking-tight">{{ stat.value }}</div>
-        <div class="mt-1 flex items-center gap-1.5">
-          <span class="flex items-center gap-0.5 text-xs font-semibold text-emerald-500">
-            <TrendingUp class="size-3" />
-            {{ stat.trend }}
-          </span>
-          <span class="text-xs text-muted-foreground">{{ stat.sub }}</span>
-        </div>
-      </CardContent>
-    </Card>
+    <StatCard label="Total Sekolah" :value="formatNumber(yayasanStatsData.sekolah.total)"
+      sub="di bawah yayasan" :trend="`${formatDelta(yayasanStatsData.sekolah.growth)} semester ini`"
+      :trendDirection="yayasanStatsData.sekolah.trendDirection" :icon="School" variant="violet" />
+
+    <StatCard label="Total Guru & Staff" :value="formatNumber(yayasanStatsData.guru.total)"
+      sub="tenaga pendidik aktif" :trend="`${formatDelta(yayasanStatsData.guru.growth)} bulan ini`"
+      :trendDirection="yayasanStatsData.guru.trendDirection" :icon="Users" variant="blue" />
 
     <!-- Card Total Anggaran dengan Progress -->
     <Card class="transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
@@ -69,13 +29,13 @@ const anggaran = {
         </div>
       </CardHeader>
       <CardContent class="space-y-3">
-        <div class="text-3xl font-bold tracking-tight">{{ anggaran.total }}</div>
+        <div class="text-3xl font-bold tracking-tight">Rp {{ yayasanStatsData.anggaran.total }}M</div>
         <div class="space-y-1.5">
           <div class="flex items-center justify-between text-xs">
             <span class="text-muted-foreground">Realisasi</span>
-            <span class="font-semibold text-emerald-500">{{ anggaran.realisasi }}%</span>
+            <span class="font-semibold text-emerald-500">{{ yayasanStatsData.anggaran.realisasi }}%</span>
           </div>
-          <Progress :model-value="anggaran.realisasi" class="h-2" />
+          <Progress :model-value="yayasanStatsData.anggaran.realisasi" class="h-2" />
         </div>
       </CardContent>
     </Card>

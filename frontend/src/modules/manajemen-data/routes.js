@@ -11,7 +11,7 @@ export default [
   },
   {
     path: 'manajemen-data/siswa/tambah',
-    component: () => import('./pages/TambahSiswa.vue'),
+    component: () => import('./pages/create/TambahSiswa.vue'),
     meta: {
       title: 'Tambah Siswa',
       parent: 'Data Siswa'
@@ -57,9 +57,17 @@ export default [
     path: 'manajemen-data/yayasan',
     component: () => import('./pages/Yayasan.vue'),
     meta: {
-      title: 'Kelola Data Yayasan',
+      title: 'Yayasan',
       parent: 'Manajemen Data',
       description: 'Daftar dan kelola informasi yayasan pendidikan terdaftar.'
+    }
+  },
+    {
+    path: 'manajemen-data/yayasan/tambah',
+    component: () => import('./pages/create/TambahYayasan.vue'),
+    meta: {
+      title: 'Tambah Yayasan',
+      parent: 'Yayasan'
     }
   },
   {

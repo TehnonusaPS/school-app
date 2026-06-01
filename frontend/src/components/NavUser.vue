@@ -6,6 +6,7 @@ import {
   LogOut,
   Sun,
   Moon,
+  Monitor,
   Palette,
   Layers
 } from 'lucide-vue-next'
@@ -59,21 +60,29 @@ const confirmLogout = () => {
   router.push('/')
 }
 
-// --- Theme Logic ---
-const isDark = ref(false)
-// Nama tema: 'blue' | 'emerald' | 'indigo' | 'bronze' | 'navy' | 'zinc'
-const activeThemeStyle = ref('blue')
+// --- Color Mode Logic (System/Light/Dark) ---
+const colorMode = ref('system')
 
-const toggleTheme = () => {
-  isDark.value = !isDark.value
-  if (isDark.value) {
+const applyColorMode = (mode) => {
+  if (mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
     document.documentElement.classList.add('dark')
-    localStorage.setItem('theme', 'dark')
   } else {
     document.documentElement.classList.remove('dark')
-    localStorage.setItem('theme', 'light')
   }
 }
+
+const cycleColorMode = () => {
+  const modes = ['system', 'light', 'dark']
+  const nextMode = modes[(modes.indexOf(colorMode.value) + 1) % modes.length]
+  colorMode.value = nextMode
+  localStorage.setItem('theme', nextMode)
+  applyColorMode(nextMode)
+}
+
+const colorModeNames = { system: 'Sistem', light: 'Terang', dark: 'Gelap' }
+
+// Nama tema: 'blue' | 'emerald' | 'indigo' | 'bronze' | 'navy' | 'zinc'
+const activeThemeStyle = ref('blue')
 
 /** Hapus semua class theme-* dari body */
 const clearThemeClasses = () => {
@@ -137,14 +146,10 @@ const backgroundNames = {
 }
 
 onMounted(() => {
-  const savedTheme = localStorage.getItem('theme')
-  if (
-    savedTheme === 'dark' ||
-    (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)
-  ) {
-    isDark.value = true
-    document.documentElement.classList.add('dark')
-  }
+  // Restore Color Mode (Terang/Gelap/Sistem)
+  const savedTheme = localStorage.getItem('theme') || 'system'
+  colorMode.value = savedTheme
+  applyColorMode(savedTheme)
 
   // Restore theme style (support legacy 'tahoe' → map ke 'blue')
   const savedThemeStyle = localStorage.getItem('themeStyle') || 'blue'
@@ -207,11 +212,17 @@ onMounted(() => {
               >Tampilan &amp; Tema</DropdownMenuLabel
             >
 
-            <!-- Dark / Light Mode Toggle -->
-            <DropdownMenuItem @select.prevent="toggleTheme" class="cursor-pointer">
-              <Sun v-if="isDark" class="size-4" />
+            <!-- Color Mode Cycle -->
+            <DropdownMenuItem @select.prevent="cycleColorMode" class="cursor-pointer">
+              <Monitor v-if="colorMode === 'system'" class="size-4" />
+              <Sun v-else-if="colorMode === 'light'" class="size-4" />
               <Moon v-else class="size-4" />
-              {{ isDark ? 'Beralih Mode Terang' : 'Beralih Mode Gelap' }}
+              <div class="truncate">
+                Mode:
+                <span class="font-semibold text-primary ml-1">{{
+                  colorModeNames[colorMode]
+                }}</span>
+              </div>
             </DropdownMenuItem>
 
             <!-- Color Theme Cycle -->

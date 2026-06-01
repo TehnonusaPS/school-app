@@ -1,0 +1,17 @@
+export const absensiData = [
+  { nama: 'Ahmad Fauzi',       kelas: 'X MIPA 1',   jam: '07:15', status: 'Hadir' },
+  { nama: 'Siti Rahayu',       kelas: 'XI IPS 2',   jam: '07:42', status: 'Terlambat' },
+  { nama: 'Budi Santoso',      kelas: 'X MIPA 1',   jam: '07:10', status: 'Hadir' },
+  { nama: 'Dewi Lestari',      kelas: 'XII IPA 3',  jam: '07:08', status: 'Hadir' },
+  { nama: 'Mukhlis Abidin',    kelas: 'XI MIPA 2',  jam: '—',     status: 'Alpa' },
+  { nama: 'Nur Fadilah',       kelas: 'X IPS 1',    jam: '07:20', status: 'Hadir' },
+  { nama: 'Agus Prasetyo',     kelas: 'XII IPS 1',  jam: '07:05', status: 'Izin' },
+  { nama: 'Ratna Sari',        kelas: 'XI IPA 1',   jam: '07:12', status: 'Hadir' },
+  { nama: 'Hendra Wijaya',     kelas: 'X MIPA 3',   jam: '07:51', status: 'Terlambat' },
+  { nama: 'Aisyah Putri',      kelas: 'XII IPA 1',  jam: '07:09', status: 'Hadir' },
+  { nama: 'Doni Prasetya',     kelas: 'X IPS 2',    jam: '07:18', status: 'Hadir' },
+  { nama: 'Lina Marlina',      kelas: 'XI MIPA 1',  jam: '—',     status: 'Alpa' },
+  { nama: 'Fajar Nugraha',     kelas: 'XII IPS 2',  jam: '07:25', status: 'Hadir' },
+  { nama: 'Yuni Astuti',       kelas: 'X MIPA 2',   jam: '07:07', status: 'Hadir' },
+  { nama: 'Rizky Ramadhan',    kelas: 'XI IPS 1',   jam: '07:38', status: 'Terlambat' },
+]

@@ -1,0 +1,39 @@
+<script setup>
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card'
+
+defineProps({
+  title: String,
+  description: String,
+  icon: Object
+})
+</script>
+
+<template>
+  <Card class="shadow-sm">
+    <CardHeader class="pb-4">
+      <div
+        v-if="icon || title"
+        class="flex items-center gap-2 text-primary font-semibold"
+      >
+        <component
+          :is="icon"
+          v-if="icon"
+          class="h-5 w-5"
+        />
+        <CardTitle>{{ title }}</CardTitle>
+      </div>
+
+      <CardDescription v-if="description">
+        {{ description }}
+      </CardDescription>
+    </CardHeader>
+
+    <CardContent class="space-y-4"><slot /></CardContent>
+  </Card>
+</template>

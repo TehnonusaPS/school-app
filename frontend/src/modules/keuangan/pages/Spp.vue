@@ -655,7 +655,7 @@ const gotoPenerimaPembayaran = () => {
             <div class="bg-primary text-primary-foreground rounded-lg w-10 h-10 flex items-center justify-center mb-3">
               <CreditCard class="size-5" />
             </div>
-            <h3 class="font-semibold text-sm">Terima Pembayaran SPPPP</h3>
+            <h3 class="font-semibold text-sm">Terima Pembayaran SPP</h3>
             <p class="text-xs text-muted-foreground mt-2">Catat pembayaran SPP siswa secara instan.</p>
           </Card>
 

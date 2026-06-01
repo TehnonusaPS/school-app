@@ -23,8 +23,14 @@ onMounted(() => {
     }
   })
 
-  // Pastikan class theme-emerald ada di body agar ambient gradients dan styles menyala indah
-  document.body.classList.add('theme-emerald')
+  // Gunakan tema yang tersimpan di localStorage (default biru)
+  const savedThemeStyle = localStorage.getItem('themeStyle') || 'blue'
+  const mappedStyle = savedThemeStyle === 'tahoe' ? 'blue' : savedThemeStyle
+  document.body.classList.add(`theme-${mappedStyle}`)
+
+  // Terapkan juga background style yang tersimpan
+  const savedBgStyle = localStorage.getItem('backgroundStyle') || 'animated'
+  document.body.classList.add(`bg-${savedBgStyle}`)
 })
 </script>
 

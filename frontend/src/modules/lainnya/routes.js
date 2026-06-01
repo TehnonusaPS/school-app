@@ -38,6 +38,24 @@ export default [
     }
   },
   {
+    path: 'lainnya/ruangan/tambah',
+    component: () => import('./pages/AddRuangan.vue'),
+    meta:{
+      title: 'Tambah Ruangan',
+      parent: 'Lainnya',
+      description: 'Form untuk menambahkan data ruangan baru.'
+    }
+  },
+  {
+    path: 'lainnya/ruangan/edit/:id',
+    component: () => import('./pages/EditRuangan.vue'),
+    meta:{
+      title: 'Edit Ruangan',
+      parent: 'Lainnya',
+      description: 'Form untuk mengedit data ruangan.'
+    }
+  },
+  {
     path: 'lainnya/aset',
     component: () => import('./pages/Aset.vue'),
     meta:{
@@ -47,12 +65,48 @@ export default [
     }
   },
   {
+    path: 'lainnya/aset/tambah',
+    component: () => import('./pages/AddAset.vue'),
+    meta:{
+      title: 'Tambah Aset',
+      parent: 'Lainnya',
+      description: 'Form untuk menambahkan data aset baru.'
+    }
+  },
+  {
+    path: 'lainnya/aset/edit/:id',
+    component: () => import('./pages/EditAset.vue'),
+    meta:{
+      title: 'Edit Aset',
+      parent: 'Lainnya',
+      description: 'Form untuk mengedit data aset.'
+    }
+  },
+  {
     path: 'lainnya/perpustakaan',
     component: () => import('./pages/Perpustakaan.vue'),
     meta:{
       title: 'Manajemen Perpustakaan',
       parent: 'Lainnya',
-      description: 'Pengelolaan data perpustakaan sekolah.'
+      description: 'Pengelolaan data buku di perpustakaan sekolah.'
+    }
+  },
+  {
+    path: 'lainnya/perpustakaan/tambah',
+    component: () => import('./pages/AddPerpustakaan.vue'),
+    meta:{
+      title: 'Tambah Buku Perpustakaan',
+      parent: 'Lainnya',
+      description: 'Form untuk menambahkan data buku baru.'
+    }
+  },
+  {
+    path: 'lainnya/perpustakaan/edit/:id',
+    component: () => import('./pages/EditPerpustakaan.vue'),
+    meta:{
+      title: 'Edit Buku',
+      parent: 'Lainnya',
+      description: 'Form untuk mengedit data buku.'
     }
   },
   {

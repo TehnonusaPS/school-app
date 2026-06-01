@@ -65,25 +65,25 @@ const router = createRouter({
 })
 
 /* 🔥 INI DIA PROTEKSI ROLE */
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, from) => {
   const auth = useAuthStore()
 
   // ❌ belum login
   if (to.meta.requiresAuth && !auth.user) {
-    return next('/login')
+    return '/login'
   }
 
   // ❌ role tidak sesuai
   if (to.meta.role && auth.user?.role !== to.meta.role) {
-    return next('/login')
+    return '/login'
   }
 
   // ❌ role tidak termasuk daftar yang diizinkan
   if (to.meta.roles && !to.meta.roles.includes(auth.user?.role)) {
-    return next('/login')
+    return '/login'
   }
-
-  next()
+  
+  // Vue Router 4+: Tidak me-return apapun (atau return true) akan otomatis melanjutkan rute
 })
 
 export default router

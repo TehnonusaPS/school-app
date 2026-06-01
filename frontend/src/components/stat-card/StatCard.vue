@@ -12,10 +12,24 @@ const props = defineProps({
     default: 'up',
     validator: (v) => ['up', 'down', 'neutral'].includes(v)
   },
-  icon: { type: [Object, Function], required: true },
-  color: { type: String, default: 'text-primary' },
-  bg: { type: String, default: 'bg-primary/10' }
+  icon: { type: [Object, Function], required: false },
+  variant: {
+    type: String,
+    default: 'primary',
+    // e.g., 'blue', 'violet', 'emerald', 'amber', 'primary'
+  }
 })
+
+function getVariantClasses(variant) {
+  const variants = {
+    blue: { color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    violet: { color: 'text-violet-500', bg: 'bg-violet-500/10' },
+    emerald: { color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    amber: { color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    primary: { color: 'text-primary', bg: 'bg-primary/10' },
+  }
+  return variants[variant] || variants.primary
+}
 
 function getTrendConfig(direction) {
   switch (direction) {
@@ -39,14 +53,14 @@ function getTrendConfig(direction) {
     <component 
       v-if="icon"
       :is="icon" 
-      :class="['absolute -right-4 -bottom-4 size-24 opacity-[0.04] rotate-12 transition-transform duration-300 group-hover:scale-110', color]" 
+      :class="['absolute -right-4 -bottom-4 size-24 opacity-[0.04] rotate-12 transition-transform duration-300 group-hover:scale-110', getVariantClasses(variant).color]" 
     />
 
     <CardHeader class="pb-2 relative z-10">
       <div class="flex items-center justify-between">
         <CardDescription class="text-sm font-medium">{{ label }}</CardDescription>
-        <div :class="['rounded-xl p-2.5 backdrop-blur-md shadow-lg border border-white/10 transition-colors', bg]">
-          <component :is="icon" :class="['size-4 drop-shadow-md', color]" />
+        <div :class="['rounded-xl p-2.5 backdrop-blur-md shadow-lg border border-white/10 transition-colors', getVariantClasses(variant).bg]">
+          <component v-if="icon" :is="icon" :class="['size-4 drop-shadow-md', getVariantClasses(variant).color]" />
         </div>
       </div>
     </CardHeader>

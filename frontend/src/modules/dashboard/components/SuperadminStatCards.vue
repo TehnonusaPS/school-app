@@ -1,64 +1,26 @@
 <script setup lang="ts">
 import { Building2, GraduationCap, School, Users } from 'lucide-vue-next'
-import StatCard from '@/components/stats-card/StatCard.vue'
-
-const stats = [
-  {
-    label: 'Total Yayasan',
-    value: '120',
-    sub: '+5 bulan ini',
-    trend: '+4.3%',
-    trendDirection: 'up',
-    icon: Building2,
-    color: 'text-blue-500',
-    bg: 'bg-blue-500/10'
-  },
-  {
-    label: 'Total Sekolah',
-    value: '270',
-    sub: '+12 bulan ini',
-    trend: '+4.6%',
-    trendDirection: 'up',
-    icon: School,
-    color: 'text-violet-500',
-    bg: 'bg-violet-500/10'
-  },
-  {
-    label: 'Total Guru',
-    value: '2.930',
-    sub: '+48 bulan ini',
-    trend: '+1.7%',
-    trendDirection: 'up',
-    icon: GraduationCap,
-    color: 'text-emerald-500',
-    bg: 'bg-emerald-500/10'
-  },
-  {
-    label: 'Total Siswa',
-    value: '1.239K',
-    sub: '+320 bulan ini',
-    trend: '+2.1%',
-    trendDirection: 'up',
-    icon: Users,
-    color: 'text-amber-500',
-    bg: 'bg-amber-500/10'
-  }
-]
+import StatCard from '@/components/stat-card/StatCard.vue'
+import { formatNumber, formatDelta } from '@/utils/formatNumber'
+import { superadminStatsData } from '../data/superadminStats'
 </script>
 
 <template>
   <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-    <StatCard
-      v-for="(stat, i) in stats"
-      :key="i"
-      :label="stat.label"
-      :value="stat.value"
-      :sub="stat.sub"
-      :trend="stat.trend"
-      :trendDirection="stat.trendDirection"
-      :icon="stat.icon"
-      :color="stat.color"
-      :bg="stat.bg"
-    />
+    <StatCard label="Total Yayasan" :value="formatNumber(superadminStatsData.yayasan.total)"
+      :sub="`${formatDelta(superadminStatsData.yayasan.newThisMonth)} bulan ini`" :trend="`${formatDelta(superadminStatsData.yayasan.growthPercent)}%`"
+      :trendDirection="superadminStatsData.yayasan.trendDirection" :icon="Building2" variant="blue" />
+
+    <StatCard label="Total Sekolah" :value="formatNumber(superadminStatsData.sekolah.total)"
+      :sub="`${formatDelta(superadminStatsData.sekolah.newThisMonth)} bulan ini`" :trend="`${formatDelta(superadminStatsData.sekolah.growthPercent)}%`"
+      :trendDirection="superadminStatsData.sekolah.trendDirection" :icon="School" variant="violet" />
+
+    <StatCard label="Total Guru" :value="formatNumber(superadminStatsData.guru.total)"
+      :sub="`${formatDelta(superadminStatsData.guru.newThisMonth)} bulan ini`" :trend="`${formatDelta(superadminStatsData.guru.growthPercent)}%`"
+      :trendDirection="superadminStatsData.guru.trendDirection" :icon="GraduationCap" variant="emerald" />
+
+    <StatCard label="Total Siswa" :value="formatNumber(superadminStatsData.siswa.total)"
+      :sub="`${formatDelta(superadminStatsData.siswa.newThisMonth)} bulan ini`" :trend="`${formatDelta(superadminStatsData.siswa.growthPercent)}%`"
+      :trendDirection="superadminStatsData.siswa.trendDirection" :icon="Users" variant="amber" />
   </div>
 </template>

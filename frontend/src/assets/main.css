@@ -181,8 +181,8 @@
   [data-slot='sidebar-inner'],
   [data-slot='sidebar'][data-mobile='true'] {
     background: color-mix(in oklch, var(--sidebar) 65%, transparent) !important;
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
     border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
   }
 
@@ -310,9 +310,9 @@
   .glass-mini {
     position: relative;
     z-index: 1;
-    background: rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.18) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    backdrop-filter: blur(20px) !important;
     border: 1px solid rgba(255, 255, 255, 0.25) !important;
     border-top: 1.5px solid rgba(255, 255, 255, 0.6) !important;
     border-left: 1.5px solid rgba(255, 255, 255, 0.4) !important;
@@ -323,7 +323,7 @@
   }
 
   .dark .glass-mini {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     border-top: 1.5px solid rgba(255, 255, 255, 0.18) !important;
     border-left: 1.5px solid rgba(255, 255, 255, 0.12) !important;
@@ -337,9 +337,9 @@
     position: relative;
     overflow: hidden;
     z-index: 10;
-    background: rgba(255, 255, 255, 0.12);
-    -webkit-backdrop-filter: blur(30px) saturate(180%);
-    backdrop-filter: blur(30px) saturate(180%);
+    background: rgba(255, 255, 255, 0.12) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
+    backdrop-filter: blur(30px) saturate(180%) !important;
     border: none !important;
     border-bottom: 1.5px solid rgba(255, 255, 255, 0.3) !important;
     box-shadow:
@@ -349,7 +349,7 @@
   }
 
   .dark .glass-header {
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.2) !important;
     border-bottom: 1.5px solid rgba(255, 255, 255, 0.1) !important;
     box-shadow:
       0 10px 30px -10px rgba(0, 0, 0, 0.3),
@@ -361,8 +361,8 @@
   .glass-btn {
     position: relative;
     overflow: hidden;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px) !important;
+    backdrop-filter: blur(12px) !important;
     box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.1) !important;
     border: none !important;
   }
@@ -434,8 +434,8 @@
   [data-slot="command"],
   [data-slot="tabs-list"] {
     background: color-mix(in oklch, var(--popover) 70%, transparent) !important;
-    backdrop-filter: blur(24px) saturate(200%);
-    -webkit-backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
+    backdrop-filter: blur(24px) saturate(200%) !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
   }
@@ -483,8 +483,8 @@
   [data-slot="sheet-content"],
   [data-slot="drawer-content"] {
     background: color-mix(in oklch, var(--card) 60%, transparent) !important;
-    backdrop-filter: blur(32px) saturate(200%);
-    -webkit-backdrop-filter: blur(32px) saturate(200%);
+    -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
+    backdrop-filter: blur(32px) saturate(200%) !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2) !important;
   }
@@ -501,8 +501,8 @@
     color: var(--primary-foreground) !important;
     border: none !important;
     /* backdrop-filter langsung di elemen agar production-safe */
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px) !important;
+    backdrop-filter: blur(16px) !important;
     box-shadow: 0 4px 16px -4px color-mix(in oklch, var(--primary) 50%, transparent) !important;
   }
 
@@ -619,8 +619,8 @@
   /* 1. Base Glass: Blur + Soft Shadow + Subtly Light Border */
   /* Dirancang untuk digabung dengan background semi-transparan Tailwind (misal: bg-primary/20) */
   .glass-ui {
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px) !important;
+    backdrop-filter: blur(14px) !important;
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
   }

@@ -1,6 +1,7 @@
 <script setup>
 import { TrendingUp, TrendingDown, Minus } from 'lucide-vue-next'
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 
 const props = defineProps({
   label: { type: String, required: true },
@@ -13,6 +14,7 @@ const props = defineProps({
     validator: (v) => ['up', 'down', 'neutral'].includes(v)
   },
   icon: { type: [Object, Function], required: false },
+  progress: { type: Number, required: false },
   variant: {
     type: String,
     default: 'primary',
@@ -67,7 +69,18 @@ function getTrendConfig(direction) {
     
     <CardContent class="relative z-10">
       <div class="text-3xl font-bold tracking-tight drop-shadow-sm">{{ value }}</div>
-      <div v-if="trend || sub" class="mt-1 flex items-center gap-1.5">
+      
+      <!-- Variant Progress -->
+      <div v-if="progress !== undefined" class="space-y-1.5 mt-3 w-full">
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-muted-foreground">{{ sub || 'Realisasi' }}</span>
+          <span :class="['font-semibold', getVariantClasses(variant).color]">{{ progress }}%</span>
+        </div>
+        <Progress :model-value="progress" class="h-2" />
+      </div>
+
+      <!-- Variant Trend Default -->
+      <div v-else-if="trend || sub" class="mt-1 flex items-center gap-1.5">
         <span 
           v-if="trend"
           :class="[

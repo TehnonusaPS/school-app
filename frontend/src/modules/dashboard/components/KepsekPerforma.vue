@@ -11,6 +11,10 @@ const rataColor = (val: number) => {
 }
 
 const kehadiranVariant = (val: number) => val < 80 ? 'destructive' : val < 90 ? 'secondary' : 'outline'
+
+const props = defineProps({
+  delay: { type: Number, default: 0 }
+})
 </script>
 
 <template>
@@ -18,6 +22,7 @@ const kehadiranVariant = (val: number) => val < 80 ? 'destructive' : val < 90 ? 
     title="Kelas dengan Performa Menurun"
     description="Kelas dengan rata-rata nilai terendah semester ini"
     contentClass="p-0"
+    :delay="delay"
   >
     <template #header-action>
       <TrendingDown class="size-4 text-rose-500" />

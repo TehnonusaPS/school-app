@@ -9,6 +9,10 @@ const typeColor: Record<string, string> = {
   evaluasi: 'bg-amber-500',
   upacara:  'bg-emerald-500'
 }
+
+const props = defineProps({
+  delay: { type: Number, default: 0 }
+})
 </script>
 
 <template>
@@ -20,6 +24,7 @@ const typeColor: Record<string, string> = {
     :items="agendaData"
     cardClass="lg:col-span-2"
     listClass="h-[320px] px-4"
+    :delay="delay"
   >
     <template #item="{ item }">
       <!-- Tanggal box -->

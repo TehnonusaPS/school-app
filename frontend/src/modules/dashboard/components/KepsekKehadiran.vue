@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import WidgetProgressList from '@/components/dashboard-widget/WidgetProgressList.vue'
 import { kehadiranProgressData, kehadiranQuickStats } from '../data/kepsekKehadiranData'
+
+const props = defineProps({
+  delay: { type: Number, default: 0 }
+})
 </script>
 
 <template>
@@ -10,6 +14,7 @@ import { kehadiranProgressData, kehadiranQuickStats } from '../data/kepsekKehadi
     cardClass="lg:col-span-3"
     contentClass="space-y-5"
     :items="kehadiranProgressData"
+    :delay="delay"
   >
     <template #value="{ item }">
       <span class="text-sm font-bold tabular-nums text-foreground">{{ item.value }}</span>

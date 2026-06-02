@@ -50,10 +50,10 @@ const auth = useAuthStore()
   <div v-else-if="auth.user?.role === 'kepala_sekolah'" class="space-y-6">
     <KepsekStatCards />
     <div class="grid gap-4 lg:grid-cols-5">
-      <KepsekKehadiran />
-      <KepsekAgenda />
+      <KepsekKehadiran :delay="1000" />
+      <KepsekAgenda :delay="1100" />
     </div>
-    <KepsekPerforma />
+    <KepsekPerforma :delay="1200" />
   </div>
 
   <!-- ── Admin Sekolah & TU Dashboard ── -->

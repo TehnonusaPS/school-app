@@ -7,15 +7,15 @@ import { siswaStatsData } from '../data/siswaStats'
 
 <template>
   <div class="grid gap-4 sm:grid-cols-3">
-    <StatCard label="Hadir" :value="formatNumber(siswaStatsData.hadir.total)"
+    <StatCard :delay="200" label="Hadir" :value="formatNumber(siswaStatsData.hadir.total)"
       sub="hari kehadiran" :trendDirection="siswaStatsData.hadir.trendDirection" 
       :icon="UserCheck" variant="emerald" />
 
-    <StatCard label="Izin" :value="formatNumber(siswaStatsData.izin.total)"
+    <StatCard :delay="400" label="Izin" :value="formatNumber(siswaStatsData.izin.total)"
       sub="hari izin" :trendDirection="siswaStatsData.izin.trendDirection" 
       :icon="FileText" variant="amber" />
 
-    <StatCard label="Alpa" :value="siswaStatsData.alpa.total === 0 ? '—' : formatNumber(siswaStatsData.alpa.total)"
+    <StatCard :delay="600" label="Alpa" :value="siswaStatsData.alpa.total === 0 ? '—' : formatNumber(siswaStatsData.alpa.total)"
       sub="tidak hadir tanpa ket." :trendDirection="siswaStatsData.alpa.trendDirection" 
       :icon="UserX" variant="primary" />
   </div>

@@ -473,10 +473,20 @@ const data = {
           roles: ['superadmin']
         },
         {
-          title: 'Informasi Sekolah',
-          url: '/lainnya/informasi-sekolah',
+          title: 'Informasi Ruangan Sekolah',
+          url: '/lainnya/informasi-ruangan',
           roles: ['admin_yayasan', 'kepala_sekolah']
-        }
+        },
+        {
+          title: 'Informasi Aset Sekolah',
+          url: '/lainnya/informasi-aset',
+          roles: ['admin_yayasan', 'kepala_sekolah']
+        },
+        {
+          title: 'Informasi Perpustakaan Sekolah',
+          url: '/lainnya/informasi-perpustakaan',
+          roles: ['admin_yayasan', 'kepala_sekolah']
+        },        
       ]
     },
     {

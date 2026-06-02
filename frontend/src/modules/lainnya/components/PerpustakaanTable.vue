@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { Search, Plus, Edit, Trash2, Megaphone, FilterX, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-vue-next'
+import { Search, Plus, Edit, Trash2, Eye, Megaphone, FilterX, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, FileSpreadsheet, FileText } from 'lucide-vue-next'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -37,13 +37,22 @@ const props = defineProps({
   items: {
     type: Array,
     required: true
+  },
+  readonly: {
+    type: Boolean,
+    default: false
+  },
+  isYayasan: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['delete'])
+const emit = defineEmits(['delete', 'view', 'export-excel', 'export-pdf'])
 
 const searchQuery = ref('')
 const selectedCategory = ref('semua')
+const selectedSchool = ref('semua')
 const currentPage = ref(1)
 const itemsPerPage = 5
 
@@ -60,11 +69,17 @@ function editBuku(id) {
 function resetFilters() {
   searchQuery.value = ''
   selectedCategory.value = 'semua'
+  selectedSchool.value = 'semua'
   currentPage.value = 1
 }
 
-watch([searchQuery, selectedCategory], () => {
+watch([searchQuery, selectedCategory, selectedSchool], () => {
   currentPage.value = 1
+})
+
+const schoolList = computed(() => {
+  const schools = [...new Set(props.items.map(i => i.school_name).filter(Boolean))]
+  return schools.sort()
 })
 
 const filteredBooks = computed(() => {
@@ -77,8 +92,13 @@ const filteredBooks = computed(() => {
     if (selectedCategory.value && selectedCategory.value !== 'semua') {
       matchesCategory = book.kategori?.toLowerCase() === selectedCategory.value.toLowerCase()
     }
+
+    let matchesSchool = true
+    if (props.isYayasan && selectedSchool.value && selectedSchool.value !== 'semua') {
+      matchesSchool = book.school_name === selectedSchool.value
+    }
     
-    return matchesSearch && matchesCategory
+    return matchesSearch && matchesCategory && matchesSchool
   })
 })
 
@@ -94,7 +114,20 @@ const paginatedBooks = computed(() => {
     <div class="space-y-2">
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 bg-card border border-border/80 p-3 sm:p-4 rounded-2xl shadow-xs">
         
-        <div class="col-span-1 lg:col-span-3">
+        <!-- School filter (Yayasan only) -->
+        <div v-if="isYayasan" class="col-span-1 lg:col-span-2">
+          <Select v-model="selectedSchool">
+            <SelectTrigger class="!h-11 w-full bg-background rounded-xl border-border px-2.5 text-xs sm:text-sm">
+              <SelectValue placeholder="Pilih Sekolah" />
+            </SelectTrigger>
+            <SelectContent class="rounded-xl shadow-md border-border bg-card">
+              <SelectItem value="semua">Semua Sekolah</SelectItem>
+              <SelectItem v-for="school in schoolList" :key="school" :value="school">{{ school }}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div :class="['col-span-1', isYayasan ? 'lg:col-span-2' : 'lg:col-span-3']">
           <Select v-model="selectedCategory">
             <SelectTrigger class="!h-11 w-full bg-background rounded-xl border-border px-2.5 text-xs sm:text-sm">
               <SelectValue placeholder="Semua Kategori" />
@@ -109,7 +142,7 @@ const paginatedBooks = computed(() => {
           </Select>
         </div>
 
-        <div class="relative col-span-1 sm:col-span-2 lg:col-span-6">
+        <div :class="['relative col-span-1 sm:col-span-2', isYayasan ? 'lg:col-span-4' : 'lg:col-span-6']">
           <Search class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           <Input 
             v-model="searchQuery" 
@@ -118,7 +151,27 @@ const paginatedBooks = computed(() => {
           />
         </div>
 
-        <div class="col-span-1 lg:col-span-3 flex justify-end">
+        <!-- Export buttons (Yayasan and Kepala Sekolah) -->
+        <div v-if="isYayasan || readonly" :class="['col-span-1 sm:col-span-2 flex items-center gap-2 justify-end', isYayasan ? 'lg:col-span-4' : 'lg:col-span-3']">
+          <Button 
+            variant="outline" 
+            @click="emit('export-excel')"
+            class="h-11 px-3 font-semibold shadow-xs gap-1.5 rounded-xl text-xs border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+          >
+            <FileSpreadsheet class="size-4" />
+            Export Excel
+          </Button>
+          <Button 
+            variant="outline" 
+            @click="emit('export-pdf')"
+            class="h-11 px-3 font-semibold shadow-xs gap-1.5 rounded-xl text-xs border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
+          >
+            <FileText class="size-4" />
+            Export PDF
+          </Button>
+        </div>
+
+        <div v-if="!readonly && !isYayasan" class="col-span-1 lg:col-span-3 flex justify-end">
           <Button 
             size="lg" 
             @click="addBuku"
@@ -130,7 +183,7 @@ const paginatedBooks = computed(() => {
         </div>
       </div>
 
-      <div v-if="searchQuery || (selectedCategory && selectedCategory !== 'semua')" class="flex justify-end">
+      <div v-if="searchQuery || (selectedCategory && selectedCategory !== 'semua') || (isYayasan && selectedSchool && selectedSchool !== 'semua')" class="flex justify-end">
         <Button 
           variant="ghost" 
           size="sm" 
@@ -150,16 +203,18 @@ const paginatedBooks = computed(() => {
           <Table>
             <TableHeader class="bg-muted/40 border-b border-border/60">
               <TableRow>
+                <TableHead v-if="isYayasan" class="font-bold text-foreground py-4 px-4 text-xs uppercase tracking-wider">CABANG SEKOLAH</TableHead>
                 <TableHead class="font-bold text-foreground py-4 px-6 text-xs uppercase tracking-wider">JUDUL BUKU</TableHead>
                 <TableHead class="font-bold text-foreground py-4 px-4 text-xs uppercase tracking-wider">ISBN</TableHead>
                 <TableHead class="font-bold text-foreground py-4 px-4 text-xs uppercase tracking-wider w-[160px]">KATEGORI</TableHead>
                 <TableHead class="font-bold text-foreground py-4 px-4 text-xs uppercase tracking-wider text-center">STOK</TableHead>
                 <TableHead class="font-bold text-foreground py-4 px-4 text-xs uppercase tracking-wider text-center">LOKASI RAK</TableHead>
-                <TableHead class="font-bold text-foreground py-4 px-6 text-xs uppercase tracking-wider text-center w-[160px]">AKSI</TableHead>
+                <TableHead class="font-bold text-foreground py-4 px-6 text-xs uppercase tracking-wider text-center w-[120px]">AKSI</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               <TableRow v-for="book in paginatedBooks" :key="book.id" class="group transition-all border-b border-border/50">
+                <TableCell v-if="isYayasan" class="py-4 px-4 text-sm font-medium">{{ book.school_name }}</TableCell>
                 <TableCell class="py-4 px-6 font-bold text-foreground text-xs">{{ book.name }}</TableCell>
                 <TableCell class="py-4 px-4 text-sm font-medium">{{ book.isbn }}</TableCell>
                 <TableCell class="py-4 px-4 text-sm font-medium uppercase">{{ book.kategori }}</TableCell>
@@ -167,21 +222,29 @@ const paginatedBooks = computed(() => {
                 <TableCell class="py-4 px-4 text-sm text-muted-foreground text-center">{{ book.lokasiRak || '-' }}</TableCell>
                 <TableCell class="py-3 px-6 text-center">
                   <div class="flex items-center justify-center gap-5">
-                    <button @click="editBuku(book.id)" class="flex flex-col items-center justify-center gap-1 group/btn text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors focus:outline-none w-11">
-                      <Edit class="size-5 transition-transform group-hover/btn:scale-110" />
-                      <span class="text-[11px] font-bold tracking-wide">Edit</span>
-                    </button>
-                    <button @click="emit('delete', book.id)" class="flex flex-col items-center justify-center gap-1 group/btn text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-400 transition-colors focus:outline-none w-11">
-                      <Trash2 class="size-5 transition-transform group-hover/btn:scale-110" />
-                      <span class="text-[11px] font-bold tracking-wide">Hapus</span>
-                    </button>
+                    <template v-if="!readonly">
+                      <button @click="editBuku(book.id)" class="flex flex-col items-center justify-center gap-1 group/btn text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors focus:outline-none w-11">
+                        <Edit class="size-5 transition-transform group-hover/btn:scale-110" />
+                        <span class="text-[11px] font-bold tracking-wide">Edit</span>
+                      </button>
+                      <button @click="emit('delete', book.id)" class="flex flex-col items-center justify-center gap-1 group/btn text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-400 transition-colors focus:outline-none w-11">
+                        <Trash2 class="size-5 transition-transform group-hover/btn:scale-110" />
+                        <span class="text-[11px] font-bold tracking-wide">Hapus</span>
+                      </button>
+                    </template>
+                    <template v-else>
+                      <button @click="emit('view', book.id)" class="flex flex-col items-center justify-center gap-1 group/btn text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors focus:outline-none w-11">
+                        <Eye class="size-5 transition-transform group-hover/btn:scale-110" />
+                        <span class="text-[11px] font-bold tracking-wide">View</span>
+                      </button>
+                    </template>
                   </div>
                 </TableCell>
               </TableRow>
               
               <!-- Empty state row -->
               <TableRow v-if="filteredBooks.length === 0">
-                <TableCell colspan="6" class="py-16 text-center text-muted-foreground">
+                <TableCell :colspan="isYayasan ? 7 : 6" class="py-16 text-center text-muted-foreground">
                   <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
                     <Megaphone class="size-8 text-muted-foreground/60 animate-pulse" />
                     <p class="font-bold text-base text-foreground/80">Tidak Ada Data Buku</p>

@@ -32,12 +32,6 @@ const auth = useAuthStore()
 <template>
   <!-- ── Superadmin Dashboard ── -->
   <div v-if="auth.user?.role === 'superadmin'" class="space-y-6 relative">
-    
-    <!-- Decorative Mesh Gradient khusus di balik StatCards -->
-    <div class="absolute -top-10 left-10 w-full h-64 bg-gradient-to-br from-primary/30 via-ring/20 to-transparent blur-3xl opacity-50 rounded-full pointer-events-none -z-10"></div>
-    <div class="absolute -top-10 right-20 w-3/4 h-64 bg-gradient-to-bl from-chart-2/20 via-chart-1/20 to-transparent blur-3xl opacity-50 rounded-full pointer-events-none -z-10"></div>
-
-  
     <SuperadminStatCards />
     <div class="grid gap-4 lg:grid-cols-5">
       <SuperadminGrowthChart />
@@ -63,10 +57,7 @@ const auth = useAuthStore()
   </div>
 
   <!-- ── Admin Sekolah & TU Dashboard ── -->
-  <div
-    v-else-if="auth.user?.role === 'admin_sekolah' || auth.user?.role === 'tata_usaha'"
-    class="space-y-6"
-  >
+  <div v-else-if="auth.user?.role === 'admin_sekolah' || auth.user?.role === 'tata_usaha'" class="space-y-6">
     <AdminSekolahStatCards />
     <div class="grid gap-4 lg:grid-cols-5">
       <AdminSekolahAbsensi />
@@ -75,10 +66,7 @@ const auth = useAuthStore()
   </div>
 
   <!-- ── Guru & Wali Kelas Dashboard ── -->
-  <div
-    v-else-if="auth.user?.role === 'guru' || auth.user?.role === 'wali_kelas'"
-    class="space-y-6"
-  >
+  <div v-else-if="auth.user?.role === 'guru' || auth.user?.role === 'wali_kelas'" class="space-y-6">
     <GuruTopSection />
     <div class="grid gap-4 lg:grid-cols-5">
       <GuruJadwal />

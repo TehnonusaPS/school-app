@@ -2,6 +2,8 @@
 import { ChevronRight } from 'lucide-vue-next'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
+import { useAuthStore } from '@/stores/authStore'
+import { navItemSlide } from '@/config/motion'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import {
   HoverCard,
@@ -27,6 +29,8 @@ const props = defineProps({
 })
 
 const route = useRoute()
+const auth = useAuthStore()
+const getNavDelay = (index) => (auth.isJustLoggedIn ? 1200 : 200) + (index * 80)
 
 // Gunakan computed agar reaktifitasnya terjamin
 const currentPath = computed(() => route.path)
@@ -54,9 +58,14 @@ const isParentActive = items => {
   <SidebarGroup>
     <SidebarGroupLabel>Menu Utama</SidebarGroupLabel>
     <SidebarMenu class="gap-1.5 px-2 group-data-[collapsible=icon]:px-0">
-      <template v-for="item in items" :key="item.title">
+      <template v-for="(item, itemIndex) in items" :key="item.title">
         <!-- CASE 1: MENU DENGAN SUB-ITEMS -->
-        <SidebarMenuItem v-if="item.items && item.items.length > 0">
+        <SidebarMenuItem 
+          v-if="item.items && item.items.length > 0"
+          v-motion
+          :initial="navItemSlide.initial"
+          :enter="{ ...navItemSlide.enter, transition: { ...navItemSlide.enter.transition, delay: getNavDelay(itemIndex) } }"
+        >
           
           <!-- HOVERCARD UNTUK MODE COLLAPSED (ICON) -->
           <HoverCard :open-delay="100" :close-delay="100">
@@ -178,7 +187,11 @@ const isParentActive = items => {
         </SidebarMenuItem>
 
         <!-- CASE 2: MENU TUNGGAL (DASHBOARD) -->
-        <SidebarMenuItem>
+        <SidebarMenuItem
+          v-motion
+          :initial="navItemSlide.initial"
+          :enter="{ ...navItemSlide.enter, transition: { ...navItemSlide.enter.transition, delay: getNavDelay(itemIndex) } }"
+        >
           <SidebarMenuButton
             v-if="!item.items || item.items.length === 0"
             as-child

@@ -34,8 +34,8 @@ const auth = useAuthStore()
   <div v-if="auth.user?.role === 'superadmin'" class="space-y-6 relative">
     <SuperadminStatCards />
     <div class="grid gap-4 lg:grid-cols-5">
-      <SuperadminGrowthChart />
-      <SuperadminActivityLog />
+      <SuperadminGrowthChart :delay="900" />
+      <SuperadminActivityLog :delay="1000" />
     </div>
   </div>
 

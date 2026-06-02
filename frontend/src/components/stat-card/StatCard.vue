@@ -2,6 +2,8 @@
 import { TrendingUp, TrendingDown, Minus } from 'lucide-vue-next'
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { glassSlide } from '@/config/motion'
+import RollingNumber from '@/components/ui/rolling-number/RollingNumber.vue'
 
 const props = defineProps({
   label: { type: String, required: true },
@@ -19,8 +21,14 @@ const props = defineProps({
     type: String,
     default: 'primary',
     // e.g., 'blue', 'violet', 'emerald', 'amber', 'primary'
-  }
+  },
+  delay: { type: Number, default: 0 }
 })
+
+import { computed } from 'vue'
+import { useAuthStore } from '@/stores/authStore'
+const auth = useAuthStore()
+const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.delay)
 
 function getVariantClasses(variant) {
   const variants = {
@@ -48,8 +56,10 @@ function getTrendConfig(direction) {
 
 <template>
   <Card
+    v-motion
+    :initial="{ opacity: 0, y: 30, scale: 0.95 }"
+    :visible="{ opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 200, damping: 20, mass: 0.8, delay: computedDelay } }"
     class="relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-white/40 group glass-ui"
-    style="contain: paint layout;"
   >
     <!-- Watermark Icon Background -->
     <component 
@@ -68,7 +78,9 @@ function getTrendConfig(direction) {
     </CardHeader>
     
     <CardContent class="relative z-10">
-      <div class="text-3xl font-bold tracking-tight drop-shadow-sm">{{ value }}</div>
+      <div class="text-3xl font-bold tracking-tight drop-shadow-sm">
+        <RollingNumber :value="value" :delay="computedDelay" />
+      </div>
       
       <!-- Variant Progress -->
       <div v-if="progress !== undefined" class="space-y-1.5 mt-3 w-full">

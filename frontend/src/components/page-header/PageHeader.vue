@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { ChevronLeft, Save } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
+import { pageHeaderSlide } from '@/config/motion'
 
 const props = defineProps({
   variant: {
@@ -37,6 +38,9 @@ const showFormActions = computed(() =>
 
 <template>
   <div
+    v-motion
+    :initial="pageHeaderSlide.initial"
+    :visible="pageHeaderSlide.visible"
     class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
   >
     <div class="flex items-center gap-4">

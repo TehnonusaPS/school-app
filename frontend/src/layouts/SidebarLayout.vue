@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppSidebar from '@/components/AppSidebar.vue'
 import {
@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Bell, Search, UserPlus, CreditCard, MessageCircle, MessageSquare } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/authStore'
+import { sidebarSlide, topbarSlide } from '@/config/motion'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +30,18 @@ import {
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
+
+const isLoginTransition = computed(() => auth.isJustLoggedIn)
+const sidebarDelay = computed(() => isLoginTransition.value ? 1000 : 100)
+const topbarDelay = computed(() => isLoginTransition.value ? 1200 : 200)
+
+onMounted(() => {
+  if (auth.isJustLoggedIn) {
+    setTimeout(() => {
+      auth.isJustLoggedIn = false
+    }, 2500)
+  }
+})
 
 // Fungsi untuk menelusuri hierarki breadcrumb secara rekursif
 const breadcrumbs = computed(() => {
@@ -98,7 +111,13 @@ const notifications = [
     <AppSidebar />
     <SidebarInset>
       <header
-        class="sticky top-2 z-10 flex h-14 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 glass-mini mx-2 mt-2 px-4 justify-between"
+        v-motion
+        :initial="topbarSlide.initial"
+        :enter="{ ...topbarSlide.enter, transition: { ...topbarSlide.enter.transition, delay: topbarDelay } }"
+        :class="[
+          'sticky top-2 z-10 flex h-14 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 glass-mini mx-2 mt-2 px-4 justify-between',
+          auth.isLoggingOut ? 'topbar-exit-active' : ''
+        ]"
       >
         <!-- SISI KIRI: Sidebar Trigger & Breadcrumb -->
         <div class="flex items-center gap-2">
@@ -198,7 +217,12 @@ const notifications = [
         </div>
       </header>
 
-      <div class="flex flex-1 flex-col gap-4 p-6 text-left">
+      <div
+        :class="[
+          'flex flex-1 flex-col gap-4 p-6 text-left transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)]',
+          auth.isLoggingOut ? 'content-exit-active' : ''
+        ]"
+      >
         <router-view />
       </div>
     </SidebarInset>

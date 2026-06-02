@@ -8,16 +8,15 @@ import { yayasanStatsData } from '../data/yayasanStats'
 <template>
   <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
     <!-- Stat Cards biasa -->
-    <StatCard label="Total Sekolah" :value="formatNumber(yayasanStatsData.sekolah.total)"
+    <StatCard :delay="100" label="Total Sekolah" :value="formatNumber(yayasanStatsData.sekolah.total)"
       sub="di bawah yayasan" :trend="`${formatDelta(yayasanStatsData.sekolah.growth)} semester ini`"
       :trendDirection="yayasanStatsData.sekolah.trendDirection" :icon="School" variant="violet" />
 
-    <StatCard label="Total Guru & Staff" :value="formatNumber(yayasanStatsData.guru.total)"
+    <StatCard :delay="200" label="Total Guru & Staff" :value="formatNumber(yayasanStatsData.guru.total)"
       sub="tenaga pendidik aktif" :trend="`${formatDelta(yayasanStatsData.guru.growth)} bulan ini`"
       :trendDirection="yayasanStatsData.guru.trendDirection" :icon="Users" variant="blue" />
 
-    <StatCard label="Total Anggaran" :value="`Rp ${yayasanStatsData.anggaran.total}M`"
-      sub="Realisasi" :progress="yayasanStatsData.anggaran.realisasi"
-      :icon="Wallet" variant="emerald" />
+    <StatCard :delay="300" label="Total Anggaran" :value="`Rp ${yayasanStatsData.anggaran.total}M`" sub="Realisasi"
+      :progress="yayasanStatsData.anggaran.realisasi" :icon="Wallet" variant="emerald" />
   </div>
 </template>

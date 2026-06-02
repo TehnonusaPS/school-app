@@ -42,6 +42,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from '@/components/ui/sidebar'
+import { sidebarSlide } from '@/config/motion'
 
 const auth = useAuthStore()
 

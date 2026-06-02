@@ -3,6 +3,9 @@ import { Badge } from '@/components/ui/badge'
 import WidgetCard from '@/components/dashboard-widget/WidgetCard.vue'
 import WidgetProgressList from '@/components/dashboard-widget/WidgetProgressList.vue'
 import { sekolahData, sdmProgressData, sdmQuickStats } from '../data/yayasanSekolahSDMData'
+const props = defineProps({
+  delay: { type: Number, default: 0 }
+})
 </script>
 
 <template>
@@ -13,6 +16,7 @@ import { sekolahData, sdmProgressData, sdmQuickStats } from '../data/yayasanSeko
       description="Sekolah yang terdaftar di bawah yayasan ini"
       cardClass="lg:col-span-3"
       contentClass="p-0"
+      :delay="delay"
     >
       <!-- Header fixed — tidak ikut scroll -->
       <table class="w-full text-sm border-b">
@@ -78,12 +82,12 @@ import { sekolahData, sdmProgressData, sdmQuickStats } from '../data/yayasanSeko
       </div>
     </WidgetCard>
 
-    <!-- Distribusi SDM -->
     <WidgetProgressList
       title="Distribusi SDM"
       description="Komposisi tenaga pendidik & staff"
       cardClass="lg:col-span-2"
       :items="sdmProgressData"
+      :delay="delay + 100"
     >
       <!-- Divider / Ringkasan -->
       <div class="border-t pt-4">

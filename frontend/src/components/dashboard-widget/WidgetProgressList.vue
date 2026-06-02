@@ -8,7 +8,8 @@ const props = defineProps({
   icon: { type: [Object, Function], required: false },
   items: { type: Array, required: true },
   cardClass: { type: String, default: '' },
-  contentClass: { type: String, default: 'space-y-4' }
+  contentClass: { type: String, default: 'space-y-4' },
+  delay: { type: Number, default: 0 }
 })
 </script>
 
@@ -19,6 +20,7 @@ const props = defineProps({
     :icon="icon"
     :cardClass="cardClass"
     :contentClass="contentClass"
+    :delay="delay"
   >
     <div v-for="item in items" :key="item.label || item.id" class="space-y-1.5">
       <div class="flex items-center justify-between text-sm">

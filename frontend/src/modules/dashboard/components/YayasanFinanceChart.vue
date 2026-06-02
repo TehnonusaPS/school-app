@@ -23,6 +23,10 @@ const chartConfig = {
     color: 'var(--muted-foreground)'
   }
 } satisfies ChartConfig
+
+const props = defineProps({
+  delay: { type: Number, default: 0 }
+})
 </script>
 
 <template>
@@ -30,6 +34,7 @@ const chartConfig = {
     title="Perbandingan Pendapatan vs Pengeluaran"
     description="6 bulan terakhir — dalam juta rupiah"
     footerClass="flex-col items-start gap-2 text-sm"
+    :delay="delay"
   >
     <ChartContainer :config="chartConfig" class="h-[260px] w-full">
       <VisXYContainer :data="chartData">

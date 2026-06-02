@@ -42,8 +42,8 @@ const auth = useAuthStore()
   <!-- ── Admin Yayasan Dashboard ── -->
   <div v-else-if="auth.user?.role === 'admin_yayasan'" class="space-y-6">
     <YayasanStatCards />
-    <YayasanSekolahSDM />
-    <YayasanFinanceChart />
+    <YayasanSekolahSDM :delay="400" />
+    <YayasanFinanceChart :delay="600" />
   </div>
 
   <!-- ── Kepala Sekolah Dashboard ── -->

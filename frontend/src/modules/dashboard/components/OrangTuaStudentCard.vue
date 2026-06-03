@@ -1,11 +1,26 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { Badge } from '@/components/ui/badge'
+import { useAuthStore } from '@/stores/authStore'
+import RollingNumber from '@/components/ui/rolling-number/RollingNumber.vue'
+
+const props = defineProps({
+  delay: { type: Number, default: 0 }
+})
+
+const auth = useAuthStore()
+const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.delay)
 </script>
 
 <template>
-  <div class="rounded-xl border bg-card text-card-foreground shadow overflow-hidden flex min-h-[210px]">
+  <div
+    v-motion
+    :initial="{ opacity: 0, y: 30, scale: 0.98 }"
+    :visible-once="{ opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 200, damping: 20, mass: 0.8, delay: computedDelay } }"
+    class="relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-white/40 group glass-ui flex min-h-[210px] w-full rounded-xl"
+  >
     <!-- Info sisi kiri — primary gradient -->
-    <div class="flex flex-col justify-between p-6 bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-primary-foreground w-[60%] shrink-0">
+    <div class="flex flex-col justify-between p-6 bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-primary-foreground w-[60%] shrink-0 relative z-10">
       <div class="space-y-1">
         <Badge class="text-[10px] mb-2 w-fit bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30 hover:bg-primary-foreground/30">
           Siswa
@@ -18,11 +33,15 @@ import { Badge } from '@/components/ui/badge'
       <!-- Mini stats -->
       <div class="flex gap-3 mt-5">
         <div class="rounded-lg border border-primary-foreground/25 bg-primary-foreground/10 px-4 py-3 text-left flex-1">
-          <p class="text-2xl font-bold">8.8</p>
+          <p class="text-2xl font-bold">
+            <RollingNumber value="8.8" :delay="computedDelay" />
+          </p>
           <p class="text-xs text-primary-foreground/70 mt-1">Rata-rata</p>
         </div>
         <div class="rounded-lg border border-primary-foreground/25 bg-primary-foreground/10 px-4 py-3 text-left flex-1">
-          <p class="text-2xl font-bold">95%</p>
+          <p class="text-2xl font-bold">
+            <RollingNumber value="95%" :delay="computedDelay" />
+          </p>
           <p class="text-xs text-primary-foreground/70 mt-1">Kehadiran</p>
         </div>
       </div>

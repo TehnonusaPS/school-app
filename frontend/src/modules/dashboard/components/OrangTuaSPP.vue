@@ -1,9 +1,19 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { Wallet, History } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import WidgetCard from '@/components/dashboard-widget/WidgetCard.vue'
+import RollingNumber from '@/components/ui/rolling-number/RollingNumber.vue'
+import { useAuthStore } from '@/stores/authStore'
 import { sppData } from '../data/orangTuaSPPData'
+
+const props = defineProps({
+  delay: { type: Number, default: 0 }
+})
+
+const auth = useAuthStore()
+const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.delay)
 </script>
 
 <template>
@@ -13,6 +23,7 @@ import { sppData } from '../data/orangTuaSPPData'
     :icon="Wallet"
     cardClass="flex flex-col justify-between"
     contentClass="flex flex-col gap-4 flex-1 justify-between"
+    :delay="delay"
   >
     <template #header-action>
       <Badge variant="destructive" class="text-xs">{{ sppData.status }}</Badge>
@@ -20,7 +31,9 @@ import { sppData } from '../data/orangTuaSPPData'
 
     <!-- Nominal -->
     <div>
-      <p class="text-3xl font-bold tracking-tight">{{ sppData.nominal }}</p>
+      <p class="text-3xl font-bold tracking-tight">
+        <RollingNumber :value="sppData.nominal" :delay="computedDelay" />
+      </p>
       <p class="text-xs text-muted-foreground mt-1">
         Jatuh tempo: <span class="text-rose-500 font-semibold">{{ sppData.jatuhTempo }}</span>
       </p>

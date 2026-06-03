@@ -50,20 +50,20 @@ watch(() => props.value, () => {
 </script>
 
 <template>
-  <div class="inline-flex items-center">
+  <div class="inline-flex items-center whitespace-nowrap" style="white-space: nowrap; display: inline-flex; align-items: center;">
     <template v-for="(charObj, index) in chars" :key="index">
       
       <!-- Non-digit characters (like dots, commas, spaces) -->
-      <span v-if="!charObj.isDigit" class="inline-block">{{ charObj.value }}</span>
+      <span v-if="!charObj.isDigit" style="display: inline-block;">{{ charObj.value }}</span>
       
       <!-- Digit columns (Mahjong slot effect) -->
-      <div v-else class="relative inline-flex flex-col overflow-hidden align-bottom" style="height: 1.1em; line-height: 1.1em;">
+      <div v-else style="position: relative; display: inline-flex; flex-direction: column; overflow: hidden; vertical-align: bottom; height: 1.1em; line-height: 1.1em;">
         <!-- Invisible static character to maintain correct dynamic width -->
-        <span class="invisible">{{ charObj.value }}</span>
+        <span style="visibility: hidden; display: inline-block; height: 0; pointer-events: none;">{{ charObj.value }}</span>
         
         <!-- The spinning column -->
         <div 
-          class="absolute inset-x-0 top-0 flex flex-col"
+          style="position: absolute; left: 0; right: 0; top: 0; display: flex; flex-direction: column;"
           :style="{ 
             transitionProperty: 'transform',
             transitionDuration: isReady ? '2200ms' : '0ms',
@@ -75,7 +75,7 @@ watch(() => props.value, () => {
           <span 
             v-for="(n, i) in charObj.column" 
             :key="i" 
-            class="flex items-center justify-center h-[1.1em]"
+            style="display: flex; align-items: center; justify-content: center; height: 1.1em;"
           >
             {{ n }}
           </span>

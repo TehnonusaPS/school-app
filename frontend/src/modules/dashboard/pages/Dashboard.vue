@@ -88,12 +88,12 @@ const auth = useAuthStore()
   <!-- ── Orang Tua Dashboard ── -->
   <div v-else-if="auth.user?.role === 'orang_tua'" class="space-y-6">
     <div class="grid gap-4 lg:grid-cols-[3fr_2fr]">
-      <OrangTuaStudentCard />
-      <OrangTuaSPP />
+      <OrangTuaStudentCard :delay="100" />
+      <OrangTuaSPP :delay="200" />
     </div>
     <div class="grid gap-4 lg:grid-cols-2">
-      <OrangTuaPerforma />
-      <OrangTuaKehadiran />
+      <OrangTuaPerforma :delay="300" />
+      <OrangTuaKehadiran :delay="400" />
     </div>
   </div>
 

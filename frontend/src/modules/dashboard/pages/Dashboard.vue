@@ -34,26 +34,26 @@ const auth = useAuthStore()
   <div v-if="auth.user?.role === 'superadmin'" class="space-y-6 relative">
     <SuperadminStatCards />
     <div class="grid gap-4 lg:grid-cols-5">
-      <SuperadminGrowthChart :delay="900" />
-      <SuperadminActivityLog :delay="1000" />
+      <SuperadminGrowthChart :delay="100" />
+      <SuperadminActivityLog :delay="200" />
     </div>
   </div>
 
   <!-- ── Admin Yayasan Dashboard ── -->
   <div v-else-if="auth.user?.role === 'admin_yayasan'" class="space-y-6">
     <YayasanStatCards />
-    <YayasanSekolahSDM :delay="400" />
-    <YayasanFinanceChart :delay="600" />
+    <YayasanSekolahSDM :delay="100" />
+    <YayasanFinanceChart :delay="200" />
   </div>
 
   <!-- ── Kepala Sekolah Dashboard ── -->
   <div v-else-if="auth.user?.role === 'kepala_sekolah'" class="space-y-6">
     <KepsekStatCards />
     <div class="grid gap-4 lg:grid-cols-5">
-      <KepsekKehadiran :delay="1000" />
-      <KepsekAgenda :delay="1100" />
+      <KepsekKehadiran :delay="100" />
+      <KepsekAgenda :delay="200" />
     </div>
-    <KepsekPerforma :delay="1200" />
+    <KepsekPerforma :delay="300" />
   </div>
 
   <!-- ── Admin Sekolah & TU Dashboard ── -->

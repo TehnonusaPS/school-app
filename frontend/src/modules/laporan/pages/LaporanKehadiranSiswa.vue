@@ -298,7 +298,7 @@ function getProgressColor(pct) {
       <Table>
         <TableHeader>
           <TableRow class="bg-muted/50">
-            <TableHead class="font-semibold w-10">#</TableHead>
+                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
             <TableHead class="font-semibold cursor-pointer select-none" @click="toggleSort('nama')">
               <div class="flex items-center gap-1">
                 Nama Siswa
@@ -329,8 +329,9 @@ function getProgressColor(pct) {
         </TableHeader>
         <TableBody>
           <template v-if="isLoading">
-            <TableRow v-for="i in 8" :key="`skel-${i}`">
-              <TableCell v-for="j in 9" :key="j"><Skeleton class="h-5 w-full" /></TableCell>
+            <TableRow v-for="(i, index) in 8" :key="`skel-${i}`">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
+              <TableCell v-for="j in 10" :key="j"><Skeleton class="h-5 w-full" /></TableCell>
             </TableRow>
           </template>
 
@@ -379,7 +380,7 @@ function getProgressColor(pct) {
             </TableRow>
 
             <TableRow v-if="paginatedData.length === 0">
-              <TableCell colspan="9" class="h-32 text-center text-muted-foreground">
+              <TableCell colspan="10" class="h-32 text-center text-muted-foreground">
                 <div class="flex flex-col items-center justify-center gap-2">
                   <Search class="size-8 text-muted-foreground/40" />
                   <p class="text-sm">Tidak ada siswa ditemukan.</p>

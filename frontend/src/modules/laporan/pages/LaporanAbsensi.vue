@@ -409,6 +409,7 @@ const ringkasanSiswa = computed(() => {
           <Table>
             <TableHeader>
               <TableRow class="bg-muted/50">
+                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
                 <TableHead class="font-semibold w-[120px]">Tanggal</TableHead>
                 <TableHead class="font-semibold">Nama Siswa</TableHead>
                 <TableHead class="font-semibold">Kelas</TableHead>
@@ -419,7 +420,8 @@ const ringkasanSiswa = computed(() => {
             </TableHeader>
             <TableBody>
               <template v-if="isLoading">
-                <TableRow v-for="i in 8" :key="`skel-${i}`">
+                <TableRow v-for="(i, index) in 8" :key="`skel-${i}`">
+                  <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
                   <TableCell><Skeleton class="h-5 w-24" /></TableCell>
                   <TableCell><Skeleton class="h-5 w-36" /></TableCell>
                   <TableCell><Skeleton class="h-5 w-20" /></TableCell>
@@ -431,10 +433,11 @@ const ringkasanSiswa = computed(() => {
 
               <template v-else>
                 <TableRow
-                  v-for="log in paginatedData"
+                  v-for="(log, index) in paginatedData"
                   :key="log.id"
                   class="hover:bg-muted/30 transition-colors"
                 >
+                  <TableCell class="text-center text-muted-foreground text-xs">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</TableCell>
                   <TableCell class="text-sm text-muted-foreground">{{ log.tanggal }}</TableCell>
                   <TableCell class="font-medium text-sm">{{ log.nama }}</TableCell>
                   <TableCell>
@@ -450,7 +453,7 @@ const ringkasanSiswa = computed(() => {
                 </TableRow>
 
                 <TableRow v-if="paginatedData.length === 0">
-                  <TableCell colspan="6" class="h-32 text-center text-muted-foreground">
+                  <TableCell colspan="7" class="h-32 text-center text-muted-foreground">
                     <div class="flex flex-col items-center justify-center gap-2">
                       <CalendarIcon class="size-8 text-muted-foreground/40" />
                       <p class="text-sm">Tidak ada data pada filter yang dipilih.</p>
@@ -497,6 +500,7 @@ const ringkasanSiswa = computed(() => {
           <Table>
             <TableHeader>
               <TableRow class="bg-muted/50">
+                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
                 <TableHead class="font-semibold">Nama Siswa</TableHead>
                 <TableHead class="font-semibold">Kelas</TableHead>
                 <TableHead class="font-semibold text-center">Hadir</TableHead>
@@ -509,16 +513,18 @@ const ringkasanSiswa = computed(() => {
             </TableHeader>
             <TableBody>
               <template v-if="isLoading">
-                <TableRow v-for="i in 5" :key="`sum-skel-${i}`">
-                  <TableCell v-for="j in 8" :key="j"><Skeleton class="h-5 w-full" /></TableCell>
+                <TableRow v-for="(i, index) in 5" :key="`sum-skel-${i}`">
+                  <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
+                  <TableCell v-for="j in 9" :key="j"><Skeleton class="h-5 w-full" /></TableCell>
                 </TableRow>
               </template>
               <template v-else>
                 <TableRow
-                  v-for="siswa in ringkasanSiswa"
+                  v-for="(siswa, index) in ringkasanSiswa"
                   :key="siswa.nama"
                   class="hover:bg-muted/30 transition-colors"
                 >
+                  <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
                   <TableCell class="font-medium text-sm">{{ siswa.nama }}</TableCell>
                   <TableCell>
                     <Badge variant="outline" class="text-xs font-normal">{{ siswa.kelas }}</Badge>
@@ -551,7 +557,7 @@ const ringkasanSiswa = computed(() => {
                   </TableCell>
                 </TableRow>
                 <TableRow v-if="ringkasanSiswa.length === 0">
-                  <TableCell colspan="8" class="h-32 text-center text-muted-foreground">
+                  <TableCell colspan="9" class="h-32 text-center text-muted-foreground">
                     <div class="flex flex-col items-center justify-center gap-2">
                       <Users class="size-8 text-muted-foreground/40" />
                       <p class="text-sm">Tidak ada data ringkasan.</p>

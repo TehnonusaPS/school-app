@@ -182,7 +182,8 @@ const jenjangColor = { SD: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 
         <Table>
           <TableHeader>
             <TableRow class="bg-muted/50">
-              <TableHead class="font-semibold">Unit Sekolah</TableHead>
+                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
+                <TableHead class="font-semibold">Unit Sekolah</TableHead>
               <TableHead class="font-semibold">Jenjang</TableHead>
               <TableHead class="font-semibold text-center">Siswa</TableHead>
               <TableHead class="font-semibold text-center">Guru</TableHead>
@@ -195,12 +196,14 @@ const jenjangColor = { SD: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 
           </TableHeader>
           <TableBody>
             <template v-if="isLoading">
-              <TableRow v-for="i in 4" :key="i">
-                <TableCell v-for="j in 9" :key="j"><Skeleton class="h-5 w-full" /></TableCell>
+              <TableRow v-for="(i, index) in 4" :key="i">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
+                <TableCell v-for="j in 10" :key="j"><Skeleton class="h-5 w-full" /></TableCell>
               </TableRow>
             </template>
             <template v-else>
-              <TableRow v-for="s in sekolahData" :key="s.id" class="hover:bg-muted/30 transition-colors">
+              <TableRow v-for="(s, index) in sekolahData" :key="s.id" class="hover:bg-muted/30 transition-colors">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
                 <TableCell class="font-semibold text-sm">{{ s.nama }}</TableCell>
                 <TableCell><Badge :class="jenjangColor[s.jenjang]">{{ s.jenjang }}</Badge></TableCell>
                 <TableCell class="text-center font-medium">{{ s.totalSiswa }}</TableCell>
@@ -216,7 +219,7 @@ const jenjangColor = { SD: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 
                 <TableCell class="text-right text-sm font-bold" :class="(s.pemasukan - s.pengeluaran) >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400'">{{ formatRp(s.pemasukan - s.pengeluaran) }}</TableCell>
               </TableRow>
               <TableRow class="bg-muted/50 font-bold">
-                <TableCell colspan="2" class="font-bold">TOTAL YAYASAN</TableCell>
+                <TableCell colspan="3" class="font-bold">TOTAL YAYASAN</TableCell>
                 <TableCell class="text-center font-bold">{{ totalSiswa }}</TableCell>
                 <TableCell class="text-center font-bold">{{ totalGuru }}</TableCell>
                 <TableCell class="text-center font-bold">{{ avgNilai }}</TableCell>

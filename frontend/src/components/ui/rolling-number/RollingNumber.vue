@@ -59,12 +59,17 @@ watch(() => props.value, () => {
       <!-- Digit columns (Mahjong slot effect) -->
       <div v-else style="position: relative; display: inline-flex; flex-direction: column; overflow: hidden; vertical-align: bottom; height: 1.1em; line-height: 1.1em;">
         <!-- Invisible static character to maintain correct dynamic width -->
-        <span style="visibility: hidden; display: inline-block; height: 0; pointer-events: none;">{{ charObj.value }}</span>
+        <span style="visibility: hidden; pointer-events: none;">{{ charObj.value }}</span>
         
         <!-- The spinning column -->
         <div 
-          style="position: absolute; left: 0; right: 0; top: 0; display: flex; flex-direction: column;"
           :style="{ 
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: 0,
+            display: 'flex',
+            flexDirection: 'column',
             transitionProperty: 'transform',
             transitionDuration: isReady ? '2200ms' : '0ms',
             transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',

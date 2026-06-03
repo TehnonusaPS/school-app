@@ -20,30 +20,30 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.de
     :visible-once="{ opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 200, damping: 20, mass: 0.8, delay: computedDelay } }"
     class="relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-primary/25 dark:border-primary/15 hover:border-primary/45 group glass-ui flex flex-row min-h-[210px] w-full p-0 gap-0"
   >
-    <!-- Info sisi kiri — primary glass styling -->
-    <div class="flex flex-col justify-between p-6 bg-gradient-to-br from-primary/25 via-primary/15 to-primary/5 w-[60%] shrink-0 relative z-10 backdrop-blur-sm -mr-px">
+    <!-- Info sisi kiri — solid primary background -->
+    <div class="flex flex-col justify-between p-6 bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-primary-foreground w-[60%] shrink-0 relative z-10 -mr-px">
       <div class="space-y-1">
-        <Badge class="text-[10px] mb-2 w-fit bg-primary/15 hover:bg-primary/25 text-primary border-none shadow-none">
+        <Badge class="text-[10px] mb-2 w-fit bg-primary-foreground/20 text-primary-foreground border-none shadow-none">
           Siswa
         </Badge>
-        <h2 class="text-xl font-bold leading-tight text-foreground">Aditya Pratama</h2>
-        <p class="text-sm text-muted-foreground mt-0.5">Kelas 10 - IPA 2</p>
-        <p class="text-xs text-muted-foreground/75">NISN: 0092837411</p>
+        <h2 class="text-xl font-bold leading-tight">Aditya Pratama</h2>
+        <p class="text-sm text-primary-foreground/80 mt-0.5">Kelas 10 - IPA 2</p>
+        <p class="text-xs text-primary-foreground/60">NISN: 0092837411</p>
       </div>
 
       <!-- Mini stats -->
       <div class="flex gap-3 mt-5">
-        <div class="rounded-xl glass-ui bg-white/20 dark:bg-white/5 border border-white/30 dark:border-white/10 shadow-sm backdrop-blur-md px-4 py-3 text-left flex-1 transition-all duration-300 hover:border-white/50">
-          <p class="text-2xl font-bold text-foreground">
+        <div class="rounded-xl glass-ui bg-primary-foreground/15 border border-primary-foreground/20 shadow-sm backdrop-blur-md px-4 py-3 text-left flex-1 transition-all duration-300 hover:border-primary-foreground/35">
+          <p class="text-2xl font-bold text-primary-foreground">
             <RollingNumber value="8.8" :delay="computedDelay" />
           </p>
-          <p class="text-xs text-muted-foreground mt-1">Rata-rata</p>
+          <p class="text-xs text-primary-foreground/75 mt-1">Rata-rata</p>
         </div>
-        <div class="rounded-xl glass-ui bg-white/20 dark:bg-white/5 border border-white/30 dark:border-white/10 shadow-sm backdrop-blur-md px-4 py-3 text-left flex-1 transition-all duration-300 hover:border-white/50">
-          <p class="text-2xl font-bold text-foreground">
+        <div class="rounded-xl glass-ui bg-primary-foreground/15 border border-primary-foreground/20 shadow-sm backdrop-blur-md px-4 py-3 text-left flex-1 transition-all duration-300 hover:border-primary-foreground/35">
+          <p class="text-2xl font-bold text-primary-foreground">
             <RollingNumber value="95%" :delay="computedDelay" />
           </p>
-          <p class="text-xs text-muted-foreground mt-1">Kehadiran</p>
+          <p class="text-xs text-primary-foreground/75 mt-1">Kehadiran</p>
         </div>
       </div>
     </div>
@@ -55,7 +55,7 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.de
         alt="Foto Siswa"
         class="absolute inset-0 w-full h-full object-cover object-top"
       />
-      <div class="absolute inset-0 bg-gradient-to-r from-primary/25 via-transparent to-transparent pointer-events-none" />
+      <div class="absolute inset-0 bg-gradient-to-r from-primary via-transparent to-transparent pointer-events-none" />
     </div>
   </Card>
 </template>

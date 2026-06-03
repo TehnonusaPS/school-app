@@ -18,7 +18,7 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.de
     v-motion
     :initial="{ opacity: 0, y: 30, scale: 0.98 }"
     :visible-once="{ opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 200, damping: 20, mass: 0.8, delay: computedDelay } }"
-    class="relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-primary/25 dark:border-primary/15 hover:border-primary/45 group glass-ui flex flex-row min-h-[210px] w-full p-0 gap-0"
+    class="relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 !border-primary/30 dark:!border-primary/20 hover:!border-primary/50 !ring-0 group glass-ui flex flex-row min-h-[210px] w-full p-0 gap-0"
   >
     <!-- Info sisi kiri — primary glass styling (vibrant & not faded) -->
     <div class="flex flex-col justify-between p-6 bg-gradient-to-br from-primary/80 via-primary/70 to-primary/60 w-[60%] shrink-0 relative z-10 backdrop-blur-md -mr-px text-primary-foreground">

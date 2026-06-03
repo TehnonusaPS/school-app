@@ -24,7 +24,7 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.de
 <template>
   <Card v-motion
     :initial="glassSlide.initial"
-    :visible="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: computedDelay } }"
+    :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: computedDelay } }"
     class="flex flex-col relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-white/40 group glass-ui"
     :class="cardClass">
     <CardHeader class="pb-2 relative z-10">

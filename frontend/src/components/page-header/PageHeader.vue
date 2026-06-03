@@ -40,7 +40,7 @@ const showFormActions = computed(() =>
   <div
     v-motion
     :initial="pageHeaderSlide.initial"
-    :visible="pageHeaderSlide.visible"
+    :visible-once="pageHeaderSlide.visible"
     class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
   >
     <div class="flex items-center gap-4">

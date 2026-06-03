@@ -41,7 +41,7 @@ const getDelay = (index) => (auth.isJustLoggedIn ? 1400 : 0) + props.delay + (in
           :key="item.id || index"
           v-motion
           :initial="glassFade.initial"
-          :visible="{ ...glassFade.visible, transition: { ...glassFade.visible.transition, delay: getDelay(index) } }"
+          :visible-once="{ ...glassFade.visible, transition: { ...glassFade.visible.transition, delay: getDelay(index) } }"
           class="group flex items-start gap-3 rounded-xl p-3 transition-all hover:bg-white/5 dark:hover:bg-white/5 cursor-default border border-transparent hover:border-white/10 hover:shadow-lg"
         >
           <slot name="item" :item="item" :index="index" />

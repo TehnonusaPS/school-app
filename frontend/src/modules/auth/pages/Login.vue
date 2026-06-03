@@ -42,6 +42,7 @@ const password = ref('')
 const showPassword = ref(false)
 const isLoading = ref(false)
 const error = ref('')
+const isTransitioning = ref(!!window.pendingViewTransition)
 
 const togglePassword = () => {
   showPassword.value = !showPassword.value
@@ -124,7 +125,13 @@ onUnmounted(() => {
 <template>
   <div class="grid min-h-screen w-full overflow-x-hidden lg:grid-cols-[450px_1fr] xl:grid-cols-[500px_1fr]">
     <!-- Left panel (Glassmorphism on mobile/tablet, clean minimal on desktop) -->
-    <div style="view-transition-name: login-left;" class="flex flex-col gap-4 p-4 sm:p-6 md:p-10 bg-background relative min-w-0 overflow-hidden justify-between">
+    <div
+      style="view-transition-name: login-left;"
+      :class="[
+        'flex flex-col gap-4 p-4 sm:p-6 md:p-10 bg-background relative min-w-0 overflow-hidden justify-between',
+        !isTransitioning ? 'login-left-entrance' : ''
+      ]"
+    >
       <!-- Mobile/Tablet Background Image Overlay -->
       <div class="absolute inset-0 lg:hidden overflow-hidden z-0">
         <img
@@ -261,7 +268,13 @@ onUnmounted(() => {
     </div>
 
     <!-- Right panel for laptop/desktop screen (hidden on mobile/tablet) -->
-    <div style="view-transition-name: login-right;" class="bg-muted relative hidden lg:block border-l overflow-hidden min-w-0">
+    <div
+      style="view-transition-name: login-right;"
+      :class="[
+        'bg-muted relative hidden lg:block border-l overflow-hidden min-w-0',
+        !isTransitioning ? 'login-right-entrance' : ''
+      ]"
+    >
       <!-- Menggunakan gambar sekolah Indonesia yang hangat dan familiar -->
       <img
         src="@/assets/images/login-bg.png"

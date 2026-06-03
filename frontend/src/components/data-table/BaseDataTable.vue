@@ -38,7 +38,7 @@ defineProps({
         :key="rowIndex"
         v-motion
         :initial="tableRowFade.initial"
-        :visible="{ ...tableRowFade.visible, transition: { ...tableRowFade.visible.transition, delay: rowIndex * 50 } }"
+        :visible-once="{ ...tableRowFade.visible, transition: { ...tableRowFade.visible.transition, delay: rowIndex * 50 } }"
       >
         <TableCell
           v-for="column in columns"

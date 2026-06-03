@@ -58,7 +58,7 @@ function getTrendConfig(direction) {
   <Card
     v-motion
     :initial="{ opacity: 0, y: 30, scale: 0.95 }"
-    :visible="{ opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 200, damping: 20, mass: 0.8, delay: computedDelay } }"
+    :visible-once="{ opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 200, damping: 20, mass: 0.8, delay: computedDelay } }"
     class="relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-white/40 group glass-ui"
   >
     <!-- Watermark Icon Background -->

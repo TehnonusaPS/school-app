@@ -24,11 +24,14 @@ const form = ref({
   nama: '',
   tanggal_berdiri: '',
   status: '',
-  contoh: '',
   alamat: '',
   email: '',
   no_hp: '',
-  website: ''
+  website: '',
+  no_akta: '',
+  tanggal_akta: '',
+  no_sk: '',
+  tanggal_sk: ''
 })
 
 const statusOptions = [
@@ -82,12 +85,11 @@ const handleSubmit = () => {
         <FormSection title="Logo Yayasan" description="Upload logo yayasan disini" :icon="Image">
             <ImageUpload :preview="imagePreview" @change="handleImage" note="Format: JPG atau PNG. Maksimal 2MB. Dimensi rasio 1:1"/>
         </FormSection>
-
         <!-- Informasi Kontak -->
         <FormSection title="Kontak Yayasan" description="Informasi kontak dari yayasan" :icon="Phone">
             <FormInput v-model="form.email" label="E-mail" placeholder="Contoh: yayasan@mail.com"/>
             <FormInput v-model="form.no_hp" label="No. Telp" placeholder="Contoh: 081289170180"/>
-            <FormInput v-model="form.website" label="Nama Yayasan" placeholder="Contoh: www.yayasan.com"/>
+            <FormInput v-model="form.website" label="Website" placeholder="Contoh: www.yayasan.com"/>
         </FormSection>
       </div>
       <!-- Kolom Kanan: Informasi Umum Yayasan (Lebar 2 Kolom) -->
@@ -102,8 +104,12 @@ const handleSubmit = () => {
                 <FormSelect v-model="form.status" label="Status" placeholder="Pilih status yayasan" :options="statusOptions"/>
             </div>
             <div class="grid gap-4 md:grid-cols-2">
-                <FormInput v-model="form.contoh" label="Input 1" placeholder="Contoh: Lorem Ipsum"/>
-                <FormInput v-model="form.contoh" label="Input 2" placeholder="Contoh: Lorem Ipsum"/>
+                <FormInput v-model="form.no_akta" label="No. Akta Pendirian" placeholder="Contoh: 1234567890"/>
+                <FormDate v-model="form.tanggal_akta" label="Tanggal Akta Pendirian"/>
+            </div>
+            <div class="grid gap-4 md:grid-cols-2">
+                <FormInput v-model="form.no_sk" label="No. SK Kemenkumham" placeholder="Contoh: 1234567890"/>
+                <FormDate v-model="form.tanggal_sk" label="Tanggal SK Kemenkumham"/>
             </div>
             <Separator class="my-4" />
             <FormTextArea v-model="form.alamat" label="Alamat Lengkap" placeholder="Contoh: Nama Jalan, RT/RW, Kelurahan, Kecamatan, Kota"/>

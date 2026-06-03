@@ -7,22 +7,22 @@ import { superadminStatsData } from '../data/superadminStats'
 
 <template>
   <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-    <StatCard :delay="200" label="Total Yayasan" :value="formatNumber(superadminStatsData.yayasan.total)"
+    <StatCard :delay="100" label="Total Yayasan" :value="formatNumber(superadminStatsData.yayasan.total)"
       :sub="`${formatDelta(superadminStatsData.yayasan.newThisMonth)} bulan ini`"
       :trend="`${formatDelta(superadminStatsData.yayasan.growthPercent)}%`"
       :trendDirection="superadminStatsData.yayasan.trendDirection" :icon="Building2" variant="blue" />
 
-    <StatCard :delay="400" label="Total Sekolah" :value="formatNumber(superadminStatsData.sekolah.total)"
+    <StatCard :delay="250" label="Total Sekolah" :value="formatNumber(superadminStatsData.sekolah.total)"
       :sub="`${formatDelta(superadminStatsData.sekolah.newThisMonth)} bulan ini`"
       :trend="`${formatDelta(superadminStatsData.sekolah.growthPercent)}%`"
       :trendDirection="superadminStatsData.sekolah.trendDirection" :icon="School" variant="violet" />
 
-    <StatCard :delay="600" label="Total Guru" :value="formatNumber(superadminStatsData.guru.total)"
+    <StatCard :delay="400" label="Total Guru" :value="formatNumber(superadminStatsData.guru.total)"
       :sub="`${formatDelta(superadminStatsData.guru.newThisMonth)} bulan ini`"
       :trend="`${formatDelta(superadminStatsData.guru.growthPercent)}%`"
       :trendDirection="superadminStatsData.guru.trendDirection" :icon="GraduationCap" variant="emerald" />
 
-    <StatCard :delay="800" label="Total Siswa" :value="formatNumber(superadminStatsData.siswa.total)"
+    <StatCard :delay="550" label="Total Siswa" :value="formatNumber(superadminStatsData.siswa.total)"
       :sub="`${formatDelta(superadminStatsData.siswa.newThisMonth)} bulan ini`"
       :trend="`${formatDelta(superadminStatsData.siswa.growthPercent)}%`"
       :trendDirection="superadminStatsData.siswa.trendDirection" :icon="Users" variant="amber" />

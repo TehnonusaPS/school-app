@@ -68,7 +68,7 @@ const nilaiColor = (v: number) =>
           <ChevronRight class="size-3.5 text-muted-foreground" />
         </div>
       </div>
-      <Progress :model-value="m.nilai" class="h-2" />
+      <Progress :model-value="m.nilai" :delay="computedDelay + 250 + (index * 50)" class="h-2" />
     </div>
 
     <template #footer>

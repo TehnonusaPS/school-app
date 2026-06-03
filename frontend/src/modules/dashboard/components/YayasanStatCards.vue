@@ -12,11 +12,11 @@ import { yayasanStatsData } from '../data/yayasanStats'
       sub="di bawah yayasan" :trend="`${formatDelta(yayasanStatsData.sekolah.growth)} semester ini`"
       :trendDirection="yayasanStatsData.sekolah.trendDirection" :icon="School" variant="violet" />
 
-    <StatCard :delay="200" label="Total Guru & Staff" :value="formatNumber(yayasanStatsData.guru.total)"
+    <StatCard :delay="250" label="Total Guru & Staff" :value="formatNumber(yayasanStatsData.guru.total)"
       sub="tenaga pendidik aktif" :trend="`${formatDelta(yayasanStatsData.guru.growth)} bulan ini`"
       :trendDirection="yayasanStatsData.guru.trendDirection" :icon="Users" variant="blue" />
 
-    <StatCard :delay="300" label="Total Anggaran" :value="`Rp ${yayasanStatsData.anggaran.total}M`" sub="Realisasi"
+    <StatCard :delay="400" label="Total Anggaran" :value="`Rp ${yayasanStatsData.anggaran.total}M`" sub="Realisasi"
       :progress="yayasanStatsData.anggaran.realisasi" :icon="Wallet" variant="emerald" />
   </div>
 </template>

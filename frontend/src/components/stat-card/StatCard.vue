@@ -88,7 +88,7 @@ function getTrendConfig(direction) {
           <span class="text-muted-foreground">{{ sub || 'Realisasi' }}</span>
           <span :class="['font-semibold', getVariantClasses(variant).color]">{{ progress }}%</span>
         </div>
-        <Progress :model-value="progress" class="h-2" />
+        <Progress :model-value="progress" :delay="computedDelay + 250" class="h-2" />
       </div>
 
       <!-- Variant Trend Default -->

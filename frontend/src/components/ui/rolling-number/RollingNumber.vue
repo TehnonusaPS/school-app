@@ -3,7 +3,8 @@ import { computed, ref, onMounted, watch } from 'vue'
 
 const props = defineProps({
   value: { type: [String, Number], required: true },
-  delay: { type: Number, default: 0 }
+  delay: { type: Number, default: 0 },
+  duration: { type: Number, default: 2200 }
 })
 
 const chars = computed(() => {
@@ -29,14 +30,14 @@ const chars = computed(() => {
 const isReady = ref(false)
 let timeoutId = null
 
-const startSpin = () => {
+const startSpin = (customDelay = null) => {
   isReady.value = false
   if (timeoutId) clearTimeout(timeoutId)
   
-  // Wait for the global delay, then start the spin!
+  const delayTime = customDelay !== null ? customDelay : props.delay
   timeoutId = setTimeout(() => {
     isReady.value = true
-  }, props.delay + 50)
+  }, delayTime + 50)
 }
 
 onMounted(() => {
@@ -45,9 +46,10 @@ onMounted(() => {
 
 // Re-spin if the value changes dynamically
 watch(() => props.value, () => {
-  startSpin()
+  startSpin(0)
 })
 </script>
+
 
 <template>
   <div class="inline-flex items-center whitespace-nowrap" style="white-space: nowrap; display: inline-flex; align-items: center;">
@@ -71,7 +73,7 @@ watch(() => props.value, () => {
             display: 'flex',
             flexDirection: 'column',
             transitionProperty: 'transform',
-            transitionDuration: isReady ? '2200ms' : '0ms',
+            transitionDuration: isReady ? `${props.duration}ms` : '0ms',
             transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
             transitionDelay: isReady ? `${index * 120}ms` : '0ms',
             transform: isReady ? 'translateY(calc(-100% + 1.1em))' : 'translateY(0)'

@@ -41,7 +41,7 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + 100)
 
     <!-- Rata-rata Presensi -->
     <StatCard
-      :delay="200"
+      :delay="250"
       label="Rata-rata Presensi"
       value="94.8%"
       trend="+2.4% dari bulan lalu"
@@ -52,7 +52,7 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + 100)
 
     <!-- Tugas Menunggu -->
     <StatCard
-      :delay="300"
+      :delay="400"
       label="Tugas Menunggu"
       value="12"
       trend="Deadline: 2 hari"

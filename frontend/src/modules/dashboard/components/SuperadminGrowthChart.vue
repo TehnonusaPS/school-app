@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ChartConfig } from '@/components/ui/chart'
 import { ArrowUpRight, TrendingUp } from 'lucide-vue-next'
+import { ref, onMounted, computed } from 'vue'
 import { Badge } from '@/components/ui/badge'
 import {
   ChartContainer,
@@ -11,7 +12,23 @@ import {
 } from '@/components/ui/chart'
 import { VisAxis, VisGroupedBar, VisXYContainer } from '@unovis/vue'
 import WidgetCard from '@/components/dashboard-widget/WidgetCard.vue'
+import { useAuthStore } from '@/stores/authStore'
 import { growthChartData as chartData } from '../data/superadminGrowthChartData'
+
+const props = defineProps({
+  delay: { type: Number, default: 0 }
+})
+
+const auth = useAuthStore()
+const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.delay)
+
+const activeData = ref(chartData.map(d => ({ ...d, sekolah: 0 })))
+
+onMounted(() => {
+  setTimeout(() => {
+    activeData.value = chartData
+  }, computedDelay.value + 350)
+})
 
 const chartConfig = {
   sekolah: {
@@ -27,6 +44,7 @@ const chartConfig = {
     description="Jumlah sekolah terdaftar per bulan — 2025"
     cardClass="lg:col-span-3"
     footerClass="flex-col items-start gap-2 text-sm"
+    :delay="delay"
   >
     <template #header-action>
       <Badge variant="secondary" class="gap-1 text-xs bg-white/10 dark:bg-white/10 backdrop-blur-md border border-white/20 shadow-sm text-foreground">
@@ -39,9 +57,10 @@ const chartConfig = {
 
     <ChartContainer :config="chartConfig" class="h-[320px] w-full bar-chart-container opacity-90 drop-shadow-sm">
       <VisXYContainer
-        :data="chartData"
-        :x-domain="[-0.5, chartData.length - 0.5]"
+        :data="activeData"
+        :x-domain="[-0.5, activeData.length - 0.5]"
         :margin="{ left: -24 }"
+        :duration="1000"
       >
         <VisGroupedBar
           :x="(_d: any, i: number) => i"

@@ -7,19 +7,19 @@ import { adminSekolahStatsData } from '../data/adminSekolahStats'
 
 <template>
   <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-    <StatCard :delay="200" label="Total Siswa" :value="formatNumber(adminSekolahStatsData.siswa.total)"
+    <StatCard :delay="100" label="Total Siswa" :value="formatNumber(adminSekolahStatsData.siswa.total)"
       sub="siswa aktif" trend="94% hadir hari ini"
       :trendDirection="adminSekolahStatsData.siswa.trendDirection" :icon="Users" variant="blue" />
 
-    <StatCard :delay="400" label="Total Kelas" :value="formatNumber(adminSekolahStatsData.kelas.total)"
+    <StatCard :delay="250" label="Total Kelas" :value="formatNumber(adminSekolahStatsData.kelas.total)"
       sub="rombel aktif" trend="Semester Ganjil"
       :trendDirection="adminSekolahStatsData.kelas.trendDirection" :icon="LayoutGrid" variant="violet" />
 
-    <StatCard :delay="600" label="Absensi Hari Ini" :value="formatNumber(adminSekolahStatsData.absensi.total)"
+    <StatCard :delay="400" label="Absensi Hari Ini" :value="formatNumber(adminSekolahStatsData.absensi.total)"
       sub="94% hadir" :trend="`${formatDelta(adminSekolahStatsData.absensi.growthPercent)}% dari kemarin`"
       :trendDirection="adminSekolahStatsData.absensi.trendDirection" :icon="ClipboardCheck" variant="emerald" />
 
-    <StatCard :delay="800" label="SPP Terkumpul" :value="`${adminSekolahStatsData.spp.total}%`"
+    <StatCard :delay="550" label="SPP Terkumpul" :value="`${adminSekolahStatsData.spp.total}%`"
       sub="Target Rp 2,4M" :trend="`${formatDelta(adminSekolahStatsData.spp.growthPercent)}% bulan ini`"
       :trendDirection="adminSekolahStatsData.spp.trendDirection" :icon="Wallet" variant="amber" />
   </div>

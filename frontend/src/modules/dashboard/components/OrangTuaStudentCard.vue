@@ -20,7 +20,7 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.de
     class="relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-white/40 group glass-ui flex min-h-[210px] w-full rounded-xl"
   >
     <!-- Info sisi kiri — primary glass styling -->
-    <div class="flex flex-col justify-between p-6 bg-gradient-to-br from-primary/25 via-primary/15 to-primary/5 w-[60%] shrink-0 relative z-10 backdrop-blur-sm">
+    <div class="flex flex-col justify-between p-6 bg-gradient-to-br from-primary/25 via-primary/15 to-primary/5 w-[60%] shrink-0 relative z-10 backdrop-blur-sm -mr-px">
       <div class="space-y-1">
         <Badge variant="outline" class="text-[10px] mb-2 w-fit border-primary/35 bg-primary/20 text-primary hover:bg-primary/30">
           Siswa

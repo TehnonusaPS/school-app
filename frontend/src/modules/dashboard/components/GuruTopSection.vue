@@ -12,13 +12,13 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + 100)
 </script>
 
 <template>
-  <div class="grid gap-4 lg:grid-cols-3">
+  <div class="grid gap-3 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
     <!-- Welcome Card (Glassmorphism & animated) -->
     <Card
       v-motion
       :initial="{ opacity: 0, y: 30, scale: 0.95 }"
       :visible-once="{ opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 200, damping: 20, mass: 0.8, delay: computedDelay } }"
-      class="relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-white/40 group glass-ui flex flex-col justify-between"
+      class="relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-white/40 group glass-ui flex flex-col justify-between max-sm:col-span-2"
     >
       <!-- Watermark Icon Background -->
       <Sun class="absolute -right-4 -bottom-4 size-24 opacity-[0.04] rotate-12 transition-transform duration-300 group-hover:scale-110 text-violet-500" />

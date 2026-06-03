@@ -232,11 +232,21 @@
     border: 1px solid rgba(255, 255, 255, 0.25) !important;
     border-top: 1.5px solid rgba(255, 255, 255, 0.6) !important;
     border-left: 1.5px solid rgba(255, 255, 255, 0.4) !important;
-    border-radius: 32px !important;
+    border-radius: 16px !important;
     box-shadow:
       0 4px 16px -4px rgba(0, 0, 0, 0.12),
       inset 0px 0px 12px 0px rgba(255, 255, 255, 0.4),
       inset 1px 1px 1px -1px rgba(255, 255, 255, 0.6) !important;
+  }
+
+  @media (min-width: 640px) {
+    [data-slot="card"],
+    [data-slot="calendar"],
+    [data-slot="range-calendar"],
+    [data-slot="alert"],
+    [data-slot="sidebar-inner"] {
+      border-radius: 32px !important;
+    }
   }
 
   .dark [data-slot="card"],

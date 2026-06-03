@@ -6,7 +6,7 @@ import { yayasanStatsData } from '../data/yayasanStats'
 </script>
 
 <template>
-  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  <div class="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
     <!-- Stat Cards biasa -->
     <StatCard :delay="100" label="Total Sekolah" :value="formatNumber(yayasanStatsData.sekolah.total)"
       sub="di bawah yayasan" :trend="`${formatDelta(yayasanStatsData.sekolah.growth)} semester ini`"
@@ -17,6 +17,6 @@ import { yayasanStatsData } from '../data/yayasanStats'
       :trendDirection="yayasanStatsData.guru.trendDirection" :icon="Users" variant="blue" />
 
     <StatCard :delay="400" label="Total Anggaran" :value="`Rp ${yayasanStatsData.anggaran.total}M`" sub="Realisasi"
-      :progress="yayasanStatsData.anggaran.realisasi" :icon="Wallet" variant="emerald" />
+      :progress="yayasanStatsData.anggaran.realisasi" :icon="Wallet" variant="emerald" class="col-span-2 sm:col-span-1" />
   </div>
 </template>

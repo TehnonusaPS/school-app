@@ -59,52 +59,52 @@ function getTrendConfig(direction) {
     v-motion
     :initial="{ opacity: 0, y: 30, scale: 0.95 }"
     :visible-once="{ opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 200, damping: 20, mass: 0.8, delay: computedDelay } }"
-    class="relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-white/40 group glass-ui"
+    class="relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-white/40 group glass-ui py-0 sm:py-4 gap-0 sm:gap-4 !rounded-2xl sm:!rounded-[32px]"
   >
     <!-- Watermark Icon Background -->
     <component 
       v-if="icon"
       :is="icon" 
-      :class="['absolute -right-4 -bottom-4 size-24 opacity-[0.04] rotate-12 transition-transform duration-300 group-hover:scale-110', getVariantClasses(variant).color]" 
+      :class="['absolute -right-4 -bottom-4 size-12 sm:size-24 opacity-[0.04] rotate-12 transition-transform duration-300 group-hover:scale-110', getVariantClasses(variant).color]" 
     />
 
-    <CardHeader class="pb-2 relative z-10">
+    <CardHeader class="!px-3.5 pt-2 pb-0 sm:!px-4 sm:pt-0 sm:pb-2 relative z-10">
       <div class="flex items-center justify-between">
-        <CardDescription class="text-sm font-medium">{{ label }}</CardDescription>
-        <div :class="['rounded-xl p-2.5 backdrop-blur-md shadow-lg border border-white/10 transition-colors', getVariantClasses(variant).bg]">
-          <component v-if="icon" :is="icon" :class="['size-4 drop-shadow-md', getVariantClasses(variant).color]" />
+        <CardDescription class="text-[10px] sm:text-sm font-medium truncate max-w-[80%]">{{ label }}</CardDescription>
+        <div :class="['rounded-md sm:rounded-xl p-1 sm:p-2.5 backdrop-blur-md shadow-lg border border-white/10 transition-colors', getVariantClasses(variant).bg]">
+          <component v-if="icon" :is="icon" :class="['size-3 sm:size-4 drop-shadow-md', getVariantClasses(variant).color]" />
         </div>
       </div>
     </CardHeader>
     
-    <CardContent class="relative z-10">
-      <div class="text-3xl font-bold tracking-tight drop-shadow-sm">
+    <CardContent class="!px-3.5 pt-0 pb-2 sm:!px-4 sm:pb-0 relative z-10 mt-[-3px] sm:mt-0">
+      <div class="text-lg sm:text-3xl font-bold tracking-tight drop-shadow-sm">
         <RollingNumber :value="value" :delay="computedDelay" />
       </div>
       
       <!-- Variant Progress -->
-      <div v-if="progress !== undefined" class="space-y-1.5 mt-3 w-full">
-        <div class="flex items-center justify-between text-xs">
-          <span class="text-muted-foreground">{{ sub || 'Realisasi' }}</span>
+      <div v-if="progress !== undefined" class="space-y-0.5 sm:space-y-1.5 mt-1 sm:mt-3 w-full">
+        <div class="flex items-center justify-between text-[9px] sm:text-xs">
+          <span class="text-muted-foreground truncate max-w-[70%]">{{ sub || 'Realisasi' }}</span>
           <span :class="['font-semibold', getVariantClasses(variant).color]">{{ progress }}%</span>
         </div>
-        <Progress :model-value="progress" :delay="computedDelay + 250" class="h-2" />
+        <Progress :model-value="progress" :delay="computedDelay + 250" class="h-1 sm:h-2" />
       </div>
 
       <!-- Variant Trend Default -->
-      <div v-else-if="trend || sub" class="mt-1 flex items-center gap-1.5">
+      <div v-else-if="trend || sub" class="mt-0.5 sm:mt-1 flex flex-col items-start gap-0 sm:flex-row sm:items-center sm:gap-1.5">
         <span 
           v-if="trend"
           :class="[
-            'flex items-center gap-0.5 text-xs font-bold px-1.5 py-0.5 rounded-md backdrop-blur-sm', 
+            'flex items-center gap-0.5 text-[9px] sm:text-xs font-bold px-1 py-0.2 rounded backdrop-blur-sm whitespace-nowrap', 
             getTrendConfig(trendDirection).colorClass,
             getTrendConfig(trendDirection).bgClass
           ]"
         >
-          <component :is="getTrendConfig(trendDirection).icon" class="size-3" />
+          <component :is="getTrendConfig(trendDirection).icon" class="size-2 sm:size-3" />
           {{ trend }}
         </span>
-        <span v-if="sub" class="text-xs text-muted-foreground">{{ sub }}</span>
+        <span v-if="sub" class="text-[9px] sm:text-xs text-muted-foreground whitespace-nowrap truncate max-w-full">{{ sub }}</span>
       </div>
     </CardContent>
   </Card>

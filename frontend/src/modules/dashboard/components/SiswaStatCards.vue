@@ -6,7 +6,7 @@ import { siswaStatsData } from '../data/siswaStats'
 </script>
 
 <template>
-  <div class="grid gap-4 sm:grid-cols-3">
+  <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
     <StatCard :delay="100" label="Hadir" :value="formatNumber(siswaStatsData.hadir.total)"
       sub="hari kehadiran" :trendDirection="siswaStatsData.hadir.trendDirection" 
       :icon="UserCheck" variant="emerald" />
@@ -17,6 +17,6 @@ import { siswaStatsData } from '../data/siswaStats'
 
     <StatCard :delay="400" label="Alpa" :value="siswaStatsData.alpa.total === 0 ? '—' : formatNumber(siswaStatsData.alpa.total)"
       sub="tidak hadir tanpa ket." :trendDirection="siswaStatsData.alpa.trendDirection" 
-      :icon="UserX" variant="primary" />
+      :icon="UserX" variant="primary" class="col-span-2 sm:col-span-1" />
   </div>
 </template>

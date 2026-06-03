@@ -6,7 +6,7 @@ import { superadminStatsData } from '../data/superadminStats'
 </script>
 
 <template>
-  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <div class="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
     <StatCard :delay="100" label="Total Yayasan" :value="formatNumber(superadminStatsData.yayasan.total)"
       :sub="`${formatDelta(superadminStatsData.yayasan.newThisMonth)} bulan ini`"
       :trend="`${formatDelta(superadminStatsData.yayasan.growthPercent)}%`"

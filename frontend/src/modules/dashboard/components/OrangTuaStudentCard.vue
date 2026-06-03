@@ -23,7 +23,7 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.de
     <!-- Info sisi kiri — primary glass styling -->
     <div class="flex flex-col justify-between p-6 bg-gradient-to-br from-primary/25 via-primary/15 to-primary/5 w-[60%] shrink-0 relative z-10 backdrop-blur-sm -mr-px">
       <div class="space-y-1">
-        <Badge variant="outline" class="text-[10px] mb-2 w-fit border-primary/35 bg-primary/20 text-primary hover:bg-primary/30">
+        <Badge class="text-[10px] mb-2 w-fit bg-primary/15 hover:bg-primary/25 text-primary border-none shadow-none">
           Siswa
         </Badge>
         <h2 class="text-xl font-bold leading-tight text-foreground">Aditya Pratama</h2>
@@ -33,13 +33,13 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.de
 
       <!-- Mini stats -->
       <div class="flex gap-3 mt-5">
-        <div class="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-left flex-1">
+        <div class="rounded-lg bg-primary/10 dark:bg-primary/5 px-4 py-3 text-left flex-1">
           <p class="text-2xl font-bold text-foreground">
             <RollingNumber value="8.8" :delay="computedDelay" />
           </p>
           <p class="text-xs text-muted-foreground mt-1">Rata-rata</p>
         </div>
-        <div class="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-left flex-1">
+        <div class="rounded-lg bg-primary/10 dark:bg-primary/5 px-4 py-3 text-left flex-1">
           <p class="text-2xl font-bold text-foreground">
             <RollingNumber value="95%" :delay="computedDelay" />
           </p>

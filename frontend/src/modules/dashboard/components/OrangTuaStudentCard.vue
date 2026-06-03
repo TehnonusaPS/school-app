@@ -33,13 +33,13 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.de
 
       <!-- Mini stats -->
       <div class="flex gap-3 mt-5">
-        <div class="rounded-lg bg-primary/10 dark:bg-primary/5 px-4 py-3 text-left flex-1">
+        <div class="rounded-lg border border-white/10 dark:border-white/5 bg-white/5 dark:bg-white/5 backdrop-blur-sm px-4 py-3 text-left flex-1">
           <p class="text-2xl font-bold text-foreground">
             <RollingNumber value="8.8" :delay="computedDelay" />
           </p>
           <p class="text-xs text-muted-foreground mt-1">Rata-rata</p>
         </div>
-        <div class="rounded-lg bg-primary/10 dark:bg-primary/5 px-4 py-3 text-left flex-1">
+        <div class="rounded-lg border border-white/10 dark:border-white/5 bg-white/5 dark:bg-white/5 backdrop-blur-sm px-4 py-3 text-left flex-1">
           <p class="text-2xl font-bold text-foreground">
             <RollingNumber value="95%" :delay="computedDelay" />
           </p>

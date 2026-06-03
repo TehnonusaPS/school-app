@@ -57,9 +57,9 @@ watch(() => props.value, () => {
       <span v-if="!charObj.isDigit" style="display: inline-block;">{{ charObj.value }}</span>
       
       <!-- Digit columns (Mahjong slot effect) -->
-      <div v-else style="position: relative; display: inline-flex; flex-direction: column; overflow: hidden; vertical-align: bottom; height: 1.1em; line-height: 1.1em;">
+      <div v-else style="position: relative; display: inline-block; overflow: hidden; vertical-align: bottom; height: 1.1em; line-height: 1.1em;">
         <!-- Invisible static character to maintain correct dynamic width -->
-        <span style="visibility: hidden; pointer-events: none;">{{ charObj.value }}</span>
+        <span style="visibility: hidden; display: inline-block; pointer-events: none;">{{ charObj.value }}</span>
         
         <!-- The spinning column -->
         <div 

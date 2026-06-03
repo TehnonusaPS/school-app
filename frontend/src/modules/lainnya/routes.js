@@ -59,7 +59,8 @@ export default [
     meta:{
       title: 'Manajemen Aset',
       parent: 'Lainnya',
-      description: 'Pengelolaan data aset sekolah.'
+      description: 'Pengelolaan data aset sekolah.',
+      roles: ['admin_sekolah']
     }
   },
   {
@@ -68,7 +69,8 @@ export default [
     meta:{
       title: 'Tambah Aset',
       parent: 'Lainnya',
-      description: 'Form untuk menambahkan data aset baru.'
+      description: 'Form untuk menambahkan data aset baru.',
+      roles: ['admin_sekolah']
     }
   },
   {
@@ -77,7 +79,8 @@ export default [
     meta:{
       title: 'Edit Aset',
       parent: 'Lainnya',
-      description: 'Form untuk mengedit data aset.'
+      description: 'Form untuk mengedit data aset.',
+      roles: ['admin_sekolah']
     }
   },
   {
@@ -86,7 +89,8 @@ export default [
     meta:{
       title: 'Manajemen Perpustakaan',
       parent: 'Lainnya',
-      description: 'Pengelolaan data buku di perpustakaan sekolah.'
+      description: 'Pengelolaan data buku di perpustakaan sekolah.',
+      roles: ['admin_sekolah']
     }
   },
   {
@@ -95,7 +99,8 @@ export default [
     meta:{
       title: 'Tambah Buku Perpustakaan',
       parent: 'Lainnya',
-      description: 'Form untuk menambahkan data buku baru.'
+      description: 'Form untuk menambahkan data buku baru.',
+      roles: ['admin_sekolah']
     }
   },
   {
@@ -104,7 +109,8 @@ export default [
     meta:{
       title: 'Edit Buku',
       parent: 'Lainnya',
-      description: 'Form untuk mengedit data buku.'
+      description: 'Form untuk mengedit data buku.',
+      roles: ['admin_sekolah']
     }
   },
   {
@@ -113,16 +119,38 @@ export default [
     meta: {
       title: 'Konfigurasi Sistem Global',
       parent: 'Lainnya',
-      description: 'Pengaturan lisensi, audit sistem, dan konfigurasi global dasbor.'
+      description: 'Pengaturan lisensi, audit sistem, dan konfigurasi global dasbor.',
+      roles: ['superadmin']
     }
   },
   {
-    path: 'lainnya/informasi-sekolah',
-    component: () => import('./pages/InformasiSekolah.vue'),
+    path: 'lainnya/informasi-perpustakaan',
+    component: () => import('./pages/InformasiPerpustakaanSekolah.vue'),
     meta: {
-      title: 'Informasi Sekolah',
+      title: 'Informasi Perpustakaan Sekolah',
       parent: 'Lainnya',
-      description: 'Detail dan informasi umum mengenai unit-unit sekolah terdaftar.'
+      description: 'Detail dan informasi umum mengenai perpustakaan sekolah.',
+      roles: ['kepala_sekolah', 'admin_yayasan']
+    }
+  },
+  {
+    path: 'lainnya/informasi-aset',
+    component: () => import('./pages/InformasiAsetSekolah.vue'),
+    meta: {
+      title: 'Informasi Aset Sekolah',
+      parent: 'Lainnya',
+      description: 'Detail dan informasi umum mengenai aset sekolah.',
+      roles: ['kepala_sekolah', 'admin_yayasan']
+    }
+  },
+  {
+    path: 'lainnya/informasi-ruangan',
+    component: () => import('./pages/InformasiRuanganSekolah.vue'),
+    meta: {
+      title: 'Informasi Ruangan Sekolah',
+      parent: 'Lainnya',
+      description: 'Detail dan informasi umum mengenai ruangan sekolah.',
+      roles: ['kepala_sekolah', 'admin_yayasan']
     }
   }
 ]

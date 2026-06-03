@@ -39,7 +39,7 @@ onMounted(() => {
   if (auth.isJustLoggedIn) {
     setTimeout(() => {
       auth.isJustLoggedIn = false
-    }, 2500)
+    }, 1200)
   }
 })
 

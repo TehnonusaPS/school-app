@@ -100,7 +100,7 @@ export default [
     meta: {
       title: 'Hak Akses Pengguna',
       parent: 'Manajemen Data',
-      description: 'Kelola kewenangan, lisensi, dan hak akses pengguna sistem.'
+      description: 'Kelola kewenangan, lisensi, dan hak akses pengguna sistem. mmmmmm'
     }
   },
   // GURU & STAFF (OLEH ADM YAYASAN)

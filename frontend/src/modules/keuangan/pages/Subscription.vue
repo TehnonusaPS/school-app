@@ -61,7 +61,6 @@ const kpiData = [
 </script>
 
 <template>
-<<<<<<< Updated upstream
   <div class="space-y-6 w-full mx-auto px-0">
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <StatCard
@@ -300,7 +299,3 @@ const kpiData = [
     </Card>
   </div>
 </template>
-=======
-  <PlaceholderPage :icon="BellRing" />
-</template>
->>>>>>> Stashed changes

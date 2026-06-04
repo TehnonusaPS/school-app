@@ -85,7 +85,7 @@ export default [
     meta: {
       title: 'Kelola Hak Akses Pengguna',
       parent: 'Manajemen Data',
-      description: 'Kelola kewenangan, lisensi, dan hak akses pengguna sistem.'
+      description: 'Kelola kewenangan, lisensi, dan hak akses pengguna sistem. mmmmmm'
     }
   },
   {

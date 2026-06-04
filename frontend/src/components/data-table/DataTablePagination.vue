@@ -1,5 +1,6 @@
 <script setup>
 import { Button } from '@/components/ui/button'
+import { computed } from 'vue'
 
 const props = defineProps({
   total: Number,
@@ -14,10 +15,12 @@ const props = defineProps({
 
 const emit = defineEmits(['update:page'])
 
-const totalPages = Math.ceil(props.total / props.perPage)
+const totalPages = computed(() =>
+  Math.ceil(props.total / props.perPage)
+)
 
 const nextPage = () => {
-  if (props.page < totalPages) {
+  if (props.page < totalPages.value) {
     emit('update:page', props.page + 1)
   }
 }
@@ -27,6 +30,26 @@ const prevPage = () => {
     emit('update:page', props.page - 1)
   }
 }
+
+const visiblePages = computed(() => {
+  const pages = []
+
+  let start = Math.max(1, props.page - 1)
+  let end = Math.min(totalPages.value, start + 2)
+
+  if (end - start < 2) {
+    start = Math.max(1, end - 2)
+  }
+
+  for (let i = start; i <= end; i++) {
+    pages.push(i)
+  }
+
+  return pages
+})
+
+const goToPage = (page) => {emit('update:page', page)}
+
 </script>
 
 <template>
@@ -40,9 +63,17 @@ const prevPage = () => {
         &lt;
       </Button>
 
-      <Button variant="default" class="w-8 h-8 p-0"> {{ page }}</Button>
+      <Button
+        v-for="pageNumber in visiblePages"
+        :key="pageNumber"
+        :variant="pageNumber === page ? 'default' : 'outline'"
+        class="w-8 h-8 p-0"
+        @click="goToPage(pageNumber)"
+      >
+        {{ pageNumber }}
+      </Button>
 
-      <Button variant="outline" class="w-8 h-8 p-0" :disabled="page >= totalPages" @click="nextPage">
+      <Button variant="outline" class="w-8 h-8 p-0" :disabled="page >= totalPages.value" @click="nextPage">
         &gt;
       </Button>
     </div>

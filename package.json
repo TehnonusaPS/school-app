@@ -1,0 +1,21 @@
+{
+  "name": "school-app",
+  "version": "1.0.0",
+  "description": "Proyek ini dipisahkan menjadi dua bagian utama: - `frontend/` : Berisi source code untuk aplikasi frontend (Vue/Vite/dll). - `backend/`  : Berisi source code untuk aplikasi backend (saat ini masih dikosongkan).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TehnonusaPS/school-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/TehnonusaPS/school-app/issues"
+  },
+  "homepage": "https://github.com/TehnonusaPS/school-app#readme"
+}

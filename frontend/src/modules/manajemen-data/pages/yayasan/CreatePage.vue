@@ -2,7 +2,8 @@
 import { 
   Phone, 
   Image,
-  Building2
+  Building2,
+  UserCog
 } from 'lucide-vue-next'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -14,6 +15,7 @@ import FormTextArea from '@/components/forms/FormTextArea.vue'
 import FormDate from '@/components/forms/FormDate.vue'
 import FormSection from '@/components/forms/FormSection.vue'
 import FormSelect from '@/components/forms/FormSelect.vue'
+import SuccessAccountDialog from '@/components/dialogs/SuccessAccountDialog.vue'
 
 const router = useRouter()
 const isLoading = ref(false)
@@ -24,11 +26,16 @@ const form = ref({
   nama: '',
   tanggal_berdiri: '',
   status: '',
-  contoh: '',
   alamat: '',
   email: '',
   no_hp: '',
-  website: ''
+  website: '',
+  no_akta: '',
+  tanggal_akta: '',
+  no_sk: '',
+  tanggal_sk: '',
+  emailLogin: '',
+  noHpLogin: ''
 })
 
 const statusOptions = [
@@ -50,14 +57,25 @@ const handleImage = (file) => {
 
 const goBack = () => router.back()
 
+const showSuccessModal = ref(false)
+
+const generatedAccount = ref({
+  email: 'admin@foundation.id',
+  phone: '081234567890',
+  password: 'Adm#2026!'
+})
+
 const handleSubmit = () => {
   isLoading.value = true
-  // Simulasi simpan data
+
   setTimeout(() => {
     isLoading.value = false
-    alert('Data yayasan berhasil disimpan!')
-    router.push('/manajemen-data/yayasan')
-  }, 1500)
+    showSuccessModal.value = true
+  }, 1000)
+}
+
+const goToList = () => {
+  router.push('/manajemen-data/yayasan')
 }
 </script>
 
@@ -69,7 +87,7 @@ const handleSubmit = () => {
     title="Tambah Yayasan"
     description="Lengkapi formulir berikut untuk menambahkan data yayasan baru"
     :loading="isLoading"
-    save-text="Simpan Data Yayasan"
+    save-text="Simpan Data"
     @back="goBack"
     @cancel="goBack"
     @save="handleSubmit"
@@ -82,12 +100,11 @@ const handleSubmit = () => {
         <FormSection title="Logo Yayasan" description="Upload logo yayasan disini" :icon="Image">
             <ImageUpload :preview="imagePreview" @change="handleImage" note="Format: JPG atau PNG. Maksimal 2MB. Dimensi rasio 1:1"/>
         </FormSection>
-
         <!-- Informasi Kontak -->
         <FormSection title="Kontak Yayasan" description="Informasi kontak dari yayasan" :icon="Phone">
             <FormInput v-model="form.email" label="E-mail" placeholder="Contoh: yayasan@mail.com"/>
             <FormInput v-model="form.no_hp" label="No. Telp" placeholder="Contoh: 081289170180"/>
-            <FormInput v-model="form.website" label="Nama Yayasan" placeholder="Contoh: www.yayasan.com"/>
+            <FormInput v-model="form.website" label="Website" placeholder="Contoh: www.yayasan.com"/>
         </FormSection>
       </div>
       <!-- Kolom Kanan: Informasi Umum Yayasan (Lebar 2 Kolom) -->
@@ -102,13 +119,35 @@ const handleSubmit = () => {
                 <FormSelect v-model="form.status" label="Status" placeholder="Pilih status yayasan" :options="statusOptions"/>
             </div>
             <div class="grid gap-4 md:grid-cols-2">
-                <FormInput v-model="form.contoh" label="Input 1" placeholder="Contoh: Lorem Ipsum"/>
-                <FormInput v-model="form.contoh" label="Input 2" placeholder="Contoh: Lorem Ipsum"/>
+                <FormInput v-model="form.no_akta" label="No. Akta Pendirian" placeholder="Contoh: 1234567890"/>
+                <FormDate v-model="form.tanggal_akta" label="Tanggal Akta Pendirian"/>
+            </div>
+            <div class="grid gap-4 md:grid-cols-2">
+                <FormInput v-model="form.no_sk" label="No. SK Kemenkumham" placeholder="Contoh: 1234567890"/>
+                <FormDate v-model="form.tanggal_sk" label="Tanggal SK Kemenkumham"/>
             </div>
             <Separator class="my-4" />
             <FormTextArea v-model="form.alamat" label="Alamat Lengkap" placeholder="Contoh: Nama Jalan, RT/RW, Kelurahan, Kecamatan, Kota"/>
         </FormSection>
+
+        <!-- Informasi Login -->
+        <FormSection title="Akun Administrator" description="Data akun yang digunakan oleh administrator yayasan untuk mengakses sistem." :icon="UserCog">
+          <div class="grid gap-4 md:grid-cols-2">
+            <FormInput v-model="form.emailLogin" label="E-mail Login" placeholder="Contoh: admin@yayasan.id"/>
+            <FormInput v-model="form.noHpLogin" label="No. HP Login" placeholder="Contoh: 081234567890"/>
+          </div>
+        </FormSection>
       </div>
     </div>
   </div>
+
+  <SuccessAccountDialog
+    v-model:open="showSuccessModal"
+    title="Yayasan Berhasil Ditambahkan"
+    description="Data yayasan berhasil disimpan dan akun administrator yayasan telah dibuat."
+    :email="generatedAccount.email"
+    :phone="generatedAccount.phone"
+    :password="generatedAccount.password"
+    @close="goToList"
+  />
 </template>

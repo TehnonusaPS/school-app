@@ -4,6 +4,8 @@ import DataTablePagination from './DataTablePagination.vue'
 import BaseDataTable from './BaseDataTable.vue'
 import { Card } from '@/components/ui/card'
 
+const emit = defineEmits(['update:page'])
+
 defineProps({
   columns: Array,
   items: Array,
@@ -44,6 +46,7 @@ defineProps({
     :to="to"
     :total="total"
     :page="page"
+    @update:page="emit('update:page', $event)"
     />
   </Card>
 </template>

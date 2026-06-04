@@ -49,6 +49,7 @@ defineProps({
             :name="`cell-${column.key}`"
             :item="item"
             :value="item[column.key]"
+            :index="rowIndex"
           >
             {{ item[column.key] }}
           </slot>

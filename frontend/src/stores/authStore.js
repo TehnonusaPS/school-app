@@ -16,7 +16,7 @@ export const useAuthStore = defineStore('auth', {
       if (normalizedEmail === 'superadmin@mail.com' && password === '123456') {
         user = { name: 'Super Admin', role: 'superadmin', roleLabel: 'SUPERADMIN', email: 'superadmin@mail.com' }
       } else if (normalizedEmail === 'adminyayasan@mail.com' && password === '123456') {
-        user = { name: 'Admin Yayasan', role: 'admin_yayasan', roleLabel: 'ADMIN YAYASAN', email: 'adminyayasan@mail.com' }
+        user = { name: 'Admin Yayasan', role: 'admin_yayasan', roleLabel: 'ADMIN YAYASAN', email: 'adminyayasan@mail.com', yayasanId: 'Y0001' }
       } else if (normalizedEmail === 'kepalasekolah@mail.com' && password === '123456') {
         user = { name: 'Kepala Sekolah', role: 'kepala_sekolah', roleLabel: 'KEPALA SEKOLAH', email: 'kepalasekolah@mail.com' }
       } else if (normalizedEmail === 'adminsekolah@mail.com' && password === '123456') {

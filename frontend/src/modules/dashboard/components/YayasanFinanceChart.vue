@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ChartConfig } from '@/components/ui/chart'
 import { TrendingUp } from 'lucide-vue-next'
+import { ref, onMounted, computed } from 'vue'
 import {
   ChartContainer,
   ChartCrosshair,
@@ -11,7 +12,23 @@ import {
 } from '@/components/ui/chart'
 import { VisAxis, VisLine, VisXYContainer } from '@unovis/vue'
 import WidgetCard from '@/components/dashboard-widget/WidgetCard.vue'
+import { useAuthStore } from '@/stores/authStore'
 import { financeChartData as chartData } from '../data/yayasanFinanceChartData'
+
+const props = defineProps({
+  delay: { type: Number, default: 0 }
+})
+
+const auth = useAuthStore()
+const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.delay)
+
+const activeData = ref(chartData.map(d => ({ ...d, pendapatan: 0, pengeluaran: 0 })))
+
+onMounted(() => {
+  setTimeout(() => {
+    activeData.value = chartData
+  }, computedDelay.value + 350)
+})
 
 const chartConfig = {
   pendapatan: {
@@ -30,9 +47,10 @@ const chartConfig = {
     title="Perbandingan Pendapatan vs Pengeluaran"
     description="6 bulan terakhir — dalam juta rupiah"
     footerClass="flex-col items-start gap-2 text-sm"
+    :delay="delay"
   >
     <ChartContainer :config="chartConfig" class="h-[260px] w-full">
-      <VisXYContainer :data="chartData">
+      <VisXYContainer :data="activeData" :duration="1000">
         <VisLine
           :x="(_d: any, i: number) => i"
           :y="(d: any) => d.pendapatan"

@@ -1,6 +1,7 @@
 <script setup>
 import { ScrollArea } from '@/components/ui/scroll-area'
 import WidgetCard from './WidgetCard.vue'
+import { glassFade } from '@/config/motion'
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -10,8 +11,13 @@ const props = defineProps({
   items: { type: Array, required: true },
   cardClass: { type: String, default: '' },
   listClass: { type: String, default: 'h-[360px] px-6' },
-  emptyText: { type: String, default: 'Tidak ada data.' }
+  emptyText: { type: String, default: 'Tidak ada data.' },
+  delay: { type: Number, default: 0 }
 })
+
+import { useAuthStore } from '@/stores/authStore'
+const auth = useAuthStore()
+const getDelay = (index) => (auth.isJustLoggedIn ? 1400 : 0) + props.delay + (index * 100)
 </script>
 
 <template>
@@ -22,6 +28,7 @@ const props = defineProps({
     :footerText="footerText"
     contentClass="p-0"
     :cardClass="cardClass"
+    :delay="delay"
   >
     <template #header-action>
       <slot name="header-action" />
@@ -32,6 +39,9 @@ const props = defineProps({
         <div
           v-for="(item, index) in items"
           :key="item.id || index"
+          v-motion
+          :initial="glassFade.initial"
+          :visible-once="{ ...glassFade.visible, transition: { ...glassFade.visible.transition, delay: getDelay(index) } }"
           class="group flex items-start gap-3 rounded-xl p-3 transition-all hover:bg-white/5 dark:hover:bg-white/5 cursor-default border border-transparent hover:border-white/10 hover:shadow-lg"
         >
           <slot name="item" :item="item" :index="index" />

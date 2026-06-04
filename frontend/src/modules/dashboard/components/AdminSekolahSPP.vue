@@ -3,7 +3,7 @@ import type { ChartConfig } from '@/components/ui/chart'
 import { Donut } from '@unovis/ts'
 import { VisDonut, VisSingleContainer } from '@unovis/vue'
 import { Wallet } from 'lucide-vue-next'
-import { computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import {
   ChartContainer,
   ChartTooltip,
@@ -11,6 +11,8 @@ import {
   componentToString
 } from '@/components/ui/chart'
 import WidgetCard from '@/components/dashboard-widget/WidgetCard.vue'
+import RollingNumber from '@/components/ui/rolling-number/RollingNumber.vue'
+import { useAuthStore } from '@/stores/authStore'
 import { sppData as chartData, sppSummary } from '../data/adminSekolahSPPData'
 
 type Data = typeof chartData[number]
@@ -21,9 +23,33 @@ const chartConfig = {
   belum: { label: 'Belum Bayar', color: 'var(--muted-foreground)' }
 } satisfies ChartConfig
 
-const total   = computed(() => chartData.reduce((a, c) => a + c.nilai, 0))
-const persen  = computed(() => Math.round((chartData[0].nilai / total.value) * 100))
+const props = defineProps({
+  delay: { type: Number, default: 0 }
+})
+
+const auth = useAuthStore()
+const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.delay)
+
+const total = computed(() => chartData.reduce((a, c) => a + c.nilai, 0))
+
+const activeData = ref<any[]>([
+  { status: 'sudah', nilai: 0 },
+  { status: 'belum', nilai: total.value }
+])
+
+const activePersen = computed(() => {
+  const sudah = activeData.value.find(d => d.status === 'sudah')?.nilai || 0
+  const tot = activeData.value.reduce((a, c) => a + c.nilai, 0)
+  return tot > 0 ? Math.round((sudah / tot) * 100) : 0
+})
+
+onMounted(() => {
+  setTimeout(() => {
+    activeData.value = chartData
+  }, computedDelay.value + 800)
+})
 </script>
+
 
 <template>
   <WidgetCard
@@ -33,25 +59,26 @@ const persen  = computed(() => Math.round((chartData[0].nilai / total.value) * 1
     cardClass="lg:col-span-2"
     contentClass="pb-0"
     footerClass="flex-col gap-0 pt-2 border-t"
+    :delay="delay"
   >
     <ChartContainer
       :config="chartConfig"
-      class="mx-auto aspect-square max-h-[220px]"
-      :style="{
-        '--vis-donut-central-label-font-size': 'var(--text-3xl)',
-        '--vis-donut-central-label-font-weight': 'var(--font-weight-bold)',
-        '--vis-donut-central-label-text-color': 'var(--foreground)',
-        '--vis-donut-central-sub-label-text-color': 'var(--muted-foreground)'
-      }"
+      class="mx-auto aspect-square max-h-[220px] relative"
     >
-      <VisSingleContainer :data="chartData" :margin="{ top: 20, bottom: 20 }">
+      <VisSingleContainer
+        v-motion
+        :initial="{ opacity: 0, scale: 0.3 }"
+        :visible-once="{ opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 180, damping: 15, delay: computedDelay + 100 } }"
+        :data="activeData"
+        :margin="{ top: 20, bottom: 20 }"
+        :duration="1200"
+      >
         <VisDonut
+          :id="(d: Data) => d.status"
           :value="(d: Data) => d.nilai"
           :color="(d: Data) => chartConfig[d.status as keyof typeof chartConfig].color"
           :arc-width="32"
-          :central-label-offset-y="10"
-          :central-label="`${persen}%`"
-          central-sub-label="Terkumpul"
+          :duration="1200"
         />
         <ChartTooltip
           :triggers="{
@@ -59,6 +86,14 @@ const persen  = computed(() => Math.round((chartData[0].nilai / total.value) * 1
           }"
         />
       </VisSingleContainer>
+
+      <!-- Central Label Overlay -->
+      <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-1">
+        <span class="text-3xl font-bold text-foreground">
+          <RollingNumber :value="activePersen + '%'" :delay="0" :duration="1200" />
+        </span>
+        <span class="text-xs text-muted-foreground mt-0.5">Terkumpul</span>
+      </div>
     </ChartContainer>
 
     <template #footer>

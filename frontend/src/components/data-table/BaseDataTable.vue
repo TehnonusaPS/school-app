@@ -1,5 +1,6 @@
 <script setup>
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { tableRowFade } from '@/config/motion'
 
 defineProps({
   columns: {
@@ -35,6 +36,9 @@ defineProps({
       <TableRow
         v-for="(item, rowIndex) in items"
         :key="rowIndex"
+        v-motion
+        :initial="tableRowFade.initial"
+        :visible-once="{ ...tableRowFade.visible, transition: { ...tableRowFade.visible.transition, delay: rowIndex * 50 } }"
       >
         <TableCell
           v-for="column in columns"

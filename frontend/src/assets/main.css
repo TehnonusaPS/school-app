@@ -232,11 +232,21 @@
     border: 1px solid rgba(255, 255, 255, 0.25) !important;
     border-top: 1.5px solid rgba(255, 255, 255, 0.6) !important;
     border-left: 1.5px solid rgba(255, 255, 255, 0.4) !important;
-    border-radius: 32px !important;
+    border-radius: 16px !important;
     box-shadow:
       0 4px 16px -4px rgba(0, 0, 0, 0.12),
       inset 0px 0px 12px 0px rgba(255, 255, 255, 0.4),
       inset 1px 1px 1px -1px rgba(255, 255, 255, 0.6) !important;
+  }
+
+  @media (min-width: 640px) {
+    [data-slot="card"],
+    [data-slot="calendar"],
+    [data-slot="range-calendar"],
+    [data-slot="alert"],
+    [data-slot="sidebar-inner"] {
+      border-radius: 32px !important;
+    }
   }
 
   .dark [data-slot="card"],
@@ -1194,4 +1204,112 @@ body.bg-static_squares .background-squares-static {
   50% {
     box-shadow: 0 0 0 16px rgb(15 118 110 / 0);
   }
+}
+
+/* ══ VIEW TRANSITIONS (Login/Logout Curtain Split & Close) ══ */
+
+/* --- Konfigurasi Dasar Elemen Transisi Tirai --- */
+::view-transition-old(login-left),
+::view-transition-new(login-left),
+::view-transition-old(login-right),
+::view-transition-new(login-right) {
+  mix-blend-mode: normal;
+  height: 100%;
+  width: 100%;
+}
+
+/* --- Login: Curtain Split (Old login page slides out to reveal dashboard) --- */
+::view-transition-old(login-left) {
+  animation: slide-out-left 1.2s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+  z-index: 9999;
+}
+
+::view-transition-old(login-right) {
+  animation: slide-out-right 1.2s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+  z-index: 9999;
+}
+
+/* --- Logout: Curtain Close (New login page slides in to cover dashboard) --- */
+::view-transition-new(login-left) {
+  animation: slide-in-left 1.2s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+  z-index: 9999;
+}
+
+::view-transition-new(login-right) {
+  animation: slide-in-right 1.2s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+  z-index: 9999;
+}
+
+/* Mencegah halaman baru langsung menutupi halaman lama dengan cepat */
+::view-transition-new(root) {
+  animation: none;
+  z-index: 1;
+}
+
+/* Saat LOGOUT, kita hilangkan old root (screenshot statis) agar tidak menutupi background animasi yang sedang bergerak aktif di live DOM */
+.transition-logout::view-transition-old(root) {
+  animation: fade-out-instantly 0.1s ease forwards;
+  z-index: 1;
+}
+
+.transition-logout::view-transition-new(root) {
+  animation: none;
+  z-index: 2;
+}
+
+@keyframes fade-out-instantly {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes slide-out-left {
+  0% { transform: translateX(0); opacity: 1; }
+  50% { opacity: 1; }
+  100% { transform: translateX(-100%); opacity: 0; }
+}
+
+@keyframes slide-out-right {
+  0% { transform: translateX(0); opacity: 1; }
+  50% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+
+@keyframes slide-in-left {
+  0% { transform: translateX(-100%); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slide-in-right {
+  0% { transform: translateX(100%); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+/* --- Kelas Animasi Keluar (Exit) Sidebar & Topbar --- */
+.sidebar-exit-active {
+  transform: translateX(-120%) !important;
+  opacity: 0 !important;
+  transition: transform 0.6s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.6s ease-in-out !important;
+}
+
+.topbar-exit-active {
+  transform: translateY(-100px) !important;
+  opacity: 0 !important;
+  transition: transform 0.6s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.6s ease-in-out !important;
+}
+
+.content-exit-active {
+  transform: translateY(40px) !important;
+  opacity: 0 !important;
+  transition: transform 0.6s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.6s ease-in-out !important;
+}
+
+/* --- Entrance Animations for Login Page (First Load) --- */
+.login-left-entrance {
+  animation: slide-in-left 1.2s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+
+.login-right-entrance {
+  animation: slide-in-right 1.2s cubic-bezier(0.76, 0, 0.24, 1) forwards;
 }

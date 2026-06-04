@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { GraduationCap, Eye, EyeOff } from 'lucide-vue-next'
@@ -42,6 +42,7 @@ const password = ref('')
 const showPassword = ref(false)
 const isLoading = ref(false)
 const error = ref('')
+const isTransitioning = ref(!!window.pendingViewTransition)
 
 const togglePassword = () => {
   showPassword.value = !showPassword.value
@@ -54,8 +55,14 @@ const handleLogin = async () => {
   try {
     const user = await auth.login(email.value, password.value)
     if (user) {
-      toast.success(`Selamat datang, ${user.role}!`, { cancel: { label: 'Tutup', onClick: () => {} } })
-      router.push('/dashboard')
+      if (document.startViewTransition) {
+        document.startViewTransition(async () => {
+          await router.push('/dashboard')
+          await nextTick()
+        })
+      } else {
+        router.push('/dashboard')
+      }
     } else {
       error.value = 'Email atau password salah.'
     }
@@ -69,7 +76,17 @@ const handleLogin = async () => {
 // Close dropdown if clicked outside
 let handleOutsideClick = null
 
-onMounted(() => {
+onMounted(async () => {
+  // Jika ada transisi halaman yang sedang berjalan (logout/login), tunggu hingga selesai
+  // agar perubahan tema global tidak membuat dashboard/halaman lama berkedip (glitch)
+  if (window.pendingViewTransition) {
+    try {
+      await window.pendingViewTransition.finished
+    } catch (e) {
+      // Abaikan jika transisi diinterupsi
+    }
+  }
+
   // Paksa halaman login selalu dalam light mode
   document.documentElement.classList.remove('dark')
 
@@ -108,12 +125,20 @@ onUnmounted(() => {
 <template>
   <div class="grid min-h-screen w-full overflow-x-hidden lg:grid-cols-[450px_1fr] xl:grid-cols-[500px_1fr]">
     <!-- Left panel (Glassmorphism on mobile/tablet, clean minimal on desktop) -->
-    <div class="flex flex-col gap-4 p-4 sm:p-6 md:p-10 bg-background relative min-w-0 overflow-hidden justify-between">
+    <div
+      style="view-transition-name: login-left;"
+      :class="[
+        'flex flex-col gap-4 p-4 sm:p-6 md:p-10 bg-background relative min-w-0 overflow-hidden justify-between',
+        !isTransitioning ? 'login-left-entrance' : ''
+      ]"
+    >
       <!-- Mobile/Tablet Background Image Overlay -->
       <div class="absolute inset-0 lg:hidden overflow-hidden z-0">
         <img
           src="@/assets/images/login-bg.png"
           alt="Suasana Sekolah Indonesia"
+          loading="eager"
+          decoding="sync"
           class="absolute inset-0 h-full w-full object-cover"
         />
         <div class="absolute inset-0 bg-primary/80 backdrop-blur-[3px] mix-blend-multiply"></div>
@@ -243,11 +268,19 @@ onUnmounted(() => {
     </div>
 
     <!-- Right panel for laptop/desktop screen (hidden on mobile/tablet) -->
-    <div class="bg-muted relative hidden lg:block border-l overflow-hidden min-w-0">
+    <div
+      style="view-transition-name: login-right;"
+      :class="[
+        'bg-muted relative hidden lg:block border-l overflow-hidden min-w-0',
+        !isTransitioning ? 'login-right-entrance' : ''
+      ]"
+    >
       <!-- Menggunakan gambar sekolah Indonesia yang hangat dan familiar -->
       <img
         src="@/assets/images/login-bg.png"
         alt="Suasana Sekolah Indonesia"
+        loading="eager"
+        decoding="sync"
         class="absolute inset-0 h-full w-full object-cover"
       />
       <div class="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/70 to-transparent mix-blend-multiply"></div>

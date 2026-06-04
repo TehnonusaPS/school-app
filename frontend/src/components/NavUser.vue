@@ -10,7 +10,7 @@ import {
   Palette,
   Layers
 } from 'lucide-vue-next'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { toast } from 'vue-sonner'
@@ -54,10 +54,34 @@ const auth = useAuthStore()
 const router = useRouter()
 const showLogoutDialog = ref(false)
 
-const confirmLogout = () => {
-  auth.logout()
-  toast.success('Logout Berhasil!', { cancel: { label: 'Tutup', onClick: () => {} } })
-  router.push('/')
+const confirmLogout = async () => {
+  // 1. Aktifkan status logging out untuk memicu transisi keluar sidebar & topbar (CSS)
+  auth.isLoggingOut = true
+
+  // 2. Berikan jeda 600ms agar animasi keluar sidebar & topbar selesai bergerak
+  await new Promise((resolve) => setTimeout(resolve, 600))
+
+  // 3. Jalankan transisi tirai menutup kembali ke login
+  if (document.startViewTransition) {
+    document.documentElement.classList.add('transition-logout')
+    const transition = document.startViewTransition(async () => {
+      auth.logout()
+      await router.push('/login')
+      await nextTick()
+    })
+    window.pendingViewTransition = transition
+    transition.finished.finally(() => {
+      document.documentElement.classList.remove('transition-logout')
+      auth.isLoggingOut = false // Reset status
+      if (window.pendingViewTransition === transition) {
+        window.pendingViewTransition = null
+      }
+    })
+  } else {
+    auth.logout()
+    router.push('/login')
+    auth.isLoggingOut = false // Reset status
+  }
 }
 
 // --- Color Mode Logic (System/Light/Dark) ---

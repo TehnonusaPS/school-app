@@ -6,6 +6,10 @@ import { Progress } from '@/components/ui/progress'
 import WidgetCard from '@/components/dashboard-widget/WidgetCard.vue'
 import { penilaianData as tugas } from '../data/guruPenilaianData'
 
+const props = defineProps({
+  delay: { type: Number, default: 0 }
+})
+
 const statusVariant = (s: string) => s === 'Selesai' ? 'default' : 'secondary'
 </script>
 
@@ -15,6 +19,7 @@ const statusVariant = (s: string) => s === 'Selesai' ? 'default' : 'secondary'
     description="Daftar tugas yang belum diberikan feedback"
     :icon="ClipboardList"
     contentClass="p-0"
+    :delay="delay"
   >
     <template #header-action>
       <Button variant="ghost" size="sm" class="h-8 text-xs gap-1 text-muted-foreground hover:text-foreground">

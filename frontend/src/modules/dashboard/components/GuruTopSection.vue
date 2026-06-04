@@ -1,27 +1,38 @@
 <script setup lang="ts">
-import { BookOpen, ClipboardCheck, TrendingUp } from 'lucide-vue-next'
+import { computed } from 'vue'
+import { BookOpen, ClipboardCheck, TrendingUp, Sun } from 'lucide-vue-next'
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/authStore'
+import StatCard from '@/components/stat-card/StatCard.vue'
 
 const auth = useAuthStore()
 const nama = auth.user?.name ?? 'Guru'
+const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + 100)
 </script>
 
 <template>
-  <div class="grid gap-4 lg:grid-cols-3">
-    <!-- Welcome Card -->
-    <Card class="transition-all duration-200 hover:shadow-md">
-      <CardHeader class="pb-2">
+  <div class="grid gap-3 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
+    <!-- Welcome Card (Glassmorphism & animated) -->
+    <Card
+      v-motion
+      :initial="{ opacity: 0, y: 30, scale: 0.95 }"
+      :visible-once="{ opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 200, damping: 20, mass: 0.8, delay: computedDelay } }"
+      class="relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-white/40 group glass-ui flex flex-col justify-between max-sm:col-span-2"
+    >
+      <!-- Watermark Icon Background -->
+      <Sun class="absolute -right-4 -bottom-4 size-24 opacity-[0.04] rotate-12 transition-transform duration-300 group-hover:scale-110 text-violet-500" />
+
+      <CardHeader class="pb-2 relative z-10">
         <CardDescription class="text-sm font-medium">Selamat Pagi 👋</CardDescription>
-        <p class="text-xl font-bold tracking-tight">{{ nama }}</p>
+        <p class="text-xl font-bold tracking-tight text-violet-500">{{ nama }}</p>
       </CardHeader>
-      <CardContent class="space-y-3">
+      <CardContent class="space-y-3 relative z-10">
         <p class="text-xs text-muted-foreground leading-relaxed">
           Hari ini Anda memiliki <strong class="text-foreground">4 sesi</strong> mengajar
           dan <strong class="text-foreground">12 tugas</strong> siswa yang perlu dinilai.
         </p>
-        <Button variant="outline" size="sm" class="h-8 text-xs gap-1.5">
+        <Button variant="outline" size="sm" class="h-8 text-xs gap-1.5 border-white/10 hover:bg-white/5">
           <BookOpen class="size-3.5" />
           Lihat Jadwal Penuh
         </Button>
@@ -29,40 +40,25 @@ const nama = auth.user?.name ?? 'Guru'
     </Card>
 
     <!-- Rata-rata Presensi -->
-    <Card class="transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
-      <CardHeader class="pb-2">
-        <div class="flex items-center justify-between">
-          <CardDescription class="text-sm font-medium">Rata-rata Presensi</CardDescription>
-          <div class="rounded-lg p-2 bg-emerald-500/10">
-            <TrendingUp class="size-4 text-emerald-500" />
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div class="text-3xl font-bold tracking-tight">94.8%</div>
-        <div class="mt-1 flex items-center gap-1.5 text-xs">
-          <span class="text-emerald-500 font-semibold">+2.4%</span>
-          <span class="text-muted-foreground">dari bulan lalu</span>
-        </div>
-      </CardContent>
-    </Card>
+    <StatCard
+      :delay="250"
+      label="Rata-rata Presensi"
+      value="94.8%"
+      trend="+2.4% dari bulan lalu"
+      trendDirection="up"
+      :icon="TrendingUp"
+      variant="emerald"
+    />
 
     <!-- Tugas Menunggu -->
-    <Card class="transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
-      <CardHeader class="pb-2">
-        <div class="flex items-center justify-between">
-          <CardDescription class="text-sm font-medium">Tugas Menunggu</CardDescription>
-          <div class="rounded-lg p-2 bg-amber-500/10">
-            <ClipboardCheck class="size-4 text-amber-500" />
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div class="text-3xl font-bold tracking-tight">12</div>
-        <div class="mt-1 text-xs text-muted-foreground">
-          Deadline penilaian: <span class="font-semibold text-rose-500">2 hari</span>
-        </div>
-      </CardContent>
-    </Card>
+    <StatCard
+      :delay="400"
+      label="Tugas Menunggu"
+      value="12"
+      trend="Deadline: 2 hari"
+      trendDirection="down"
+      :icon="ClipboardCheck"
+      variant="amber"
+    />
   </div>
 </template>

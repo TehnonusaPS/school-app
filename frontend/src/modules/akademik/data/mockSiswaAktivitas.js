@@ -7,7 +7,7 @@ export const mockAktivitas = [
     title: 'Ujian Harian',
     description: '7 Hari Lagi',
     icon: ClipboardList,
-    variant: 'green'
+    variant: 'purple'
   },
   {
     date: 30,
@@ -15,7 +15,7 @@ export const mockAktivitas = [
     title: 'Tugas Rumah',
     description: '34 Hari Lagi',
     icon: BookOpen,
-    variant: 'blue'
+    variant: 'amber'
   },
   {
     date: 18,
@@ -23,6 +23,6 @@ export const mockAktivitas = [
     title: 'Title Activity',
     description: 'Description Text',
     icon: ClipboardList,
-    variant: 'purple'
+    variant: 'green'
   }
 ]

@@ -11,9 +11,17 @@ import {
 import AppCard from '@/components/app-card/AppCard.vue'
 import StatCard from '@/components/stat-card/StatCard.vue'
 import ActivityCard from '@/components/activity-card/ActivityCard.vue'
+import GradeDetailCard from '@/components/grade-detail-card/GradeDetailCard.vue'
+import ScoreCircleCard from '@/components/score-circle-card/ScoreCircleCard.vue'
 import { siswaStatsData } from '../data/mockSiswaStatCards'
 import { mockAktivitas } from '../data/mockSiswaAktivitas'
 import { mockMateriList } from '../data/mockSiswaMateri'
+import {
+  gradeDetailIcon,
+  gradeDetailCategories,
+  averageScoreData,
+  attendanceData
+} from '../data/mockSiswaNilai'
 import { formatNumber, formatDelta } from '@/utils/formatNumber'
 
 const selectedMapel = ref('matematika')
@@ -130,6 +138,36 @@ const selectedMateri = ref('')
           :variant="item.variant"
         />
       </AppCard>
+    </div>
+
+    <!-- Grade Detail Section: Detail Nilai + Rata-rata + Kehadiran -->
+    <div class="grid gap-6 lg:grid-cols-3">
+      <!-- Left: Detail Nilai dengan Progress Bar -->
+      <GradeDetailCard
+        title="Detail Nilai Mata Pelajaran Matematika"
+        :icon="gradeDetailIcon"
+        :categories="gradeDetailCategories"
+      />
+
+      <!-- Center: Rata-rata Nilai (Circle biru) -->
+      <ScoreCircleCard
+        :title="averageScoreData.title"
+        :score="averageScoreData.score"
+        :label="averageScoreData.label"
+        :description="averageScoreData.description"
+        :percentage="averageScoreData.percentage"
+        :variant="averageScoreData.variant"
+      />
+
+      <!-- Right: Persentase Kehadiran (Circle hijau) -->
+      <ScoreCircleCard
+        :title="attendanceData.title"
+        :score="attendanceData.score"
+        :label="attendanceData.label"
+        :description="attendanceData.description"
+        :percentage="attendanceData.percentage"
+        :variant="attendanceData.variant"
+      />
     </div>
   </div>
 </template>

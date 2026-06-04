@@ -103,6 +103,7 @@ const jenjangColor = { SD: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 
           <Table>
             <TableHeader>
               <TableRow class="bg-muted/50">
+                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
                 <TableHead class="font-semibold">Unit Sekolah</TableHead>
                 <TableHead class="font-semibold">Jenjang</TableHead>
                 <TableHead class="font-semibold text-center">Guru</TableHead>
@@ -115,9 +116,11 @@ const jenjangColor = { SD: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 
               </TableRow>
             </TableHeader>
             <TableBody>
-              <template v-if="isLoading"><TableRow v-for="i in 4" :key="i"><TableCell v-for="j in 9" :key="j"><Skeleton class="h-5 w-full" /></TableCell></TableRow></template>
+              <template v-if="isLoading"><TableRow v-for="(i, index) in 4" :key="i">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell><TableCell v-for="j in 10" :key="j"><Skeleton class="h-5 w-full" /></TableCell></TableRow></template>
               <template v-else>
-                <TableRow v-for="s in guruData" :key="s.id" class="hover:bg-muted/30 transition-colors">
+                <TableRow v-for="(s, index) in guruData" :key="s.id" class="hover:bg-muted/30 transition-colors">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
                   <TableCell class="font-semibold text-sm">{{ s.sekolah }}</TableCell>
                   <TableCell><Badge :class="jenjangColor[s.jenjang]">{{ s.jenjang }}</Badge></TableCell>
                   <TableCell class="text-center font-medium">{{ s.totalGuru }}</TableCell>
@@ -142,6 +145,7 @@ const jenjangColor = { SD: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 
           <Table>
             <TableHeader>
               <TableRow class="bg-muted/50">
+                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
                 <TableHead class="font-semibold">Nama Guru</TableHead>
                 <TableHead class="font-semibold">Sekolah</TableHead>
                 <TableHead class="font-semibold">Mata Pelajaran</TableHead>
@@ -153,9 +157,11 @@ const jenjangColor = { SD: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 
               </TableRow>
             </TableHeader>
             <TableBody>
-              <template v-if="isLoading"><TableRow v-for="i in 5" :key="i"><TableCell v-for="j in 8" :key="j"><Skeleton class="h-5 w-full" /></TableCell></TableRow></template>
+              <template v-if="isLoading"><TableRow v-for="(i, index) in 5" :key="i">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell><TableCell v-for="j in 9" :key="j"><Skeleton class="h-5 w-full" /></TableCell></TableRow></template>
               <template v-else>
-                <TableRow v-for="g in filteredAbsensi" :key="g.id" class="hover:bg-muted/30 transition-colors">
+                <TableRow v-for="(g, index) in filteredAbsensi" :key="g.id" class="hover:bg-muted/30 transition-colors">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
                   <TableCell class="font-medium text-sm">{{ g.nama }}</TableCell>
                   <TableCell class="text-sm text-muted-foreground">{{ g.sekolah }}</TableCell>
                   <TableCell><Badge variant="outline" class="text-xs">{{ g.mapel }}</Badge></TableCell>

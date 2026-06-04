@@ -224,6 +224,7 @@ function sortIconClass(field) {
           <Table>
             <TableHeader>
               <TableRow class="bg-muted/50">
+                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
                 <TableHead class="cursor-pointer select-none font-semibold" @click="toggleSort('kelas')">
                   <div class="flex items-center gap-1">Kelas <component :is="sortIcon('kelas')" :class="['size-3', sortIconClass('kelas')]" /></div>
                 </TableHead>
@@ -241,12 +242,14 @@ function sortIconClass(field) {
             </TableHeader>
             <TableBody>
               <template v-if="isLoading">
-                <TableRow v-for="i in 6" :key="i">
-                  <TableCell v-for="j in 7" :key="j"><Skeleton class="h-5 w-full" /></TableCell>
+                <TableRow v-for="(i, index) in 6" :key="i">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
+                  <TableCell v-for="j in 8" :key="j"><Skeleton class="h-5 w-full" /></TableCell>
                 </TableRow>
               </template>
               <template v-else>
-                <TableRow v-for="k in filteredKelas" :key="k.id" class="hover:bg-muted/30 transition-colors">
+                <TableRow v-for="(k, index) in filteredKelas" :key="k.id" class="hover:bg-muted/30 transition-colors">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
                   <TableCell class="font-semibold text-sm">{{ k.kelas }}</TableCell>
                   <TableCell class="text-sm text-muted-foreground">{{ k.waliKelas }}</TableCell>
                   <TableCell class="text-center font-medium">{{ k.totalSiswa }}</TableCell>
@@ -275,6 +278,7 @@ function sortIconClass(field) {
           <Table>
             <TableHeader>
               <TableRow class="bg-muted/50">
+                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
                 <TableHead class="font-semibold">Mata Pelajaran</TableHead>
                 <TableHead class="font-semibold text-center">Rata-rata</TableHead>
                 <TableHead class="font-semibold text-center">Nilai Tertinggi</TableHead>
@@ -284,12 +288,14 @@ function sortIconClass(field) {
             </TableHeader>
             <TableBody>
               <template v-if="isLoading">
-                <TableRow v-for="i in 6" :key="i">
-                  <TableCell v-for="j in 5" :key="j"><Skeleton class="h-5 w-full" /></TableCell>
+                <TableRow v-for="(i, index) in 6" :key="i">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
+                  <TableCell v-for="j in 6" :key="j"><Skeleton class="h-5 w-full" /></TableCell>
                 </TableRow>
               </template>
               <template v-else>
-                <TableRow v-for="m in mapelData" :key="m.mapel" class="hover:bg-muted/30 transition-colors">
+                <TableRow v-for="(m, index) in mapelData" :key="m.mapel" class="hover:bg-muted/30 transition-colors">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
                   <TableCell class="font-medium text-sm">{{ m.mapel }}</TableCell>
                   <TableCell class="text-center font-bold" :class="m.avg >= 80 ? 'text-green-600 dark:text-green-400' : m.avg >= 75 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'">{{ m.avg }}</TableCell>
                   <TableCell class="text-center text-green-600 dark:text-green-400 font-semibold">{{ m.tertinggi }}</TableCell>

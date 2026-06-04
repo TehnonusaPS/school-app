@@ -201,6 +201,7 @@ const bulanList = [
           <Table>
             <TableHeader>
               <TableRow class="bg-muted/50">
+                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
                 <TableHead class="font-semibold">Tanggal</TableHead>
                 <TableHead class="font-semibold">Keterangan</TableHead>
                 <TableHead class="font-semibold">Kategori</TableHead>
@@ -210,12 +211,14 @@ const bulanList = [
             </TableHeader>
             <TableBody>
               <template v-if="isLoading">
-                <TableRow v-for="i in 5" :key="i">
-                  <TableCell v-for="j in 5" :key="j"><Skeleton class="h-5 w-full" /></TableCell>
+                <TableRow v-for="(i, index) in 5" :key="i">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
+                  <TableCell v-for="j in 6" :key="j"><Skeleton class="h-5 w-full" /></TableCell>
                 </TableRow>
               </template>
               <template v-else>
-                <TableRow v-for="item in filteredPemasukan" :key="item.id" class="hover:bg-muted/30 transition-colors">
+                <TableRow v-for="(item, index) in filteredPemasukan" :key="item.id" class="hover:bg-muted/30 transition-colors">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
                   <TableCell class="text-sm text-muted-foreground">{{ item.tanggal }}</TableCell>
                   <TableCell class="font-medium text-sm">{{ item.keterangan }}</TableCell>
                   <TableCell><Badge variant="outline" class="text-xs">{{ item.kategori }}</Badge></TableCell>
@@ -227,7 +230,7 @@ const bulanList = [
                   </TableCell>
                 </TableRow>
                 <TableRow class="bg-muted/30 font-bold">
-                  <TableCell colspan="3" class="font-bold">Total Pemasukan</TableCell>
+                  <TableCell colspan="4" class="font-bold">Total Pemasukan</TableCell>
                   <TableCell class="text-right font-bold text-green-700 dark:text-green-400">{{ formatRp(totalPemasukan) }}</TableCell>
                   <TableCell />
                 </TableRow>
@@ -242,6 +245,7 @@ const bulanList = [
           <Table>
             <TableHeader>
               <TableRow class="bg-muted/50">
+                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
                 <TableHead class="font-semibold">Tanggal</TableHead>
                 <TableHead class="font-semibold">Keterangan</TableHead>
                 <TableHead class="font-semibold">Kategori</TableHead>
@@ -251,12 +255,14 @@ const bulanList = [
             </TableHeader>
             <TableBody>
               <template v-if="isLoading">
-                <TableRow v-for="i in 5" :key="i">
-                  <TableCell v-for="j in 5" :key="j"><Skeleton class="h-5 w-full" /></TableCell>
+                <TableRow v-for="(i, index) in 5" :key="i">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
+                  <TableCell v-for="j in 6" :key="j"><Skeleton class="h-5 w-full" /></TableCell>
                 </TableRow>
               </template>
               <template v-else>
-                <TableRow v-for="item in filteredPengeluaran" :key="item.id" class="hover:bg-muted/30 transition-colors">
+                <TableRow v-for="(item, index) in filteredPengeluaran" :key="item.id" class="hover:bg-muted/30 transition-colors">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
                   <TableCell class="text-sm text-muted-foreground">{{ item.tanggal }}</TableCell>
                   <TableCell class="font-medium text-sm">{{ item.keterangan }}</TableCell>
                   <TableCell><Badge variant="outline" class="text-xs">{{ item.kategori }}</Badge></TableCell>
@@ -266,7 +272,7 @@ const bulanList = [
                   </TableCell>
                 </TableRow>
                 <TableRow class="bg-muted/30 font-bold">
-                  <TableCell colspan="3" class="font-bold">Total Pengeluaran</TableCell>
+                  <TableCell colspan="4" class="font-bold">Total Pengeluaran</TableCell>
                   <TableCell class="text-right font-bold text-red-700 dark:text-red-400">{{ formatRp(totalPengeluaran) }}</TableCell>
                   <TableCell />
                 </TableRow>

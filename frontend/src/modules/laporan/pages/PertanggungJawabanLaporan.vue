@@ -156,7 +156,8 @@ function getStatusColor(status) {
       <Table>
         <TableHeader>
           <TableRow class="bg-muted/50">
-            <TableHead class="font-semibold cursor-pointer select-none" @click="toggleSort('kegiatan')">
+                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
+                <TableHead class="font-semibold cursor-pointer select-none" @click="toggleSort('kegiatan')">
               <div class="flex items-center gap-1">Nama Kegiatan <component :is="sortField==='kegiatan'&&sortDir==='desc'?ChevronDown:ChevronUp" :class="['size-3',sortField==='kegiatan'?'text-primary':'text-muted-foreground/40']" /></div>
             </TableHead>
             <TableHead class="font-semibold">Unit Sekolah</TableHead>
@@ -171,9 +172,11 @@ function getStatusColor(status) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          <template v-if="isLoading"><TableRow v-for="i in 6" :key="i"><TableCell v-for="j in 8" :key="j"><Skeleton class="h-5 w-full" /></TableCell></TableRow></template>
+          <template v-if="isLoading"><TableRow v-for="(i, index) in 6" :key="i">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell><TableCell v-for="j in 9" :key="j"><Skeleton class="h-5 w-full" /></TableCell></TableRow></template>
           <template v-else>
-            <TableRow v-for="item in filteredData" :key="item.id" class="hover:bg-muted/30 transition-colors">
+            <TableRow v-for="(item, index) in filteredData" :key="item.id" class="hover:bg-muted/30 transition-colors">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
               <TableCell class="font-medium text-sm">{{ item.kegiatan }}</TableCell>
               <TableCell class="text-sm text-muted-foreground">{{ item.unit }}</TableCell>
               <TableCell class="text-sm">{{ item.pic }}</TableCell>
@@ -191,7 +194,7 @@ function getStatusColor(status) {
               </TableCell>
             </TableRow>
             <TableRow v-if="filteredData.length === 0">
-              <TableCell colspan="8" class="h-32 text-center text-muted-foreground">
+              <TableCell colspan="9" class="h-32 text-center text-muted-foreground">
                 <div class="flex flex-col items-center justify-center gap-2">
                   <Search class="size-8 text-muted-foreground/40" />
                   <p class="text-sm">Tidak ada LPJ ditemukan.</p>

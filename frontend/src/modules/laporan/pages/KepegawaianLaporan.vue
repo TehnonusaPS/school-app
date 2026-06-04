@@ -196,7 +196,7 @@ const bulanList = [
       <Table>
         <TableHeader>
           <TableRow class="bg-muted/50">
-            <TableHead class="font-semibold w-10">#</TableHead>
+            <TableHead class="font-semibold w-10">No</TableHead>
             <TableHead class="cursor-pointer select-none font-semibold" @click="toggleSort('nama')">
               <div class="flex items-center gap-1">Nama <component :is="sortField==='nama'&&sortDir==='desc'?ChevronDown:ChevronUp" :class="['size-3',sortField==='nama'?'text-primary':'text-muted-foreground/40']" /></div>
             </TableHead>

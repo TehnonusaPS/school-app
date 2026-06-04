@@ -339,7 +339,7 @@ const peringkat = computed(() => {
             <Table>
               <TableHeader>
                 <TableRow class="bg-muted/50">
-                  <TableHead class="font-semibold w-8">#</TableHead>
+                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
                   <TableHead class="font-semibold min-w-[160px] cursor-pointer select-none" @click="toggleSort('nama')">
                     <div class="flex items-center gap-1">
                       Nama Siswa
@@ -376,7 +376,8 @@ const peringkat = computed(() => {
               </TableHeader>
               <TableBody>
                 <template v-if="isLoading">
-                  <TableRow v-for="i in 8" :key="`skel-${i}`">
+                  <TableRow v-for="(i, index) in 8" :key="`skel-${i}`">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
                     <TableCell v-for="j in (activeMapelList.length + 5)" :key="j">
                       <Skeleton class="h-5 w-full" />
                     </TableCell>
@@ -416,7 +417,7 @@ const peringkat = computed(() => {
                   </TableRow>
 
                   <TableRow v-if="paginatedData.length === 0">
-                    <TableCell :colspan="activeMapelList.length + 5" class="h-32 text-center text-muted-foreground">
+                    <TableCell :colspan="activeMapelList.length + 6" class="h-32 text-center text-muted-foreground">
                       <div class="flex flex-col items-center justify-center gap-2">
                         <Search class="size-8 text-muted-foreground/40" />
                         <p class="text-sm">Tidak ada data nilai ditemukan.</p>
@@ -491,6 +492,7 @@ const peringkat = computed(() => {
           <Table>
             <TableHeader>
               <TableRow class="bg-muted/50">
+                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
                 <TableHead class="w-10 font-semibold">Peringkat</TableHead>
                 <TableHead class="font-semibold">Nama Siswa</TableHead>
                 <TableHead class="font-semibold">Kelas</TableHead>

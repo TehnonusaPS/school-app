@@ -311,7 +311,7 @@ function handlePrint() {
       <Table>
         <TableHeader>
           <TableRow class="bg-muted/50">
-            <TableHead class="font-semibold w-8">#</TableHead>
+                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
             <TableHead class="font-semibold">Nama Siswa</TableHead>
             <TableHead class="font-semibold">Kelas</TableHead>
             <TableHead class="font-semibold">Wali Kelas</TableHead>
@@ -324,8 +324,9 @@ function handlePrint() {
         </TableHeader>
         <TableBody>
           <template v-if="isLoading">
-            <TableRow v-for="i in 6" :key="`skel-${i}`">
-              <TableCell v-for="j in 9" :key="j"><Skeleton class="h-5 w-full" /></TableCell>
+            <TableRow v-for="(i, index) in 6" :key="`skel-${i}`">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
+              <TableCell v-for="j in 10" :key="j"><Skeleton class="h-5 w-full" /></TableCell>
             </TableRow>
           </template>
 
@@ -397,7 +398,7 @@ function handlePrint() {
             </TableRow>
 
             <TableRow v-if="paginatedData.length === 0">
-              <TableCell colspan="9" class="h-32 text-center text-muted-foreground">
+              <TableCell colspan="10" class="h-32 text-center text-muted-foreground">
                 <div class="flex flex-col items-center justify-center gap-2">
                   <FileBarChart class="size-8 text-muted-foreground/40" />
                   <p class="text-sm">Tidak ada data raport ditemukan.</p>
@@ -465,13 +466,15 @@ function handlePrint() {
               <Table>
                 <TableHeader>
                   <TableRow class="bg-muted/50">
-                    <TableHead class="font-semibold">Mata Pelajaran</TableHead>
+                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
+                <TableHead class="font-semibold">Mata Pelajaran</TableHead>
                     <TableHead class="font-semibold text-center">Nilai</TableHead>
                     <TableHead class="font-semibold text-center">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow v-for="mapel in mataPelajaranList" :key="mapel">
+                  <TableRow v-for="(mapel, index) in mataPelajaranList" :key="mapel">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
                     <TableCell class="text-sm">{{ mapel }}</TableCell>
                     <TableCell class="text-center font-bold" :class="getNilaiClass(selectedRaport.nilai[mapel])">
                       {{ selectedRaport.nilai[mapel] ?? '-' }}

@@ -106,29 +106,19 @@ const data = {
       excludeRoles: ['guru', 'siswa', 'orang_tua'],
       items: [
         { 
-          title: 'Data Siswa', 
+          title: 'Siswa', 
           url: '/manajemen-data/siswa',
-          excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'wali_kelas']
+          roles: ['admin_sekolah', 'tata_usaha']
         },
         { 
-          title: 'Mengelola Data Siswa', 
-          url: '/manajemen-data/siswa',
-          roles: ['wali_kelas']
-        },
-        { 
-          title: 'Mengelola Pendaftaran Siswa', 
-          url: '/manajemen-data/siswa',
-          roles: ['tata_usaha']
-        },
-        { 
-          title: 'Kelola Data Yayasan', 
+          title: 'Yayasan', 
           url: '/manajemen-data/yayasan',
           roles: ['superadmin']
         },
         { 
-          title: 'Kelola Data Sekolah dibawah Yayasan', 
+          title: 'Sekolah', 
           url: '/manajemen-data/sekolah',
-          roles: ['superadmin']
+          roles: ['superadmin', 'admin_yayasan']
         },
         { 
           title: 'Kelola Hak Akses Pengguna', 
@@ -136,12 +126,7 @@ const data = {
           roles: ['superadmin']
         },
         { 
-          title: 'Mengelola Data Sekolah dalam Yayasan', 
-          url: '/manajemen-data/sekolah-yayasan',
-          roles: ['admin_yayasan']
-        },
-        { 
-          title: 'Mengelola Data Guru dan Staff Yayasan', 
+          title: 'Guru dan Staff Yayasan', 
           url: '/manajemen-data/guru-staff-yayasan',
           roles: ['admin_yayasan']
         },

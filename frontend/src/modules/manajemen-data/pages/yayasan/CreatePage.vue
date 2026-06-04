@@ -2,7 +2,8 @@
 import { 
   Phone, 
   Image,
-  Building2
+  Building2,
+  UserCog
 } from 'lucide-vue-next'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -14,6 +15,7 @@ import FormTextArea from '@/components/forms/FormTextArea.vue'
 import FormDate from '@/components/forms/FormDate.vue'
 import FormSection from '@/components/forms/FormSection.vue'
 import FormSelect from '@/components/forms/FormSelect.vue'
+import SuccessAccountDialog from '@/components/dialogs/SuccessAccountDialog.vue'
 
 const router = useRouter()
 const isLoading = ref(false)
@@ -31,7 +33,9 @@ const form = ref({
   no_akta: '',
   tanggal_akta: '',
   no_sk: '',
-  tanggal_sk: ''
+  tanggal_sk: '',
+  emailLogin: '',
+  noHpLogin: ''
 })
 
 const statusOptions = [
@@ -53,14 +57,25 @@ const handleImage = (file) => {
 
 const goBack = () => router.back()
 
+const showSuccessModal = ref(false)
+
+const generatedAccount = ref({
+  email: 'admin@foundation.id',
+  phone: '081234567890',
+  password: 'Adm#2026!'
+})
+
 const handleSubmit = () => {
   isLoading.value = true
-  // Simulasi simpan data
+
   setTimeout(() => {
     isLoading.value = false
-    alert('Data yayasan berhasil disimpan!')
-    router.push('/manajemen-data/yayasan')
-  }, 1500)
+    showSuccessModal.value = true
+  }, 1000)
+}
+
+const goToList = () => {
+  router.push('/manajemen-data/yayasan')
 }
 </script>
 
@@ -72,7 +87,7 @@ const handleSubmit = () => {
     title="Tambah Yayasan"
     description="Lengkapi formulir berikut untuk menambahkan data yayasan baru"
     :loading="isLoading"
-    save-text="Simpan Data Yayasan"
+    save-text="Simpan Data"
     @back="goBack"
     @cancel="goBack"
     @save="handleSubmit"
@@ -114,7 +129,25 @@ const handleSubmit = () => {
             <Separator class="my-4" />
             <FormTextArea v-model="form.alamat" label="Alamat Lengkap" placeholder="Contoh: Nama Jalan, RT/RW, Kelurahan, Kecamatan, Kota"/>
         </FormSection>
+
+        <!-- Informasi Login -->
+        <FormSection title="Akun Administrator" description="Data akun yang digunakan oleh administrator yayasan untuk mengakses sistem." :icon="UserCog">
+          <div class="grid gap-4 md:grid-cols-2">
+            <FormInput v-model="form.emailLogin" label="E-mail Login" placeholder="Contoh: admin@yayasan.id"/>
+            <FormInput v-model="form.noHpLogin" label="No. HP Login" placeholder="Contoh: 081234567890"/>
+          </div>
+        </FormSection>
       </div>
     </div>
   </div>
+
+  <SuccessAccountDialog
+    v-model:open="showSuccessModal"
+    title="Yayasan Berhasil Ditambahkan"
+    description="Data yayasan berhasil disimpan dan akun administrator yayasan telah dibuat."
+    :email="generatedAccount.email"
+    :phone="generatedAccount.phone"
+    :password="generatedAccount.password"
+    @close="goToList"
+  />
 </template>

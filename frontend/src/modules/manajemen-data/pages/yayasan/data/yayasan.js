@@ -45,6 +45,7 @@ export const stats = [
 ]
 
 export const columns = [
+  { key: 'no', label: 'No.' },
   { key: 'yayasan', label: 'Nama Yayasan' },
   { key: 'jmlSekolah', label: 'Jumlah Sekolah' },
   { key: 'alamat', label: 'Alamat Yayasan' },

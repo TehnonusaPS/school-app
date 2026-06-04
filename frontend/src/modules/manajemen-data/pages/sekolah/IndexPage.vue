@@ -2,15 +2,30 @@
 import {
   Pencil,
   Ban,
+  Eye,
 } from 'lucide-vue-next'
 import DataTableCard from '@/components/data-table/DataTableCard.vue'
 import PageHeader from '@/components/page-header/PageHeader.vue'
 import { Badge } from '@/components/ui/badge'
 import { statusConfig } from '@/constants/statusConfig'
 import { usePagination } from '@/composables/usePagination'
-import { stats, columns, filters, actions, items } from './data/sekolah.js'
+import { stats, columns, filters, actions, allItems } from './data/sekolah.js'
 import StatCard from '@/components/stat-card/StatCard.vue'
+import { useAuthStore } from '@/stores/authStore'
+import { computed } from 'vue'
 
+const auth = useAuthStore()
+const isSuperAdmin = computed(() => auth.user?.role === 'superadmin')
+
+const items = computed(() => {
+  if (isSuperAdmin.value) {
+    return allItems.value
+  }
+
+  return allItems.value.filter(
+    item => item.yayasanId === auth.user?.yayasanId
+  )
+})
 const { currentPage, total, from, to, paginatedItems } = usePagination(items)
 
 </script>
@@ -44,8 +59,14 @@ const { currentPage, total, from, to, paginatedItems } = usePagination(items)
       :to="to"
       :total="total"
       :page="currentPage"
+      @update:page="currentPage = $event"
     >
+      <template #cell-no="{ index }">
+        {{ from + index }}
+      </template>
+
       <template #cell-namaSekolah="{ item }">
+        
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded bg-primary text-white flex items-center justify-center text-xs font-bold">
             {{ item.initial }}
@@ -58,12 +79,20 @@ const { currentPage, total, from, to, paginatedItems } = usePagination(items)
         </div>
       </template>
 
+      <template #cell-alamatSekolah="{ value }">
+        <div class="max-w-sm whitespace-normal break-words">{{ value }}</div>
+      </template>
+
       <template #cell-status="{ value }">
         <Badge :variant="statusConfig[value]" showDot> {{ value }}</Badge>
       </template>
 
       <template #cell-actions>
         <div class="flex items-center gap-3 text-muted-foreground">
+          <button class="hover:text-foreground">
+            <Eye class="w-4 h-4" />
+          </button>
+
           <button class="hover:text-foreground">
             <Pencil class="w-4 h-4" />
           </button>

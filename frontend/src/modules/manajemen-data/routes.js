@@ -80,7 +80,7 @@ export default [
     path: 'manajemen-data/sekolah',
     component: () => import('./pages/sekolah/IndexPage.vue'),
     meta: {
-      title: 'Data Sekolah',
+      title: 'Sekolah',
       parent: 'Manajemen Data',
       description: 'Manajemen daftar unit sekolah di bawah naungan yayasan.'
     }
@@ -90,7 +90,7 @@ export default [
     component: () => import('./pages/sekolah/CreatePage.vue'),
     meta: {
       title: 'Tambah Sekolah',
-      parent: 'Data Sekolah'
+      parent: 'Sekolah'
     }
   },
   // HAK AKSES
@@ -101,24 +101,6 @@ export default [
       title: 'Hak Akses Pengguna',
       parent: 'Manajemen Data',
       description: 'Kelola kewenangan, lisensi, dan hak akses pengguna sistem.'
-    }
-  },
-  // SEKOLAH (OLEH ADM YAYASAN)
-  {
-    path: 'manajemen-data/sekolah-yayasan',
-    component: () => import('./pages/sekolah-yayasan/IndexPage.vue'),
-    meta: {
-      title: 'Data Sekolah',
-      parent: 'Manajemen Data',
-      description: 'Pengelolaan daftar dan profil unit sekolah di bawah yayasan.'
-    }
-  },
-  {
-    path: 'manajemen-data/sekolah-yayasan/tambah',
-    component: () => import('./pages/sekolah-yayasan/CreatePage.vue'),
-    meta: {
-      title: 'Tambah Sekolah',
-      parent: 'Data Sekolah'
     }
   },
   // GURU & STAFF (OLEH ADM YAYASAN)

@@ -35,7 +35,6 @@ const { currentPage, total, from, to, paginatedItems } = usePagination(items)
       :variant="stat.variant"
       />
      </div>
-    
 
     <DataTableCard
       :columns="columns"
@@ -48,6 +47,10 @@ const { currentPage, total, from, to, paginatedItems } = usePagination(items)
       :total="total"
       :page="currentPage"
     >
+      <template #cell-no="{ index }">
+        {{ from + index }}
+      </template>
+
       <template #cell-yayasan="{ item }">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded bg-primary text-white flex items-center justify-center text-xs font-bold">
@@ -58,6 +61,10 @@ const { currentPage, total, from, to, paginatedItems } = usePagination(items)
             <div class="font-bold">{{ item.yayasan }}</div>
           </div>
         </div>
+      </template>
+
+      <template #cell-alamat="{ value }">
+        <div class="max-w-s whitespace-normal break-words">{{ value }}</div>
       </template>
 
       <template #cell-status="{ value }">

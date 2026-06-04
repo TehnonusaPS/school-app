@@ -68,7 +68,7 @@ export const pageHeaderSlide = {
   visible: { 
     opacity: 1, 
     x: 0, 
-    transition: { type: 'spring', stiffness: 220, damping: 22, mass: 0.7 } 
+    transition: { type: 'spring', stiffness: 120, damping: 18, mass: 0.8 } 
   }
 }
 

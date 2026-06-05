@@ -12,6 +12,7 @@ import StatCardGroupDemo from './stat-card/StatCardGroupDemo.vue'
 import DataTableCardDemo from './data-table/DataTableCardDemo.vue'
 import DataSheetDemo from './data-sheet/DataSheetDemo.vue'
 import FormSheetDemo from './data-sheet/FormSheetDemo.vue'
+import DatePickerDemo from './date-picker/DatePickerDemo.vue'
 
 const props = defineProps({
   searchQuery: { type: String, default: '' }
@@ -98,6 +99,17 @@ const match = keywords => {
 
       <ShowcaseItem label="Form Sheet Demo (Form Input Create & Edit)">
         <FormSheetDemo />
+      </ShowcaseItem>
+    </ShowcaseSection>
+
+    <!-- DATE PICKER -->
+    <ShowcaseSection
+      v-show="match('date picker kalender tanggal')"
+      title="Date Picker"
+      description="Komponen pemilih tanggal (date picker) menggunakan kombinasi Popover dan Calendar."
+    >
+      <ShowcaseItem label="DatePicker Default (Month and Year Selection)">
+        <DatePickerDemo />
       </ShowcaseItem>
     </ShowcaseSection>
   </div>

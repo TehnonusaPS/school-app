@@ -510,6 +510,21 @@
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2) !important;
   }
+
+  /* Strip glass-ui card styles when calendar is embedded inside popovers */
+  [data-slot="popover-content"] [data-slot="calendar"],
+  [data-slot="popover-content"] [data-slot="range-calendar"] {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  [data-slot="popover-content"] [data-slot="calendar"]::after,
+  [data-slot="popover-content"] [data-slot="range-calendar"]::after {
+    display: none !important;
+  }
 }
 
 @layer utilities {

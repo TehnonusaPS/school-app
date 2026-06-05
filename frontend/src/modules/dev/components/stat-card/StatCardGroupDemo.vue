@@ -3,56 +3,6 @@ import StatCard from '@/components/stat-card/StatCard.vue'
 import StatCardGrid from '@/components/stat-card/StatCardGrid.vue'
 import { statCardDemosData } from './data/statCardDemos'
 import { Users, UserCheck, Wallet } from 'lucide-vue-next'
-
-const groupCardsData = [
-  {
-    label: 'Total Siswa',
-    value: statCardDemosData.siswa.total,
-    sub: statCardDemosData.siswa.sub,
-    icon: Users,
-    color: 'blue',
-    variant: 'default'
-  },
-  {
-    label: 'Absensi Hari Ini',
-    value: statCardDemosData.absensi.total,
-    sub: statCardDemosData.absensi.sub,
-    trend: statCardDemosData.absensi.trend,
-    trendDirection: statCardDemosData.absensi.trendDirection,
-    icon: UserCheck,
-    color: 'emerald',
-    variant: 'up'
-  },
-  {
-    label: 'Total Anggaran',
-    value: statCardDemosData.anggaran.total,
-    sub: statCardDemosData.anggaran.sub,
-    progress: statCardDemosData.anggaran.progress,
-    icon: Wallet,
-    color: 'violet',
-    variant: 'progress'
-  },
-  {
-    label: 'Pendaftaran Baru',
-    value: statCardDemosData.pendaftaran.total,
-    sub: statCardDemosData.pendaftaran.sub,
-    trend: statCardDemosData.pendaftaran.trend,
-    trendDirection: statCardDemosData.pendaftaran.trendDirection,
-    icon: Users,
-    color: 'amber',
-    variant: 'down'
-  },
-  {
-    label: 'Tingkat Kelulusan',
-    value: statCardDemosData.kelulusan.total,
-    sub: statCardDemosData.kelulusan.sub,
-    trend: statCardDemosData.kelulusan.trend,
-    trendDirection: statCardDemosData.kelulusan.trendDirection,
-    icon: Users,
-    color: 'primary',
-    variant: 'neutral'
-  }
-]
 </script>
 
 <template>
@@ -63,7 +13,14 @@ const groupCardsData = [
         Demo 1 Card (Full Width - Mobile, Tablet, & Desktop)
       </div>
       <StatCardGrid cols="1">
-        <StatCard v-bind="groupCardsData[0]" />
+        <StatCard
+          label="Total Siswa"
+          :value="statCardDemosData.siswa.total"
+          :sub="statCardDemosData.siswa.sub"
+          :icon="Users"
+          color="blue"
+          variant="default"
+        />
       </StatCardGrid>
     </div>
 
@@ -74,9 +31,23 @@ const groupCardsData = [
       </div>
       <StatCardGrid cols="2">
         <StatCard
-          v-for="(card, i) in groupCardsData.slice(0, 2)"
-          :key="i"
-          v-bind="card"
+          label="Total Siswa"
+          :value="statCardDemosData.siswa.total"
+          :sub="statCardDemosData.siswa.sub"
+          :icon="Users"
+          color="blue"
+          variant="default"
+        />
+
+        <StatCard
+          label="Absensi Hari Ini"
+          :value="statCardDemosData.absensi.total"
+          :sub="statCardDemosData.absensi.sub"
+          :trend="statCardDemosData.absensi.trend"
+          :trendDirection="statCardDemosData.absensi.trendDirection"
+          :icon="UserCheck"
+          color="emerald"
+          variant="up"
         />
       </StatCardGrid>
     </div>
@@ -91,9 +62,33 @@ const groupCardsData = [
         :delay="500"
       >
         <StatCard
-          v-for="(card, i) in groupCardsData.slice(0, 3)"
-          :key="i"
-          v-bind="card"
+          label="Total Siswa"
+          :value="statCardDemosData.siswa.total"
+          :sub="statCardDemosData.siswa.sub"
+          :icon="Users"
+          color="blue"
+          variant="default"
+        />
+
+        <StatCard
+          label="Absensi Hari Ini"
+          :value="statCardDemosData.absensi.total"
+          :sub="statCardDemosData.absensi.sub"
+          :trend="statCardDemosData.absensi.trend"
+          :trendDirection="statCardDemosData.absensi.trendDirection"
+          :icon="UserCheck"
+          color="emerald"
+          variant="up"
+        />
+
+        <StatCard
+          label="Total Anggaran"
+          :value="statCardDemosData.anggaran.total"
+          :sub="statCardDemosData.anggaran.sub"
+          :progress="statCardDemosData.anggaran.progress"
+          :icon="Wallet"
+          color="violet"
+          variant="progress"
         />
       </StatCardGrid>
     </div>
@@ -108,9 +103,44 @@ const groupCardsData = [
         :delay="300"
       >
         <StatCard
-          v-for="(card, i) in groupCardsData.slice(0, 4)"
-          :key="i"
-          v-bind="card"
+          label="Total Siswa"
+          :value="statCardDemosData.siswa.total"
+          :sub="statCardDemosData.siswa.sub"
+          :icon="Users"
+          color="blue"
+          variant="default"
+        />
+
+        <StatCard
+          label="Absensi Hari Ini"
+          :value="statCardDemosData.absensi.total"
+          :sub="statCardDemosData.absensi.sub"
+          :trend="statCardDemosData.absensi.trend"
+          :trendDirection="statCardDemosData.absensi.trendDirection"
+          :icon="UserCheck"
+          color="emerald"
+          variant="up"
+        />
+
+        <StatCard
+          label="Total Anggaran"
+          :value="statCardDemosData.anggaran.total"
+          :sub="statCardDemosData.anggaran.sub"
+          :progress="statCardDemosData.anggaran.progress"
+          :icon="Wallet"
+          color="violet"
+          variant="progress"
+        />
+
+        <StatCard
+          label="Tingkat Kelulusan"
+          :value="statCardDemosData.kelulusan.total"
+          :sub="statCardDemosData.kelulusan.sub"
+          :trend="statCardDemosData.kelulusan.trend"
+          :trendDirection="statCardDemosData.kelulusan.trendDirection"
+          :icon="Users"
+          color="primary"
+          variant="neutral"
         />
       </StatCardGrid>
     </div>
@@ -122,9 +152,55 @@ const groupCardsData = [
       </div>
       <StatCardGrid cols="5">
         <StatCard
-          v-for="(card, i) in groupCardsData"
-          :key="i"
-          v-bind="card"
+          label="Total Siswa"
+          :value="statCardDemosData.siswa.total"
+          :sub="statCardDemosData.siswa.sub"
+          :icon="Users"
+          color="blue"
+          variant="default"
+        />
+
+        <StatCard
+          label="Absensi Hari Ini"
+          :value="statCardDemosData.absensi.total"
+          :sub="statCardDemosData.absensi.sub"
+          :trend="statCardDemosData.absensi.trend"
+          :trendDirection="statCardDemosData.absensi.trendDirection"
+          :icon="UserCheck"
+          color="emerald"
+          variant="up"
+        />
+
+        <StatCard
+          label="Total Anggaran"
+          :value="statCardDemosData.anggaran.total"
+          :sub="statCardDemosData.anggaran.sub"
+          :progress="statCardDemosData.anggaran.progress"
+          :icon="Wallet"
+          color="violet"
+          variant="progress"
+        />
+
+        <StatCard
+          label="Pendaftaran Baru"
+          :value="statCardDemosData.pendaftaran.total"
+          :sub="statCardDemosData.pendaftaran.sub"
+          :trend="statCardDemosData.pendaftaran.trend"
+          :trendDirection="statCardDemosData.pendaftaran.trendDirection"
+          :icon="Users"
+          color="amber"
+          variant="down"
+        />
+
+        <StatCard
+          label="Tingkat Kelulusan"
+          :value="statCardDemosData.kelulusan.total"
+          :sub="statCardDemosData.kelulusan.sub"
+          :trend="statCardDemosData.kelulusan.trend"
+          :trendDirection="statCardDemosData.kelulusan.trendDirection"
+          :icon="Users"
+          color="primary"
+          variant="neutral"
         />
       </StatCardGrid>
     </div>

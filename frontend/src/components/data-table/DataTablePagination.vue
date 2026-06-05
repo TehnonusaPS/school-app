@@ -1,6 +1,13 @@
 <script setup>
-import { Button } from '@/components/ui/button'
-import { computed } from 'vue'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious
+} from '@/components/ui/pagination'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 const props = defineProps({
   total: Number,
@@ -10,72 +17,77 @@ const props = defineProps({
   perPage: {
     type: Number,
     default: 10
+  },
+  perPageOptions: {
+    type: Array,
+    default: () => [5, 10, 15, 20, 30, 50]
   }
 })
 
-const emit = defineEmits(['update:page'])
-
-const totalPages = computed(() =>
-  Math.ceil(props.total / props.perPage)
-)
-
-const nextPage = () => {
-  if (props.page < totalPages.value) {
-    emit('update:page', props.page + 1)
-  }
-}
-
-const prevPage = () => {
-  if (props.page > 1) {
-    emit('update:page', props.page - 1)
-  }
-}
-
-const visiblePages = computed(() => {
-  const pages = []
-
-  let start = Math.max(1, props.page - 1)
-  let end = Math.min(totalPages.value, start + 2)
-
-  if (end - start < 2) {
-    start = Math.max(1, end - 2)
-  }
-
-  for (let i = start; i <= end; i++) {
-    pages.push(i)
-  }
-
-  return pages
-})
-
-const goToPage = (page) => {emit('update:page', page)}
-
+const emit = defineEmits(['update:page', 'update:perPage'])
 </script>
 
 <template>
-  <div class="p-4 border-t flex justify-between items-center text-sm text-muted-foreground">
-    <div>
-      Menampilkan {{ from }}-{{ to }} dari {{ total }} Data
+  <div
+    class="p-4 border-t flex flex-col lg:flex-row justify-between items-center gap-4 text-sm text-muted-foreground w-full"
+  >
+    <div class="flex items-center justify-between w-full lg:w-auto gap-4">
+      <span class="whitespace-nowrap">{{ from }}-{{ to }} dari {{ total }}</span>
+
+      <div class="flex items-center gap-1.5">
+        <span class="text-xs whitespace-nowrap">Baris:</span>
+        <Select
+          :model-value="String(perPage)"
+          @update:model-value="emit('update:perPage', Number($event))"
+        >
+          <SelectTrigger class="h-7 w-[70px] text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem
+              v-for="opt in perPageOptions"
+              :key="opt"
+              :value="String(opt)"
+              class="text-xs"
+            >
+              {{ opt }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
     </div>
 
-    <div class="flex items-center gap-1">
-      <Button variant="outline" class="w-8 h-8 p-0" :disabled="page <= 1" @click="prevPage">
-        &lt;
-      </Button>
+    <!-- Kanan: pagination -->
+    <Pagination
+      v-slot="{ page: rootPage }"
+      :total="total"
+      :page="page"
+      :items-per-page="perPage"
+      :sibling-count="0"
+      show-edges
+      class="w-full lg:w-auto flex justify-center lg:justify-end mx-0"
+      @update:page="emit('update:page', $event)"
+    >
+      <PaginationContent v-slot="{ items }">
+        <PaginationPrevious />
 
-      <Button
-        v-for="pageNumber in visiblePages"
-        :key="pageNumber"
-        :variant="pageNumber === page ? 'default' : 'outline'"
-        class="w-8 h-8 p-0"
-        @click="goToPage(pageNumber)"
-      >
-        {{ pageNumber }}
-      </Button>
+        <template v-for="(item, index) in items" :key="index">
+          <PaginationItem
+            v-if="item.type === 'page'"
+            :value="item.value"
+            :is-active="item.value === rootPage"
+            :class="item.value === rootPage ? 'bg-primary! text-primary-foreground! hover:bg-primary/90!' : ''"
+          >
+            {{ item.value }}
+          </PaginationItem>
+          <PaginationEllipsis
+            v-else
+            :index="index"
+          />
+        </template>
 
-      <Button variant="outline" class="w-8 h-8 p-0" :disabled="page >= totalPages.value" @click="nextPage">
-        &gt;
-      </Button>
-    </div>
+        <PaginationNext />
+      </PaginationContent>
+    </Pagination>
   </div>
 </template>

@@ -219,11 +219,13 @@ const notifications = [
 
       <div
         :class="[
-          'flex flex-1 flex-col gap-4 p-6 text-left transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)]',
+          'flex flex-1 flex-col gap-4 p-6 text-left transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] min-w-0',
           auth.isLoggingOut ? 'content-exit-active' : ''
         ]"
       >
-        <router-view />
+        <div class="w-full min-w-0 flex-1">
+          <router-view />
+        </div>
       </div>
     </SidebarInset>
   </SidebarProvider>

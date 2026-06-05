@@ -7,6 +7,7 @@ import ShowcasePart4 from '../components/ShowcasePart4.vue'
 import ShowcasePart5 from '../components/ShowcasePart5.vue'
 import ShowcasePart6 from '../components/ShowcasePart6.vue'
 import ShowcasePart7 from '../components/ShowcasePart7.vue'
+import Showcase from '../components/Showcase.vue'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-vue-next'
 
@@ -18,7 +19,7 @@ const searchQuery = ref('')
     <div>
       <h1 class="text-3xl font-bold tracking-tight text-foreground">UI Components Reference</h1>
       <p class="text-muted-foreground mt-2 max-w-3xl">
-        Kumpulan dokumentasi lengkap seluruh komponen UI yang ada pada aplikasi ini. Terdapat 60
+        Kumpulan dokumentasi lengkap seluruh komponen UI yang ada pada aplikasi ini. Terdapat 68
         komponen yang siap digunakan.
       </p>
       <div class="mt-4 relative max-w-md">
@@ -31,6 +32,7 @@ const searchQuery = ref('')
       </div>
     </div>
 
+    <!--
     <ShowcasePart1 :search-query="searchQuery" />
     <ShowcasePart2 :search-query="searchQuery" />
     <ShowcasePart3 :search-query="searchQuery" />
@@ -38,5 +40,7 @@ const searchQuery = ref('')
     <ShowcasePart5 :search-query="searchQuery" />
     <ShowcasePart6 :search-query="searchQuery" />
     <ShowcasePart7 :search-query="searchQuery" />
+    -->
+    <Showcase :search-query="searchQuery" />
   </div>
 </template>

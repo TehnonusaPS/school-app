@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/authStore'
 import StatCard from '@/components/stat-card/StatCard.vue'
+import StatCardGrid from '@/components/stat-card/StatCardGrid.vue'
 
 const auth = useAuthStore()
 const nama = auth.user?.name ?? 'Guru'
@@ -12,13 +13,13 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + 100)
 </script>
 
 <template>
-  <div class="grid gap-3 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
+  <StatCardGrid cols="3">
     <!-- Welcome Card (Glassmorphism & animated) -->
     <Card
       v-motion
       :initial="{ opacity: 0, y: 30, scale: 0.95 }"
       :visible-once="{ opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 200, damping: 20, mass: 0.8, delay: computedDelay } }"
-      class="relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-white/40 group glass-ui flex flex-col justify-between max-sm:col-span-2"
+      class="relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-white/40 group glass-ui flex flex-col justify-between col-span-2 lg:col-span-1"
     >
       <!-- Watermark Icon Background -->
       <Sun class="absolute -right-4 -bottom-4 size-24 opacity-[0.04] rotate-12 transition-transform duration-300 group-hover:scale-110 text-violet-500" />
@@ -41,7 +42,6 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + 100)
 
     <!-- Rata-rata Presensi -->
     <StatCard
-      :delay="250"
       label="Rata-rata Presensi"
       value="94.8%"
       trend="+2.4% dari bulan lalu"
@@ -52,7 +52,6 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + 100)
 
     <!-- Tugas Menunggu -->
     <StatCard
-      :delay="400"
       label="Tugas Menunggu"
       value="12"
       trend="Deadline: 2 hari"
@@ -60,5 +59,5 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + 100)
       :icon="ClipboardCheck"
       variant="amber"
     />
-  </div>
+  </StatCardGrid>
 </template>

@@ -141,13 +141,7 @@ function deleteSurat(item) {
             class="pl-9 bg-muted/50 border-muted-foreground/20 focus-visible:ring-primary/30 text-muted-foreground"
           />
         </div>
-        <Button 
-          v-if="searchQuery || searchDate" 
-          variant="ghost" 
-          size="sm" 
-          @click="searchQuery = ''; searchDate = ''" 
-          class="text-xs h-9 text-muted-foreground hover:text-foreground self-start sm:self-center"
-        >
+        <Button v-if="searchQuery || searchDate" variant="ghost" size="sm" @click="searchQuery = ''; searchDate = ''" class="text-xs h-9 text-muted-foreground hover:text-foreground self-start sm:self-center">
           Reset Filter
         </Button>
       </div>

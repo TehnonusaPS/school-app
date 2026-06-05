@@ -25,8 +25,7 @@ import FormTextArea from '@/components/forms/FormTextArea.vue'
 import FormDate from '@/components/forms/FormDate.vue'
 import ImageUpload from '@/components/forms/ImageUpload.vue'
 
-// Page Header
-import PageHeader from '@/components/page-header/PageHeader.vue'
+
 
 // Activity Card
 import ActivityCard from '@/components/activity-card/ActivityCard.vue'
@@ -241,41 +240,7 @@ const handleImageChange = (file) => {
       </DataTableCard>
     </section>
 
-    <!-- 66. PAGE HEADER -->
-    <section v-show="match('page header halaman judul deskripsi navigasi back form')" class="space-y-4">
-      <div class="border-b pb-2">
-        <h2 class="text-2xl font-semibold text-primary">66. Page Header</h2>
-        <p class="text-sm text-muted-foreground mt-1">
-          Header halaman standar. Mendukung 3 variant: <code class="bg-muted px-1 rounded text-xs">default</code> (judul saja), <code class="bg-muted px-1 rounded text-xs">back</code> (dengan tombol kembali), dan <code class="bg-muted px-1 rounded text-xs">form</code> (dengan tombol Simpan & Batal).
-        </p>
-      </div>
 
-      <div class="space-y-6 p-6 border rounded-xl bg-card">
-        <!-- Variant default -->
-        <div class="space-y-2">
-          <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Variant: default</p>
-          <div class="p-4 border rounded-lg bg-background">
-            <PageHeader title="Data Siswa" description="Kelola informasi siswa secara lengkap dan terstruktur." />
-          </div>
-        </div>
-
-        <!-- Variant back -->
-        <div class="space-y-2">
-          <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Variant: back</p>
-          <div class="p-4 border rounded-lg bg-background">
-            <PageHeader variant="back" title="Detail Siswa" description="Informasi lengkap profil siswa." />
-          </div>
-        </div>
-
-        <!-- Variant form -->
-        <div class="space-y-2">
-          <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Variant: form</p>
-          <div class="p-4 border rounded-lg bg-background">
-            <PageHeader variant="form" title="Tambah Siswa Baru" description="Isi data siswa dengan lengkap dan benar." />
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- 67. FORM COMPONENTS -->
     <section v-show="match('form input select textarea tanggal date upload gambar section komponen')" class="space-y-4">

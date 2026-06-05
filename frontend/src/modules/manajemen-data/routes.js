@@ -52,7 +52,7 @@ export default [
     path: 'manajemen-data/tahun-ajaran',
     component: () => import('./pages/TahunAjaran.vue'),
     meta: {
-      title: 'Tahun Ajaran Bedasarkan Siswa/Kelas',
+      title: 'Tahun Ajaran',
       parent: 'Manajemen Data',
       description: 'Data Siswa dan Kelas Bedasarkan Tahun Ajaran.'
     }
@@ -108,7 +108,7 @@ export default [
     path: 'manajemen-data/guru-staff-yayasan',
     component: () => import('./pages/guru-staff-yayasan/IndexPage.vue'),
     meta: {
-      title: 'Data Guru dan Staff Yayasan',
+      title: 'Guru dan Staff',
       parent: 'Manajemen Data',
       description: 'Pengelolaan data tenaga pendidik dan kependidikan di seluruh yayasan.'
     }

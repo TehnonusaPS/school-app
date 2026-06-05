@@ -73,12 +73,13 @@ const handleAction = action => {
         </div>
       </template>
 
-      <!-- Select Filters -->
+      <!-- Select & Date Filters -->
       <div class="flex flex-row flex-wrap items-center gap-3 w-full lg:w-auto">
         <template
           v-for="filter in filters"
           :key="filter.key"
         >
+          <!-- Select Filter -->
           <div
             v-if="filter.type === 'select'"
             class="flex items-center gap-1.5 w-auto"
@@ -106,6 +107,26 @@ const handleAction = action => {
                 </SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <!-- Date Filter -->
+          <div
+            v-else-if="filter.type === 'date'"
+            class="flex items-center gap-1.5 w-auto"
+          >
+            <span
+              v-if="filter.label"
+              class="text-sm font-medium text-muted-foreground whitespace-nowrap"
+            >
+              {{ filter.label }}
+            </span>
+            <Input
+              type="date"
+              :model-value="filterValues[filter.key]"
+              @update:model-value="updateFilter(filter.key, $event)"
+              @click="$event.target.showPicker()"
+              class="h-8 w-[140px] px-2 bg-background cursor-pointer text-xs"
+            />
           </div>
         </template>
       </div>

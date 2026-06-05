@@ -19,6 +19,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { getStudents, getLogs, postScan } from '@/services/api/absensi'
+import { glassSlide, glassFade } from '@/config/motion'
 
 const router = useRouter()
 
@@ -269,7 +270,12 @@ const filteredStudents = computed(() => absensiData.value)
     <main class="kiosk-main">
 
       <!-- LEFT: Scanner Viewport -->
-      <section class="right-panel">
+      <section
+        v-motion
+        :initial="glassSlide.initial"
+        :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 100 } }"
+        class="right-panel"
+      >
         <Card class="scanner-card">
 
           <!-- Scanner Header -->
@@ -415,7 +421,12 @@ const filteredStudents = computed(() => absensiData.value)
       </section>
 
       <!-- RIGHT: Clock + Student List -->
-      <section class="left-panel">
+      <section
+        v-motion
+        :initial="glassSlide.initial"
+        :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 250 } }"
+        class="left-panel"
+      >
 
         <!-- Clock Card -->
         <Card class="clock-card">

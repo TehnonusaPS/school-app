@@ -122,12 +122,12 @@ const data = {
           roles: ['superadmin', 'admin_yayasan']
         },
         { 
-          title: 'Kelola Hak Akses Pengguna', 
+          title: 'Kelola Hak Akses', 
           url: '/manajemen-data/hak-akses',
           roles: ['superadmin']
         },
         { 
-          title: 'Guru dan Staff Yayasan', 
+          title: 'Guru dan Staff', 
           url: '/manajemen-data/guru-staff-yayasan',
           roles: ['admin_yayasan']
         },
@@ -151,11 +151,11 @@ const data = {
           url: '/manajemen-data/manajemen-kelas',
           roles: ['admin_sekolah']
         },
-        { title: 'Data Guru dan Staff', url: '/manajemen-data/guru-staff', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'wali_kelas'] },
+        { title: 'Guru dan Staff', url: '/manajemen-data/guru-staff', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'wali_kelas'] },
         { title: 'Data Kelas', url: '/manajemen-data/kelas', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'kepala_sekolah', 'wali_kelas'] },
         { title: 'Mata Pelajaran', url: '/manajemen-data/mata-pelajaran', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'wali_kelas'] },
         { 
-          title: 'Tahun Ajaran Bedasarkan Siswa/Kelas', 
+          title: 'Tahun Ajaran', 
           url: '/manajemen-data/tahun-ajaran',
           roles: ['admin_sekolah']
         },
@@ -175,17 +175,17 @@ const data = {
         { title: 'Mata Pelajaran', url: '/akademik/mapel', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'siswa', 'orang_tua'] },
         { title: 'Ekstrakurikuler', url: '/akademik/ekskul', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'siswa', 'orang_tua'] },
         {
-          title: 'Kalender Akademik',
+          title: 'Kalender',
           url: '/akademik/kalender',
           roles: ['kepala_sekolah', 'admin_sekolah']
         },
         {
-          title: 'Kegiatan akademik sekolah',
+          title: 'Kegiatan',
           url: '/akademik/kegiatan',
           roles: ['kepala_sekolah', 'admin_sekolah']
         },
         {
-          title: 'Kelola Materi',
+          title: 'Materi',
           url: '/akademik/materi',
           roles: ['guru', 'wali_kelas']
         },
@@ -200,12 +200,12 @@ const data = {
           roles: ['guru', 'wali_kelas']
         },
         {
-          title: 'Nilai dan Raport',
+          title: 'Nilai & Raport',
           url: '/akademik/nilai',
           roles: ['siswa']
         },
         {
-          title: 'Materi Pembelajaran',
+          title: 'Materi',
           url: '/akademik/materi',
           roles: ['siswa']
         },
@@ -225,12 +225,12 @@ const data = {
           roles: ['siswa']
         },
         {
-          title: 'Nilai dan Raport Anak',
+          title: 'Nilai & Rapor',
           url: '/akademik/nilai',
           roles: ['orang_tua']
         },
         {
-          title: 'Jadwal Pelajaran Anak',
+          title: 'Jadwal Pelajaran',
           url: '/akademik/jadwal',
           roles: ['orang_tua']
         }
@@ -244,35 +244,35 @@ const data = {
       items: [
         { title: 'SPP Siswa', url: '/keuangan/spp', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'admin_sekolah', 'siswa', 'orang_tua'] },
         { 
-          title: 'Daftar Siswa yang Blom Bayar SPP', 
+          title: 'SPP Siswa', 
           url: '/keuangan/spp',
           roles: ['tata_usaha']
         },
-        { title: 'Tagihan & Pembayaran', url: '/keuangan/tagihan', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'admin_sekolah', 'siswa', 'orang_tua'] },
+        { title: 'Transaksi', url: '/keuangan/tagihan', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'admin_sekolah', 'siswa', 'orang_tua'] },
         { 
-          title: 'History Transaksi Keuangan', 
+          title: 'Transaksi', 
           url: '/keuangan/tagihan',
           roles: ['tata_usaha']
         },
         { title: 'Pengeluaran', url: '/keuangan/pengeluaran', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'admin_sekolah', 'siswa', 'orang_tua'] },
         { title: 'Laporan Keuangan', url: '/keuangan/laporan', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'admin_sekolah', 'siswa', 'orang_tua'] },
         {
-          title: 'Monitoring Subscribtion',
+          title: 'Subscribtion',
           url: '/keuangan/subscription',
           roles: ['superadmin']
         },
         {
-          title: 'Halaman Monitoring Keuangan Yayasan',
+          title: 'Keuangan Yayasan',
           url: '/keuangan/monitoring-yayasan',
           roles: ['admin_yayasan']
         },
         {
-          title: 'Halaman Menu Paket Subcription',
+          title: 'Paket Subcription',
           url: '/keuangan/paket-subscription',
           roles: ['admin_yayasan']
         },
         {
-          title: 'Mengelola Dana Yayasan',
+          title: 'Dana Yayasan',
           url: '/keuangan/kelola-dana-yayasan',
           roles: ['admin_sekolah']
         },
@@ -282,17 +282,17 @@ const data = {
           roles: ['admin_sekolah', 'admin_yayasan', 'superadmin', 'tata_usaha']
         },
         {
-          title: 'Pembayaran SPP',
+          title: 'SPP',
           url: '/keuangan/spp',
           roles: ['siswa']
         },
         {
-          title: 'Pembayaran SPP',
+          title: 'SPP',
           url: '/keuangan/spp',
           roles: ['orang_tua']
         },
         {
-          title: 'Riwayat Pembayaran SPP',
+          title: 'Transaksi',
           url: '/keuangan/tagihan',
           roles: ['orang_tua']
         }
@@ -302,18 +302,23 @@ const data = {
       title: 'Absensi',
       url: '/absensi',
       icon: ClipboardList,
-      excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'tata_usaha', 'orang_tua'],
+      excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'tata_usaha'],
       items: [
-        { title: 'Absensi Siswa', url: '/absensi/siswa', excludeRoles: ['guru', 'wali_kelas', 'siswa'] },
-        { title: 'Absensi Guru & Staff', url: '/absensi/guru-staff', excludeRoles: ['guru', 'wali_kelas', 'siswa'] },
-        { title: 'Rekap Bulanan', url: '/absensi/rekap', excludeRoles: ['guru', 'wali_kelas', 'siswa'] },
+        { title: 'Absensi Siswa', url: '/absensi/siswa', excludeRoles: ['guru', 'wali_kelas', 'siswa', 'orang_tua'] },
+        { title: 'Absensi Guru & Staff', url: '/absensi/guru-staff', excludeRoles: ['guru', 'wali_kelas', 'siswa', 'orang_tua'] },
+        { title: 'Rekap Bulanan', url: '/absensi/rekap', excludeRoles: ['guru', 'wali_kelas', 'siswa', 'orang_tua'] },
         {
-          title: 'Absensi',
+          title: 'Absensi Siswa',
           url: '/absensi/siswa',
           roles: ['guru', 'wali_kelas']
         },
         {
-          title: 'Input Kehadiran Siswa',
+          title: 'Absensi Guru',
+          url: '/absensi/guru-staff',
+          roles: ['guru']
+        },
+        {
+          title: 'Kehadiran',
           url: '/absensi/input',
           roles: ['guru', 'wali_kelas']
         },
@@ -321,6 +326,11 @@ const data = {
           title: 'Rekap Absensi',
           url: '/absensi/rekap',
           roles: ['siswa']
+        },
+        {
+          title: 'Rekap Absensi',
+          url: '/absensi/rekap',
+          roles: ['orang_tua']
         }
       ]
     },
@@ -328,13 +338,13 @@ const data = {
       title: 'Komunikasi',
       url: '/komunikasi',
       icon: MessageSquare,
-      excludeRoles: ['superadmin', 'guru', 'wali_kelas', 'siswa', 'orang_tua'],
+      excludeRoles: ['superadmin', 'guru', 'wali_kelas', 'siswa'],
       items: [
-        { title: 'Pengumuman', url: '/komunikasi/pengumuman', excludeRoles: ['tata_usaha', 'kepala_sekolah', 'admin_sekolah'] },
-        { title: 'Berita Kegiatan', url: '/komunikasi/berita-kegiatan', excludeRoles: ['tata_usaha', 'admin_yayasan'] },
-        { title: 'Feedback Orang Tua', url: '/komunikasi/feedback', excludeRoles: ['tata_usaha', 'admin_yayasan'] },
-        { title: 'Pesan Internal', url: '/komunikasi/pesan', excludeRoles: ['tata_usaha', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah'] },
-        { title: 'Notifikasi', url: '/komunikasi/notifikasi', excludeRoles: ['tata_usaha', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah'] },
+        { title: 'Pengumuman', url: '/komunikasi/pengumuman', excludeRoles: ['tata_usaha', 'kepala_sekolah', 'admin_sekolah', 'orang_tua'] },
+        { title: 'Berita Kegiatan', url: '/komunikasi/berita-kegiatan', excludeRoles: ['tata_usaha', 'admin_yayasan', 'orang_tua'] },
+        { title: 'Feedback', url: '/komunikasi/feedback', excludeRoles: ['tata_usaha', 'admin_yayasan'] },
+        { title: 'Pesan Internal', url: '/komunikasi/pesan', excludeRoles: ['tata_usaha', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'orang_tua'] },
+        { title: 'Notifikasi', url: '/komunikasi/notifikasi', excludeRoles: ['tata_usaha', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'orang_tua'] },
         { title: 'Keterangan Aktif', url: '/komunikasi/persuratan/aktif', roles: ['tata_usaha'] },
         {
           title: 'Surat Dispensasi',
@@ -343,7 +353,7 @@ const data = {
         },
         { title: 'Keterangan Lulus', url: '/komunikasi/persuratan/lulus', roles: ['tata_usaha'] },
         {
-          title: 'Peringatan/Tunggakan',
+          title: 'Peringatan',
           url: '/komunikasi/persuratan/peringatan',
           roles: ['tata_usaha']
         }
@@ -355,31 +365,31 @@ const data = {
       icon: FileBarChart,
       excludeRoles: ['siswa'],
       items: [
-        { title: 'Laporan Akademik', url: '/laporan/akademik', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'orang_tua'] },
+        { title: 'Akademik', url: '/laporan/akademik', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'orang_tua'] },
         { 
-          title: 'Laporan Akademik Perkelas', 
+          title: 'Akademik', 
           url: '/laporan/akademik',
           roles: ['tata_usaha']
         },
         { 
-          title: 'Akademik Perkelas', 
+          title: 'Perkelas', 
           url: '/laporan/akademik',
           roles: ['kepala_sekolah', 'admin_sekolah']
         },
-        { title: 'Laporan Keuangan', url: '/laporan/keuangan', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'orang_tua'] },
+        { title: 'Keuangan', url: '/laporan/keuangan', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'orang_tua'] },
         { 
-          title: 'Laporan Keuangan SPP dan Pendapatan Sekolah', 
+          title: 'Keuangan', 
           url: '/laporan/keuangan',
           roles: ['tata_usaha']
         },
         { 
-          title: 'Keuangan SPP dan Pendapatan Sekolah', 
+          title: 'Keuangan', 
           url: '/laporan/keuangan',
           roles: ['kepala_sekolah', 'admin_sekolah']
         },
-        { title: 'Laporan Absensi', url: '/laporan/absensi', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'orang_tua'] },
+        { title: 'Absensi', url: '/laporan/absensi', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'orang_tua'] },
         { 
-          title: 'Laporan Absensi Kepegawaian', 
+          title: 'Absensi', 
           url: '/laporan/absensi',
           roles: ['tata_usaha']
         },
@@ -390,22 +400,22 @@ const data = {
           roles: ['guru', 'wali_kelas']
         },
         {
-          title: 'Laporan Kehadiran Siswa',
+          title: 'Kehadiran',
           url: '/laporan/kehadiran-siswa',
           roles: ['guru', 'wali_kelas']
         },
         {
-          title: 'Laporan Raport Siswa',
+          title: 'Raport Siswa',
           url: '/laporan/raport',
           roles: ['wali_kelas']
         },
         {
-          title: 'Perkembangan Anak',
+          title: 'Perkembangan',
           url: '/laporan/perkembangan',
           roles: ['orang_tua']
         },
         {
-          title: 'Mengakses laporan konsolidasi seluruh yayasan',
+          title: 'Yayasan',
           url: '/laporan/konsolidasi',
           roles: ['superadmin']
         },
@@ -440,7 +450,7 @@ const data = {
           roles: ['kepala_sekolah', 'admin_sekolah']
         },
         {
-          title: 'Laporan pertanggung Jawaban',
+          title: 'LPJ',
           url: '/laporan/pertanggung-jawaban',
           roles: ['kepala_sekolah']
         }
@@ -455,26 +465,26 @@ const data = {
         { title: 'Pengaturan Sekolah', url: '/lainnya/pengaturan', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah'] },
         { title: 'Manajemen Pengguna', url: '/lainnya/pengguna', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah'] },
         { title: 'Backup & Restore', url: '/lainnya/backup', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah'] },
-        { title: 'Manajemen Ruangan', url: '/lainnya/ruangan', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah'] },
-        { title: 'Manajemen Aset', url: '/lainnya/aset', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah'] },
-        { title: 'Manajemen Perpustakaan', url: '/lainnya/perpustakaan', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah'] },
+        { title: 'Ruangan', url: '/lainnya/ruangan', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah'] },
+        { title: 'Aset', url: '/lainnya/aset', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah'] },
+        { title: 'Perpustakaan', url: '/lainnya/perpustakaan', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah'] },
         {
-          title: 'Konfigurasi sistem global',
+          title: 'Konfigurasi Global',
           url: '/lainnya/konfigurasi-global',
           roles: ['superadmin']
         },
         {
-          title: 'Informasi Ruangan Sekolah',
+          title: 'Ruangan Sekolah',
           url: '/lainnya/informasi-ruangan',
           roles: ['admin_yayasan', 'kepala_sekolah']
         },
         {
-          title: 'Informasi Aset Sekolah',
+          title: 'Aset Sekolah',
           url: '/lainnya/informasi-aset',
           roles: ['admin_yayasan', 'kepala_sekolah']
         },
         {
-          title: 'Informasi Perpustakaan Sekolah',
+          title: 'Perpustakaan',
           url: '/lainnya/informasi-perpustakaan',
           roles: ['admin_yayasan', 'kepala_sekolah']
         },        

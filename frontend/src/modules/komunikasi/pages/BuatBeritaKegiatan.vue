@@ -16,6 +16,8 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { Trash2, UploadCloud } from 'lucide-vue-next'
 import { useBeritaKegiatanStore } from '@/stores/beritaKegiatanStore'
+import PageHeader from '@/components/page-header/PageHeader.vue'
+import { glassFade } from '@/config/motion'
 
 const router = useRouter()
 const store = useBeritaKegiatanStore()
@@ -113,16 +115,19 @@ function handleSave() {
 </script>
 
 <template>
-  <div class="space-y-6 p-1">
+  <div
+    v-motion
+    :initial="glassFade.initial"
+    :visible-once="glassFade.visible"
+    class="space-y-6 p-1"
+  >
     <!-- Header -->
-    <div class="flex flex-col gap-1 mb-6">
-      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
-        Buat Berita Kegiatan
-      </h1>
-      <p class="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-        Lengkapi Formulir dibawah ini untuk mempublikasikan berita kegiatan sekolah terbaru
-      </p>
-    </div>
+    <PageHeader
+      title="Buat Berita Kegiatan"
+      description="Lengkapi Formulir dibawah ini untuk mempublikasikan berita kegiatan sekolah terbaru"
+      back
+      @back="handleCancel"
+    />
 
     <!-- Form Container -->
     <Card class="rounded-2xl border-border bg-card shadow-xs overflow-hidden">

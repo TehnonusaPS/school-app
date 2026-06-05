@@ -7,12 +7,17 @@ import Avatar from '@/components/ui/avatar/Avatar.vue'
 import { useAuthStore } from '@/stores/authStore'
 
 const auth = useAuthStore()
-const currentRole = computed(() => auth.user?.role || 'guru')
+const currentRole = computed(() => {
+  const role = auth.user?.role || 'guru'
+  if (role === 'wali_kelas') return 'guru'
+  if (role === 'orang_tua') return 'siswa'
+  return role
+})
 const isStudent = computed(() => currentRole.value === 'siswa')
 
 const filters = [
   { label: 'Semua', value: 'all' },
-  { label: 'Guru', value: 'guru' },
+  { label: 'Orang Tua', value: 'orang_tua' },
   { label: 'Siswa', value: 'siswa' }
 ]
 
@@ -21,9 +26,9 @@ const conversationsByRole = {
     {
       id: 1,
       name: 'Bpk. Budi Santoso',
-      role: 'siswa',
-      roleLabel: 'Siswa',
-      detail: 'XI RPL 2',
+      role: 'orang_tua',
+      roleLabel: 'Orang Tua',
+      detail: 'Andi - 3 C',
       preview: 'Selamat pagi, Pak Guru.',
       unread: 2,
       time: '13:14',
@@ -31,13 +36,13 @@ const conversationsByRole = {
         {
           id: 1,
           from: 'other',
-          text: 'Selamat pagi, Pak Guru. Saya ingin menanyakan terkait jadwal ujian praktik biologi minggu depan, apakah ada perubahan jadwal?',
+          text: 'Selamat pagi, Pak Guru. Saya ingin menanyakan terkait jadwal ujian praktek biologi minggu depan, apakah ada perubahan jadwal?',
           time: '10:00'
         },
         {
           id: 2,
           from: 'me',
-          text: 'Selamat pagi, Pak Budi. Untuk jadwal ujian praktik biologi tetap sesuai rencana yaitu hari Kamis jam 08.00.',
+          text: 'Selamat pagi, Pak Budi. Untuk jadwal ujian praktik biologi tetap sesuai rencana yaitu hari Kamis jam 08.00. Mohon Andi dipersiapkan dengan baik ya, Pak.',
           time: '10:14',
           status: 'read'
         },
@@ -61,7 +66,7 @@ const conversationsByRole = {
       name: 'Andi Ahmad',
       role: 'siswa',
       roleLabel: 'Siswa',
-      detail: 'X RPL 1',
+      detail: 'Andi - 3 C',
       preview: 'Terima kasih informasinya.',
       unread: 0,
       time: '17:14',
@@ -69,65 +74,28 @@ const conversationsByRole = {
         {
           id: 1,
           from: 'other',
-          text: 'Pak, apakah tugas proyek hari ini dikumpulkan via kelas atau langsung ke guru?',
-          time: '09:20'
+          text: 'Selamat pagi, Pak Guru. Saya ingin menanyakan terkait Tugas praktek biologi, untuk materi yang akan diuji apa saja ya?',
+          time: '09:14'
         },
         {
           id: 2,
           from: 'me',
-          text: 'Silakan dikumpulkan lewat kelas saja dulu, nanti saya cek satu per satu ya.',
-          time: '09:26',
-          status: 'sent'
-        }
-      ]
-    },
-    {
-      id: 3,
-      name: 'Bu Rina',
-      role: 'guru',
-      roleLabel: 'Guru',
-      detail: 'Matematika',
-      preview: 'Mohon cek data absensi ya Pak.',
-      unread: 1,
-      time: '17:14',
-      messages: [
-        {
-          id: 1,
-          from: 'other',
-          text: 'Mohon cek data absensi kelas hari ini ya Pak.',
-          time: '08:15'
-        },
-        {
-          id: 2,
-          from: 'me',
-          text: 'Siap Bu, saya cek dan update setelah jam istirahat.',
-          time: '08:21',
+          text: 'Selamat pagi, Untuk tugas praktek biologi materi yang akan diuji dari Bab I - Bab III, Mohon Andi dipersiapkan dengan baik ya, Pak.',
+          time: '10:14',
           status: 'read'
-        }
-      ]
-    },
-    {
-      id: 4,
-      name: 'Siti Aminah',
-      role: 'siswa',
-      roleLabel: 'Siswa',
-      detail: 'Bahasa Inggris',
-      preview: 'Terima kasih Pak.',
-      unread: 0,
-      time: '13:14',
-      messages: [
-        {
-          id: 1,
-          from: 'other',
-          text: 'Pak, saya izin tanya materi yang kemarin sempat tertinggal.',
-          time: '07:55'
         },
         {
-          id: 2,
+          id: 3,
+          from: 'other',
+          text: 'Baik, terima kasih atas informasinya, Pak.',
+          time: '12:24'
+        },
+        {
+          id: 4,
           from: 'me',
-          text: 'Bisa, nanti saya kirim ringkasannya di grup kelas juga.',
-          time: '08:03',
-          status: 'sent'
+          text: 'Sama - sama',
+          time: '17:14',
+          status: 'read'
         }
       ]
     }
@@ -340,27 +308,25 @@ function send() {
 
           <div class="min-w-0 flex-1">
             <div class="flex items-start justify-between gap-2">
-              <div class="min-w-0">
-                <div class="truncate font-medium text-foreground">{{ convo.name }}</div>
-                <div class="truncate text-xs text-muted-foreground">{{ convo.preview }}</div>
+              <div class="truncate font-semibold text-foreground text-sm sm:text-base">{{ convo.name }}</div>
+              <div class="flex items-center gap-1">
+                <div class="text-[10px] text-muted-foreground font-medium font-mono">{{ convo.time }}</div>
+                <span
+                  v-if="convo.unread"
+                  class="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-bold text-white"
+                >
+                  {{ convo.unread }}
+                </span>
               </div>
-              <span
-                v-if="convo.unread"
-                class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-medium text-primary-foreground"
-              >
-                {{ convo.unread }}
-              </span>
             </div>
 
-            <div class="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-              <span class="rounded-full border border-border px-2 py-0.5">{{
-                convo.roleLabel
-              }}</span>
-              <span>{{ convo.detail }}</span>
+            <div class="mt-1.5 flex items-center gap-2 text-xs text-muted-foreground">
+              <span class="rounded-md border border-border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-muted/40 text-foreground/85">
+                {{ convo.roleLabel }}
+              </span>
+              <span class="text-[11px] font-medium">{{ convo.detail }}</span>
             </div>
           </div>
-
-          <div class="self-start text-[10px] text-muted-foreground">{{ convo.time }}</div>
         </button>
 
         <div
@@ -377,20 +343,15 @@ function send() {
     >
       <header class="flex items-center gap-3 border-b border-border p-4 sm:p-5">
         <Avatar class="h-11 w-11 ring-1 ring-border" />
-        <div class="min-w-0 flex-1">
-          <div class="flex flex-wrap items-center gap-2">
-            <div class="truncate text-base font-semibold text-foreground">
-              {{ activeConversation?.name || 'Pilih percakapan' }}
-            </div>
-            <span
-              v-if="activeConversation"
-              class="inline-flex rounded-full border border-border px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
-            >
+        <div class="min-w-0 flex-1 text-left">
+          <div class="truncate text-base font-semibold text-foreground">
+            {{ activeConversation?.name || 'Pilih percakapan' }}
+          </div>
+          <div v-if="activeConversation" class="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+            <span class="rounded-md border border-border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-muted/40 text-foreground/85">
               {{ activeConversation.roleLabel }}
             </span>
-          </div>
-          <div class="text-sm text-muted-foreground">
-            {{ activeConversation ? activeConversation.detail : 'Belum ada percakapan aktif' }}
+            <span class="text-[11px] font-medium">{{ activeConversation.detail }}</span>
           </div>
         </div>
       </header>
@@ -401,36 +362,46 @@ function send() {
             <div
               v-for="message in activeConversation.messages"
               :key="message.id"
-              class="flex max-w-[85%] gap-3 sm:max-w-[75%]"
-              :class="message.from === 'me' ? 'ml-auto justify-end' : 'justify-start'"
+              class="flex flex-col gap-1 w-full"
+              :class="message.from === 'me' ? 'items-end' : 'items-start'"
             >
-              <Avatar
-                v-if="message.from !== 'me'"
-                class="mt-1 h-9 w-9 shrink-0 ring-1 ring-border"
-              />
+              <div class="flex items-start gap-3 max-w-[85%] sm:max-w-[75%]" :class="message.from === 'me' ? 'justify-end' : ''">
+                <!-- Avatar for other sender -->
+                <Avatar
+                  v-if="message.from !== 'me'"
+                  class="h-9 w-9 shrink-0 ring-1 ring-border self-start"
+                />
 
-              <div
-                class="max-w-full rounded-2xl border px-4 py-3 text-sm leading-6 shadow-sm"
-                :class="
-                  message.from === 'me'
-                    ? 'border-primary/20 bg-primary text-primary-foreground'
-                    : 'border-border bg-muted/40 text-foreground'
-                "
-              >
-                <p class="whitespace-pre-line">{{ message.text }}</p>
-                <div
-                  class="mt-1 flex items-center gap-1 text-[11px] opacity-80"
-                  :class="message.from === 'me' ? 'justify-end' : 'justify-start'"
-                >
-                  <span>{{ message.time }}</span>
-                  <CheckCheck
-                    v-if="message.from === 'me' && message.status === 'read'"
-                    class="h-3.5 w-3.5"
-                  />
-                  <Check
-                    v-else-if="message.from === 'me' && message.status === 'sent'"
-                    class="h-3.5 w-3.5"
-                  />
+                <div class="flex flex-col gap-1 w-full">
+                  <!-- Message Bubble Box -->
+                  <div
+                    class="rounded-xl border px-4 py-3 text-sm leading-6 shadow-xs text-left"
+                    :class="
+                      message.from === 'me'
+                        ? 'border-primary/30 bg-primary/10 text-foreground'
+                        : 'border-border bg-muted/40 text-foreground'
+                    "
+                  >
+                    <p class="whitespace-pre-line">{{ message.text }}</p>
+                  </div>
+
+                  <!-- Time & Status below message box -->
+                  <div
+                    class="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground px-1 font-mono"
+                    :class="message.from === 'me' ? 'justify-end' : 'justify-start'"
+                  >
+                    <span>{{ message.time }}</span>
+                    <template v-if="message.from === 'me'">
+                      <CheckCheck
+                        v-if="message.status === 'read'"
+                        class="h-3 w-3 text-emerald-500"
+                      />
+                      <Check
+                        v-else-if="message.status === 'sent'"
+                        class="h-3 w-3 text-muted-foreground/80"
+                      />
+                    </template>
+                  </div>
                 </div>
               </div>
             </div>

@@ -22,7 +22,7 @@ export default [
     component: () => import('./pages/BuatBeritaKegiatan.vue'),
     meta: {
       title: 'Buat Berita Kegiatan',
-      parent: 'Komunikasi',
+      parent: 'Berita Kegiatan',
       description: 'Buat berita kegiatan baru.'
     }
   },
@@ -31,7 +31,7 @@ export default [
     component: () => import('./pages/EditBeritaKegiatan.vue'),
     meta: {
       title: 'Edit Berita Kegiatan',
-      parent: 'Komunikasi',
+      parent: 'Berita Kegiatan',
       description: 'Edit berita kegiatan.'
     }
   },
@@ -40,7 +40,7 @@ export default [
     component: () => import('./pages/DetailBeritaKegiatan.vue'),
     meta: {
       title: 'Detail Berita Kegiatan',
-      parent: 'Komunikasi',
+      parent: 'Berita Kegiatan',
       description: 'Detail informasi berita kegiatan.'
     }
   },
@@ -48,7 +48,7 @@ export default [
     path: 'komunikasi/feedback',
     component: () => import('./pages/FeedbackOrangTua.vue'),
     meta: {
-      title: 'Feedback Orang Tua',
+      title: 'Feedback',
       parent: 'Komunikasi',
       description: 'Daftar masukan dan saran dari orang tua murid.'
     }
@@ -79,7 +79,7 @@ export default [
       parent: 'Komunikasi',
       description: 'Pesan dan percakapan antara guru dan wali murid.',
       requiresAuth: true,
-      roles: ['guru', 'siswa']
+      roles: ['guru', 'siswa', 'wali_kelas', 'orang_tua']
     }
   },
   {
@@ -98,7 +98,7 @@ export default [
     component: () => import('./pages/BuatSuratAktif.vue'),
     meta: {
       title: 'Buat Surat Keterangan Aktif',
-      parent: 'Komunikasi',
+      parent: 'Surat Keterangan Aktif',
       description: 'Form pembuatan surat keterangan siswa aktif.',
       requiresAuth: true,
       roles: ['tata_usaha']
@@ -109,7 +109,7 @@ export default [
     component: () => import('./pages/EditSuratAktif.vue'),
     meta: {
       title: 'Edit Surat Keterangan Aktif',
-      parent: 'Komunikasi',
+      parent: 'Surat Keterangan Aktif',
       description: 'Form edit surat keterangan siswa aktif.',
       requiresAuth: true,
       roles: ['tata_usaha']
@@ -131,7 +131,7 @@ export default [
     component: () => import('./pages/BuatSuratDispensasi.vue'),
     meta: {
       title: 'Buat Surat Dispensasi',
-      parent: 'Komunikasi',
+      parent: 'Surat Dispensasi',
       description: 'Form pembuatan surat izin atau dispensasi siswa.',
       requiresAuth: true,
       roles: ['tata_usaha']
@@ -142,7 +142,7 @@ export default [
     component: () => import('./pages/EditSuratDispensasi.vue'),
     meta: {
       title: 'Edit Surat Dispensasi',
-      parent: 'Komunikasi',
+      parent: 'Surat Dispensasi',
       description: 'Form edit surat izin atau dispensasi siswa.',
       requiresAuth: true,
       roles: ['tata_usaha']
@@ -164,7 +164,7 @@ export default [
     component: () => import('./pages/BuatSuratLulus.vue'),
     meta: {
       title: 'Buat Surat Keterangan Lulus',
-      parent: 'Komunikasi',
+      parent: 'Surat Keterangan Lulus',
       description: 'Form pembuatan Surat Keterangan Lulus (SKL) sementara.',
       requiresAuth: true,
       roles: ['tata_usaha']
@@ -175,7 +175,7 @@ export default [
     component: () => import('./pages/EditSuratLulus.vue'),
     meta: {
       title: 'Edit Surat Keterangan Lulus',
-      parent: 'Komunikasi',
+      parent: 'Surat Keterangan Lulus',
       description: 'Form edit Surat Keterangan Lulus (SKL) sementara.',
       requiresAuth: true,
       roles: ['tata_usaha']
@@ -185,7 +185,7 @@ export default [
     path: 'komunikasi/persuratan/peringatan',
     component: () => import('./pages/SuratPeringatan.vue'),
     meta: {
-      title: 'Surat Peringatan & Tunggakan',
+      title: 'Peringatan',
       parent: 'Komunikasi',
       description: 'Manajemen surat peringatan, tagihan, dan pemanggilan.',
       requiresAuth: true,
@@ -196,8 +196,8 @@ export default [
     path: 'komunikasi/persuratan/peringatan/buat',
     component: () => import('./pages/BuatSuratPeringatan.vue'),
     meta: {
-      title: 'Buat Surat Peringatan & Tunggakan',
-      parent: 'Komunikasi',
+      title: 'Buat Surat Peringatan',
+      parent: 'Surat Peringatan',
       description: 'Form pembuatan surat peringatan, tagihan, dan pemanggilan.',
       requiresAuth: true,
       roles: ['tata_usaha']
@@ -207,8 +207,8 @@ export default [
     path: 'komunikasi/persuratan/peringatan/edit/:id',
     component: () => import('./pages/EditSuratPeringatan.vue'),
     meta: {
-      title: 'Edit Surat Peringatan & Tunggakan',
-      parent: 'Komunikasi',
+      title: 'Edit Surat Peringatan ',
+      parent: 'Surat Peringatan',
       description: 'Form edit surat peringatan, tagihan, dan pemanggilan.',
       requiresAuth: true,
       roles: ['tata_usaha']

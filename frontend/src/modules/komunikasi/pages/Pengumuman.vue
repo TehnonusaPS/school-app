@@ -2,12 +2,15 @@
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { mockAnnouncements } from '../data/mockAnnouncements'
-import AnnouncementStats from '../components/AnnouncementStats.vue'
 import AnnouncementTable from '../components/AnnouncementTable.vue'
 import AnnouncementDetailModal from '../components/AnnouncementDetailModal.vue'
 import AnnouncementFormModal from '../components/AnnouncementFormModal.vue'
 import AnnouncementDeleteModal from '../components/AnnouncementDeleteModal.vue'
 import { useAuthStore } from '@/stores/authStore'
+import PageHeader from '@/components/page-header/PageHeader.vue'
+import StatCard from '@/components/stat-card/StatCard.vue'
+import { Plus, Megaphone } from 'lucide-vue-next'
+import { glassSlide, glassFade } from '@/config/motion'
 
 const authStore = useAuthStore()
 const currentUser = authStore.user
@@ -92,22 +95,53 @@ function deleteAnnouncement() {
 </script>
 
 <template>
-  <div class="space-y-6 p-1">
+  <div
+    v-motion
+    :initial="glassFade.initial"
+    :visible-once="glassFade.visible"
+    class="space-y-6 p-1"
+  >
     <!-- Header & Stats Card component -->
-    <AnnouncementStats 
-      :total="announcements.length" 
-      :is-school-role="isSchoolRole"
-      @create="openCreateDialog" 
+    <PageHeader
+      title="Daftar Pengumuman"
+      description="Kelola dan Kirim informasi ke seluruh unit sekolah"
+      :actions="!isSchoolRole ? [
+        {
+          label: 'Buat Pengumuman Baru',
+          icon: Plus,
+          variant: 'default',
+          click: openCreateDialog
+        }
+      ] : []"
     />
 
+    <div
+      v-motion
+      :initial="glassSlide.initial"
+      :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 100 } }"
+    >
+      <StatCard
+        label="Total Pengumuman"
+        :value="announcements.length"
+        :icon="Megaphone"
+        variant="primary"
+      />
+    </div>
+
     <!-- Main Data Table & Filtering & Pagination -->
-    <AnnouncementTable 
-      :items="announcements" 
-      :is-school-role="isSchoolRole"
-      @view="openDetailDialog" 
-      @edit="openEditDialog" 
-      @delete="confirmDelete" 
-    />
+    <div
+      v-motion
+      :initial="glassSlide.initial"
+      :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 200 } }"
+    >
+      <AnnouncementTable 
+        :items="announcements" 
+        :is-school-role="isSchoolRole"
+        @view="openDetailDialog" 
+        @edit="openEditDialog" 
+        @delete="confirmDelete" 
+      />
+    </div>
 
     <!-- Dialog / Modals components -->
     <AnnouncementDetailModal 

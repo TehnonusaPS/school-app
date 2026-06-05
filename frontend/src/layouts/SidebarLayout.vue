@@ -109,7 +109,7 @@ const notifications = [
 <template>
   <SidebarProvider>
     <AppSidebar />
-    <SidebarInset>
+    <SidebarInset class="min-w-0 overflow-x-hidden">
       <header
         v-motion
         :initial="topbarSlide.initial"
@@ -151,8 +151,8 @@ const notifications = [
             />
           </div>
 
-          <!-- Chat Icon (Guru & Siswa) -->
-          <div v-if="auth.user?.role === 'guru' || auth.user?.role === 'siswa'" class="relative">
+          <!-- Chat Icon (Guru, Siswa, Wali Kelas, & Orang Tua) -->
+          <div v-if="auth.user?.role === 'guru' || auth.user?.role === 'siswa' || auth.user?.role === 'wali_kelas' || auth.user?.role === 'orang_tua'" class="relative">
             <Button
               variant="ghost"
               size="icon"

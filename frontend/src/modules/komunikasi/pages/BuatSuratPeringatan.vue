@@ -14,6 +14,8 @@ import {
 import { fetchAllSiswa } from '@/services/siswaService'
 import { useSuratPeringatanStore } from '@/stores/suratPeringatanStore'
 import { toast } from 'vue-sonner'
+import PageHeader from '@/components/page-header/PageHeader.vue'
+import { glassFade } from '@/config/motion'
 
 const router = useRouter()
 const store = useSuratPeringatanStore()
@@ -109,16 +111,19 @@ function handleCancel() {
 </script>
 
 <template>
-  <div class="space-y-8 p-1 sm:p-4 max-w-5xl mx-auto w-full">
+  <div
+    v-motion
+    :initial="glassFade.initial"
+    :visible-once="glassFade.visible"
+    class="space-y-8 p-1 sm:p-4 max-w-5xl mx-auto w-full"
+  >
     <!-- Header -->
-    <div class="flex flex-col gap-2 mb-2">
-      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-slate-500 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
-        Buat Surat Peringatan & Tunggakan
-      </h1>
-      <p class="text-sm text-muted-foreground leading-relaxed">
-        Kelola Surat Keterangan Pelanggaran & Tunggakan
-      </p>
-    </div>
+    <PageHeader
+      title="Buat Surat Peringatan & Tunggakan"
+      description="Lengkapi formulir di bawah ini untuk menerbitkan surat peringatan kedisiplinan atau tunggakan baru."
+      back
+      @back="handleCancel"
+    />
 
     <!-- Form Container -->
     <div class="bg-card border border-border/60 rounded-2xl shadow-sm overflow-hidden flex flex-col">

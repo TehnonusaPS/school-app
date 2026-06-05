@@ -29,8 +29,8 @@ export default [
   {
     path: 'lainnya/ruangan',
     component: () => import('./pages/Ruangan.vue'),
-    meta:{
-      title: 'Manajemen Ruangan',
+    meta: {
+      title: 'Ruangan',
       parent: 'Lainnya',
       description: 'Pengelolaan data ruangan sekolah.'
     }
@@ -38,7 +38,7 @@ export default [
   {
     path: 'lainnya/ruangan/tambah',
     component: () => import('./pages/AddRuangan.vue'),
-    meta:{
+    meta: {
       title: 'Tambah Ruangan',
       parent: 'Lainnya',
       description: 'Form untuk menambahkan data ruangan baru.'
@@ -47,7 +47,7 @@ export default [
   {
     path: 'lainnya/ruangan/edit/:id',
     component: () => import('./pages/EditRuangan.vue'),
-    meta:{
+    meta: {
       title: 'Edit Ruangan',
       parent: 'Lainnya',
       description: 'Form untuk mengedit data ruangan.'
@@ -56,8 +56,8 @@ export default [
   {
     path: 'lainnya/aset',
     component: () => import('./pages/Aset.vue'),
-    meta:{
-      title: 'Manajemen Aset',
+    meta: {
+      title: 'Aset',
       parent: 'Lainnya',
       description: 'Pengelolaan data aset sekolah.',
       roles: ['admin_sekolah']
@@ -66,7 +66,7 @@ export default [
   {
     path: 'lainnya/aset/tambah',
     component: () => import('./pages/AddAset.vue'),
-    meta:{
+    meta: {
       title: 'Tambah Aset',
       parent: 'Lainnya',
       description: 'Form untuk menambahkan data aset baru.',
@@ -76,7 +76,7 @@ export default [
   {
     path: 'lainnya/aset/edit/:id',
     component: () => import('./pages/EditAset.vue'),
-    meta:{
+    meta: {
       title: 'Edit Aset',
       parent: 'Lainnya',
       description: 'Form untuk mengedit data aset.',
@@ -86,8 +86,8 @@ export default [
   {
     path: 'lainnya/perpustakaan',
     component: () => import('./pages/Perpustakaan.vue'),
-    meta:{
-      title: 'Manajemen Perpustakaan',
+    meta: {
+      title: 'Perpustakaan',
       parent: 'Lainnya',
       description: 'Pengelolaan data buku di perpustakaan sekolah.',
       roles: ['admin_sekolah']
@@ -96,7 +96,7 @@ export default [
   {
     path: 'lainnya/perpustakaan/tambah',
     component: () => import('./pages/AddPerpustakaan.vue'),
-    meta:{
+    meta: {
       title: 'Tambah Buku Perpustakaan',
       parent: 'Lainnya',
       description: 'Form untuk menambahkan data buku baru.',
@@ -106,7 +106,7 @@ export default [
   {
     path: 'lainnya/perpustakaan/edit/:id',
     component: () => import('./pages/EditPerpustakaan.vue'),
-    meta:{
+    meta: {
       title: 'Edit Buku',
       parent: 'Lainnya',
       description: 'Form untuk mengedit data buku.',

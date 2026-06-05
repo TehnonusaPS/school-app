@@ -1,5 +1,10 @@
 <template>
-  <div class="space-y-6">
+  <div
+    v-motion
+    :initial="glassFade.initial"
+    :visible-once="glassFade.visible"
+    class="space-y-6"
+  >
     <!-- Page Header -->
     <div class="border-b pb-4">
       <h1 class="text-2xl font-bold tracking-tight">{{ title }}</h1>
@@ -28,6 +33,7 @@
 import { Construction } from 'lucide-vue-next'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
+import { glassFade } from '@/config/motion'
 
 const route = useRoute()
 

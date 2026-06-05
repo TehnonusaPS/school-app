@@ -190,7 +190,7 @@ function handlePrint() {
       <div>
         <h1 class="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
           <FileBarChart class="size-6 text-primary" />
-          Laporan Raport Siswa
+          Raport Siswa
         </h1>
         <p class="text-muted-foreground mt-1 text-sm">
           Rekapitulasi nilai akhir semester dan pencetakan rapor siswa perwalian.

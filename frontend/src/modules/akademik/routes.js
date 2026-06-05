@@ -21,7 +21,7 @@ export default [
     path: 'akademik/ujian',
     component: () => import('./pages/Ujian.vue'),
     meta: {
-      title: 'Ujian & Penilaian',
+      title: 'Ujian',
       parent: 'Akademik',
       description: 'Manajemen ujian, kuis, dan penilaian harian.'
     }
@@ -75,7 +75,7 @@ export default [
     path: 'akademik/materi',
     component: () => import('./pages/KelolaMateri.vue'),
     meta: {
-      title: 'Kelola Materi',
+      title: 'Materi',
       parent: 'Akademik',
       description: 'Unggah, sunting, dan bagikan materi ajar interaktif.'
     }
@@ -84,7 +84,7 @@ export default [
     path: 'akademik/tugas',
     component: () => import('./pages/KelolaTugas.vue'),
     meta: {
-      title: 'Kelola Tugas',
+      title: 'Tugas',
       parent: 'Akademik',
       description: 'Buat tugas baru dan pantau pengumpulan tugas siswa.'
     }

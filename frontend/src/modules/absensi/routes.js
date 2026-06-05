@@ -30,7 +30,7 @@ export default [
     path: 'absensi/rekap',
     component: () => import('./pages/Rekap.vue'),
     meta: {
-      title: 'Rekap Bulanan',
+      title: 'Rekap Absensi',
       parent: 'Absensi',
       description: 'Rekap kehadiran bulanan seluruh civitas.'
     }
@@ -39,7 +39,7 @@ export default [
     path: 'absensi/input',
     component: () => import('./pages/InputKehadiran.vue'),
     meta: {
-      title: 'Input Kehadiran Siswa',
+      title: 'Kehadiran',
       parent: 'Absensi',
       description: 'Isi lembar kehadiran siswa secara harian dan periodik.'
     }

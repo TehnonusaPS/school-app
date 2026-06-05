@@ -81,6 +81,15 @@ export default [
     }
   },
   {
+    path: 'keuangan/tarif-spp',
+    component: () => import('./pages/TarifSpp.vue'),
+    meta: {
+      title: 'Pengaturan Tarif SPP',
+      parent: 'Keuangan',
+      description: 'Manajemen pengaturan tarif SPP dan biaya sekolah.'
+    }
+  },
+  {
     path: 'keuangan/input-pengeluaran-kecil',
     component: () => import('./pages/PengeluaranKecil.vue'),
     meta: {

@@ -30,6 +30,8 @@ import {
 } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { postGuruScan } from '@/services/api/absensi'
+import PageHeader from '@/components/page-header/PageHeader.vue'
+import { glassFade, glassSlide, tableRowFade } from '@/config/motion'
 
 // ─── STATE ──────────────────────────────────────────────────
 const currentTime = ref('')
@@ -164,17 +166,18 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="space-y-6 animate-in fade-in duration-300 w-full pb-10">
+  <div
+    v-motion
+    :initial="glassFade.initial"
+    :visible-once="glassFade.visible"
+    class="space-y-6 animate-in fade-in duration-300 w-full pb-10"
+  >
     
     <!-- ── Header ── -->
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b pb-4">
-      <div>
-        <h1 class="text-2xl font-bold tracking-tight text-foreground">Absensi Guru & Staff</h1>
-        <p class="text-muted-foreground mt-1 text-sm">
-          Selamat datang kembali, Budi Santoso (Guru Matematika)
-        </p>
-      </div>
-    </div>
+    <PageHeader
+      title="Absensi Guru & Staff"
+      description="Selamat datang kembali, Budi Santoso (Guru Matematika)"
+    />
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       
@@ -182,7 +185,12 @@ onUnmounted(() => {
       <div class="md:col-span-1 space-y-6">
         
         <!-- Action Card -->
-        <Card class="overflow-hidden relative min-h-[380px] flex flex-col justify-center">
+        <Card
+          v-motion
+          :initial="glassSlide.initial"
+          :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 80 } }"
+          class="overflow-hidden relative min-h-[380px] flex flex-col justify-center"
+        >
           <!-- decorative bg -->
           <div class="absolute inset-0 bg-gradient-to-br from-indigo-50/50 to-white dark:from-indigo-950/20 dark:to-transparent pointer-events-none"></div>
           
@@ -237,7 +245,11 @@ onUnmounted(() => {
         </Card>
 
         <!-- Quick Stats List -->
-        <Card>
+        <Card
+          v-motion
+          :initial="glassSlide.initial"
+          :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 180 } }"
+        >
           <CardHeader class="pb-2">
             <CardTitle class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Ringkasan Bulan Ini</CardTitle>
           </CardHeader>
@@ -281,7 +293,12 @@ onUnmounted(() => {
         
         <!-- Top stat cards (Horizontal) -->
         <div class="grid grid-cols-2 gap-4">
-          <Card class="p-4 flex items-center gap-4">
+          <Card
+            v-motion
+            :initial="glassSlide.initial"
+            :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 120 } }"
+            class="p-4 flex items-center gap-4"
+          >
             <div class="p-3 bg-primary/10 text-primary rounded-xl">
               <Briefcase class="size-5" />
             </div>
@@ -291,7 +308,12 @@ onUnmounted(() => {
               <p v-else class="text-2xl font-bold">148<span class="text-sm font-normal text-muted-foreground ml-1">Jam</span></p>
             </div>
           </Card>
-          <Card class="p-4 flex items-center gap-4">
+          <Card
+            v-motion
+            :initial="glassSlide.initial"
+            :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 160 } }"
+            class="p-4 flex items-center gap-4"
+          >
             <div class="p-3 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
               <CalendarDays class="size-5" />
             </div>
@@ -304,7 +326,12 @@ onUnmounted(() => {
         </div>
 
         <!-- History Table -->
-        <Card class="overflow-hidden flex flex-col h-full max-h-[500px]">
+        <Card
+          v-motion
+          :initial="glassSlide.initial"
+          :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 220 } }"
+          class="overflow-hidden flex flex-col h-full max-h-[500px]"
+        >
           <div class="p-4 border-b bg-muted/20 flex items-center justify-between">
             <h2 class="font-semibold">Riwayat Absensi Terakhir</h2>
             <Button variant="outline" size="sm" class="h-8 text-xs">Lihat Semua</Button>
@@ -332,8 +359,11 @@ onUnmounted(() => {
                 </template>
                 <template v-else>
                   <TableRow 
-                    v-for="log in recentLogs" 
+                    v-for="(log, index) in recentLogs" 
                     :key="log.id"
+                    v-motion
+                    :initial="tableRowFade.initial"
+                    :visible-once="{ ...tableRowFade.visible, transition: { ...tableRowFade.visible.transition, delay: index * 60 } }"
                     class="hover:bg-muted/30 transition-colors"
                   >
                     <TableCell class="font-medium">{{ log.tanggal }}</TableCell>

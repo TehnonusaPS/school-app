@@ -39,6 +39,15 @@ const routes = [
       title: 'Kiosk Presensi Siswa'
     }
   },
+  {
+    path: '/absensi/input/print',
+    name: 'CetakKehadiran',
+    component: () => import('../modules/absensi/pages/CetakKehadiran.vue'),
+    meta: {
+      requiresAuth: true,
+      title: 'Cetak Kehadiran Siswa'
+    }
+  },
 
   // Semua rute aplikasi yang pakai Sidebar
   {
@@ -82,7 +91,7 @@ router.beforeEach((to, from) => {
   if (to.meta.roles && !to.meta.roles.includes(auth.user?.role)) {
     return '/login'
   }
-  
+
   // Vue Router 4+: Tidak me-return apapun (atau return true) akan otomatis melanjutkan rute
 })
 

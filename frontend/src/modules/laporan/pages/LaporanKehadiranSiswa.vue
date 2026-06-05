@@ -156,7 +156,7 @@ function getProgressColor(pct) {
       <div>
         <h1 class="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
           <ClipboardList class="size-6 text-primary" />
-          Laporan Kehadiran Siswa
+          Kehadiran Siswa
         </h1>
         <p class="text-muted-foreground mt-1 text-sm">
           Rekapitulasi persentase kehadiran dan daftar siswa yang perlu perhatian khusus.

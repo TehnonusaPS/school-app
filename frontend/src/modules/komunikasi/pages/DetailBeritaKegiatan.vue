@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Calendar, Building, Megaphone } from 'lucide-vue-next'
 import { useBeritaKegiatanStore } from '@/stores/beritaKegiatanStore'
+import PageHeader from '@/components/page-header/PageHeader.vue'
+import { glassFade } from '@/config/motion'
 
 const route = useRoute()
 const router = useRouter()
@@ -49,27 +51,20 @@ function handleBack() {
 </script>
 
 <template>
-  <div class="space-y-6 p-1" v-if="item">
+  <div
+    v-if="item"
+    v-motion
+    :initial="glassFade.initial"
+    :visible-once="glassFade.visible"
+    class="space-y-6 p-1"
+  >
     <!-- Header -->
-    <div class="flex flex-col gap-3 mb-6">
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        @click="handleBack"
-        class="w-fit gap-1.5 -ml-2 text-muted-foreground hover:text-foreground h-9 rounded-lg"
-      >
-        <ArrowLeft class="size-4" />
-        Kembali ke Daftar
-      </Button>
-      <div class="flex flex-col gap-1">
-        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
-          Detail Berita Kegiatan
-        </h1>
-        <p class="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-          Informasi lengkap mengenai berita kegiatan sekolah yang dipublikasikan
-        </p>
-      </div>
-    </div>
+    <PageHeader
+      title="Detail Berita Kegiatan"
+      description="Informasi lengkap mengenai berita kegiatan sekolah yang dipublikasikan"
+      back
+      @back="handleBack"
+    />
 
     <!-- Details Container -->
     <Card class="rounded-2xl border-border bg-card shadow-xs overflow-hidden">

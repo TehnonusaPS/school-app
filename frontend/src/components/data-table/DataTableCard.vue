@@ -5,6 +5,7 @@ import DataTableToolbar from './DataTableToolbar.vue'
 import DataTablePagination from './DataTablePagination.vue'
 import BaseDataTable from './BaseDataTable.vue'
 import { Card } from '@/components/ui/card'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import {
   AlertDialog,
   AlertDialogContent,
@@ -57,6 +58,18 @@ const localFilterValues = computed({
   set: val => emit('update:filterValues', val)
 })
 
+// ── Detail sheet ─────────────────────────────────────────────────────────────
+const detailSheetOpen = ref(false)
+const selectedItemForDetail = ref(null)
+
+const openDetailSheet = item => {
+  selectedItemForDetail.value = item
+  detailSheetOpen.value = true
+  if (props.onView) {
+    props.onView(item)
+  }
+}
+
 // ── Delete confirmation dialog ────────────────────────────────────────────────
 const deleteDialogOpen = ref(false)
 const pendingDeleteItem = ref(null)
@@ -101,7 +114,7 @@ const cancelDelete = () => {
  */
 const defaultRowActions = computed(() => {
   const actions = []
-  if (props.onView) actions.push({ label: 'Detail', icon: Eye, click: props.onView })
+  if (props.onView) actions.push({ label: 'Detail', icon: Eye, click: openDetailSheet })
   if (props.onEdit) actions.push({ label: 'Edit', icon: Pencil, click: props.onEdit })
   if (props.onDelete) actions.push({ label: 'Hapus', icon: Trash2, click: requestDelete })
   return actions
@@ -193,5 +206,24 @@ const resolvedRowActions = computed(() =>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+
+    <!-- Detail Sheet -->
+    <Sheet v-model:open="detailSheetOpen">
+      <SheetContent class="sm:max-w-md">
+        <slot name="detail" :item="selectedItemForDetail">
+          <SheetHeader>
+            <SheetTitle>Detail Data</SheetTitle>
+            <SheetDescription>
+              Informasi detail data yang terpilih.
+            </SheetDescription>
+          </SheetHeader>
+          <!-- Kosongan Dulu (Empty for now) -->
+          <div class="py-6 flex flex-col items-center justify-center text-muted-foreground gap-2">
+            <p class="text-sm">Konten Detail Kosong</p>
+            <pre v-if="selectedItemForDetail" class="text-xs bg-muted p-4 rounded-lg w-full overflow-auto max-h-60 font-mono text-left text-foreground">{{ JSON.stringify(selectedItemForDetail, null, 2) }}</pre>
+          </div>
+        </slot>
+      </SheetContent>
+    </Sheet>
   </Card>
 </template>

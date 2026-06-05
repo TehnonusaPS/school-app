@@ -10,6 +10,8 @@ import StatCardTrendNeutralDemo from './stat-card/StatCardTrendNeutralDemo.vue'
 import StatCardProgressDemo from './stat-card/StatCardProgressDemo.vue'
 import StatCardGroupDemo from './stat-card/StatCardGroupDemo.vue'
 import DataTableCardDemo from './data-table/DataTableCardDemo.vue'
+import DataSheetDemo from './data-sheet/DataSheetDemo.vue'
+import FormSheetDemo from './data-sheet/FormSheetDemo.vue'
 
 const props = defineProps({
   searchQuery: { type: String, default: '' }
@@ -81,6 +83,21 @@ const match = keywords => {
     >
       <ShowcaseItem label="Data Table Card (Tabel Lengkap dengan Card, Toolbar & Pagination)">
         <DataTableCardDemo />
+      </ShowcaseItem>
+    </ShowcaseSection>
+
+    <!-- DATA SHEET -->
+    <ShowcaseSection
+      v-show="match('data sheet panel drawer detail profil form edit create')"
+      title="Data Sheet"
+      description="Komponen panel laci samping (side drawer) untuk menampilkan rincian detail data lengkap secara terstruktur, atau melakukan entry/edit data menggunakan form-sheet."
+    >
+      <ShowcaseItem label="Data Sheet Demo (Detail Profil Read-Only)">
+        <DataSheetDemo />
+      </ShowcaseItem>
+
+      <ShowcaseItem label="Form Sheet Demo (Form Input Create & Edit)">
+        <FormSheetDemo />
       </ShowcaseItem>
     </ShowcaseSection>
   </div>

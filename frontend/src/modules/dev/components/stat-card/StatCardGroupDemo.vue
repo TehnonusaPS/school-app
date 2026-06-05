@@ -1,7 +1,58 @@
 <script setup>
 import StatCard from '@/components/stat-card/StatCard.vue'
 import StatCardGrid from '@/components/stat-card/StatCardGrid.vue'
+import { statCardDemosData } from './data/statCardDemos'
 import { Users, UserCheck, Wallet } from 'lucide-vue-next'
+
+const groupCardsData = [
+  {
+    label: 'Total Siswa',
+    value: statCardDemosData.siswa.total,
+    sub: statCardDemosData.siswa.sub,
+    icon: Users,
+    color: 'blue',
+    variant: 'default'
+  },
+  {
+    label: 'Absensi Hari Ini',
+    value: statCardDemosData.absensi.total,
+    sub: statCardDemosData.absensi.sub,
+    trend: statCardDemosData.absensi.trend,
+    trendDirection: statCardDemosData.absensi.trendDirection,
+    icon: UserCheck,
+    color: 'emerald',
+    variant: 'up'
+  },
+  {
+    label: 'Total Anggaran',
+    value: statCardDemosData.anggaran.total,
+    sub: statCardDemosData.anggaran.sub,
+    progress: statCardDemosData.anggaran.progress,
+    icon: Wallet,
+    color: 'violet',
+    variant: 'progress'
+  },
+  {
+    label: 'Pendaftaran Baru',
+    value: statCardDemosData.pendaftaran.total,
+    sub: statCardDemosData.pendaftaran.sub,
+    trend: statCardDemosData.pendaftaran.trend,
+    trendDirection: statCardDemosData.pendaftaran.trendDirection,
+    icon: Users,
+    color: 'amber',
+    variant: 'down'
+  },
+  {
+    label: 'Tingkat Kelulusan',
+    value: statCardDemosData.kelulusan.total,
+    sub: statCardDemosData.kelulusan.sub,
+    trend: statCardDemosData.kelulusan.trend,
+    trendDirection: statCardDemosData.kelulusan.trendDirection,
+    icon: Users,
+    color: 'primary',
+    variant: 'neutral'
+  }
+]
 </script>
 
 <template>
@@ -12,14 +63,7 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
         Demo 1 Card (Full Width - Mobile, Tablet, & Desktop)
       </div>
       <StatCardGrid cols="1">
-        <StatCard
-          label="Total Siswa"
-          value="402"
-          sub="siswa aktif"
-          :icon="Users"
-          color="blue"
-          variant="default"
-        />
+        <StatCard v-bind="groupCardsData[0]" />
       </StatCardGrid>
     </div>
 
@@ -30,22 +74,9 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
       </div>
       <StatCardGrid cols="2">
         <StatCard
-          label="Total Siswa"
-          value="402"
-          sub="siswa aktif"
-          :icon="Users"
-          color="blue"
-          variant="default"
-        />
-
-        <StatCard
-          label="Absensi Hari Ini"
-          value="378"
-          sub="94% hadir"
-          trend="+2% dari kemarin"
-          :icon="UserCheck"
-          color="emerald"
-          variant="up"
+          v-for="(card, i) in groupCardsData.slice(0, 2)"
+          :key="i"
+          v-bind="card"
         />
       </StatCardGrid>
     </div>
@@ -60,32 +91,9 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
         :delay="500"
       >
         <StatCard
-          label="Total Siswa"
-          value="402"
-          sub="siswa aktif"
-          :icon="Users"
-          color="blue"
-          variant="default"
-        />
-
-        <StatCard
-          label="Absensi Hari Ini"
-          value="378"
-          sub="94% hadir"
-          trend="+2% dari kemarin"
-          :icon="UserCheck"
-          color="emerald"
-          variant="up"
-        />
-
-        <StatCard
-          label="Total Anggaran"
-          value="78.5"
-          sub="Realisasi Anggaran"
-          :progress="78.5"
-          :icon="Wallet"
-          color="violet"
-          variant="progress"
+          v-for="(card, i) in groupCardsData.slice(0, 3)"
+          :key="i"
+          v-bind="card"
         />
       </StatCardGrid>
     </div>
@@ -100,42 +108,9 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
         :delay="300"
       >
         <StatCard
-          label="Total Siswa"
-          value="402"
-          sub="siswa aktif"
-          :icon="Users"
-          color="blue"
-          variant="default"
-        />
-
-        <StatCard
-          label="Absensi Hari Ini"
-          value="378"
-          sub="94% hadir"
-          trend="+2% dari kemarin"
-          :icon="UserCheck"
-          color="emerald"
-          variant="up"
-        />
-
-        <StatCard
-          label="Total Anggaran"
-          value="78.5"
-          sub="Realisasi Anggaran"
-          :progress="78.5"
-          :icon="Wallet"
-          color="violet"
-          variant="progress"
-        />
-
-        <StatCard
-          label="Tingkat Kelulusan"
-          value="100%"
-          sub="stabil dibanding tahun lalu"
-          trend="0% perubahan"
-          :icon="Users"
-          color="primary"
-          variant="neutral"
+          v-for="(card, i) in groupCardsData.slice(0, 4)"
+          :key="i"
+          v-bind="card"
         />
       </StatCardGrid>
     </div>
@@ -143,57 +118,13 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
     <!-- Group of 5 Cards -->
     <div class="space-y-3">
       <div class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-        Demo 5 Cards (2 Columns on Mobile & Tablet with bottom card full width, 5 Columns on
-        Desktop)
+        Demo 5 Cards (2 Columns on Mobile & Tablet with bottom card full width, 5 Columns on Desktop)
       </div>
       <StatCardGrid cols="5">
         <StatCard
-          label="Total Siswa"
-          value="402"
-          sub="siswa aktif"
-          :icon="Users"
-          color="blue"
-          variant="default"
-        />
-
-        <StatCard
-          label="Absensi Hari Ini"
-          value="378"
-          sub="94% hadir"
-          trend="+2% dari kemarin"
-          :icon="UserCheck"
-          color="emerald"
-          variant="up"
-        />
-
-        <StatCard
-          label="Total Anggaran"
-          value="78.5"
-          sub="Realisasi Anggaran"
-          :progress="78.5"
-          :icon="Wallet"
-          color="violet"
-          variant="progress"
-        />
-
-        <StatCard
-          label="Pendaftaran Baru"
-          value="12"
-          sub="siswa mendaftar"
-          trend="-4% dari minggu lalu"
-          :icon="Users"
-          color="amber"
-          variant="down"
-        />
-
-        <StatCard
-          label="Tingkat Kelulusan"
-          value="100%"
-          sub="stabil dibanding tahun lalu"
-          trend="0% perubahan"
-          :icon="Users"
-          color="primary"
-          variant="neutral"
+          v-for="(card, i) in groupCardsData"
+          :key="i"
+          v-bind="card"
         />
       </StatCardGrid>
     </div>

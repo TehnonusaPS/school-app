@@ -1,22 +1,23 @@
 <script setup lang="ts">
 import { UserCheck, FileText, UserX } from 'lucide-vue-next'
 import StatCard from '@/components/stat-card/StatCard.vue'
+import StatCardGrid from '@/components/stat-card/StatCardGrid.vue'
 import { formatNumber } from '@/utils/formatNumber'
 import { siswaStatsData } from '../data/siswaStats'
 </script>
 
 <template>
-  <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
-    <StatCard :delay="100" label="Hadir" :value="formatNumber(siswaStatsData.hadir.total)"
+  <StatCardGrid cols="3">
+    <StatCard label="Hadir" :value="formatNumber(siswaStatsData.hadir.total)"
       sub="hari kehadiran" :trendDirection="siswaStatsData.hadir.trendDirection" 
       :icon="UserCheck" variant="emerald" />
 
-    <StatCard :delay="250" label="Izin" :value="formatNumber(siswaStatsData.izin.total)"
+    <StatCard label="Izin" :value="formatNumber(siswaStatsData.izin.total)"
       sub="hari izin" :trendDirection="siswaStatsData.izin.trendDirection" 
       :icon="FileText" variant="amber" />
 
-    <StatCard :delay="400" label="Alpa" :value="siswaStatsData.alpa.total === 0 ? '—' : formatNumber(siswaStatsData.alpa.total)"
+    <StatCard label="Alpa" :value="siswaStatsData.alpa.total === 0 ? '—' : formatNumber(siswaStatsData.alpa.total)"
       sub="tidak hadir tanpa ket." :trendDirection="siswaStatsData.alpa.trendDirection" 
-      :icon="UserX" variant="primary" class="col-span-2 sm:col-span-1" />
-  </div>
+      :icon="UserX" variant="primary" />
+  </StatCardGrid>
 </template>

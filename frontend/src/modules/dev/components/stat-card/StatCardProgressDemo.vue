@@ -1,14 +1,15 @@
 <script setup>
 import StatCard from '@/components/stat-card/StatCard.vue'
+import { statCardDemosData } from './data/statCardDemos'
 import { Wallet } from 'lucide-vue-next'
 </script>
 
 <template>
   <StatCard
     label="Total Anggaran"
-    value="78.5"
-    sub="Realisasi Anggaran"
-    :progress="78.5"
+    :value="statCardDemosData.anggaran.total"
+    :sub="statCardDemosData.anggaran.sub"
+    :progress="statCardDemosData.anggaran.progress"
     :icon="Wallet"
     variant="progress"
     color="violet"

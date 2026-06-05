@@ -7,7 +7,7 @@ import ShowcasePart4 from '../components/ShowcasePart4.vue'
 import ShowcasePart5 from '../components/ShowcasePart5.vue'
 import ShowcasePart6 from '../components/ShowcasePart6.vue'
 import ShowcasePart7 from '../components/ShowcasePart7.vue'
-import ShowcasePart8 from '../components/ShowcasePart8.vue'
+import Showcase from '../components/Showcase.vue'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-vue-next'
 
@@ -41,6 +41,6 @@ const searchQuery = ref('')
     <ShowcasePart6 :search-query="searchQuery" />
     <ShowcasePart7 :search-query="searchQuery" />
     -->
-    <ShowcasePart8 :search-query="searchQuery" />
+    <Showcase :search-query="searchQuery" />
   </div>
 </template>

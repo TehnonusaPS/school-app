@@ -1,14 +1,16 @@
 <script setup>
 import StatCard from '@/components/stat-card/StatCard.vue'
+import { statCardDemosData } from './data/statCardDemos'
 import { UserCheck } from 'lucide-vue-next'
 </script>
 
 <template>
   <StatCard
     label="Absensi Hari Ini"
-    value="378"
-    sub="94% hadir"
-    trend="+2% dari kemarin"
+    :value="statCardDemosData.absensi.total"
+    :sub="statCardDemosData.absensi.sub"
+    :trend="statCardDemosData.absensi.trend"
+    :trendDirection="statCardDemosData.absensi.trendDirection"
     :icon="UserCheck"
     color="emerald"
     variant="up"

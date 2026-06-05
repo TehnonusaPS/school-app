@@ -79,10 +79,10 @@ const props = defineProps<ToasterProps>()
   }
 }
 
-/* Force description text color for normal primary toasts */
-.toaster [data-sonner-toast]:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"]) [data-description] {
-  color: var(--primary-foreground) !important;
-  opacity: 0.9 !important;
+/* Description pakai warna yang sama dengan judul tapi lebih redup */
+.toaster [data-sonner-toast] [data-description] {
+  color: currentColor !important;
+  opacity: 0.65 !important;
 }
 
 /* Light mode overrides */

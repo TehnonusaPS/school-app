@@ -72,12 +72,12 @@ export const pageHeaderSlide = {
   }
 }
 
-// Table rows — subtle fade up
+// Table rows — smooth elastic fade up
 export const tableRowFade = {
-  initial: { opacity: 0, y: 12 },
+  initial: { opacity: 0, y: 24 },
   visible: { 
     opacity: 1, 
     y: 0, 
-    transition: { type: 'spring', stiffness: 300, damping: 28, mass: 0.5 } 
+    transition: { type: 'spring', stiffness: 140, damping: 16, mass: 0.6 } 
   }
 }

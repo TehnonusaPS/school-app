@@ -9,6 +9,7 @@ import StatCardTrendDownDemo from './stat-card/StatCardTrendDownDemo.vue'
 import StatCardTrendNeutralDemo from './stat-card/StatCardTrendNeutralDemo.vue'
 import StatCardProgressDemo from './stat-card/StatCardProgressDemo.vue'
 import StatCardGroupDemo from './stat-card/StatCardGroupDemo.vue'
+import DataTableCardDemo from './data-table/DataTableCardDemo.vue'
 
 const props = defineProps({
   searchQuery: { type: String, default: '' }
@@ -69,6 +70,17 @@ const match = keywords => {
 
       <ShowcaseItem label="Varian Group (Beberapa Card dalam Grid)">
         <StatCardGroupDemo />
+      </ShowcaseItem>
+    </ShowcaseSection>
+
+    <!-- DATA TABLE -->
+    <ShowcaseSection
+      v-show="match('data table tabel kartu pagination filter')"
+      title="Data Table"
+      description="Komponen tabel data lengkap yang mendukung filtering, pagination, custom cell templating, dan animasi staggered untuk baris tabel."
+    >
+      <ShowcaseItem label="Data Table Card (Tabel Lengkap dengan Card, Toolbar & Pagination)">
+        <DataTableCardDemo />
       </ShowcaseItem>
     </ShowcaseSection>
   </div>

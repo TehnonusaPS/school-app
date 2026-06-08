@@ -2,10 +2,10 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import PageHeader from '@/components/page-header/PageHeader.vue'
-import SuccessAccountDialog from '@/components/dialogs/SuccessAccountDialog.vue'
 import YayasanForm from './components/YayasanForm.vue'
 import { defaultForm } from './data/defaultForm'
 import { statusOptions } from './data/yayasan.js'
+import { toast } from 'vue-sonner'
 import { Save } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -19,25 +19,19 @@ const handleImage = (file) => {
   imagePreview.value = URL.createObjectURL(file)
 }
 
-const showSuccessModal = ref(false)
-
-const generatedAccount = ref({
-  email: 'admin@foundation.id',
-  phone: '081234567890',
-  password: 'Adm#2026!'
-})
-
 const handleSubmit = () => {
   isLoading.value = true
 
   setTimeout(() => {
     isLoading.value = false
-    showSuccessModal.value = true
-  }, 1000)
-}
 
-const goToList = () => {
-  router.push('/manajemen-data/yayasan')
+    toast('Data yayasan berhasil diperbarui', {
+      description: 'Perubahan data yayasan telah berhasil disimpan.'
+    })
+
+    router.push('/manajemen-data/yayasan')
+
+  }, 1000)
 }
 
 const customActions = computed(() => [
@@ -48,6 +42,7 @@ const customActions = computed(() => [
     click: handleSubmit
   },
 ])
+
 </script>
 
 <template>
@@ -55,8 +50,8 @@ const customActions = computed(() => [
     <!-- Header dengan Tombol Kembali -->
     <PageHeader
       back
-      title="Tambah Yayasan"
-      description="Lengkapi formulir berikut untuk menambahkan data yayasan baru"
+      title="Edit Yayasan"
+      description="Lengkapi formulir berikut untuk mengedit data yayasan"
       :actions="customActions"
     />
 
@@ -67,14 +62,4 @@ const customActions = computed(() => [
       @image-change="handleImage"
     />
   </div>
-
-  <SuccessAccountDialog
-    v-model:open="showSuccessModal"
-    title="Yayasan Berhasil Ditambahkan"
-    description="Data yayasan berhasil disimpan dan akun administrator yayasan telah dibuat."
-    :email="generatedAccount.email"
-    :phone="generatedAccount.phone"
-    :password="generatedAccount.password"
-    @close="goToList"
-  />
 </template>

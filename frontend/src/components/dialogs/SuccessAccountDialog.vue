@@ -69,12 +69,12 @@ const handleOpenChange = (value) => {
       </DialogHeader>
 
       <div class="space-y-4">
-        <div class="rounded-lg border overflow-hidden">
+        <div class="rounded-lg border overflow-hidden bg-muted/40">
           <div class="bg-primary/10 border-b px-4 py-3 text-center">
             <h3 class="font-bold text-primary">Informasi Akun Administrator</h3>
           </div>
 
-          <div class="p-4 space-y-3">
+          <div class="p-4 space-y-3 bg-white/20">
             <div>
               <div class="text-muted-foreground">Email Login</div>
               <div class="font-medium">{{ email }}</div>

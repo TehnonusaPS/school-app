@@ -75,6 +75,14 @@ export default [
       parent: 'Yayasan'
     }
   },
+  {
+    path: 'manajemen-data/yayasan/edit',
+    component: () => import('./pages/yayasan/EditPage.vue'),
+    meta: {
+      title: 'Edit Yayasan',
+      parent: 'Yayasan'
+    }
+  },
   // SEKOLAH
   {
     path: 'manajemen-data/sekolah',
@@ -93,6 +101,14 @@ export default [
       parent: 'Sekolah'
     }
   },
+  {
+    path: 'manajemen-data/sekolah/edit',
+    component: () => import('./pages/sekolah/EditPage.vue'),
+    meta: {
+      title: 'Edit Sekolah',
+      parent: 'Sekolah'
+    }
+  },
   // HAK AKSES
   {
     path: 'manajemen-data/hak-akses',
@@ -103,7 +119,7 @@ export default [
       description: 'Kelola kewenangan, lisensi, dan hak akses pengguna sistem. mmmmmm'
     }
   },
-  // GURU & STAFF (OLEH ADM YAYASAN)
+  // GURU & STAFF
   {
     path: 'manajemen-data/guru-staff-yayasan',
     component: () => import('./pages/guru-staff-yayasan/IndexPage.vue'),

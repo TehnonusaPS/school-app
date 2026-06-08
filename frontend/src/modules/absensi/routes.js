@@ -25,23 +25,27 @@ export default [
     }
   },
 
-  // 2. Rute Redirect Absensi Guru-Staff (Bisa Admin Sekolah & Guru)
+  // 2. Rute Redirect Absensi Guru-Staff (Bisa Admin Sekolah, Guru, Wali Kelas, Kepala Sekolah, & Tata Usaha)
   {
     path: 'absensi/guru-staff',
     meta: {
       requiresAuth: true,
-      roles: ['admin_sekolah', 'guru']
+      roles: ['admin_sekolah', 'guru', 'wali_kelas', 'kepala_sekolah', 'tata_usaha']
     },
     redirect: () => {
       const auth = useAuthStore()
-      if (auth.user?.role === 'admin_sekolah') return '/absensi/admin-sekolah/guru-staff'
-      if (auth.user?.role === 'guru') return '/absensi/guru/absensi-diri'
+      const role = auth.user?.role
+      if (role === 'admin_sekolah') return '/absensi/admin-sekolah/absensi-diri'
+      if (role === 'guru') return '/absensi/guru/absensi-diri'
+      if (role === 'wali_kelas') return '/absensi/wali-kelas/absensi-diri'
+      if (role === 'kepala_sekolah') return '/absensi/kepala-sekolah/absensi-diri'
+      if (role === 'tata_usaha') return '/absensi/tata-usaha/absensi-diri'
       return '/dashboard'
     }
   },
   {
-    path: 'absensi/admin-sekolah/guru-staff',
-    component: () => import('./pages/admin-sekolah/absensi-staff/index.vue'),
+    path: 'absensi/admin-sekolah/absensi-diri',
+    component: () => import('./pages/admin-sekolah/absensi-diri/index.vue'),
     meta: {
       requiresAuth: true,
       roles: ['admin_sekolah'],
@@ -57,6 +61,39 @@ export default [
       requiresAuth: true,
       roles: ['guru'],
       title: 'Absensi Guru',
+      parent: 'Absensi',
+      description: 'Mandiri mencatat kehadiran menggunakan kamera.'
+    }
+  },
+  {
+    path: 'absensi/wali-kelas/absensi-diri',
+    component: () => import('./pages/wali-kelas/absensi-diri/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['wali_kelas'],
+      title: 'Absensi Guru',
+      parent: 'Absensi',
+      description: 'Mandiri mencatat kehadiran menggunakan kamera.'
+    }
+  },
+  {
+    path: 'absensi/kepala-sekolah/absensi-diri',
+    component: () => import('./pages/kepala-sekolah/absensi-diri/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['kepala_sekolah'],
+      title: 'Absensi Staff',
+      parent: 'Absensi',
+      description: 'Mandiri mencatat kehadiran menggunakan kamera.'
+    }
+  },
+  {
+    path: 'absensi/tata-usaha/absensi-diri',
+    component: () => import('./pages/tata-usaha/absensi-diri/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['tata_usaha'],
+      title: 'Absensi Staff',
       parent: 'Absensi',
       description: 'Mandiri mencatat kehadiran menggunakan kamera.'
     }

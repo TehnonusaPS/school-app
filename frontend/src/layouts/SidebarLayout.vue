@@ -35,6 +35,15 @@ const isLoginTransition = computed(() => auth.isJustLoggedIn)
 const sidebarDelay = computed(() => isLoginTransition.value ? 1000 : 100)
 const topbarDelay = computed(() => isLoginTransition.value ? 1200 : 200)
 
+const chatRoute = computed(() => {
+  const role = auth.user?.role
+  if (role === 'guru') return '/komunikasi/guru/chat'
+  if (role === 'wali_kelas') return '/komunikasi/wali-kelas/chat'
+  if (role === 'siswa') return '/komunikasi/siswa/chat'
+  if (role === 'orang_tua') return '/komunikasi/orang-tua/chat'
+  return '/komunikasi/chat'
+})
+
 onMounted(() => {
   if (auth.isJustLoggedIn) {
     setTimeout(() => {
@@ -157,7 +166,7 @@ const notifications = [
               variant="ghost"
               size="icon"
               class="rounded-full hover:bg-muted"
-              @click="router.push('/komunikasi/chat')"
+              @click="router.push(chatRoute)"
             >
               <MessageSquare class="h-5 w-5" />
             </Button>

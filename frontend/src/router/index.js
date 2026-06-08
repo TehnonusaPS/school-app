@@ -33,18 +33,42 @@ const routes = [
   // ─── Halaman Presensi (Fullscreen, tanpa Sidebar) ───
   {
     path: '/absensi/siswa/scan',
-    component: () => import('../modules/absensi/pages/PresensiSiswa.vue'),
+    component: () => import('../modules/absensi/pages/admin-sekolah/presensi-siswa/index.vue'),
     meta: {
       requiresAuth: true,
+      roles: ['admin_sekolah'],
       title: 'Kiosk Presensi Siswa'
     }
   },
   {
     path: '/absensi/input/print',
     name: 'CetakKehadiran',
-    component: () => import('../modules/absensi/pages/CetakKehadiran.vue'),
     meta: {
       requiresAuth: true,
+      roles: ['guru', 'wali_kelas']
+    },
+    redirect: () => {
+      const auth = useAuthStore()
+      if (auth.user?.role === 'guru') return '/absensi/guru/input-kehadiran/print'
+      if (auth.user?.role === 'wali_kelas') return '/absensi/wali-kelas/input-kehadiran/print'
+      return '/dashboard'
+    }
+  },
+  {
+    path: '/absensi/guru/input-kehadiran/print',
+    component: () => import('../modules/absensi/pages/guru/input-kehadiran/print.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['guru'],
+      title: 'Cetak Kehadiran Siswa'
+    }
+  },
+  {
+    path: '/absensi/wali-kelas/input-kehadiran/print',
+    component: () => import('../modules/absensi/pages/wali-kelas/input-kehadiran/print.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['wali_kelas'],
       title: 'Cetak Kehadiran Siswa'
     }
   },

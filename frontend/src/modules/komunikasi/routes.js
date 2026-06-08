@@ -1,7 +1,9 @@
+import { useAuthStore } from '@/stores/authStore'
+
 export default [
   {
     path: 'komunikasi/pengumuman',
-    component: () => import('./pages/Pengumuman.vue'),
+    component: () => import('./pages/admin-yayasan/pengumuman/index.vue'),
     meta: {
       title: 'Pengumuman',
       parent: 'Komunikasi',
@@ -10,7 +12,7 @@ export default [
   },
   {
     path: 'komunikasi/berita-kegiatan',
-    component: () => import('./pages/BeritaKegiatan.vue'),
+    component: () => import('./pages/kepala-sekolah/berita-kegiatan/index.vue'),
     meta: {
       title: 'Berita Kegiatan',
       parent: 'Komunikasi',
@@ -19,7 +21,7 @@ export default [
   },
   {
     path: 'komunikasi/berita-kegiatan/buat',
-    component: () => import('./pages/BuatBeritaKegiatan.vue'),
+    component: () => import('./pages/kepala-sekolah/berita-kegiatan/create.vue'),
     meta: {
       title: 'Buat Berita Kegiatan',
       parent: 'Berita Kegiatan',
@@ -28,7 +30,7 @@ export default [
   },
   {
     path: 'komunikasi/berita-kegiatan/edit/:id',
-    component: () => import('./pages/EditBeritaKegiatan.vue'),
+    component: () => import('./pages/kepala-sekolah/berita-kegiatan/edit.vue'),
     meta: {
       title: 'Edit Berita Kegiatan',
       parent: 'Berita Kegiatan',
@@ -37,7 +39,7 @@ export default [
   },
   {
     path: 'komunikasi/berita-kegiatan/lihat/:id',
-    component: () => import('./pages/DetailBeritaKegiatan.vue'),
+    component: () => import('./pages/kepala-sekolah/berita-kegiatan/detail.vue'),
     meta: {
       title: 'Detail Berita Kegiatan',
       parent: 'Berita Kegiatan',
@@ -46,7 +48,7 @@ export default [
   },
   {
     path: 'komunikasi/feedback',
-    component: () => import('./pages/FeedbackOrangTua.vue'),
+    component: () => import('./pages/Feedback.vue'),
     meta: {
       title: 'Feedback',
       parent: 'Komunikasi',
@@ -59,7 +61,9 @@ export default [
     meta: {
       title: 'Pesan Internal',
       parent: 'Komunikasi',
-      description: 'Pesan internal antar warga sekolah.'
+      description: 'Pesan internal antar warga sekolah.',
+      requiresAuth: true,
+      roles: ['guru', 'wali_kelas', 'siswa', 'orang_tua']
     }
   },
   {
@@ -73,18 +77,63 @@ export default [
   },
   {
     path: 'komunikasi/chat',
-    component: () => import('./pages/Chat.vue'),
     meta: {
-      title: 'Chat',
-      parent: 'Komunikasi',
-      description: 'Pesan dan percakapan antara guru dan wali murid.',
       requiresAuth: true,
       roles: ['guru', 'siswa', 'wali_kelas', 'orang_tua']
+    },
+    redirect: to => {
+      const auth = useAuthStore()
+      const role = auth.user?.role
+      if (role === 'guru') return '/komunikasi/guru/chat'
+      if (role === 'wali_kelas') return '/komunikasi/wali-kelas/chat'
+      if (role === 'siswa') return '/komunikasi/siswa/chat'
+      if (role === 'orang_tua') return '/komunikasi/orang-tua/chat'
+      return '/dashboard'
+    }
+  },
+  {
+    path: 'komunikasi/guru/chat',
+    component: () => import('./pages/guru/chat/index.vue'),
+    meta: {
+      title: 'Chat Guru',
+      parent: 'Komunikasi',
+      requiresAuth: true,
+      roles: ['guru']
+    }
+  },
+  {
+    path: 'komunikasi/wali-kelas/chat',
+    component: () => import('./pages/wali-kelas/chat/index.vue'),
+    meta: {
+      title: 'Chat Wali Kelas',
+      parent: 'Komunikasi',
+      requiresAuth: true,
+      roles: ['wali_kelas']
+    }
+  },
+  {
+    path: 'komunikasi/siswa/chat',
+    component: () => import('./pages/siswa/chat/index.vue'),
+    meta: {
+      title: 'Chat Siswa',
+      parent: 'Komunikasi',
+      requiresAuth: true,
+      roles: ['siswa']
+    }
+  },
+  {
+    path: 'komunikasi/orang-tua/chat',
+    component: () => import('./pages/orang-tua/chat/index.vue'),
+    meta: {
+      title: 'Chat Orang Tua',
+      parent: 'Komunikasi',
+      requiresAuth: true,
+      roles: ['orang_tua']
     }
   },
   {
     path: 'komunikasi/persuratan/aktif',
-    component: () => import('./pages/SuratKeteranganAktif.vue'),
+    component: () => import('./pages/tata-usaha/surat-aktif/index.vue'),
     meta: {
       title: 'Surat Keterangan Aktif',
       parent: 'Komunikasi',
@@ -95,7 +144,7 @@ export default [
   },
   {
     path: 'komunikasi/persuratan/aktif/buat',
-    component: () => import('./pages/BuatSuratAktif.vue'),
+    component: () => import('./pages/tata-usaha/surat-aktif/create.vue'),
     meta: {
       title: 'Buat Surat Keterangan Aktif',
       parent: 'Surat Keterangan Aktif',
@@ -106,7 +155,7 @@ export default [
   },
   {
     path: 'komunikasi/persuratan/aktif/edit/:id',
-    component: () => import('./pages/EditSuratAktif.vue'),
+    component: () => import('./pages/tata-usaha/surat-aktif/edit.vue'),
     meta: {
       title: 'Edit Surat Keterangan Aktif',
       parent: 'Surat Keterangan Aktif',
@@ -117,18 +166,18 @@ export default [
   },
   {
     path: 'komunikasi/persuratan/dispensasi',
-    component: () => import('./pages/SuratDispensasi.vue'),
+    component: () => import('./pages/tata-usaha/surat-dispensasi/index.vue'),
     meta: {
       title: 'Surat Dispensasi',
       parent: 'Komunikasi',
-      description: 'Manajemen surat izin dan dispensasi kegiatan siswa.',
+      description: 'Manajemen surat izin and dispensasi kegiatan siswa.',
       requiresAuth: true,
       roles: ['tata_usaha']
     }
   },
   {
     path: 'komunikasi/persuratan/dispensasi/buat',
-    component: () => import('./pages/BuatSuratDispensasi.vue'),
+    component: () => import('./pages/tata-usaha/surat-dispensasi/create.vue'),
     meta: {
       title: 'Buat Surat Dispensasi',
       parent: 'Surat Dispensasi',
@@ -139,7 +188,7 @@ export default [
   },
   {
     path: 'komunikasi/persuratan/dispensasi/edit/:id',
-    component: () => import('./pages/EditSuratDispensasi.vue'),
+    component: () => import('./pages/tata-usaha/surat-dispensasi/edit.vue'),
     meta: {
       title: 'Edit Surat Dispensasi',
       parent: 'Surat Dispensasi',
@@ -150,7 +199,7 @@ export default [
   },
   {
     path: 'komunikasi/persuratan/lulus',
-    component: () => import('./pages/SuratKeteranganLulus.vue'),
+    component: () => import('./pages/tata-usaha/surat-lulus/index.vue'),
     meta: {
       title: 'Surat Keterangan Lulus',
       parent: 'Komunikasi',
@@ -161,7 +210,7 @@ export default [
   },
   {
     path: 'komunikasi/persuratan/lulus/buat',
-    component: () => import('./pages/BuatSuratLulus.vue'),
+    component: () => import('./pages/tata-usaha/surat-lulus/create.vue'),
     meta: {
       title: 'Buat Surat Keterangan Lulus',
       parent: 'Surat Keterangan Lulus',
@@ -172,7 +221,7 @@ export default [
   },
   {
     path: 'komunikasi/persuratan/lulus/edit/:id',
-    component: () => import('./pages/EditSuratLulus.vue'),
+    component: () => import('./pages/tata-usaha/surat-lulus/edit.vue'),
     meta: {
       title: 'Edit Surat Keterangan Lulus',
       parent: 'Surat Keterangan Lulus',
@@ -183,7 +232,7 @@ export default [
   },
   {
     path: 'komunikasi/persuratan/peringatan',
-    component: () => import('./pages/SuratPeringatan.vue'),
+    component: () => import('./pages/tata-usaha/surat-peringatan/index.vue'),
     meta: {
       title: 'Peringatan',
       parent: 'Komunikasi',
@@ -194,7 +243,7 @@ export default [
   },
   {
     path: 'komunikasi/persuratan/peringatan/buat',
-    component: () => import('./pages/BuatSuratPeringatan.vue'),
+    component: () => import('./pages/tata-usaha/surat-peringatan/create.vue'),
     meta: {
       title: 'Buat Surat Peringatan',
       parent: 'Surat Peringatan',
@@ -205,7 +254,7 @@ export default [
   },
   {
     path: 'komunikasi/persuratan/peringatan/edit/:id',
-    component: () => import('./pages/EditSuratPeringatan.vue'),
+    component: () => import('./pages/tata-usaha/surat-peringatan/edit.vue'),
     meta: {
       title: 'Edit Surat Peringatan ',
       parent: 'Surat Peringatan',

@@ -6,7 +6,8 @@ import {
   BookAlert,
   BookX
 } from 'lucide-vue-next'
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
+import { toast } from 'vue-sonner'
 
 // Data for StatsCard
 export const stats = [
@@ -54,44 +55,59 @@ export const filters = [
     type: 'select',
     key: 'status',
     label: 'Filter Status:',
-    placeholder: 'Semua Status',
+    placeholder: 'Semua',
     options: [
       {
         label: 'Aktif',
-        value: 'active'
+        value: 'Aktif'
       },
       {
-        label: 'Non Aktif',
-        value: 'inactive'
+        label: 'Nonaktif',
+        value: 'Nonaktif'
       },
       {
         label: 'Trial',
-        value: 'trial'
+        value: 'Trial'
       }
     ]
   }
 ]
 
+const isExporting = ref(false)
 export const actions = [
   {
-    label: 'Tambah Sekolah Baru',
+    label: 'Tambah Sekolah',
     icon: Plus,
     to: '/manajemen-data/sekolah/tambah'
   },
   {
     label: 'Export',
     icon: Download,
-    variant: 'outline'
+    variant: 'outline',
+    loading: isExporting.value,
+    click: () => {
+      isExporting.value = true
+      setTimeout(() => {
+        isExporting.value = false
+        toast.success('Export berhasil', {
+          description: 'Data berhasil diexport ke format Excel/PDF.'
+        })
+      }, 1500)
+    }
   }
 ]
 
 export const columns = [
-  { key: 'no', label: 'No' },
-  { key: 'namaSekolah', label: 'Nama Sekolah' },
+  { key: 'nama', label: 'Nama Sekolah',avatar: true, avatarKey: 'foto' },
   { key: 'namaYayasan', label: 'Nama Yayasan' },
-  { key: 'alamatSekolah', label: 'Alamat Sekolah' },
-  { key: 'jmlSiswa', label: 'Jumlah Siswa' },
-  { key: 'status', label: 'Status' },
+  { key: 'alamatSekolah', label: 'Alamat Sekolah', type: 'muted', truncate: true },
+  { key: 'jmlSiswa', label: 'Jumlah Siswa', type: 'number' },
+  { key: 'status', label: 'Status', badge: true,
+    badgeVariant: {
+      Aktif: 'green',
+      Nonaktif: 'gray',
+      Trial: 'amber',
+    } },
   { key: 'actions', label: 'Aksi' }
 ]
 
@@ -99,7 +115,7 @@ export const allItems = computed(() => [
   {
     id: 1,
     initial: 'NPB',
-    namaSekolah: 'SD Nusantara Pintar Bekasi',
+    nama: 'SD Nusantara Pintar Bekasi',
     code: 'loremipsum',
     namaYayasan: 'Yayasan Nusantara Pintar',
     yayasanId: 'Y0001',
@@ -110,7 +126,7 @@ export const allItems = computed(() => [
   {
     id: 2,
     initial: 'NPJT',
-    namaSekolah: 'SD Nusantara Pintar Jakarta Timur',
+    nama: 'SD Nusantara Pintar Jakarta Timur',
     code: 'loremipsum',
     yayasanId: 'Y0001',
     namaYayasan: 'Yayasan Nusantara Pintar',
@@ -121,18 +137,18 @@ export const allItems = computed(() => [
   {
     id: 3,
     initial: 'NPC',
-    namaSekolah: 'SD Nusantara Pintar Cibubur',
+    nama: 'SD Nusantara Pintar Cibubur',
     code: 'loremipsum',
     yayasanId: 'Y0001',
     namaYayasan: 'Yayasan Nusantara Pintar',
     alamatSekolah: 'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
     jmlSiswa: '136',
-    status: 'Non Aktif',
+    status: 'Nonaktif',
   },
   {
     id: 4,
     initial: 'HB',
-    namaSekolah: 'SD Harapan Bangsa 1',
+    nama: 'SD Harapan Bangsa 1',
     code: 'loremipsum',
     yayasanId: 'Y0002',
     namaYayasan: 'Yayasan Harapan Bangsa',
@@ -143,7 +159,7 @@ export const allItems = computed(() => [
   {
     id: 5,
     initial: 'HB2',
-    namaSekolah: 'SD Harapan Bangsa 2',
+    nama: 'SD Harapan Bangsa 2',
     code: 'loremipsum',
     yayasanId: 'Y0002',
     namaYayasan: 'Yayasan Harapan Bangsa',
@@ -154,7 +170,7 @@ export const allItems = computed(() => [
   {
     id: 6,
     initial: 'TKHB',
-    namaSekolah: 'TK Harapan Bangsa',
+    nama: 'TK Harapan Bangsa',
     code: 'loremipsum',
     yayasanId: 'Y0002',
     namaYayasan: 'Yayasan Harapan Bangsa',
@@ -165,7 +181,7 @@ export const allItems = computed(() => [
   {
     id: 7,
     initial: 'SIKL',
-    namaSekolah: 'SD Sinar Ilmu Kebayoran Lama',
+    nama: 'SD Sinar Ilmu Kebayoran Lama',
     code: 'loremipsum',
     yayasanId: 'Y0003',
     namaYayasan: 'Yayasan Sinar Ilmu',
@@ -176,7 +192,7 @@ export const allItems = computed(() => [
   {
     id: 8,
     initial: 'SIT',
-    namaSekolah: 'SD Sinar Ilmu Tebet',
+    nama: 'SD Sinar Ilmu Tebet',
     code: 'loremipsum',
     yayasanId: 'Y0003',
     namaYayasan: 'Yayasan Sinar Ilmu',
@@ -187,7 +203,7 @@ export const allItems = computed(() => [
   {
     id: 9,
     initial: 'NPC',
-    namaSekolah: 'SD Nusantara Pintar Cilandak',
+    nama: 'SD Nusantara Pintar Cilandak',
     code: 'loremipsum',
     yayasanId: 'Y0001',
     namaYayasan: 'Yayasan Nusantara Pintar',
@@ -198,7 +214,7 @@ export const allItems = computed(() => [
   {
     id: 10,
     initial: 'TKN',
-    namaSekolah: 'TK Nusantara Pintar Bekasi',
+    nama: 'TK Nusantara Pintar Bekasi',
     code: 'loremipsum',
     yayasanId: 'Y0001',
     namaYayasan: 'Yayasan Nusantara Pintar',
@@ -209,7 +225,7 @@ export const allItems = computed(() => [
   {
     id: 11,
     initial: 'TKN',
-    namaSekolah: 'TK Nusantara Pintar Depok',
+    nama: 'TK Nusantara Pintar Depok',
     code: 'loremipsum',
     yayasanId: 'Y0001',
     namaYayasan: 'Yayasan Nusantara Pintar',

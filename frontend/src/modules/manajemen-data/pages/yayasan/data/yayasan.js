@@ -6,7 +6,8 @@ import {
   Plus,
   Download,
 } from 'lucide-vue-next'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import { toast } from 'vue-sonner'
 
 // Data for StatsCard
 export const stats = [
@@ -45,12 +46,16 @@ export const stats = [
 ]
 
 export const columns = [
-  { key: 'no', label: 'No.' },
-  { key: 'yayasan', label: 'Nama Yayasan' },
-  { key: 'jmlSekolah', label: 'Jumlah Sekolah' },
-  { key: 'alamat', label: 'Alamat Yayasan' },
-  { key: 'jmlSiswa', label: 'Jumlah Siswa' },
-  { key: 'status', label: 'Status' },
+  { key: 'nama', label: 'Nama Yayasan', avatar: true, avatarKey: 'foto'  },
+  { key: 'jmlSekolah', label: 'Jumlah Sekolah', type: 'number' },
+  { key: 'alamat', label: 'Alamat Yayasan', type: 'muted', truncate: true  },
+  { key: 'jmlPengguna', label: 'Jumlah Pengguna', type: 'number' },
+  { key: 'status', label: 'Status', badge: true,
+    badgeVariant: {
+      Aktif: 'green',
+      Nonaktif: 'gray',
+      Trial: 'amber',
+    } },
   { key: 'actions', label: 'Aksi' }
 ]
 
@@ -64,34 +69,45 @@ export const filters = [
     type: 'select',
     key: 'status',
     label: 'Filter Status:',
-    placeholder: 'Semua Status',
+    placeholder: 'Semua',
     options: [
       {
         label: 'Aktif',
-        value: 'active'
+        value: 'Aktif'
       },
       {
-        label: 'Non Aktif',
-        value: 'inactive'
+        label: 'Nonaktif',
+        value: 'Nonaktif'
       },
       {
         label: 'Trial',
-        value: 'trial'
+        value: 'Trial'
       }
     ]
   }
 ]
 
+const isExporting = ref(false)
 export const actions = [
   {
-    label: 'Tambah Yayasan Baru',
+    label: 'Tambah Yayasan',
     icon: Plus,
     to: '/manajemen-data/yayasan/tambah'
   },
   {
     label: 'Export',
     icon: Download,
-    variant: 'outline'
+    variant: 'outline',
+    loading: isExporting.value,
+    click: () => {
+      isExporting.value = true
+      setTimeout(() => {
+        isExporting.value = false
+        toast.success('Export berhasil', {
+          description: 'Data berhasil diexport ke format Excel/PDF.'
+        })
+      }, 1500)
+    }
   }
 ]
 
@@ -99,28 +115,63 @@ export const items = computed(() => [
   {
     id: 1,
     initial: 'NP',
-    yayasan: 'Yayasan Nusantara Pintar',
+    nama: 'Yayasan Nusantara Pintar',
     jmlSekolah: '2',
     alamat: 'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
-    jmlSiswa: '612',
+    jmlPengguna: '612',
     status: 'Aktif',
   },
   {
     id: 2,
     initial: 'HB',
-    yayasan: 'Yayasan Harapan Bangsa',
+    nama: 'Yayasan Harapan Bangsa',
     jmlSekolah: '1',
     alamat: 'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
-    jmlSiswa: '248',
-    status: 'Non Aktif',
+    jmlPengguna: '248',
+    status: 'Nonaktif',
   },
   {
     id: 3,
     initial: 'SI',
-    yayasan: 'Yayasan Sinar Ilmu',
+    nama: 'Yayasan Sinar Ilmu',
     jmlSekolah: '3',
     alamat: 'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
-    jmlSiswa: '937',
+    jmlPengguna: '937',
     status: 'Trial',
   },
+  {
+    id: 4,
+    nama: 'Yayasan Cerdas Bangsa',
+    jmlSekolah: '3',
+    alamat: 'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
+    jmlPengguna: '625',
+    status: 'Nonaktif',
+  },
+  {
+    id: 5,
+    nama: 'Yayasan Pendidikan Maju',
+    jmlSekolah: '3',
+    alamat: 'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
+    jmlPengguna: '1227',
+    status: 'Trial',
+  },
+  {
+    id: 6,
+    nama: 'Yayasan Cemerlang Abadi',
+    jmlSekolah: '3',
+    alamat: 'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
+    jmlPengguna: '1025',
+    status: 'Aktif',
+  },
 ])
+
+export const statusOptions = [
+  {
+    label: 'Aktif',
+    value: '1'
+  },
+  {
+    label: 'Tidak Aktif',
+    value: '0'
+  }
+]

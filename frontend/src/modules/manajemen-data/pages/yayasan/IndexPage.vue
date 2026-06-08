@@ -1,18 +1,61 @@
 <script setup>
-import {
-  Pencil,
-  Ban,
-} from 'lucide-vue-next'
-// import StatsCard from '@/components/stats-card/StatsCard.vue'
 import DataTableCard from '@/components/data-table/DataTableCard.vue'
 import PageHeader from '@/components/page-header/PageHeader.vue'
-import { Badge } from '@/components/ui/badge'
-import { statusConfig } from '@/constants/statusConfig'
 import { usePagination } from '@/composables/usePagination'
 import { stats, columns, filters, actions, items } from './data/yayasan.js'
 import StatCard from '@/components/stat-card/StatCard.vue'
+import { ref, computed, watch } from 'vue'
+import { toast } from 'vue-sonner'
+import DataSheet from '@/components/data-sheet/DataSheet.vue'
+import { rawYayasanItem, yayasanSheetSections } from './data/dataSheetDetail.js'
 
-const { currentPage, total, from, to, paginatedItems } = usePagination(items)
+const perPage = ref(5)
+const tableItems = ref([...items.value])
+
+const filterValues = ref({
+  search: '',
+  status: 'all'
+})
+
+const deleteItem = (id, item) => {
+  tableItems.value = tableItems.value.filter(
+    item => item.id !== id
+  )
+
+  toast.success('Berhasil dihapus', {
+    description: `${item.nama} telah dihapus dari sistem.`
+  })
+}
+const filteredItems = computed(() => {
+  return tableItems.value.filter(item => {
+    const searchVal = filterValues.value.search?.trim().toLowerCase() || ''
+    const searchMatch =
+      !searchVal ||
+      item.nama.toLowerCase().includes(searchVal)
+
+    const statusVal = filterValues.value.status
+    const statusMatch = !statusVal || statusVal === 'all' || item.status === statusVal
+
+    return searchMatch && statusMatch
+  })
+})
+
+const { currentPage, total, from, to, paginatedItems } = usePagination(filteredItems, perPage)
+
+watch(filteredItems, () => {
+  currentPage.value = 1
+})
+
+const isDetailSheetOpen = ref(false)
+const selectedItemForDetail = ref(null)
+
+const handleViewDetail = id => {
+  const item = tableItems.value.find(x => x.id === id)
+  if (item) {
+    selectedItemForDetail.value = item
+    isDetailSheetOpen.value = true
+  }
+}
 
 </script>
 
@@ -41,48 +84,28 @@ const { currentPage, total, from, to, paginatedItems } = usePagination(items)
       :items="paginatedItems"
       :filters="filters"
       :actions="actions"
-
+      v-model:filterValues="filterValues"
+      v-model:perPage="perPage"
       :from="from"
       :to="to"
       :total="total"
       :page="currentPage"
-    >
-      <template #cell-no="{ index }">
-        {{ from + index }}
-      </template>
-
-      <template #cell-yayasan="{ item }">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded bg-primary text-white flex items-center justify-center text-xs font-bold">
-            {{ item.initial }}
-          </div>
-
-          <div>
-            <div class="font-bold">{{ item.yayasan }}</div>
-          </div>
-        </div>
-      </template>
-
-      <template #cell-alamat="{ value }">
-        <div class="max-w-s whitespace-normal break-words">{{ value }}</div>
-      </template>
-
-      <template #cell-status="{ value }">
-        <Badge :variant="statusConfig[value]" showDot>{{ value }}</Badge>
-      </template>
-
-      <template #cell-actions>
-        <div class="flex items-center gap-3 text-muted-foreground">
-          <button class="hover:text-foreground">
-            <Pencil class="w-4 h-4" />
-          </button>
-
-          <button class="hover:text-foreground">
-            <Ban class="w-4 h-4" />
-          </button>
-        </div>
-      </template>
-    </DataTableCard>
-
+      @update:page="currentPage = $event"
+      @view="handleViewDetail"
+      @edit="$router.push('/manajemen-data/yayasan/edit')"
+      @delete="deleteItem"
+    />
   </div>
+
+  <!-- Detail Sheet -->
+  <DataSheet
+    v-model:open="isDetailSheetOpen"
+    :item="rawYayasanItem"
+    title-key="nama"
+    description-key="no_akta"
+    description-prefix="No. Akta: "
+    avatar-key="logo"
+    badge-key="status"
+    :sections="yayasanSheetSections"
+  />
 </template>

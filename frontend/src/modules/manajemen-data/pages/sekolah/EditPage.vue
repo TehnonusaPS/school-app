@@ -5,9 +5,9 @@ import PageHeader from '@/components/page-header/PageHeader.vue'
 import { akreditasi, jenjangOptions, statusOptions, yayasanOptions } from './data/sekolah'
 import { useAuthStore } from '@/stores/authStore'
 import { computed } from 'vue'
-import SuccessAccountDialog from '@/components/dialogs/SuccessAccountDialog.vue'
 import SekolahForm from './components/SekolahForm.vue'
 import { defaultForm } from './data/defaultForm'
+import { toast } from 'vue-sonner'
 import { Save } from 'lucide-vue-next'
 
 const auth = useAuthStore()
@@ -34,25 +34,19 @@ const handleImage = (file) => {
   imagePreview.value = URL.createObjectURL(file)
 }
 
-const showSuccessModal = ref(false)
-
-const generatedAccount = ref({
-  email: 'admin@sdnusantara.sch.id',
-  phone: '081234567890',
-  password: 'Adm#2026!'
-})
-
 const handleSubmit = () => {
   isLoading.value = true
 
   setTimeout(() => {
     isLoading.value = false
-    showSuccessModal.value = true
-  }, 1500)
-}
 
-const goToList = () => {
-  router.push('/manajemen-data/sekolah')
+    toast('Data sekolah berhasil diperbarui', {
+      description: 'Perubahan data sekolah telah berhasil disimpan.'
+    })
+
+    router.push('/manajemen-data/sekolah')
+
+  }, 1000)
 }
 
 const customActions = computed(() => [
@@ -63,15 +57,15 @@ const customActions = computed(() => [
     click: handleSubmit
   },
 ])
+
 </script>
 
 <template>
   <div class="space-y-6 p-1 pb-10">
-    <!-- Header dengan Tombol Kembali -->
     <PageHeader
       back
-      title="Tambah Sekolah"
-      description="Lengkapi formulir berikut untuk menambahkan data sekolah baru"
+      title="Edit Sekolah"
+      description="Lengkapi formulir berikut untuk mengedit data sekolah"
       :actions="customActions"
     /> 
 
@@ -86,14 +80,4 @@ const customActions = computed(() => [
       @image-change="handleImage"
     />
   </div>
-
-  <SuccessAccountDialog
-    v-model:open="showSuccessModal"
-    title="Sekolah Berhasil Ditambahkan"
-    description="Data sekolah berhasil disimpan dan akun administrator sekolah telah dibuat."
-    :email="generatedAccount.email"
-    :phone="generatedAccount.phone"
-    :password="generatedAccount.password"
-    @close="goToList"
-  />
 </template>

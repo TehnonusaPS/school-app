@@ -54,6 +54,15 @@ export default [
     }
   },
   {
+    path: 'keuangan/subscription/tambah',
+    component: () => import('./pages/formTambahLangganan.vue'),
+    meta: {
+      title: 'Tambah Langganan Baru',
+      parent: 'Keuangan',
+      description: 'Daftarkan institusi baru ke dalam paket langganan.'
+    }
+  },
+  {
     path: 'keuangan/monitoring-yayasan',
     component: () => import('./pages/MonitoringYayasan.vue'),
     meta: {

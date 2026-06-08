@@ -279,7 +279,7 @@ const data = {
         {
           title: 'Tarif SPP',
           url: '/keuangan/tarif-spp',
-          roles: ['admin_sekolah', 'admin_yayasan', 'superadmin', 'tata_usaha']
+          roles: ['admin_sekolah']
         },
         {
           title: 'SPP',

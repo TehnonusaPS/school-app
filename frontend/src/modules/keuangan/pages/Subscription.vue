@@ -18,6 +18,7 @@ import {
 } from 'lucide-vue-next'
 import StatCard from '@/components/stat-card/StatCard.vue'
 
+import { useRouter } from 'vue-router'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
@@ -58,6 +59,12 @@ const kpiData = [
     variant: 'primary'
   }
 ]
+
+const router = useRouter()
+
+const formLangganan = () => {
+  router.push('/keuangan/subscription/tambah')
+}
 </script>
 
 <template>
@@ -109,7 +116,7 @@ const kpiData = [
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <Button class="h-8">
+          <Button @click="formLangganan" class="h-8">
             <Plus class="w-4 h-4 mr-1" /> Tambah Langganan Baru
           </Button>
           <Button variant="outline" class="h-8">

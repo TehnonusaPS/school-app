@@ -302,15 +302,15 @@ const data = {
       title: 'Absensi',
       url: '/absensi',
       icon: ClipboardList,
-      excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah', 'tata_usaha'],
+      excludeRoles: ['superadmin', 'admin_yayasan'],
       items: [
-        { title: 'Absensi Siswa', url: '/absensi/siswa', excludeRoles: ['guru', 'wali_kelas', 'siswa', 'orang_tua'] },
-        { title: 'Absensi Staff', url: '/absensi/guru-staff', excludeRoles: ['guru', 'wali_kelas', 'siswa', 'orang_tua'] },
-        { title: 'Rekap Bulanan', url: '/absensi/rekap', excludeRoles: ['guru', 'wali_kelas', 'siswa', 'orang_tua'] },
+        { title: 'Absensi Siswa', url: '/absensi/siswa', roles: ['admin_sekolah'] },
+        { title: 'Absensi Staff', url: '/absensi/guru-staff', roles: ['admin_sekolah', 'kepala_sekolah', 'tata_usaha'] },
+        { title: 'Rekap Bulanan', url: '/absensi/rekap', roles: ['admin_sekolah'] },
         {
           title: 'Absensi Guru',
           url: '/absensi/guru-staff',
-          roles: ['guru']
+          roles: ['guru', 'wali_kelas']
         },
         {
           title: 'Kehadiran',

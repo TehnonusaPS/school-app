@@ -4,9 +4,6 @@ import {
   Bell,
   ChevronsUpDown,
   LogOut,
-  Sun,
-  Moon,
-  Monitor,
   Palette,
   Layers,
   Sparkles
@@ -85,26 +82,7 @@ const confirmLogout = async () => {
   }
 }
 
-// --- Color Mode Logic (System/Light/Dark) ---
-const colorMode = ref('system')
 
-const applyColorMode = (mode) => {
-  if (mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    document.documentElement.classList.add('dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-  }
-}
-
-const cycleColorMode = () => {
-  const modes = ['system', 'light', 'dark']
-  const nextMode = modes[(modes.indexOf(colorMode.value) + 1) % modes.length]
-  colorMode.value = nextMode
-  localStorage.setItem('theme', nextMode)
-  applyColorMode(nextMode)
-}
-
-const colorModeNames = { system: 'Sistem', light: 'Terang', dark: 'Gelap' }
 
 // Nama tema: 'blue' | 'emerald' | 'indigo' | 'bronze' | 'navy' | 'zinc'
 const activeThemeStyle = ref('blue')
@@ -205,10 +183,7 @@ const finishNames = {
 }
 
 onMounted(() => {
-  // Restore Color Mode (Terang/Gelap/Sistem)
-  const savedTheme = localStorage.getItem('theme') || 'system'
-  colorMode.value = savedTheme
-  applyColorMode(savedTheme)
+
 
   // Restore theme style (support legacy 'tahoe' → map ke 'blue')
   const savedThemeStyle = localStorage.getItem('themeStyle') || 'blue'
@@ -275,18 +250,7 @@ onMounted(() => {
               >Tampilan &amp; Tema</DropdownMenuLabel
             >
 
-            <!-- Color Mode Cycle -->
-            <DropdownMenuItem @select.prevent="cycleColorMode" class="cursor-pointer">
-              <Monitor v-if="colorMode === 'system'" class="size-4" />
-              <Sun v-else-if="colorMode === 'light'" class="size-4" />
-              <Moon v-else class="size-4" />
-              <div class="truncate">
-                Mode:
-                <span class="font-semibold text-primary ml-1">{{
-                  colorModeNames[colorMode]
-                }}</span>
-              </div>
-            </DropdownMenuItem>
+
 
             <!-- Color Theme Cycle -->
             <DropdownMenuItem @select.prevent="cycleThemeStyle" class="cursor-pointer">

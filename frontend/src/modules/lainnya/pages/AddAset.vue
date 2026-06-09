@@ -3,6 +3,7 @@ import { useRouter } from 'vue-router'
 import { useAsetStore } from '@/stores/asetStore'
 import { toast } from 'vue-sonner'
 import AsetForm from '@/modules/lainnya/components/AsetForm.vue'
+import PageHeader from '@/components/page-header/PageHeader.vue'
 
 const router = useRouter()
 const store = useAsetStore()
@@ -20,14 +21,11 @@ function handleCancel() {
 
 <template>
   <div class="space-y-6">
-    <div class="flex flex-col gap-1">
-      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
-        Tambah Aset Sekolah
-      </h1>
-      <p class="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-        Lengkapi formulir dibawah ini untuk menambahkan aset sekolah
-      </p>
-    </div>
+    <PageHeader 
+      title="Tambah Aset Sekolah" 
+      description="Lengkapi formulir dibawah ini untuk menambahkan aset sekolah"
+      back
+    />
     <AsetForm @submit="handleSubmit" @cancel="handleCancel" />
   </div>
 </template>

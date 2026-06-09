@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { Camera, X } from 'lucide-vue-next'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -27,6 +27,13 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['submit', 'cancel'])
+
+import { useRuanganStore } from '@/stores/ruanganStore'
+const ruanganStore = useRuanganStore()
+
+const availableRooms = computed(() => {
+  return [...new Set(ruanganStore.items.map(r => r.name))]
+})
 
 const form = ref({
   name: props.initialData.name || '',
@@ -153,7 +160,16 @@ function submit() {
           </div>
           <div class="space-y-2">
             <Label class="text-xs sm:text-sm font-semibold">Ruangan</Label>
-            <Input v-model="form.room" placeholder="Contoh : Lab IPA" class="rounded-xl h-11" />
+            <Select v-model="form.room">
+              <SelectTrigger class="w-full rounded-xl !h-11 bg-background">
+                <SelectValue placeholder="Pilih Ruangan" />
+              </SelectTrigger>
+              <SelectContent class="rounded-xl">
+                <SelectItem v-for="room in availableRooms" :key="room" :value="room">
+                  {{ room }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>

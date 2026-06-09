@@ -19,15 +19,8 @@ import { Book, Hash, Calendar, BookOpen, Layers, School } from 'lucide-vue-next'
 import PerpustakaanStatCards from '../components/PerpustakaanStatCards.vue'
 import PerpustakaanTable from '../components/PerpustakaanTable.vue'
 import { usePerpustakaanStore } from '@/stores/perpustakaanStore'
+import PageHeader from '@/components/page-header/PageHeader.vue'
 
-import { VisAxis, VisGroupedBar, VisXYContainer } from '@unovis/vue'
-import {
-  ChartContainer,
-  ChartCrosshair,
-  ChartTooltip,
-  ChartTooltipContent,
-  componentToString
-} from '@/components/ui/chart'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -37,25 +30,6 @@ const isYayasan = computed(() => auth.user?.role === 'admin_yayasan')
 
 const books = computed(() => store.items)
 
-const chartData = computed(() => {
-  const sains = store.items.filter(i => i.kategori?.toLowerCase() === 'sains').length
-  const tik = store.items.filter(i => i.kategori?.toLowerCase() === 'tik').length
-  const bahasa = store.items.filter(i => i.kategori?.toLowerCase() === 'bahasa').length
-  const sejarah = store.items.filter(i => i.kategori?.toLowerCase() === 'sejarah').length
-  return [
-    { type: 'Sains', total: sains },
-    { type: 'TIK', total: tik },
-    { type: 'Bahasa', total: bahasa },
-    { type: 'Sejarah', total: sejarah }
-  ]
-})
-
-const chartConfig = {
-  total: {
-    label: 'Jumlah Buku',
-    color: 'var(--primary)'
-  }
-}
 
 const isViewModalOpen = ref(false)
 const selectedBook = ref(null)
@@ -89,63 +63,14 @@ function handleExportPdf() {
 
 <template>
   <div class="space-y-6">
-    <div class="flex flex-col gap-1">
-      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
-        Informasi Buku Perpustakaan
-      </h1>
-      <p class="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-        {{ isYayasan ? 'Lihat katalog dan informasi buku di seluruh perpustakaan cabang sekolah' : 'Lihat katalog dan informasi buku di perpustakaan sekolah' }}
-      </p>
-    </div>
+    <PageHeader 
+      title="Informasi Buku Perpustakaan" 
+      :description="isYayasan ? 'Lihat katalog dan informasi buku di seluruh perpustakaan cabang sekolah' : 'Lihat katalog dan informasi buku di perpustakaan sekolah'" 
+    />
 
     <!-- Stats Cards -->
     <PerpustakaanStatCards :is-yayasan="isYayasan" />
 
-    <!-- Grafik Perpustakaan (hanya untuk Kepala Sekolah) -->
-    <div v-if="!isYayasan" class="bg-card border border-border rounded-2xl p-6 shadow-xs">
-      <div class="mb-6">
-        <h2 class="text-lg font-bold">Grafik Buku Perpustakaan</h2>
-        <p class="text-sm text-muted-foreground">Distribusi jumlah buku berdasarkan kategorinya</p>
-      </div>
-      <ChartContainer :config="chartConfig" class="h-[300px] w-full">
-        <VisXYContainer
-          :data="chartData"
-          :x-domain="[-0.5, chartData.length - 0.5]"
-          :margin="{ left: -24 }"
-        >
-          <VisGroupedBar
-            :x="(d, i) => i"
-            :y="[(d) => d.total]"
-            :color="['var(--primary)']"
-            :rounded-corners="4"
-          />
-          <VisAxis
-            type="x"
-            :tick-format="(i) => chartData[i]?.type"
-            :tick-values="chartData.map((_, i) => i)"
-            :grid-line="false"
-            :tick-line="false"
-            :domain-line="false"
-          />
-          <VisAxis
-            type="y"
-            :num-ticks="4"
-            :tick-line="false"
-            :domain-line="false"
-            :grid-line="true"
-          />
-          <ChartTooltip />
-          <ChartCrosshair
-            :template="componentToString(chartConfig, ChartTooltipContent, {
-              labelFormatter: (x) => chartData[Math.round(x)]?.type || ''
-            })"
-            :color="['var(--primary)']"
-            :hide-when-far-from-pointer="false"
-            :skip-range-check="true"
-          />
-        </VisXYContainer>
-      </ChartContainer>
-    </div>
 
     <!-- Data Table & Filters -->
     <PerpustakaanTable 

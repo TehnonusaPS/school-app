@@ -19,15 +19,8 @@ import { School, MapPin, Users, Info, DoorOpen } from 'lucide-vue-next'
 import RuanganStatCards from '../components/RuanganStatCards.vue'
 import RuanganTable from '../components/RuanganTable.vue'
 import { useRuanganStore } from '@/stores/ruanganStore'
+import PageHeader from '@/components/page-header/PageHeader.vue'
 
-import { VisAxis, VisGroupedBar, VisXYContainer } from '@unovis/vue'
-import {
-  ChartContainer,
-  ChartCrosshair,
-  ChartTooltip,
-  ChartTooltipContent,
-  componentToString
-} from '@/components/ui/chart'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -37,23 +30,6 @@ const isYayasan = computed(() => auth.user?.role === 'admin_yayasan')
 
 const rooms = computed(() => store.items)
 
-const chartData = computed(() => {
-  const kelas = store.items.filter(i => i.category === 'kelas').length
-  const lab = store.items.filter(i => i.category === 'lab').length
-  const fasilitas = store.items.filter(i => i.category === 'fasilitas').length
-  return [
-    { type: 'Kelas', total: kelas },
-    { type: 'Laboratorium', total: lab },
-    { type: 'Fasilitas Lain', total: fasilitas }
-  ]
-})
-
-const chartConfig = {
-  total: {
-    label: 'Jumlah Ruangan',
-    color: 'var(--primary)'
-  }
-}
 
 const isViewModalOpen = ref(false)
 const selectedRoom = ref(null)
@@ -86,63 +62,14 @@ function handleExportPdf() {
 
 <template>
   <div class="space-y-6">
-    <div class="flex flex-col gap-1">
-      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
-        Informasi Ruangan Sekolah
-      </h1>
-      <p class="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-        {{ isYayasan ? 'Lihat data ruangan di seluruh cabang sekolah yang terdaftar' : 'Lihat data ruangan kelas, laboratorium, dan fasilitas lainnya' }}
-      </p>
-    </div>
+    <PageHeader 
+      title="Informasi Ruangan Sekolah" 
+      :description="isYayasan ? 'Lihat data ruangan di seluruh cabang sekolah yang terdaftar' : 'Lihat data ruangan kelas, laboratorium, dan fasilitas lainnya'" 
+    />
 
     <!-- Stats Cards -->
     <RuanganStatCards :is-yayasan="isYayasan" />
 
-    <!-- Grafik Ruangan (hanya untuk Kepala Sekolah) -->
-    <div v-if="!isYayasan" class="bg-card border border-border rounded-2xl p-6 shadow-xs">
-      <div class="mb-6">
-        <h2 class="text-lg font-bold">Grafik Ruangan di Sekolah</h2>
-        <p class="text-sm text-muted-foreground">Distribusi jumlah ruangan berdasarkan kategori</p>
-      </div>
-      <ChartContainer :config="chartConfig" class="h-[300px] w-full">
-        <VisXYContainer
-          :data="chartData"
-          :x-domain="[-0.5, chartData.length - 0.5]"
-          :margin="{ left: -24 }"
-        >
-          <VisGroupedBar
-            :x="(d, i) => i"
-            :y="[(d) => d.total]"
-            :color="['var(--primary)']"
-            :rounded-corners="4"
-          />
-          <VisAxis
-            type="x"
-            :tick-format="(i) => chartData[i]?.type"
-            :tick-values="chartData.map((_, i) => i)"
-            :grid-line="false"
-            :tick-line="false"
-            :domain-line="false"
-          />
-          <VisAxis
-            type="y"
-            :num-ticks="4"
-            :tick-line="false"
-            :domain-line="false"
-            :grid-line="true"
-          />
-          <ChartTooltip />
-          <ChartCrosshair
-            :template="componentToString(chartConfig, ChartTooltipContent, {
-              labelFormatter: (x) => chartData[Math.round(x)]?.type || ''
-            })"
-            :color="['var(--primary)']"
-            :hide-when-far-from-pointer="false"
-            :skip-range-check="true"
-          />
-        </VisXYContainer>
-      </ChartContainer>
-    </div>
 
     <!-- Data Table & Filters -->
     <RuanganTable 

@@ -92,6 +92,7 @@ const handleViewDetail = id => {
         :sub="stat.sub"
         :progress="stat.progress"
         :variant="stat.variant"
+        :illustration="stat.illustration"
       />
     </div>
 

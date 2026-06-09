@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { HTMLAttributes } from 'vue'
 
-import { PanelLeftIcon } from 'lucide-vue-next'
+import { PanelLeftIcon, Menu } from 'lucide-vue-next'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useSidebar } from './utils'
@@ -10,7 +10,7 @@ const props = defineProps<{
   class?: HTMLAttributes['class']
 }>()
 
-const { toggleSidebar } = useSidebar()
+const { toggleSidebar, isMobile } = useSidebar()
 </script>
 
 <template>
@@ -22,7 +22,7 @@ const { toggleSidebar } = useSidebar()
     :class="cn('', props.class)"
     @click="toggleSidebar"
   >
-    <PanelLeftIcon class="cn-rtl-flip" />
+    <component :is="isMobile ? Menu : PanelLeftIcon" class="cn-rtl-flip" />
     <span class="sr-only">Toggle Sidebar</span>
   </Button>
 </template>

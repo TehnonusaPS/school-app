@@ -6,7 +6,8 @@ import {
   School,
   BookX
 } from 'lucide-vue-next'
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
+import { toast } from 'vue-sonner'
 
 // Data for StatsCard
 export const stats = [
@@ -44,7 +45,6 @@ export const stats = [
   }
 ]
 
-
 export const filters = [
   {
     type: 'search',
@@ -55,53 +55,70 @@ export const filters = [
     type: 'select',
     key: 'status',
     label: 'Filter Status:',
-    placeholder: 'Semua Status',
+    placeholder: 'Semua',
     options: [
       {
         label: 'Tetap',
-        value: 'tetap'
+        value: 'Tetap'
       },
       {
         label: 'Kontrak',
-        value: 'kontrak'
+        value: 'Kontrak'
       },
       {
         label: 'Honorer',
-        value: 'honorer'
+        value: 'Honorer'
       }
     ]
   }
 ]
 
+const isExporting = ref(false)
 export const actions = [
   {
-    label: 'Tambah Guru/Staff Baru',
+    label: 'Tambah Guru/Staff',
     icon: Plus,
-    to: '/manajemen-data/guru-staff-yayasan/tambah'
+    to: '/manajemen-data/guru-staff/tambah'
   },
   {
     label: 'Export',
     icon: Download,
-    variant: 'outline'
+    variant: 'outline',
+    loading: isExporting.value,
+    click: () => {
+      isExporting.value = true
+      setTimeout(() => {
+        isExporting.value = false
+        toast.success('Export berhasil', {
+          description: 'Data berhasil diexport ke format Excel/PDF.'
+        })
+      }, 1500)
+    }
   }
 ]
 
 export const columns = [
-  { key: 'nama', label: 'Nama Lengkap' },
+  { key: 'nama', label: 'Nama Lengkap', avatar: true, avatarKey: 'foto' },
   { key: 'nip', label: 'NIP' },
-  { key: 'namaSekolah', label: 'Nama Sekolah' },
+  { key: 'unitKerja', label: 'Unit Kerja' },
   { key: 'jabatan', label: 'Jabatan' },
   { key: 'masaKerja', label: 'Masa Kerja' },
-  { key: 'status', label: 'Status Kepegawaian' },
+  { key: 'status', label: 'Status Kepegawaian', badge: true,
+    badgeVariant: {
+      Tetap: 'green',
+      Honorer: 'gray',
+      Kontrak: 'amber',
+    } },
   { key: 'actions', label: 'Aksi' }
 ]
 
-export const items = computed(() => [
+export const allItems = computed(() => [
   {
     id: 1,
     nama: 'Angga Yunanda',
     nip: '1234567890',
-    namaSekolah: 'SD Nusantara Pintar Bekasi',
+    unitKerja: 'SD Nusantara Pintar Bekasi',
+    unitId: 'S0001',
     jabatan: 'Kepala Sekolah',
     masaKerja: '2 tahun 6 bulan',
     status: 'Tetap'
@@ -110,8 +127,9 @@ export const items = computed(() => [
     id: 2,
     nama: 'Michelle Zudith',
     nip: '1234567890',
-    namaSekolah: 'SD Nusantara Pintar Bekasi',
-    jabatan: 'Guru',
+    unitKerja: 'Yayasan Nusantara Pintar',
+    unitId: 'Y0001',
+    jabatan: 'Staff Yayasan',
     masaKerja: '2 tahun 6 bulan',
     status: 'Tetap'
   },
@@ -119,7 +137,8 @@ export const items = computed(() => [
     id: 3,
     nama: 'Luna Maya',
     nip: '1234567890',
-    namaSekolah: 'SD Nusantara Pintar Bekasi',
+    unitKerja: 'SD Nusantara Pintar Bekasi',
+    unitId: 'S0001',
     jabatan: 'Guru',
     masaKerja: '2 tahun 6 bulan',
     status: 'Kontrak'
@@ -128,7 +147,8 @@ export const items = computed(() => [
     id: 4,
     nama: 'Nadiem Makarim',
     nip: '1234567890',
-    namaSekolah: 'SD Nusantara Pintar Jakarta Timut',
+    unitKerja: 'SD Nusantara Pintar Jakarta Timur',
+    unitId: 'S0002',
     jabatan: 'Kepala Sekolah',
     masaKerja: '2 tahun 6 bulan',
     status: 'Tetap'
@@ -137,19 +157,31 @@ export const items = computed(() => [
     id: 5,
     nama: 'Maudy Ayunda',
     nip: '1234567890',
-    namaSekolah: 'SD Nusantara Pintar Bekasi',
+    unitKerja: 'SD Nusantara Pintar Bekasi',
+    unitId: 'S0001',
     jabatan: 'Guru',
-    masaKerja: '2 tahun 6 bulan',
+    masaKerja: '3 tahun 8 bulan',
     status: 'Tetap'
   },
   {
     id: 6,
     nama: 'Tiara Andiri',
     nip: '1234567890',
-    namaSekolah: 'SD Nusantara Pintar Bekasi',
+    unitKerja: 'SD Nusantara Pintar Jakarta Selatan',
+    unitId: 'S0004',
     jabatan: 'Guru',
     masaKerja: '2 tahun 6 bulan',
     status: 'Honorer'
+  },
+  {
+    id: 7,
+    nama: 'Reza Rahadian',
+    nip: '1234567890',
+    unitKerja: 'SD Nusantara Pintar Bekasi',
+    unitId: 'S0001',
+    jabatan: 'Guru',
+    masaKerja: '2 tahun 6 bulan',
+    status: 'Tetap'
   },
 ])
 
@@ -249,7 +281,7 @@ export const pendidikanOptions = [
   },
 ]
 
-export const jabatan = [
+export const jabatanOptions = [
   {
     label: 'Kepala Yayasan',
     value: 'J001'
@@ -272,7 +304,7 @@ export const jabatan = [
   },
 ]
 
-export const statusKepegawaian = [
+export const statusKepegawaianOptions = [
   {
     label: 'Tetap',
     value: 'SK01'
@@ -287,26 +319,26 @@ export const statusKepegawaian = [
   },
 ]
 
-export const unitKerja = [
+export const unitKerjaOptions = [
   {
     label: 'Yayasan Nusantara Pintar',
-    value: 1
+    value: 'Y0001'
   },
   {
     label: 'SD Nusantara Pintar Jakarta Timur',
-    value: 2
+    value: 'S0002'
   },
   {
     label: 'SD Nusantara Pintar Jakarta Selatan',
-    value: 3
+    value: 'S0004'
   },
   {
     label: 'SD Nusantara Pintar Bekasi',
-    value: 4
+    value: 'S0001'
   },
   {
     label: 'TK Nusantara Pintar Jakarta Selatan',
-    value: 5
+    value: 'S0003'
   },
 ]
 
@@ -314,10 +346,10 @@ export const unitKerja = [
 export const statusOptions = [
   {
     label: 'Aktif',
-    value: 'active'
+    value: 'Aktif'
   },
   {
-    label: 'Non Aktif',
-    value: 'inactive'
+    label: 'Nonaktif',
+    value: 'Nonaktif'
   },
 ]

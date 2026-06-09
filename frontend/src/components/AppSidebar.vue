@@ -128,8 +128,8 @@ const data = {
         },
         { 
           title: 'Guru dan Staff', 
-          url: '/manajemen-data/guru-staff-yayasan',
-          roles: ['admin_yayasan']
+          url: '/manajemen-data/guru-staff',
+          roles: ['admin_yayasan', 'admin_sekolah', 'kepala_sekolah', 'tata_usaha']
         },
         { 
           title: 'Monitoring Kelas', 
@@ -151,7 +151,6 @@ const data = {
           url: '/manajemen-data/manajemen-kelas',
           roles: ['admin_sekolah']
         },
-        { title: 'Guru dan Staff', url: '/manajemen-data/guru-staff', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'wali_kelas'] },
         { title: 'Data Kelas', url: '/manajemen-data/kelas', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'kepala_sekolah', 'wali_kelas'] },
         { title: 'Mata Pelajaran', url: '/manajemen-data/mata-pelajaran', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'wali_kelas'] },
         { 

@@ -18,16 +18,6 @@ export default [
       parent: 'Data Siswa'
     }
   },
-  // GURU DAN STAFF
-  {
-    path: 'manajemen-data/guru-staff',
-    component: () => import('./pages/GuruStaff.vue'),
-    meta: {
-      title: 'Data Guru dan Staff',
-      parent: 'Manajemen Data',
-      description: 'Kelola data guru dan tenaga kependidikan.'
-    }
-  },
   {
     path: 'manajemen-data/kelas',
     component: () => import('./pages/Kelas.vue'),
@@ -121,8 +111,8 @@ export default [
   },
   // GURU & STAFF
   {
-    path: 'manajemen-data/guru-staff-yayasan',
-    component: () => import('./pages/guru-staff-yayasan/IndexPage.vue'),
+    path: 'manajemen-data/guru-staff',
+    component: () => import('./pages/guru-staff/IndexPage.vue'),
     meta: {
       title: 'Guru dan Staff',
       parent: 'Manajemen Data',
@@ -130,11 +120,19 @@ export default [
     }
   },
   {
-    path: 'manajemen-data/guru-staff-yayasan/tambah',
-    component: () => import('./pages/guru-staff-yayasan/CreatePage.vue'),
+    path: 'manajemen-data/guru-staff/tambah',
+    component: () => import('./pages/guru-staff/CreatePage.vue'),
     meta: {
       title: 'Tambah Guru/Staff',
-      parent: 'Data Guru dan Staff Yayasan'
+      parent: 'Guru dan Staff'
+    }
+  },
+  {
+    path: 'manajemen-data/guru-staff/edit',
+    component: () => import('./pages/guru-staff/EditPage.vue'),
+    meta: {
+      title: 'Edit Guru/Staff',
+      parent: 'Guru dan Staff'
     }
   },
   {

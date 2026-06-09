@@ -4,6 +4,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useRuanganStore } from '@/stores/ruanganStore'
 import { toast } from 'vue-sonner'
 import RuanganForm from '@/modules/lainnya/components/RuanganForm.vue'
+import PageHeader from '@/components/page-header/PageHeader.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -42,14 +43,11 @@ function handleCancel() {
 
 <template>
   <div class="space-y-6">
-    <div class="flex flex-col gap-1">
-      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
-        Edit Ruangan Sekolah
-      </h1>
-      <p class="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-        Ubah informasi ruangan kelas, lab, atau fasilitas di bawah ini
-      </p>
-    </div>
+    <PageHeader 
+      title="Edit Ruangan Sekolah" 
+      description="Ubah informasi ruangan kelas, lab, atau fasilitas di bawah ini"
+      back
+    />
     
     <div v-if="isLoading" class="flex justify-center items-center py-20">
       <p class="text-muted-foreground font-medium animate-pulse">Memuat data ruangan...</p>

@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { School, Presentation, FlaskConical, DoorOpen } from 'lucide-vue-next'
 import { useRuanganStore } from '@/stores/ruanganStore'
 import StatCard from '@/components/stat-card/StatCard.vue'
+import StatCardGrid from '@/components/stat-card/StatCardGrid.vue'
 
 const props = defineProps({
   isYayasan: {
@@ -34,7 +35,7 @@ const stats = computed(() => {
 </script>
 
 <template>
-  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+  <StatCardGrid cols="4" :delay="300">
     <StatCard 
       v-for="(stat, index) in stats" 
       :key="index"
@@ -44,5 +45,5 @@ const stats = computed(() => {
       :icon="stat.icon"
       :variant="stat.variant"
     />
-  </div>
+  </StatCardGrid>
 </template>

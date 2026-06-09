@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import { Lock } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 
+import PageHeader from '@/components/page-header/PageHeader.vue'
 import PerpustakaanStatCards from '../components/PerpustakaanStatCards.vue'
 import PerpustakaanTable from '../components/PerpustakaanTable.vue'
 import { usePerpustakaanStore } from '@/stores/perpustakaanStore'
@@ -25,14 +26,10 @@ function handleDelete(id) {
 
 <template>
   <div v-if="auth.user?.role === 'admin_sekolah'" class="space-y-6">
-    <div class="flex flex-col gap-1">
-      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
-        Manajemen Buku Perpustakaan
-      </h1>
-      <p class="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-        Kelola koleksi buku yang ada di perpustakaan sekolah
-      </p>
-    </div>
+    <PageHeader 
+      title="Manajemen Buku Perpustakaan" 
+      description="Kelola koleksi buku yang ada di perpustakaan sekolah" 
+    />
 
     <!-- Stats Cards -->
     <PerpustakaanStatCards />

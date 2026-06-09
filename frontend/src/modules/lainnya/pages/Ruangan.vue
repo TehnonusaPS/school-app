@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import { Lock } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 
+import PageHeader from '@/components/page-header/PageHeader.vue'
 import RuanganStatCards from '../components/RuanganStatCards.vue'
 import RuanganTable from '../components/RuanganTable.vue'
 import { useRuanganStore } from '@/stores/ruanganStore'
@@ -25,14 +26,10 @@ function handleDelete(id) {
 
 <template>
   <div v-if="auth.user?.role === 'admin_sekolah'" class="space-y-6">
-    <div class="flex flex-col gap-1">
-      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
-        Manajemen Ruangan Sekolah
-      </h1>
-      <p class="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-        Kelola data ruangan kelas, laboratorium, dan fasilitas lainnya
-      </p>
-    </div>
+    <PageHeader 
+      title="Manajemen Ruangan Sekolah" 
+      description="Kelola data ruangan kelas, laboratorium, dan fasilitas lainnya" 
+    />
 
     <!-- Stats Cards -->
     <RuanganStatCards />

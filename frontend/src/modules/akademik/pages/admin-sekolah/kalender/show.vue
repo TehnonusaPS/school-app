@@ -1,0 +1,486 @@
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar as CalendarIcon,
+  ArrowRight,
+  CornerUpLeft,
+  Lock
+} from 'lucide-vue-next'
+import PageHeader from '@/components/page-header/PageHeader.vue'
+
+// Import Mock Data
+import {
+  academicMonths,
+  eventTypes,
+  getEvents,
+  getYearStatuses
+} from '../../../data/mockKalender'
+import { glassFade } from '@/config/motion'
+
+const route = useRoute()
+const router = useRouter()
+
+// --- State ---
+const events = ref([])
+const yearStatuses = ref({})
+const selectedTahun = ref('')
+const activeMonthIdx = ref(0)
+const selectedDateStr = ref('')
+const isLoading = ref(false)
+
+onMounted(() => {
+  isLoading.value = true
+  events.value = getEvents()
+  yearStatuses.value = getYearStatuses()
+  
+  // Parse Tahun Ajaran from param (e.g., "2025-2026" to "2025/2026")
+  const param = route.params.tahun
+  if (param) {
+    selectedTahun.value = param.replace('-', '/')
+  } else {
+    selectedTahun.value = '2025/2026'
+  }
+  
+  if (selectedTahun.value === '2025/2026') {
+    activeMonthIdx.value = 11
+    selectedDateStr.value = '2026-06-08'
+  } else {
+    const startYear = parseInt(selectedTahun.value.split('/')[0])
+    selectedDateStr.value = `${startYear}-07-01`
+  }
+  
+  isLoading.value = false
+})
+
+// --- Computed Date Calculations ---
+const currentCalendarYear = computed(() => {
+  if (!selectedTahun.value) return 2026
+  const startYear = parseInt(selectedTahun.value.split('/')[0])
+  const monthInfo = academicMonths[activeMonthIdx.value]
+  return startYear + monthInfo.yearOffset
+})
+
+const selectedMonthVal = computed(() => {
+  return academicMonths[activeMonthIdx.value].val
+})
+
+const currentMonthName = computed(() => {
+  return academicMonths[activeMonthIdx.value].name
+})
+
+const currentSemester = computed(() => {
+  return academicMonths[activeMonthIdx.value].semester
+})
+
+const currentYearStatus = computed(() => {
+  return yearStatuses.value[selectedTahun.value]?.status || 'draft'
+})
+
+// Helper to check range overlap
+function isDateInBetween(dateStr, startStr, endStr) {
+  return dateStr >= startStr && dateStr <= endStr
+}
+
+// Calendar Grid Cells
+const calendarCells = computed(() => {
+  const year = currentCalendarYear.value
+  const monthVal = selectedMonthVal.value
+  const firstDayOffset = new Date(year, monthVal, 1).getDay()
+  const totalDays = new Date(year, monthVal + 1, 0).getDate()
+  
+  const cells = []
+  
+  // Padding cells
+  for (let i = 0; i < firstDayOffset; i++) {
+    cells.push({ isPadding: true })
+  }
+  
+  // Real days
+  for (let d = 1; d <= totalDays; d++) {
+    const dateStr = `${year}-${String(monthVal + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+    const dateObj = new Date(year, monthVal, d)
+    const dayOfWeek = dateObj.getDay()
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
+    
+    // Filter events overlapping this date
+    const dayEvents = events.value.filter(e => isDateInBetween(dateStr, e.startDate, e.endDate))
+    
+    cells.push({
+      isPadding: false,
+      dateNum: d,
+      dateStr,
+      isWeekend,
+      dayOfWeek,
+      events: dayEvents
+    })
+  }
+  
+  return cells
+})
+
+// Month navigation
+const prevMonth = () => {
+  if (activeMonthIdx.value > 0) {
+    activeMonthIdx.value--
+  } else {
+    toast.info('Batas Awal Semester', {
+      description: 'Sudah mencapai batas awal semester ganjil pada tahun ajaran ini.'
+    })
+  }
+}
+
+const nextMonth = () => {
+  if (activeMonthIdx.value < 11) {
+    activeMonthIdx.value++
+  } else {
+    toast.info('Batas Akhir Semester', {
+      description: 'Sudah mencapai batas akhir semester genap pada tahun ajaran ini.'
+    })
+  }
+}
+
+// Events filter for side list
+const selectedDateEvents = computed(() => {
+  return events.value.filter(e => isDateInBetween(selectedDateStr.value, e.startDate, e.endDate))
+})
+
+const activeMonthEvents = computed(() => {
+  const year = currentCalendarYear.value
+  const monthVal = selectedMonthVal.value
+  const firstDayStr = `${year}-${String(monthVal + 1).padStart(2, '0')}-01`
+  const lastDay = new Date(year, monthVal + 1, 0).getDate()
+  const lastDayStr = `${year}-${String(monthVal + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
+  
+  return events.value
+    .filter(e => {
+      return e.startDate <= lastDayStr && e.endDate >= firstDayStr
+    })
+    .sort((a, b) => a.startDate.localeCompare(b.startDate))
+})
+
+// Formatted Date Title
+const formattedSelectedDate = computed(() => {
+  if (!selectedDateStr.value) return ''
+  const dObj = new Date(selectedDateStr.value)
+  const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+  const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+  return `${dayNames[dObj.getDay()]}, ${dObj.getDate()} ${monthNames[dObj.getMonth()]} ${dObj.getFullYear()}`
+})
+
+// --- Helper Labels & Styling ---
+function getEventTypeLabel(type) {
+  const t = eventTypes.find(opt => opt.value === type)
+  return t ? t.label : 'Kegiatan'
+}
+
+function getEventTypeBadgeClass(type) {
+  if (type === 'libur_nasional' || type === 'tanggal_merah') {
+    return 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800'
+  }
+  if (type === 'ujian') {
+    return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800'
+  }
+  return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
+}
+
+function getYearStatusLabel(status) {
+  if (status === 'approved') return 'Disetujui'
+  if (status === 'pending') return 'Menunggu Persetujuan'
+  if (status === 'rejected') return 'Ditolak'
+  return 'Draft'
+}
+
+function getYearStatusBadgeClass(status) {
+  if (status === 'approved') return 'bg-emerald-500 text-white'
+  if (status === 'pending') return 'bg-orange-500 text-white animate-pulse'
+  if (status === 'rejected') return 'bg-rose-500 text-white'
+  return 'bg-secondary text-secondary-foreground'
+}
+
+const handleSelectCell = (cell) => {
+  if (cell.isPadding) return
+  selectedDateStr.value = cell.dateStr
+}
+
+const handleBack = () => {
+  router.push('/akademik/admin-sekolah/kalender')
+}
+</script>
+
+<template>
+  <div
+    v-motion
+    :initial="glassFade.initial"
+    :visible-once="glassFade.visible"
+    class="space-y-6 text-left"
+  >
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <PageHeader
+        title="Detail Kalender Akademik"
+        description="Detail dan susunan agenda kegiatan sekolah dalam format kalender read-only."
+      />
+      <Button
+        variant="outline"
+        class="w-full sm:w-auto text-xs font-bold rounded-xl cursor-pointer flex items-center gap-2 h-10 shadow-xs"
+        @click="handleBack"
+      >
+        <CornerUpLeft class="h-4 w-4" />
+        Kembali ke Daftar
+      </Button>
+    </div>
+
+    <!-- Info Box: Read Only Status -->
+    <Card class="rounded-2xl border bg-card p-4 sm:p-6 flex items-center justify-between gap-4">
+      <div class="space-y-0.5">
+        <div class="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Tahun Pelajaran: <span class="text-foreground">{{ selectedTahun }}</span></div>
+        <div class="text-xs font-extrabold text-foreground mt-1">
+          Status Kalender: 
+          <Badge class="text-[8px] font-extrabold ml-1.5 uppercase px-2 py-0.5" :class="getYearStatusBadgeClass(currentYearStatus)">
+            {{ getYearStatusLabel(currentYearStatus) }}
+          </Badge>
+        </div>
+      </div>
+      <div class="text-[11px] font-semibold text-muted-foreground bg-muted/40 p-2 border rounded-xl flex items-center gap-1.5">
+        <Lock class="h-3.5 w-3.5 text-muted-foreground" />
+        <span>Tampilan Pratinjau (Read-Only)</span>
+      </div>
+    </Card>
+
+    <!-- Header Controls: Tahun Ajaran & Bulan -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center bg-muted/30 p-4 rounded-2xl border border-border">
+      <!-- Tahun Ajaran -->
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0 border border-primary/20">
+          <CalendarIcon class="h-5 w-5" />
+        </div>
+        <div class="flex flex-col gap-1 text-left">
+          <span class="text-[9px] uppercase font-bold tracking-wider text-muted-foreground">Tahun Pelajaran</span>
+          <span class="text-sm font-extrabold text-foreground">Tahun Ajaran {{ selectedTahun }}</span>
+        </div>
+      </div>
+
+      <!-- Bulan & Navigasi -->
+      <div class="flex items-center justify-between md:justify-end gap-4 w-full">
+        <div class="flex flex-col text-left md:text-right hidden sm:flex">
+          <span class="text-[9px] uppercase font-bold tracking-wider text-muted-foreground">Periode Aktif</span>
+          <span class="text-xs font-bold text-foreground">{{ currentMonthName }} {{ currentCalendarYear }} • Semester {{ currentSemester }}</span>
+        </div>
+        
+        <div class="flex items-center gap-2 bg-card border border-border p-1 rounded-xl shadow-xs">
+          <Button variant="ghost" size="icon" class="h-8 w-8 rounded-lg cursor-pointer" @click="prevMonth">
+            <ChevronLeft class="h-4 w-4" />
+          </Button>
+          <div class="px-3 text-xs font-bold min-w-[90px] text-center">
+            {{ currentMonthName }} {{ currentCalendarYear }}
+          </div>
+          <Button variant="ghost" size="icon" class="h-8 w-8 rounded-lg cursor-pointer" @click="nextMonth">
+            <ChevronRight class="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Container: Calendar & Side list -->
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_390px] gap-6">
+      
+      <!-- 1. CALENDAR BOX -->
+      <Card class="rounded-2xl border border-border bg-card shadow-xs overflow-hidden h-fit">
+        <div class="overflow-x-auto">
+          <!-- Calendar Days Header -->
+          <div class="grid grid-cols-7 gap-2 text-center font-bold text-[10px] uppercase tracking-wider text-muted-foreground py-3 border-b border-border/60 bg-muted/20 min-w-[650px]">
+            <div class="text-rose-500/80">Minggu</div>
+            <div>Senin</div>
+            <div>Selasa</div>
+            <div>Rabu</div>
+            <div>Kamis</div>
+            <div>Jumat</div>
+            <div class="text-rose-500/80">Sabtu</div>
+          </div>
+          
+          <!-- Calendar Grid Cells -->
+          <div class="grid grid-cols-7 gap-3 p-4 min-w-[650px]">
+            <div
+              v-for="(cell, idx) in calendarCells"
+              :key="`admin-cell-${idx}`"
+              @click="handleSelectCell(cell)"
+              class="relative aspect-square rounded-xl border flex flex-col justify-between p-2 transition-all cursor-pointer"
+              :class="[
+                cell.isPadding ? 'border-transparent bg-transparent pointer-events-none' : (
+                  cell.dateStr === selectedDateStr ? 'bg-primary/5 border-primary shadow-xs' : (
+                    cell.isWeekend ? 'bg-muted/40 border-border/30 opacity-80' : 'bg-card border-border/80 hover:shadow-xs hover:border-foreground/20'
+                  )
+                )
+              ]"
+            >
+              <template v-if="!cell.isPadding">
+                <!-- Date Number -->
+                <div class="flex justify-between items-center">
+                  <span class="text-xs font-bold font-mono" :class="[
+                    cell.isWeekend ? 'text-rose-500/80' : 'text-foreground/80',
+                    cell.dateStr === selectedDateStr ? 'text-primary' : ''
+                  ]">
+                    {{ cell.dateNum }}
+                  </span>
+                </div>
+
+                <!-- Events display inside cell -->
+                <div class="flex flex-col gap-1 mt-1 overflow-hidden">
+                  <template v-if="cell.events.length > 0">
+                    <div
+                      v-for="e in cell.events.slice(0, 2)"
+                      :key="e.id"
+                      class="text-[8px] font-bold px-1 py-0.5 rounded border truncate text-left"
+                      :class="getEventTypeBadgeClass(e.type)"
+                      :title="e.title"
+                    >
+                      {{ e.title }}
+                    </div>
+                    <span v-if="cell.events.length > 2" class="text-[8px] text-muted-foreground font-bold pl-1">
+                      +{{ cell.events.length - 2 }} lainnya
+                    </span>
+                  </template>
+                  
+                  <!-- Default Weekend Libur Label if no custom event -->
+                  <template v-else-if="cell.isWeekend">
+                    <span class="text-[9px] font-bold text-rose-500/35 uppercase text-center pb-1">
+                      Libur
+                    </span>
+                  </template>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- Legend info footer -->
+        <div class="px-6 py-4 border-t border-border bg-muted/10 flex flex-wrap items-center justify-center gap-6 text-[10px] font-bold text-muted-foreground/80">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-rose-500/20 border border-rose-500 text-rose-600 flex items-center justify-center text-[8px]"></span>
+            <span>Libur Nasional / Merah</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-amber-500/20 border border-amber-500 text-amber-600 flex items-center justify-center text-[8px]"></span>
+            <span>Ujian</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-emerald-500/20 border border-emerald-500 text-emerald-600 flex items-center justify-center text-[8px]"></span>
+            <span>Kegiatan Sekolah</span>
+          </div>
+        </div>
+      </Card>
+
+      <!-- 2. SIDE PANEL: AGENDA AT SELECTED DATE -->
+      <div class="space-y-6">
+        <!-- Selected Date list -->
+        <Card class="rounded-2xl border border-border bg-card shadow-xs overflow-hidden text-left">
+          <CardHeader class="pb-3 bg-muted/10 border-b">
+            <CardDescription class="text-[9px] font-bold uppercase tracking-wider text-primary">Agenda Tanggal Terpilih</CardDescription>
+            <CardTitle class="text-sm font-bold mt-1 text-foreground leading-tight">
+              {{ formattedSelectedDate }}
+            </CardTitle>
+          </CardHeader>
+          <CardContent class="p-4 space-y-4">
+            
+            <div v-if="selectedDateEvents.length > 0" class="space-y-3">
+              <div
+                v-for="event in selectedDateEvents"
+                :key="event.id"
+                class="p-3.5 rounded-xl border border-border bg-card space-y-2 relative"
+              >
+                <!-- Title & Type -->
+                <div class="flex items-start justify-between gap-2">
+                  <div class="space-y-1">
+                    <Badge variant="outline" class="text-[8px] uppercase tracking-wider" :class="getEventTypeBadgeClass(event.type)">
+                      {{ getEventTypeLabel(event.type) }}
+                    </Badge>
+                    <h4 class="text-xs font-bold text-foreground leading-snug">{{ event.title }}</h4>
+                  </div>
+                </div>
+
+                <!-- Range display -->
+                <div class="flex items-center gap-1 text-[9px] font-bold text-muted-foreground/80">
+                  <span class="font-mono bg-muted border px-1.5 py-0.5 rounded">{{ event.startDate }}</span>
+                  <ArrowRight class="h-3 w-3" />
+                  <span class="font-mono bg-muted border px-1.5 py-0.5 rounded">{{ event.endDate }}</span>
+                </div>
+
+                <!-- Description -->
+                <p v-if="event.description" class="text-[10px] text-muted-foreground line-clamp-3 leading-relaxed">
+                  {{ event.description }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Empty selected date state -->
+            <div v-else class="py-6 text-center space-y-2">
+              <CalendarIcon class="h-8 w-8 text-muted-foreground/35 mx-auto" />
+              <div class="text-[11px] font-bold text-muted-foreground">Tidak ada agenda khusus</div>
+              <p class="text-[10px] text-muted-foreground/70">
+                Secara default, hari ini terhitung sebagai <span class="font-semibold text-foreground/80">{{ new Date(selectedDateStr).getDay() === 0 || new Date(selectedDateStr).getDay() === 6 ? 'Libur Akhir Pekan' : 'Hari Sekolah Efektif' }}</span>.
+              </p>
+            </div>
+
+          </CardContent>
+        </Card>
+
+        <!-- Summary list of the current month -->
+        <Card class="rounded-2xl border border-border bg-card shadow-xs overflow-hidden text-left">
+          <CardHeader class="pb-2 bg-muted/10 border-b">
+            <CardTitle class="text-xs font-bold text-foreground">Agenda Bulan {{ currentMonthName }}</CardTitle>
+            <CardDescription class="text-[9px]">Daftar seluruh agenda akademik bulan ini.</CardDescription>
+          </CardHeader>
+          <CardContent class="p-0">
+            <div class="max-h-[260px] overflow-y-auto divide-y divide-border/60">
+              <div
+                v-for="event in activeMonthEvents"
+                :key="event.id"
+                class="p-3 text-xs hover:bg-muted/20 transition-all flex items-center justify-between gap-3"
+              >
+                <div class="space-y-0.5 overflow-hidden">
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-mono text-[9px] font-bold text-muted-foreground shrink-0 bg-muted px-1 rounded border">
+                      {{ event.startDate.split('-')[2] }} - {{ event.endDate.split('-')[2] }}
+                    </span>
+                    <span class="font-bold text-foreground truncate" :title="event.title">{{ event.title }}</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <Badge variant="outline" class="text-[7px] py-0 px-1 hover:bg-transparent" :class="getEventTypeBadgeClass(event.type)">
+                      {{ getEventTypeLabel(event.type) }}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty monthly state -->
+              <div v-if="activeMonthEvents.length === 0" class="p-6 text-center text-[10px] font-semibold text-muted-foreground">
+                Belum ada agenda bulan ini.
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+    </div>
+
+  </div>
+</template>
+
+<style scoped>
+/* Scroller style */
+.max-h-\[260px\]::-webkit-scrollbar {
+  width: 4px;
+}
+.max-h-\[260px\]::-webkit-scrollbar-track {
+  background: transparent;
+}
+.max-h-\[260px\]::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+</style>

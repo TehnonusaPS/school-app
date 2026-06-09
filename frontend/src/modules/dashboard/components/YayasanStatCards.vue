@@ -11,13 +11,13 @@ import { yayasanStatsData } from '../data/yayasanStats'
     <!-- Stat Cards biasa -->
     <StatCard label="Total Sekolah" :value="formatNumber(yayasanStatsData.sekolah.total)"
       sub="di bawah yayasan" :trend="`${formatDelta(yayasanStatsData.sekolah.growth)} semester ini`"
-      :trendDirection="yayasanStatsData.sekolah.trendDirection" :icon="School" variant="violet" />
+      :trendDirection="yayasanStatsData.sekolah.trendDirection" :icon="School" illustration="globe" variant="violet" />
 
     <StatCard label="Total Guru & Staff" :value="formatNumber(yayasanStatsData.guru.total)"
       sub="tenaga pendidik aktif" :trend="`${formatDelta(yayasanStatsData.guru.growth)} bulan ini`"
-      :trendDirection="yayasanStatsData.guru.trendDirection" :icon="Users" variant="blue" />
+      :trendDirection="yayasanStatsData.guru.trendDirection" :icon="Users" illustration="closed_book" variant="blue" />
 
     <StatCard label="Total Anggaran" :value="`Rp ${yayasanStatsData.anggaran.total}M`" sub="Realisasi"
-      :progress="yayasanStatsData.anggaran.realisasi" :icon="Wallet" variant="emerald" />
+      :progress="yayasanStatsData.anggaran.realisasi" :icon="Wallet" illustration="atom" variant="emerald" />
   </StatCardGrid>
 </template>

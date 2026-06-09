@@ -17,6 +17,7 @@ const props = defineProps({
     validator: v => ['up', 'down', 'neutral'].includes(v)
   },
   icon: { type: [Object, Function], required: false },
+  illustration: { type: String, default: '' },
   progress: { type: Number, required: false },
   variant: {
     type: String,
@@ -84,9 +85,28 @@ function getTrendConfig(direction) {
     :style="{ '--base-delay': `${computedDelay}ms` }"
     class="animate-card-enter relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-white/40 group glass-ui py-0 sm:py-4 gap-0 sm:gap-4 !rounded-2xl sm:!rounded-[32px]"
   >
-    <!-- Watermark Icon Background -->
+    <!-- Watermark Doodle Illustration Background -->
+    <div
+      v-if="illustration"
+      :class="[
+        'absolute -right-2 -bottom-2 size-16 sm:size-28 opacity-[0.18] dark:opacity-[0.25] rotate-12 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6',
+        getColorClasses(resolvedColor).color
+      ]"
+      :style="{
+        backgroundColor: 'currentColor',
+        maskImage: `url(/images/illustrations/${illustration}.png)`,
+        webkitMaskImage: `url(/images/illustrations/${illustration}.png)`,
+        maskSize: 'contain',
+        webkitMaskSize: 'contain',
+        maskRepeat: 'no-repeat',
+        webkitMaskRepeat: 'no-repeat',
+        maskPosition: 'center',
+        webkitMaskPosition: 'center'
+      }"
+    />
+    <!-- Fallback Watermark Icon Background -->
     <component
-      v-if="icon"
+      v-else-if="icon"
       :is="icon"
       :class="[
         'absolute -right-4 -bottom-4 size-12 sm:size-24 opacity-[0.04] rotate-12 transition-transform duration-300 group-hover:scale-110',
@@ -101,7 +121,7 @@ function getTrendConfig(direction) {
         </CardDescription>
         <div
           :class="[
-            'rounded-md sm:rounded-xl p-1 sm:p-2.5 backdrop-blur-md shadow-lg border border-white/10 transition-colors',
+            'stat-icon-badge rounded-md sm:rounded-xl p-1 sm:p-2.5 backdrop-blur-md shadow-lg border border-white/10 transition-colors',
             getColorClasses(resolvedColor).bg
           ]"
         >

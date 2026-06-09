@@ -15,6 +15,7 @@ import { superadminStatsData } from '../data/superadminStats'
       :trend="`${formatDelta(superadminStatsData.yayasan.growthPercent)}%`"
       :trendDirection="superadminStatsData.yayasan.trendDirection"
       :icon="Building2"
+      illustration="globe"
       variant="blue"
     />
 
@@ -25,6 +26,7 @@ import { superadminStatsData } from '../data/superadminStats'
       :trend="`${formatDelta(superadminStatsData.sekolah.growthPercent)}%`"
       :trendDirection="superadminStatsData.sekolah.trendDirection"
       :icon="School"
+      illustration="abc_board"
       variant="violet"
     />
 
@@ -35,6 +37,7 @@ import { superadminStatsData } from '../data/superadminStats'
       :trend="`${formatDelta(superadminStatsData.guru.growthPercent)}%`"
       :trendDirection="superadminStatsData.guru.trendDirection"
       :icon="GraduationCap"
+      illustration="open_book"
       variant="emerald"
     />
 
@@ -45,6 +48,7 @@ import { superadminStatsData } from '../data/superadminStats'
       :trend="`${formatDelta(superadminStatsData.siswa.growthPercent)}%`"
       :trendDirection="superadminStatsData.siswa.trendDirection"
       :icon="Users"
+      illustration="graduation_cap"
       variant="amber"
     />
   </StatCardGrid>

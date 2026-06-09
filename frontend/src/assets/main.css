@@ -647,6 +647,16 @@
   .finish-solid .glass-overlay::after {
     display: none !important;
   }
+
+  .finish-solid .stat-icon-badge {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+  .finish-solid .stat-icon-badge > svg {
+    filter: none !important;
+  }
 }
 
 @layer utilities {
@@ -874,6 +884,7 @@ body.finish-solid .school-background {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: -1;
   background-color: var(--primary);
   -webkit-mask-image: url('/images/bg-school.png');
   mask-image: url('/images/bg-school.png');
@@ -905,6 +916,7 @@ body.finish-solid [data-slot='sidebar'][data-mobile='true']::before {
   content: "" !important;
   position: absolute !important;
   inset: 0 !important;
+  z-index: -1 !important;
   pointer-events: none !important;
   
   /* Colorized with primary color */

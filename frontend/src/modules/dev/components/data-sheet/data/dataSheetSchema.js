@@ -1,4 +1,4 @@
-import { Briefcase, GraduationCap, Calendar, Mail, Phone, MapPin } from 'lucide-vue-next'
+import { Briefcase, GraduationCap, Calendar, Mail, Phone, MapPin, File } from 'lucide-vue-next'
 
 export const guruSheetSections = [
   {
@@ -17,6 +17,20 @@ export const guruSheetSections = [
       { label: 'Email Resmi', key: 'email', icon: Mail },
       { label: 'Nomor Telepon', key: 'telp', icon: Phone },
       { label: 'Alamat Rumah', key: 'alamat', icon: MapPin, textarea: true }
+    ]
+  },
+  {
+    id: 'mapel',
+    title: 'Mata Pelajaran',
+    fields: [
+      { label: 'Mata Pelajaran', key: 'mapel', icon: Briefcase, select: true, options: ['balala', 'yayaya'] }
+    ]
+  },
+  {
+    id: 'dokumens',
+    title: 'Dokumen',
+    fields: [
+      { label: 'Dokumen', key: 'dokumen', icon: File, file: true }
     ]
   }
 ]

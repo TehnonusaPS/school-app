@@ -172,7 +172,7 @@ const data = {
         { title: 'Nilai & Rapor', url: '/akademik/nilai', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'siswa', 'orang_tua'] },
         { title: 'Ujian & Penilaian', url: '/akademik/ujian', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'siswa', 'orang_tua'] },
         { title: 'Kurikulum', url: '/akademik/kurikulum', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'siswa', 'orang_tua'] },
-        { title: 'Mata Pelajaran', url: '/akademik/mapel', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'siswa', 'orang_tua'] },
+        { title: 'Mata Pelajaran', url: '/akademik/mapel', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'wali_kelas', 'siswa', 'orang_tua'] },
         { title: 'Ekstrakurikuler', url: '/akademik/ekskul', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'siswa', 'orang_tua'] },
         {
           title: 'Kalender',
@@ -183,21 +183,6 @@ const data = {
           title: 'Kegiatan',
           url: '/akademik/kegiatan',
           roles: ['kepala_sekolah', 'admin_sekolah']
-        },
-        {
-          title: 'Materi',
-          url: '/akademik/materi',
-          roles: ['guru', 'wali_kelas']
-        },
-        {
-          title: 'Kelola Tugas',
-          url: '/akademik/tugas',
-          roles: ['guru', 'wali_kelas']
-        },
-        {
-          title: 'Input Nilai',
-          url: '/akademik/input-nilai',
-          roles: ['guru', 'wali_kelas']
         },
         {
           title: 'Nilai & Raport',

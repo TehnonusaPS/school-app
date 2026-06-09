@@ -6,7 +6,14 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { Camera } from 'lucide-vue-next'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
+import { Camera, UploadCloud } from 'lucide-vue-next'
 
 const props = defineProps({
   open: {
@@ -52,10 +59,14 @@ const props = defineProps({
   loading: {
     type: Boolean,
     default: false
+  },
+  disabled: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['update:open', 'submit', 'cancel'])
+const emit = defineEmits(['update:open', 'submit', 'cancel', 'change'])
 
 const isOpen = computed({
   get: () => props.open,
@@ -74,6 +85,9 @@ watch(
         section.fields.forEach(field => {
           if (field.key) {
             form[field.key] = props.item ? (props.item[field.key] ?? '') : ''
+            if (field.type === 'file' || field.file) {
+              form[field.key + '_fileName'] = props.item ? (props.item[field.key + '_fileName'] ?? props.item[field.key] ?? '') : ''
+            }
           }
         })
       })
@@ -87,6 +101,37 @@ watch(
     }
   },
   { immediate: true }
+)
+
+// Sync localForm changes back to parent
+watch(localForm, (newVal) => {
+  emit('change', { ...newVal })
+}, { deep: true })
+
+// Sync prop item updates to localForm (e.g. parent dynamically updating fields like grades or file names)
+watch(
+  () => props.item,
+  (newItem) => {
+    if (newItem && props.open) {
+      props.sections.forEach(section => {
+        section.fields.forEach(field => {
+          if (field.key && newItem[field.key] !== undefined) {
+            localForm.value[field.key] = newItem[field.key]
+            if (field.type === 'file' || field.file) {
+              const fileNameKey = field.key + '_fileName'
+              if (newItem[fileNameKey] !== undefined) {
+                localForm.value[fileNameKey] = newItem[fileNameKey]
+              }
+            }
+          }
+        })
+      })
+      if (props.avatarKey && typeof props.avatarKey === 'string' && newItem[props.avatarKey] !== undefined) {
+        localForm.value[props.avatarKey] = newItem[props.avatarKey]
+      }
+    }
+  },
+  { deep: true }
 )
 
 const resolvedAvatarFallback = computed(() => {
@@ -210,14 +255,59 @@ const handleSubmit = () => {
                         </label>
                       </div>
                       <Textarea
-                        v-if="field.textarea"
+                        v-if="field.textarea || field.type === 'textarea'"
                         v-model="localForm[field.key]"
+                        :disabled="disabled"
                         class="min-h-16 bg-background border-input focus-visible:ring-1 focus-visible:ring-ring text-sm"
                         :placeholder="field.placeholder || ('Masukkan ' + field.label)"
                       />
+                      <Select
+                        v-else-if="field.type === 'select' || field.select || field.options"
+                        v-model="localForm[field.key]"
+                        :disabled="disabled"
+                      >
+                        <SelectTrigger class="h-8 bg-background border-input focus-visible:ring-1 focus-visible:ring-ring text-sm w-full">
+                          <SelectValue :placeholder="field.placeholder || ('Pilih ' + field.label)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem
+                            v-for="opt in field.options"
+                            :key="opt.value !== undefined ? opt.value : opt"
+                            :value="String(opt.value !== undefined ? opt.value : opt)"
+                          >
+                            {{ opt.label || opt }}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <div
+                        v-else-if="field.type === 'file' || field.file"
+                        class="border-2 border-dashed border-border/80 rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-muted/30 transition-all"
+                        :class="disabled ? 'pointer-events-none opacity-85' : ''"
+                        @click="!disabled && $refs['fileInput_' + field.key]?.[0]?.click()"
+                      >
+                        <UploadCloud class="size-6 text-muted-foreground animate-bounce" />
+                        <span class="text-xs font-semibold text-foreground text-center line-clamp-2 px-2">
+                          {{ localForm[field.key + '_fileName'] || localForm[field.key]?.name || localForm[field.key] || field.placeholder || 'Pilih file (PDF, DOCX, PPTX atau Gambar)' }}
+                        </span>
+                        <input
+                          v-if="!disabled"
+                          :ref="'fileInput_' + field.key"
+                          type="file"
+                          :accept="field.accept || '*/*'"
+                          class="hidden"
+                          @change="(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              localForm[field.key] = file;
+                              localForm[field.key + '_fileName'] = file.name;
+                            }
+                          }"
+                        />
+                      </div>
                       <Input
                         v-else
                         v-model="localForm[field.key]"
+                        :disabled="disabled"
                         class="h-8 bg-background border-input focus-visible:ring-1 focus-visible:ring-ring text-sm"
                         :placeholder="field.placeholder || ('Masukkan ' + field.label)"
                       />

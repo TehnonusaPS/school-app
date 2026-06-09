@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
+import { File } from 'lucide-vue-next'
 
 const props = defineProps({
   open: {
@@ -229,11 +230,28 @@ const resolveFieldValue = (field) => {
                         </label>
                       </div>
                       <Textarea
-                        v-if="field.textarea"
+                        v-if="field.textarea || field.type === 'textarea'"
                         :model-value="resolveFieldValue(field)"
                         readonly
                         class="min-h-16 bg-muted/40 cursor-default focus-visible:ring-0 resize-none text-sm"
                       />
+                      <div
+                        v-else-if="field.file || field.type === 'file'"
+                        class="flex items-center gap-2 p-2 rounded-lg border border-border bg-muted/30"
+                      >
+                        <File class="size-4 text-primary shrink-0" />
+                        <span class="text-xs font-medium text-foreground truncate flex-1">
+                          {{ resolveFieldValue(field) || 'Tidak ada dokumen' }}
+                        </span>
+                        <a
+                          v-if="resolveFieldValue(field)"
+                          :href="resolveFieldValue(field)"
+                          target="_blank"
+                          class="text-[10px] font-semibold text-primary hover:underline px-2 py-1 bg-primary/10 rounded"
+                        >
+                          Lihat
+                        </a>
+                      </div>
                       <Input
                         v-else
                         :model-value="resolveFieldValue(field)"

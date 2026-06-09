@@ -101,7 +101,8 @@ const cancelDelete = () => {
  */
 const defaultRowActions = computed(() => {
   const actions = []
-  if (props.onView) actions.push({ label: 'Detail', icon: Eye, click: item => props.onView(item.id, item) })
+  if (props.onView)
+    actions.push({ label: 'Detail', icon: Eye, click: item => props.onView(item.id, item) })
   if (props.onEdit) actions.push({ label: 'Edit', icon: Pencil, click: props.onEdit })
   if (props.onDelete) actions.push({ label: 'Hapus', icon: Trash2, click: requestDelete })
   return actions
@@ -116,7 +117,7 @@ const resolvedRowActions = computed(() =>
 <template>
   <Card
     v-motion
-    class="w-full min-w-0"
+    class="w-full min-w-0 relative overflow-hidden"
     :initial="{ opacity: 0, y: 20 }"
     :visible-once="{
       opacity: 1,
@@ -129,13 +130,30 @@ const resolvedRowActions = computed(() =>
       }
     }"
   >
+    <!-- Background Watermarks -->
+    <div
+      class="absolute top-[-80px] right-[-90px] size-80 rotate-[-15deg] opacity-[0.15] dark:opacity-[0.22] pointer-events-none select-none bg-primary z-0"
+      style="
+        mask-image: url(/images/illustrations/textbook.png);
+        -webkit-mask-image: url(/images/illustrations/textbook.png);
+        mask-size: contain;
+        -webkit-mask-size: contain;
+        mask-repeat: no-repeat;
+        -webkit-mask-repeat: no-repeat;
+        mask-position: center;
+        -webkit-mask-position: center;
+      "
+    />
+
     <DataTableToolbar
+      class="relative z-10"
       :filters="filters"
       :actions="actions"
       v-model:filterValues="localFilterValues"
     />
 
     <BaseDataTable
+      class="relative z-10"
       :columns="columns"
       :items="items"
       :row-actions="resolvedRowActions"
@@ -156,6 +174,7 @@ const resolvedRowActions = computed(() =>
     </BaseDataTable>
 
     <DataTablePagination
+      class="relative z-10"
       :from="from"
       :to="to"
       :total="total"
@@ -193,6 +212,5 @@ const resolvedRowActions = computed(() =>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-
   </Card>
 </template>

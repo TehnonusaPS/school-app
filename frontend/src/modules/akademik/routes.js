@@ -1,3 +1,5 @@
+import { useAuthStore } from '@/stores/authStore'
+
 export default [
   {
     path: 'akademik/jadwal',
@@ -55,11 +57,76 @@ export default [
   },
   {
     path: 'akademik/kalender',
-    component: () => import('./pages/KalenderAkademik.vue'),
     meta: {
+      requiresAuth: true,
+      roles: ['admin_sekolah', 'kepala_sekolah']
+    },
+    redirect: () => {
+      const auth = useAuthStore()
+      const role = auth.user?.role
+      if (role === 'admin_sekolah') return '/akademik/admin-sekolah/kalender'
+      if (role === 'kepala_sekolah') return '/akademik/kepala-sekolah/kalender'
+      return '/dashboard'
+    }
+  },
+  {
+    path: 'akademik/admin-sekolah/kalender',
+    component: () => import('./pages/admin-sekolah/kalender/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin_sekolah'],
       title: 'Kalender Akademik',
-      parent: 'Akademik',
-      description: 'Kalender kegiatan pembelajaran dan hari libur sekolah.'
+      parent: 'Akademik'
+    }
+  },
+  {
+    path: 'akademik/admin-sekolah/kalender/create',
+    component: () => import('./pages/admin-sekolah/kalender/create.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin_sekolah'],
+      title: 'Buat Kalender Akademik',
+      parent: 'Akademik'
+    }
+  },
+  {
+    path: 'akademik/admin-sekolah/kalender/edit/:tahun',
+    component: () => import('./pages/admin-sekolah/kalender/edit.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin_sekolah'],
+      title: 'Edit Kalender Akademik',
+      parent: 'Akademik'
+    }
+  },
+  {
+    path: 'akademik/admin-sekolah/kalender/show/:tahun',
+    component: () => import('./pages/admin-sekolah/kalender/show.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin_sekolah'],
+      title: 'Detail Kalender Akademik',
+      parent: 'Akademik'
+    }
+  },
+  {
+    path: 'akademik/kepala-sekolah/kalender',
+    component: () => import('./pages/kepala-sekolah/kalender/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['kepala_sekolah'],
+      title: 'Kalender Akademik',
+      parent: 'Akademik'
+    }
+  },
+  {
+    path: 'akademik/kepala-sekolah/kalender/show/:tahun',
+    component: () => import('./pages/kepala-sekolah/kalender/show.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['kepala_sekolah'],
+      title: 'Review Kalender Akademik',
+      parent: 'Akademik'
     }
   },
   {

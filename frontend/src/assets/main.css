@@ -849,8 +849,7 @@
 /* Sembunyikan semua background layer secara bawaan */
 .apple-glass-background,
 .background-squares,
-.background-squares-static,
-.school-background {
+.background-squares-static {
   display: none !important;
 }
 
@@ -867,19 +866,18 @@ body.bg-static_squares:not(.finish-solid) .background-squares-static {
   display: block !important;
 }
 
-body.bg-school .school-background,
-body.finish-solid .school-background {
+.school-background {
   display: block !important;
 }
 
 
-/* 🏫 School Doodle Background */
+/* 🏫 School Doodle Background (Always Visible Overlay) */
 .school-background {
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-color: var(--background);
+  /* background-color: var(--background); Removed so it overlays transparently over other backgrounds */
 }
 
 .school-background::before {
@@ -904,17 +902,14 @@ body.finish-solid .school-background {
   opacity: 0.10;
 }
 
-/* 🏫 School Theme Sidebar Override & Solid Finish Sidebar Override */
-body.bg-school [data-slot='sidebar-inner'],
-body.finish-solid [data-slot='sidebar-inner'] {
+/* 🏫 School Theme Sidebar Override (Always Present) */
+[data-slot='sidebar-inner'] {
   position: relative !important;
   z-index: 0 !important; /* establish stacking context */
 }
 
-body.bg-school [data-slot='sidebar-inner']::before,
-body.bg-school [data-slot='sidebar'][data-mobile='true']::before,
-body.finish-solid [data-slot='sidebar-inner']::before,
-body.finish-solid [data-slot='sidebar'][data-mobile='true']::before {
+[data-slot='sidebar-inner']::before,
+[data-slot='sidebar'][data-mobile='true']::before {
   content: "" !important;
   position: absolute !important;
   inset: 0 !important;
@@ -936,16 +931,13 @@ body.finish-solid [data-slot='sidebar'][data-mobile='true']::before {
   transition: opacity 0.3s ease;
 }
 
-.dark body.bg-school [data-slot='sidebar-inner']::before,
-.dark body.bg-school [data-slot='sidebar'][data-mobile='true']::before,
-.dark body.finish-solid [data-slot='sidebar-inner']::before,
-.dark body.finish-solid [data-slot='sidebar'][data-mobile='true']::before {
+.dark [data-slot='sidebar-inner']::before,
+.dark [data-slot='sidebar'][data-mobile='true']::before {
   opacity: 0.10 !important;
 }
 
 @media (max-width: 768px) {
-  body.bg-school [data-slot='sidebar'][data-mobile='true']::before,
-  body.finish-solid [data-slot='sidebar'][data-mobile='true']::before {
+  [data-slot='sidebar'][data-mobile='true']::before {
     -webkit-mask-size: 100% auto !important;
     mask-size: 100% auto !important;
     -webkit-mask-position: center -100px !important;

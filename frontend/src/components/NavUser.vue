@@ -126,21 +126,17 @@ const themeNames = {
 
 // --- Background Style Logic ---
 const activeBackgroundStyle = ref('animated')
-const savedBgBeforeSolid = ref(localStorage.getItem('savedBgBeforeSolid') || 'animated')
 
 const setBackgroundStyle = styleName => {
-  activeBackgroundStyle.value = styleName
+  const resolvedStyle = styleName === 'school' ? 'solid' : styleName
+  activeBackgroundStyle.value = resolvedStyle
   document.body.classList.remove('bg-animated', 'bg-static_squares', 'bg-glass', 'bg-school', 'bg-solid')
-  document.body.classList.add(`bg-${styleName}`)
-  localStorage.setItem('backgroundStyle', styleName)
-  if (styleName !== 'school' && activeThemeFinish.value !== 'solid') {
-    savedBgBeforeSolid.value = styleName
-    localStorage.setItem('savedBgBeforeSolid', styleName)
-  }
+  document.body.classList.add(`bg-${resolvedStyle}`)
+  localStorage.setItem('backgroundStyle', resolvedStyle)
 }
 
 const cycleBackgroundStyle = () => {
-  const styles = ['animated', 'static_squares', 'glass', 'school', 'solid']
+  const styles = ['animated', 'static_squares', 'glass', 'solid']
   const currentIndex = styles.indexOf(activeBackgroundStyle.value)
   const newStyle = styles[(currentIndex + 1) % styles.length]
   setBackgroundStyle(newStyle)
@@ -150,7 +146,6 @@ const backgroundNames = {
   animated: 'Animasi Kotak',
   static_squares: 'Kotak Statis',
   glass: 'Apple Glass Image',
-  school: 'Doodle Sekolah',
   solid: 'Solid Polos'
 }
 
@@ -161,11 +156,8 @@ const setThemeFinish = finishName => {
   activeThemeFinish.value = finishName
   if (finishName === 'solid') {
     document.body.classList.add('finish-solid')
-    setBackgroundStyle('school')
   } else {
     document.body.classList.remove('finish-solid')
-    const restoredBg = localStorage.getItem('savedBgBeforeSolid') || savedBgBeforeSolid.value || 'animated'
-    setBackgroundStyle(restoredBg)
   }
   localStorage.setItem('themeFinish', finishName)
 }
@@ -183,8 +175,6 @@ const finishNames = {
 }
 
 onMounted(() => {
-
-
   // Restore theme style (support legacy 'tahoe' → map ke 'blue')
   const savedThemeStyle = localStorage.getItem('themeStyle') || 'blue'
   const mappedStyle = savedThemeStyle === 'tahoe' ? 'blue' : savedThemeStyle

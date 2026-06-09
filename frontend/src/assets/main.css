@@ -874,7 +874,6 @@ body.finish-solid .school-background {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: -1;
   background-color: var(--primary);
   -webkit-mask-image: url('/images/bg-school.png');
   mask-image: url('/images/bg-school.png');
@@ -889,7 +888,7 @@ body.finish-solid .school-background {
 }
 
 .dark .school-background::before {
-  opacity: 0.06;
+  opacity: 0.10;
 }
 
 /* 🏫 School Theme Sidebar Override & Solid Finish Sidebar Override */
@@ -906,7 +905,6 @@ body.finish-solid [data-slot='sidebar'][data-mobile='true']::before {
   content: "" !important;
   position: absolute !important;
   inset: 0 !important;
-  z-index: -1 !important;
   pointer-events: none !important;
   
   /* Colorized with primary color */
@@ -928,7 +926,7 @@ body.finish-solid [data-slot='sidebar'][data-mobile='true']::before {
 .dark body.bg-school [data-slot='sidebar'][data-mobile='true']::before,
 .dark body.finish-solid [data-slot='sidebar-inner']::before,
 .dark body.finish-solid [data-slot='sidebar'][data-mobile='true']::before {
-  opacity: 0.06 !important;
+  opacity: 0.10 !important;
 }
 
 @media (max-width: 768px) {

@@ -121,7 +121,7 @@
   --secondary: oklch(0.278 0.033 256.848);
   --secondary-foreground: oklch(0.984 0.003 247.858);
   --muted: oklch(0.278 0.033 256.848);
-  --muted-foreground: oklch(0.704 0.04 256.788);
+  --muted-foreground: oklch(0.86 0.005 256.788);
   --accent: oklch(0.278 0.033 256.848);
   --accent-foreground: oklch(0.984 0.003 247.858);
   --destructive: oklch(0.396 0.141 25.723);
@@ -525,6 +525,128 @@
   [data-slot="popover-content"] [data-slot="range-calendar"]::after {
     display: none !important;
   }
+
+  /* ══ SOLID FINISH OVERRIDES (.finish-solid) ══ */
+  .finish-solid [data-slot="card"],
+  .finish-solid [data-slot="calendar"],
+  .finish-solid [data-slot="range-calendar"],
+  .finish-solid [data-slot="alert"],
+  .finish-solid [data-slot="sidebar-inner"] {
+    background: var(--card) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.08) !important;
+  }
+  .finish-solid [data-slot="card"]::after,
+  .finish-solid [data-slot="calendar"]::after,
+  .finish-solid [data-slot="range-calendar"]::after,
+  .finish-solid [data-slot="alert"]::after,
+  .finish-solid [data-slot="sidebar-inner"]::after {
+    display: none !important;
+  }
+
+  .finish-solid [data-slot='sidebar-inner'],
+  .finish-solid [data-slot='sidebar'][data-mobile='true'] {
+    background: var(--sidebar) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    border-right: 1px solid var(--sidebar-border) !important;
+  }
+
+  .finish-solid .glass-popup {
+    background: var(--popover) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .finish-solid .glass-mini {
+    background: var(--card) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .finish-solid .glass-header {
+    background: var(--background) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  }
+  .finish-solid .glass-header::after {
+    display: none !important;
+  }
+
+  .finish-solid .glass-btn {
+    background: var(--secondary) !important;
+    color: var(--secondary-foreground) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: none !important;
+  }
+  .finish-solid .glass-btn::after {
+    display: none !important;
+  }
+
+  .finish-solid [data-slot="popover-content"],
+  .finish-solid [data-slot="dropdown-menu-content"],
+  .finish-solid [data-slot="context-menu-content"],
+  .finish-solid [data-slot="select-content"],
+  .finish-solid [data-slot="hover-card-content"],
+  .finish-solid [data-slot="tooltip-content"],
+  .finish-solid [data-slot="command"],
+  .finish-solid [data-slot="tabs-list"] {
+    background: var(--popover) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  .finish-solid [data-sonner-toast] {
+    background: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    border: 1px solid var(--primary) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .finish-solid [data-slot="dialog-content"],
+  .finish-solid [data-slot="sheet-content"],
+  .finish-solid [data-slot="drawer-content"] {
+    background: var(--card) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  }
+
+  .finish-solid .glossy-active {
+    background: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+  }
+  .finish-solid .glossy-active::after {
+    display: none !important;
+  }
+
+  .finish-solid .glass-ui {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: none !important;
+  }
+  .finish-solid .glass-overlay::after {
+    display: none !important;
+  }
 }
 
 @layer utilities {
@@ -715,21 +837,108 @@
 /* Sembunyikan semua background layer secara bawaan */
 .apple-glass-background,
 .background-squares,
-.background-squares-static {
+.background-squares-static,
+.school-background {
   display: none !important;
 }
 
-/* Munculkan hanya background layer yang aktif sesuai class body */
-body.bg-glass .apple-glass-background {
+/* Munculkan hanya background layer yang aktif sesuai class body (sembunyikan jika solid finish aktif) */
+body.bg-glass:not(.finish-solid) .apple-glass-background {
   display: block !important;
 }
 
-body.bg-animated .background-squares {
+body.bg-animated:not(.finish-solid) .background-squares {
   display: block !important;
 }
 
-body.bg-static_squares .background-squares-static {
+body.bg-static_squares:not(.finish-solid) .background-squares-static {
   display: block !important;
+}
+
+body.bg-school .school-background,
+body.finish-solid .school-background {
+  display: block !important;
+}
+
+
+/* 🏫 School Doodle Background */
+.school-background {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: var(--background);
+}
+
+.school-background::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--primary);
+  -webkit-mask-image: url('/images/bg-school.png');
+  mask-image: url('/images/bg-school.png');
+  -webkit-mask-size: cover;
+  mask-size: cover;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  opacity: 0.12;
+  transition: opacity 0.3s ease;
+}
+
+.dark .school-background::before {
+  opacity: 0.22;
+}
+
+/* 🏫 School Theme Sidebar Override & Solid Finish Sidebar Override */
+body.bg-school [data-slot='sidebar-inner'],
+body.finish-solid [data-slot='sidebar-inner'] {
+  position: relative !important;
+  z-index: 0 !important; /* establish stacking context */
+}
+
+body.bg-school [data-slot='sidebar-inner']::before,
+body.bg-school [data-slot='sidebar'][data-mobile='true']::before,
+body.finish-solid [data-slot='sidebar-inner']::before,
+body.finish-solid [data-slot='sidebar'][data-mobile='true']::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
+  
+  /* Colorized with primary color */
+  background-color: var(--primary) !important;
+  -webkit-mask-image: url('/images/bg-school-sidebar.png') !important;
+  mask-image: url('/images/bg-school-sidebar.png') !important;
+  -webkit-mask-size: cover !important;
+  mask-size: cover !important;
+  -webkit-mask-position: center 50px !important;
+  mask-position: center 50px !important;
+  -webkit-mask-repeat: no-repeat !important;
+  mask-repeat: no-repeat !important;
+  
+  opacity: 0.12 !important;
+  transition: opacity 0.3s ease;
+}
+
+.dark body.bg-school [data-slot='sidebar-inner']::before,
+.dark body.bg-school [data-slot='sidebar'][data-mobile='true']::before,
+.dark body.finish-solid [data-slot='sidebar-inner']::before,
+.dark body.finish-solid [data-slot='sidebar'][data-mobile='true']::before {
+  opacity: 0.22 !important;
+}
+
+@media (max-width: 768px) {
+  body.bg-school [data-slot='sidebar'][data-mobile='true']::before,
+  body.finish-solid [data-slot='sidebar'][data-mobile='true']::before {
+    -webkit-mask-size: 100% auto !important;
+    mask-size: 100% auto !important;
+    -webkit-mask-position: center -100px !important;
+    mask-position: center -100px !important;
+  }
 }
 
 

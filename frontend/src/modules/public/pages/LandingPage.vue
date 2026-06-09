@@ -18,7 +18,7 @@ onMounted(() => {
 
   // Bersihkan semua class tema atau background yang mungkin terbawa dari dashboard
   document.body.classList.forEach(cls => {
-    if (cls.startsWith('theme-') || ['bg-animated', 'bg-static_squares', 'bg-glass', 'bg-solid'].includes(cls)) {
+    if (cls.startsWith('theme-') || ['bg-animated', 'bg-static_squares', 'bg-glass', 'bg-school', 'bg-solid', 'finish-solid'].includes(cls)) {
       document.body.classList.remove(cls)
     }
   })

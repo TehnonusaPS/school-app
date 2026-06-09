@@ -8,7 +8,8 @@ import {
   Moon,
   Monitor,
   Palette,
-  Layers
+  Layers,
+  Sparkles
 } from 'lucide-vue-next'
 import { onMounted, ref, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
@@ -147,16 +148,21 @@ const themeNames = {
 
 // --- Background Style Logic ---
 const activeBackgroundStyle = ref('animated')
+const savedBgBeforeSolid = ref(localStorage.getItem('savedBgBeforeSolid') || 'animated')
 
 const setBackgroundStyle = styleName => {
   activeBackgroundStyle.value = styleName
-  document.body.classList.remove('bg-animated', 'bg-static_squares', 'bg-glass', 'bg-solid')
+  document.body.classList.remove('bg-animated', 'bg-static_squares', 'bg-glass', 'bg-school', 'bg-solid')
   document.body.classList.add(`bg-${styleName}`)
   localStorage.setItem('backgroundStyle', styleName)
+  if (styleName !== 'school' && activeThemeFinish.value !== 'solid') {
+    savedBgBeforeSolid.value = styleName
+    localStorage.setItem('savedBgBeforeSolid', styleName)
+  }
 }
 
 const cycleBackgroundStyle = () => {
-  const styles = ['animated', 'static_squares', 'glass', 'solid']
+  const styles = ['animated', 'static_squares', 'glass', 'school', 'solid']
   const currentIndex = styles.indexOf(activeBackgroundStyle.value)
   const newStyle = styles[(currentIndex + 1) % styles.length]
   setBackgroundStyle(newStyle)
@@ -166,7 +172,36 @@ const backgroundNames = {
   animated: 'Animasi Kotak',
   static_squares: 'Kotak Statis',
   glass: 'Apple Glass Image',
+  school: 'Doodle Sekolah',
   solid: 'Solid Polos'
+}
+
+// --- Finish Style Logic (Glossy/Solid) ---
+const activeThemeFinish = ref('glossy')
+
+const setThemeFinish = finishName => {
+  activeThemeFinish.value = finishName
+  if (finishName === 'solid') {
+    document.body.classList.add('finish-solid')
+    setBackgroundStyle('school')
+  } else {
+    document.body.classList.remove('finish-solid')
+    const restoredBg = localStorage.getItem('savedBgBeforeSolid') || savedBgBeforeSolid.value || 'animated'
+    setBackgroundStyle(restoredBg)
+  }
+  localStorage.setItem('themeFinish', finishName)
+}
+
+const cycleThemeFinish = () => {
+  const finishes = ['glossy', 'solid']
+  const currentIndex = finishes.indexOf(activeThemeFinish.value)
+  const newFinish = finishes[(currentIndex + 1) % finishes.length]
+  setThemeFinish(newFinish)
+}
+
+const finishNames = {
+  glossy: 'Glossy (Glass)',
+  solid: 'Solid (Flat)'
 }
 
 onMounted(() => {
@@ -187,6 +222,10 @@ onMounted(() => {
   // Restore background style
   const savedBgStyle = localStorage.getItem('backgroundStyle') || 'animated'
   setBackgroundStyle(savedBgStyle)
+
+  // Restore theme finish
+  const savedFinish = localStorage.getItem('themeFinish') || 'glossy'
+  setThemeFinish(savedFinish)
 })
 </script>
 
@@ -261,12 +300,23 @@ onMounted(() => {
             </DropdownMenuItem>
 
             <!-- Background Style Cycle -->
-            <DropdownMenuItem @select.prevent="cycleBackgroundStyle" class="cursor-pointer">
+            <DropdownMenuItem v-if="activeThemeFinish !== 'solid'" @select.prevent="cycleBackgroundStyle" class="cursor-pointer">
               <Layers class="size-4" />
               <div class="truncate">
                 Latar:
                 <span class="font-semibold text-primary ml-1">{{
                   backgroundNames[activeBackgroundStyle] || 'Animasi Kotak'
+                }}</span>
+              </div>
+            </DropdownMenuItem>
+
+            <!-- Theme Finish Cycle -->
+            <DropdownMenuItem @select.prevent="cycleThemeFinish" class="cursor-pointer">
+              <Sparkles class="size-4" />
+              <div class="truncate">
+                Finish:
+                <span class="font-semibold text-primary ml-1">{{
+                  finishNames[activeThemeFinish] || 'Glossy (Glass)'
                 }}</span>
               </div>
             </DropdownMenuItem>

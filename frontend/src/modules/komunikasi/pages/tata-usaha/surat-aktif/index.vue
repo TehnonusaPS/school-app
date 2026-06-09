@@ -236,6 +236,7 @@ function handleSave() {
         label="Total Surat Keterangan Aktif Dibuat"
         :value="store.items.length"
         :icon="Mail"
+        illustration="paper_sheet"
         variant="primary"
       />
     </div>

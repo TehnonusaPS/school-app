@@ -62,6 +62,7 @@ function deleteBerita(item) {
         label="Total Berita Terbuat"
         :value="beritaKegiatans.length"
         :icon="Megaphone"
+        illustration="open_book"
         variant="primary"
       />
     </div>

@@ -347,6 +347,7 @@ const handleSave = (savedForm) => {
         trend="Turun 2,65%"
         trendDirection="down"
         :icon="Book"
+        illustration="graded_paper"
         variant="violet"
       />
       <StatCard
@@ -356,6 +357,7 @@ const handleSave = (savedForm) => {
         trend="Naik 2,65%"
         trendDirection="up"
         :icon="BookOpen"
+        illustration="open_book"
         variant="emerald"
       />
       <StatCard
@@ -365,6 +367,7 @@ const handleSave = (savedForm) => {
         trend="Naik 2,65%"
         trendDirection="up"
         :icon="Users"
+        illustration="school_bell"
         variant="amber"
       />
       <StatCard
@@ -372,6 +375,7 @@ const handleSave = (savedForm) => {
         :value="totalMateriUploaded"
         sub="Total Ukuran File Upload : 120MB"
         :icon="FolderOpen"
+        illustration="closed_book"
         variant="blue"
       />
     </StatCardGrid>

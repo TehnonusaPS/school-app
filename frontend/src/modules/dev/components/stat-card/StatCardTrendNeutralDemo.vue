@@ -12,6 +12,7 @@ import { Users } from 'lucide-vue-next'
     :trend="statCardDemosData.kelulusan.trend"
     :trendDirection="statCardDemosData.kelulusan.trendDirection"
     :icon="Users"
+    illustration="abc_board"
     color="primary"
     variant="neutral"
   />

@@ -33,6 +33,7 @@ const kpiData = [
     trend: '+8.4% bln ini',
     trendDirection: 'up',
     icon: Banknote,
+    illustration: 'bag',
     variant: 'emerald'
   },
   {
@@ -41,6 +42,7 @@ const kpiData = [
     trend: '+12 Baru',
     trendDirection: 'up',
     icon: Building2,
+    illustration: 'globe',
     variant: 'blue'
   },
   {
@@ -49,6 +51,7 @@ const kpiData = [
     trend: '-0.5% (Sehat)',
     trendDirection: 'down',
     icon: UserMinus,
+    illustration: 'star',
     variant: 'amber'
   },
   {
@@ -56,6 +59,7 @@ const kpiData = [
     value: '99.9%',
     progress: 99.9,
     icon: Cloud,
+    illustration: 'abc_board',
     variant: 'primary'
   }
 ]
@@ -80,6 +84,7 @@ const formLangganan = () => {
         :icon="stat.icon"
         :progress="stat.progress"
         :variant="stat.variant"
+        :illustration="stat.illustration"
       />
     </div>
     

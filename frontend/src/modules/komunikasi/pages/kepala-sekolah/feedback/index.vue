@@ -77,6 +77,7 @@ function handleExportPdf() {
           :value="totalCount"
           sub="Masukan Masuk"
           :icon="MessageSquare"
+          illustration="paper_sheet"
           variant="primary"
         />
         <StatCard 
@@ -84,6 +85,7 @@ function handleExportPdf() {
           :value="akademikCount"
           sub="Kurikulum & Pembelajaran"
           :icon="BookOpen"
+          illustration="open_book"
           variant="blue"
         />
         <StatCard 
@@ -91,6 +93,7 @@ function handleExportPdf() {
           :value="fasilitasCount"
           sub="Sarana & Prasarana"
           :icon="Building2"
+          illustration="abc_board"
           variant="emerald"
         />
         <StatCard 
@@ -98,6 +101,7 @@ function handleExportPdf() {
           :value="pelayananCount"
           sub="Administrasi & TU"
           :icon="HeartHandshake"
+          illustration="star"
           variant="amber"
         />
         <StatCard 
@@ -105,6 +109,7 @@ function handleExportPdf() {
           :value="keuanganCount"
           sub="SPP & Biaya Sekolah"
           :icon="Wallet"
+          illustration="bag"
           variant="violet"
         />
       </StatCardGrid>

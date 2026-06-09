@@ -92,6 +92,7 @@ const handleViewDetail = id => {
         :trendDirection="stat.trendDirection"
         :icon="stat.icon"
         :variant="stat.variant"
+        :illustration="stat.illustration"
       />
     </div>
 

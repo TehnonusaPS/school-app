@@ -288,6 +288,7 @@ function handleSave() {
         label="Total Surat Dispensasi Siswa Dibuat"
         :value="store.items.length"
         :icon="Mail"
+        illustration="paper_plane"
         variant="primary"
       />
     </div>

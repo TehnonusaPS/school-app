@@ -236,6 +236,7 @@ function handleSave() {
         label="Total Surat Keterangan Lulus Siswa Dibuat"
         :value="store.items.length"
         :icon="Mail"
+        illustration="graduation_cap"
         variant="primary"
       />
     </div>

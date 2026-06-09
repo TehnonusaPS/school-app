@@ -12,6 +12,7 @@ import { UserCheck } from 'lucide-vue-next'
     :trend="statCardDemosData.absensi.trend"
     :trendDirection="statCardDemosData.absensi.trendDirection"
     :icon="UserCheck"
+    illustration="school_bell"
     color="emerald"
     variant="up"
   />

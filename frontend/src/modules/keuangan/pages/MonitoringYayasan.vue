@@ -27,6 +27,7 @@ const kpiData = [
     trend: '12.5% dari tahun lalu',
     trendDirection: 'up',
     icon: TrendingUp,
+    illustration: 'globe',
     variant: 'blue'
   },
   {
@@ -35,6 +36,7 @@ const kpiData = [
     trend: '50% Rasio Pengeluaran',
     trendDirection: 'up',
     icon: FileText,
+    illustration: 'ruler',
     variant: 'amber'
   },
   {
@@ -43,12 +45,14 @@ const kpiData = [
     trend: 'Likuiditas Sehat',
     trendDirection: 'up',
     icon: CheckCircle2,
+    illustration: 'star',
     variant: 'emerald'
   },
   {
     label: 'Rerata Penagihan SPP',
     value: '92.4%',
     progress: 92.4,
+    illustration: 'abc_board',
     variant: 'primary'
   }
 ]
@@ -90,6 +94,7 @@ const kpiData = [
         :icon="stat.icon"
         :progress="stat.progress"
         :variant="stat.variant"
+        :illustration="stat.illustration"
       />
     </div>
 

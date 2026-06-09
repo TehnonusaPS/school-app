@@ -19,9 +19,9 @@ const schoolCount = computed(() => new Set(store.items.map(i => i.school_name).f
 const stats = computed(() => {
   if (props.isYayasan) {
     return [
-      { label: 'Total Cabang', value: schoolCount.value.toLocaleString('id-ID'), sub: 'unit terdaftar', icon: School, variant: 'blue' },
-      { label: 'Total Buku', value: store.items.reduce((acc, curr) => acc + (parseInt(curr.jumlahStok) || 0), 0).toLocaleString('id-ID'), sub: 'total eksemplar', icon: Book, variant: 'emerald' },
-      { label: 'Total Judul', value: store.items.length.toLocaleString('id-ID'), sub: 'judul unik', icon: BookOpen, variant: 'violet' },
+      { label: 'Total Cabang', value: schoolCount.value.toLocaleString('id-ID'), sub: 'unit terdaftar', icon: School, variant: 'blue', illustration: 'globe' },
+      { label: 'Total Buku', value: store.items.reduce((acc, curr) => acc + (parseInt(curr.jumlahStok) || 0), 0).toLocaleString('id-ID'), sub: 'total eksemplar', icon: Book, variant: 'emerald', illustration: 'textbook' },
+      { label: 'Total Judul', value: store.items.length.toLocaleString('id-ID'), sub: 'judul unik', icon: BookOpen, variant: 'violet', illustration: 'open_book' },
       { 
         label: 'Buku Terbaru', 
         value: store.items.filter(i => {
@@ -31,7 +31,8 @@ const stats = computed(() => {
         }).length.toLocaleString('id-ID'), 
         sub: '3 tahun terakhir',
         icon: BookMarked,
-        variant: 'amber'
+        variant: 'amber',
+        illustration: 'closed_book'
       },
     ]
   }
@@ -41,10 +42,11 @@ const stats = computed(() => {
       value: store.items.reduce((acc, curr) => acc + (parseInt(curr.jumlahStok) || 0), 0).toLocaleString('id-ID'), 
       sub: 'total eksemplar',
       icon: Book,
-      variant: 'blue'
+      variant: 'blue',
+      illustration: 'textbook'
     },
-    { label: 'Total Judul', value: store.items.length.toLocaleString('id-ID'), sub: 'judul unik', icon: BookOpen, variant: 'emerald' },
-    { label: 'Total Kategori', value: new Set(store.items.map(i => i.kategori)).size.toLocaleString('id-ID'), sub: 'kategori', icon: Library, variant: 'violet' },
+    { label: 'Total Judul', value: store.items.length.toLocaleString('id-ID'), sub: 'judul unik', icon: BookOpen, variant: 'emerald', illustration: 'open_book' },
+    { label: 'Total Kategori', value: new Set(store.items.map(i => i.kategori)).size.toLocaleString('id-ID'), sub: 'kategori', icon: Library, variant: 'violet', illustration: 'abc_board' },
     { 
       label: 'Buku Terbaru', 
       value: store.items.filter(i => {
@@ -54,7 +56,8 @@ const stats = computed(() => {
       }).length.toLocaleString('id-ID'), 
       sub: '3 tahun terakhir',
       icon: BookMarked,
-      variant: 'amber'
+      variant: 'amber',
+      illustration: 'closed_book'
     },
   ]
 })
@@ -70,6 +73,7 @@ const stats = computed(() => {
       :sub="stat.sub"
       :icon="stat.icon"
       :variant="stat.variant"
+      :illustration="stat.illustration"
     />
   </StatCardGrid>
 </template>

@@ -28,10 +28,10 @@ const stats = computed(() => {
     ]
   }
   return [
-    { label: 'Total Aset', value: store.items.length.toLocaleString('id-ID'), sub: 'semua aset', icon: Package, variant: 'blue' },
-    { label: 'Kondisi Baik', value: store.items.filter(i => i.condition === 'baik').length.toLocaleString('id-ID'), sub: 'layak pakai', icon: CheckCircle, variant: 'emerald' },
-    { label: 'Rusak Ringan', value: store.items.filter(i => i.condition === 'rusak ringan' || i.condition === 'perbaikan').length.toLocaleString('id-ID'), sub: 'perlu perbaikan', icon: Wrench, variant: 'amber' },
-    { label: 'Rusak Berat', value: store.items.filter(i => i.condition === 'rusak berat').length.toLocaleString('id-ID'), sub: 'tidak layak', icon: TriangleAlert, variant: 'rose' },
+    { label: 'Total Aset', value: store.items.length.toLocaleString('id-ID'), sub: 'semua aset', icon: Package, variant: 'blue', illustration: 'globe' },
+    { label: 'Kondisi Baik', value: store.items.filter(i => i.condition === 'baik').length.toLocaleString('id-ID'), sub: 'layak pakai', icon: CheckCircle, variant: 'emerald', illustration: 'star' },
+    { label: 'Rusak Ringan', value: store.items.filter(i => i.condition === 'rusak ringan' || i.condition === 'perbaikan').length.toLocaleString('id-ID'), sub: 'perlu perbaikan', icon: Wrench, variant: 'amber', illustration: 'crayon' },
+    { label: 'Rusak Berat', value: store.items.filter(i => i.condition === 'rusak berat').length.toLocaleString('id-ID'), sub: 'tidak layak', icon: TriangleAlert, variant: 'rose', illustration: 'ruler' },
   ]
 })
 </script>
@@ -46,6 +46,7 @@ const stats = computed(() => {
       :sub="stat.sub"
       :icon="stat.icon"
       :variant="stat.variant"
+      :illustration="stat.illustration"
     />
   </StatCardGrid>
 </template>

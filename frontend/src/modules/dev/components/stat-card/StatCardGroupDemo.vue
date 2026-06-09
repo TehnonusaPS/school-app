@@ -15,6 +15,7 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
         :value="statCardDemosData.siswa.total"
         :sub="statCardDemosData.siswa.sub"
         :icon="Users"
+        illustration="graduation_cap"
         color="blue"
         variant="default"
       />
@@ -29,6 +30,7 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
         :value="statCardDemosData.siswa.total"
         :sub="statCardDemosData.siswa.sub"
         :icon="Users"
+        illustration="graduation_cap"
         color="blue"
         variant="default"
       />
@@ -40,6 +42,7 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
         :trend="statCardDemosData.absensi.trend"
         :trendDirection="statCardDemosData.absensi.trendDirection"
         :icon="UserCheck"
+        illustration="school_bell"
         color="emerald"
         variant="up"
       />
@@ -57,6 +60,7 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
         :value="statCardDemosData.siswa.total"
         :sub="statCardDemosData.siswa.sub"
         :icon="Users"
+        illustration="graduation_cap"
         color="blue"
         variant="default"
       />
@@ -68,6 +72,7 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
         :trend="statCardDemosData.absensi.trend"
         :trendDirection="statCardDemosData.absensi.trendDirection"
         :icon="UserCheck"
+        illustration="school_bell"
         color="emerald"
         variant="up"
       />
@@ -78,6 +83,7 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
         :sub="statCardDemosData.anggaran.sub"
         :progress="statCardDemosData.anggaran.progress"
         :icon="Wallet"
+        illustration="open_book"
         color="violet"
         variant="progress"
       />
@@ -95,6 +101,7 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
         :value="statCardDemosData.siswa.total"
         :sub="statCardDemosData.siswa.sub"
         :icon="Users"
+        illustration="graduation_cap"
         color="blue"
         variant="default"
       />
@@ -106,6 +113,7 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
         :trend="statCardDemosData.absensi.trend"
         :trendDirection="statCardDemosData.absensi.trendDirection"
         :icon="UserCheck"
+        illustration="school_bell"
         color="emerald"
         variant="up"
       />
@@ -116,6 +124,7 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
         :sub="statCardDemosData.anggaran.sub"
         :progress="statCardDemosData.anggaran.progress"
         :icon="Wallet"
+        illustration="open_book"
         color="violet"
         variant="progress"
       />
@@ -127,6 +136,7 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
         :trend="statCardDemosData.kelulusan.trend"
         :trendDirection="statCardDemosData.kelulusan.trendDirection"
         :icon="Users"
+        illustration="abc_board"
         color="primary"
         variant="neutral"
       />
@@ -141,6 +151,7 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
         :value="statCardDemosData.siswa.total"
         :sub="statCardDemosData.siswa.sub"
         :icon="Users"
+        illustration="graduation_cap"
         color="blue"
         variant="default"
       />
@@ -152,6 +163,7 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
         :trend="statCardDemosData.absensi.trend"
         :trendDirection="statCardDemosData.absensi.trendDirection"
         :icon="UserCheck"
+        illustration="school_bell"
         color="emerald"
         variant="up"
       />
@@ -162,6 +174,7 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
         :sub="statCardDemosData.anggaran.sub"
         :progress="statCardDemosData.anggaran.progress"
         :icon="Wallet"
+        illustration="open_book"
         color="violet"
         variant="progress"
       />
@@ -173,6 +186,7 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
         :trend="statCardDemosData.pendaftaran.trend"
         :trendDirection="statCardDemosData.pendaftaran.trendDirection"
         :icon="Users"
+        illustration="star"
         color="amber"
         variant="down"
       />
@@ -184,6 +198,7 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
         :trend="statCardDemosData.kelulusan.trend"
         :trendDirection="statCardDemosData.kelulusan.trendDirection"
         :icon="Users"
+        illustration="abc_board"
         color="primary"
         variant="neutral"
       />

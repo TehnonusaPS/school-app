@@ -11,6 +11,7 @@ import { Wallet } from 'lucide-vue-next'
     :sub="statCardDemosData.anggaran.sub"
     :progress="statCardDemosData.anggaran.progress"
     :icon="Wallet"
+    illustration="open_book"
     variant="progress"
     color="violet"
   />

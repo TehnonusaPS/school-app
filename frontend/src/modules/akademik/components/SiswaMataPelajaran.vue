@@ -35,23 +35,23 @@ const selectedMateri = ref('')
     <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
       <StatCard label="Nilai Asal-asalan" :value="formatNumber(siswaStatsData.nilaiAsal.total)"
         sub="naik dari semester sebelumnya" :trend="`${formatDelta(siswaStatsData.nilaiAsal.growthPercent)}%`"
-        :trendDirection="siswaStatsData.nilaiAsal.trendDirection" :icon="Book" variant="blue" />
+        :trendDirection="siswaStatsData.nilaiAsal.trendDirection" :icon="Book" illustration="apple" variant="blue" />
 
       <StatCard label="Jumlah Tugas Terselesaikan" :value="formatNumber(siswaStatsData.tugas.total)"
         sub="turun dari semester sebelumnya" :trend="`${formatDelta(siswaStatsData.tugas.growthPercent)}%`"
-        :trendDirection="siswaStatsData.tugas.trendDirection" :icon="Book" variant="violet" />
+        :trendDirection="siswaStatsData.tugas.trendDirection" :icon="Book" illustration="open_book" variant="violet" />
 
       <StatCard label="Nilai Ujian Matematika" :value="formatNumber(siswaStatsData.nilaiMtk.total)"
         sub="naik dari semester sebelumnya" :trend="`${formatDelta(siswaStatsData.nilaiMtk.growthPercent)}%`"
-        :trendDirection="siswaStatsData.nilaiMtk.trendDirection" :icon="Book" variant="emerald" />
+        :trendDirection="siswaStatsData.nilaiMtk.trendDirection" :icon="Book" illustration="protractor" variant="emerald" />
 
       <StatCard label="Jumlah Ujian Terselesaikan" :value="formatNumber(siswaStatsData.ujian.total)"
         sub="turun dari semester sebelumnya" :trend="`${formatDelta(siswaStatsData.ujian.growthPercent)}%`"
-        :trendDirection="siswaStatsData.ujian.trendDirection" :icon="Book" variant="amber" />
+        :trendDirection="siswaStatsData.ujian.trendDirection" :icon="Book" illustration="graded_paper" variant="amber" />
 
       <StatCard label="Jumlah Kuis Terselesaikan" :value="formatNumber(siswaStatsData.kuis.total)"
         sub="turun dari semester sebelumnya" :trend="`${formatDelta(siswaStatsData.kuis.growthPercent)}%`"
-        :trendDirection="siswaStatsData.kuis.trendDirection" :icon="Book" variant="primary" />
+        :trendDirection="siswaStatsData.kuis.trendDirection" :icon="Book" illustration="star" variant="primary" />
     </div>
 
     <!-- Header: Mata Pelajaran + Filters -->

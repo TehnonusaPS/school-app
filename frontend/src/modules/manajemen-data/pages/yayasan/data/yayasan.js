@@ -17,6 +17,7 @@ export const stats = [
     trend: '+8.4% bln ini',
     trendDirection: 'up',
     icon: Building2,
+    illustration: 'globe',
     variant: 'primary'
   },
   {
@@ -25,6 +26,7 @@ export const stats = [
     trend: '+12 Baru',
     trendDirection: 'up',
     icon: ShieldCheck,
+    illustration: 'school_bell',
     variant: 'emerald'
   },
   {
@@ -33,6 +35,7 @@ export const stats = [
     trend: '-2 Yayasan',
     trendDirection: 'down',
     icon: ShieldAlert,
+    illustration: 'pencil',
     variant: 'amber'
   },
   {
@@ -41,6 +44,7 @@ export const stats = [
     trend: '-1 Yayasan',
     trendDirection: 'up',
     icon: ShieldX,
+    illustration: 'ruler',
     variant: 'violet'
   }
 ]

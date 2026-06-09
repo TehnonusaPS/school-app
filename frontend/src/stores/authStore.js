@@ -18,15 +18,15 @@ export const useAuthStore = defineStore('auth', {
       } else if (normalizedEmail === 'adminyayasan@mail.com' && password === '123456') {
         user = { name: 'Admin Yayasan', role: 'admin_yayasan', roleLabel: 'ADMIN YAYASAN', email: 'adminyayasan@mail.com', yayasanId: 'Y0001' }
       } else if (normalizedEmail === 'kepalasekolah@mail.com' && password === '123456') {
-        user = { name: 'Kepala Sekolah', role: 'kepala_sekolah', roleLabel: 'KEPALA SEKOLAH', email: 'kepalasekolah@mail.com' }
+        user = { name: 'Kepala Sekolah', role: 'kepala_sekolah', roleLabel: 'KEPALA SEKOLAH', email: 'kepalasekolah@mail.com', unitId: 'S0001' }
       } else if (normalizedEmail === 'adminsekolah@mail.com' && password === '123456') {
-        user = { name: 'Admin Sekolah', role: 'admin_sekolah', roleLabel: 'ADMIN SEKOLAH', email: 'adminsekolah@mail.com' }
+        user = { name: 'Admin Sekolah', role: 'admin_sekolah', roleLabel: 'ADMIN SEKOLAH', email: 'adminsekolah@mail.com', unitId: 'S0001' }
       } else if (normalizedEmail === 'tatausaha@mail.com' && password === '123456') {
-        user = { name: 'Tata Usaha', role: 'tata_usaha', roleLabel: 'TATA USAHA', email: 'tatausaha@mail.com' }
+        user = { name: 'Tata Usaha', role: 'tata_usaha', roleLabel: 'TATA USAHA', email: 'tatausaha@mail.com', unitId: 'S0001' }
       } else if (normalizedEmail === 'guru@mail.com' && password === '123456') {
-        user = { name: 'Guru Pengajar', role: 'guru', roleLabel: 'GURU', email: 'guru@mail.com' }
+        user = { name: 'Guru Pengajar', role: 'guru', roleLabel: 'GURU', email: 'guru@mail.com', unitId: 'S0001' }
       } else if (normalizedEmail === 'walikelas@mail.com' && password === '123456') {
-        user = { name: 'Wali Kelas', role: 'wali_kelas', roleLabel: 'WALI KELAS', email: 'walikelas@mail.com' }
+        user = { name: 'Wali Kelas', role: 'wali_kelas', roleLabel: 'WALI KELAS', email: 'walikelas@mail.com', unitId: 'S0001' }
       } else if (normalizedEmail === 'siswa@mail.com' && password === '123456') {
         user = { id: 1, name: 'Ahmad Wibowo', role: 'siswa', roleLabel: 'SISWA', email: 'siswa@mail.com', kelas: '2 D' }
       } else if (normalizedEmail === 'orangtua@mail.com' && password === '123456') {

@@ -10,7 +10,10 @@ import {
 defineProps({
   title: String,
   description: String,
-  icon: Object
+  icon: {
+    type: [Object, Function],
+    default: null,
+  },
 })
 </script>
 

@@ -889,7 +889,7 @@ body.finish-solid .school-background {
 }
 
 .dark .school-background::before {
-  opacity: 0.22;
+  opacity: 0.06;
 }
 
 /* 🏫 School Theme Sidebar Override & Solid Finish Sidebar Override */
@@ -928,7 +928,7 @@ body.finish-solid [data-slot='sidebar'][data-mobile='true']::before {
 .dark body.bg-school [data-slot='sidebar'][data-mobile='true']::before,
 .dark body.finish-solid [data-slot='sidebar-inner']::before,
 .dark body.finish-solid [data-slot='sidebar'][data-mobile='true']::before {
-  opacity: 0.22 !important;
+  opacity: 0.06 !important;
 }
 
 @media (max-width: 768px) {

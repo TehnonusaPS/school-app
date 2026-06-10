@@ -2,9 +2,9 @@ export default [
   // SISWA
   {
     path: 'manajemen-data/siswa',
-    component: () => import('./pages/siswa/DataSiswa.vue'),
+    component: () => import('./pages/siswa/IndexPage.vue'),
     meta: {
-      title: 'Data Siswa',
+      title: 'Siswa',
       parent: 'Manajemen Data',
       description: 'Kelola data seluruh siswa aktif.'
       // roles: ['superadmin', 'admin_sekolah'] <-- Contoh cara membatasi rute
@@ -12,10 +12,18 @@ export default [
   },
   {
     path: 'manajemen-data/siswa/tambah',
-    component: () => import('./pages/siswa/TambahSiswa.vue'),
+    component: () => import('./pages/siswa/CreatePage.vue'),
     meta: {
       title: 'Tambah Siswa',
-      parent: 'Data Siswa'
+      parent: 'Siswa'
+    }
+  },
+  {
+    path: 'manajemen-data/siswa/edit',
+    component: () => import('./pages/siswa/EditPage.vue'),
+    meta: {
+      title: 'Edit Siswa',
+      parent: 'Siswa'
     }
   },
   {

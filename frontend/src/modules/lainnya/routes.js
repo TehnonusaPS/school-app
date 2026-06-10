@@ -12,7 +12,7 @@ export default [
     path: 'lainnya/pengguna',
     component: () => import('./pages/Pengguna.vue'),
     meta: {
-      title: 'Manajemen Pengguna',
+      title: 'Hak Akses',
       parent: 'Lainnya',
       description: 'Kelola akun pengguna dan hak akses.'
     }

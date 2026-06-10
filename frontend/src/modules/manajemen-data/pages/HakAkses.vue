@@ -1,8 +1,7 @@
 <script setup>
-import PlaceholderPage from '@/components/PlaceholderPage.vue'
-import { ShieldCheck } from 'lucide-vue-next'
+import IndexPage from './data-pengguna/IndexPage.vue'
 </script>
 
 <template>
-  <PlaceholderPage :icon="ShieldCheck" />
+  <IndexPage />
 </template>

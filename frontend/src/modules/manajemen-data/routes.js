@@ -30,7 +30,7 @@ export default [
   // MATA PELAJARAN
   {
     path: 'manajemen-data/mata-pelajaran',
-    component: () => import('./pages/MataPelajaran.vue'),
+    component: () => import('./pages/mata-pelajaran/IndexPage.vue'),
     meta: {
       title: 'Mata Pelajaran',
       parent: 'Manajemen Data',

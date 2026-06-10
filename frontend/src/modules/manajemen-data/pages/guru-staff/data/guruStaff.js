@@ -17,6 +17,7 @@ export const stats = [
     trend: '+8.4% bln ini',
     trendDirection: 'up',
     icon: School,
+    illustration: 'globe',
     variant: 'primary'
   },
   {
@@ -25,6 +26,7 @@ export const stats = [
     trend: '+12 Baru',
     trendDirection: 'up',
     icon: BookCheck,
+    illustration: 'school_bell',
     variant: 'emerald'
   },
   {
@@ -33,6 +35,7 @@ export const stats = [
     sub: 'Kehadiran',
     progress: 98,
     icon: GraduationCap,
+    illustration: 'open_book',
     variant: 'amber'
   },
   {
@@ -41,6 +44,7 @@ export const stats = [
     sub: 'Kehadiran',
     progress: 90,
     icon: BookX,
+    illustration: 'abc_board',
     variant: 'violet'
   }
 ]

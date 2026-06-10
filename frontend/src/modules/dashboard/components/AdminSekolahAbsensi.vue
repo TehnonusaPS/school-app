@@ -23,6 +23,7 @@ const statusVariant = (s: string) =>
     cardClass="lg:col-span-3"
     contentClass="p-0"
     :delay="delay"
+    illustration="school_bell"
   >
     <!-- Fixed header -->
     <table class="w-full text-sm border-b">

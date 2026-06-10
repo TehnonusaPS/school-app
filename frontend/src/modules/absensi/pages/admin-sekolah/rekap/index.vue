@@ -151,6 +151,7 @@ const tableActions = computed(() => [
         :actions="tableActions"
         v-model:filterValues="filterValues"
         v-model:perPage="itemsPerPage"
+        illustration="school_bell"
         :from="from"
         :to="to"
         :total="total"

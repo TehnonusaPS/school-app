@@ -23,6 +23,7 @@ const props = defineProps({
     description="Kelas dengan rata-rata nilai terendah semester ini"
     contentClass="p-0"
     :delay="delay"
+    illustration="star"
   >
     <template #header-action>
       <TrendingDown class="size-4 text-rose-500" />

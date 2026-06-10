@@ -17,6 +17,7 @@ import { Toaster } from '@/components/ui/sonner'
     <li></li><li></li><li></li><li></li><li></li>
   </ul>
   <div class="apple-glass-background"></div>
+  <div class="school-background"></div>
   <router-view />
   <Toaster position="top-center" />
 </template>

@@ -288,6 +288,7 @@ function handleSave() {
         label="Total Surat Dispensasi Siswa Dibuat"
         :value="store.items.length"
         :icon="Mail"
+        illustration="paper_plane"
         variant="primary"
       />
     </div>
@@ -303,6 +304,7 @@ function handleSave() {
         :items="paginatedSuratList"
         :filters="filters"
         v-model:filterValues="filterValues"
+        illustration="paper_plane"
         v-model:perPage="itemsPerPage"
         :from="from"
         :to="to"

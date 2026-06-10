@@ -76,6 +76,7 @@ const handleViewDetail = id => {
       :trendDirection="stat.trendDirection"
       :icon="stat.icon"
       :variant="stat.variant"
+      :illustration="stat.illustration"
       />
      </div>
 
@@ -86,6 +87,7 @@ const handleViewDetail = id => {
       :actions="actions"
       v-model:filterValues="filterValues"
       v-model:perPage="perPage"
+      illustration="globe"
       :from="from"
       :to="to"
       :total="total"

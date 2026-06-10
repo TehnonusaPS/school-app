@@ -14,7 +14,8 @@ import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Bell, Search, UserPlus, CreditCard, MessageCircle, MessageSquare } from 'lucide-vue-next'
+import { Bell, Search, UserPlus, CreditCard, MessageCircle, MessageSquare, Sun, Moon, Monitor } from 'lucide-vue-next'
+import { ref } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { sidebarSlide, topbarSlide } from '@/config/motion'
 import {
@@ -44,12 +45,36 @@ const chatRoute = computed(() => {
   return '/komunikasi/chat'
 })
 
+// --- Color Mode Logic (System/Light/Dark) ---
+const colorMode = ref('system')
+
+const applyColorMode = (mode) => {
+  if (mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+}
+
+const cycleColorMode = () => {
+  const modes = ['system', 'light', 'dark']
+  const nextMode = modes[(modes.indexOf(colorMode.value) + 1) % modes.length]
+  colorMode.value = nextMode
+  localStorage.setItem('theme', nextMode)
+  applyColorMode(nextMode)
+}
+
 onMounted(() => {
   if (auth.isJustLoggedIn) {
     setTimeout(() => {
       auth.isJustLoggedIn = false
     }, 1200)
   }
+
+  // Restore Color Mode (Terang/Gelap/Sistem)
+  const savedTheme = localStorage.getItem('theme') || 'system'
+  colorMode.value = savedTheme
+  applyColorMode(savedTheme)
 })
 
 // Fungsi untuk menelusuri hierarki breadcrumb secara rekursif
@@ -223,6 +248,19 @@ const notifications = [
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <!-- Mode Tampilan (Dark/Light/Sistem) -->
+          <Button
+            variant="ghost"
+            size="icon"
+            class="rounded-full hover:bg-muted"
+            @click="cycleColorMode"
+            title="Ganti Mode Tampilan"
+          >
+            <Monitor v-if="colorMode === 'system'" class="h-5 w-5" />
+            <Sun v-else-if="colorMode === 'light'" class="h-5 w-5" />
+            <Moon v-else class="h-5 w-5" />
+          </Button>
         </div>
       </header>
 

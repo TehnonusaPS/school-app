@@ -258,18 +258,21 @@ function handleSave() {
         label="Total Surat Dibuat"
         :value="store.items.length"
         :icon="Mail"
+        illustration="paper_sheet"
         variant="primary"
       />
       <StatCard
         label="Surat Kedisiplinan"
         :value="totalPelanggaran"
         :icon="AlertTriangle"
+        illustration="school_bell"
         variant="amber"
       />
       <StatCard
         label="Surat Tunggakan"
         :value="totalTunggakan"
         :icon="CreditCard"
+        illustration="bag"
         variant="violet"
       />
     </StatCardGrid>
@@ -285,6 +288,7 @@ function handleSave() {
         :items="paginatedSuratList"
         :filters="filters"
         v-model:filterValues="filterValues"
+        illustration="paper_sheet"
         v-model:perPage="itemsPerPage"
         :from="from"
         :to="to"

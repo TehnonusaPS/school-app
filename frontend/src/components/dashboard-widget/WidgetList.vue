@@ -12,7 +12,8 @@ const props = defineProps({
   cardClass: { type: String, default: '' },
   listClass: { type: String, default: 'h-[360px] px-6' },
   emptyText: { type: String, default: 'Tidak ada data.' },
-  delay: { type: Number, default: 0 }
+  delay: { type: Number, default: 0 },
+  illustration: { type: String, default: '' }
 })
 
 import { useAuthStore } from '@/stores/authStore'
@@ -29,6 +30,7 @@ const getDelay = (index) => (auth.isJustLoggedIn ? 1400 : 0) + props.delay + (in
     contentClass="p-0"
     :cardClass="cardClass"
     :delay="delay"
+    :illustration="illustration"
   >
     <template #header-action>
       <slot name="header-action" />

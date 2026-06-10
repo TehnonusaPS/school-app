@@ -151,6 +151,7 @@ const paginatedItems = computed(() => {
     :items="paginatedItems"
     :filters="filters"
     :actions="actions"
+    illustration="textbook"
     v-model:filterValues="filterValues"
     :page="page"
     :per-page="perPage"

@@ -92,6 +92,7 @@ const handleViewDetail = id => {
         :sub="stat.sub"
         :progress="stat.progress"
         :variant="stat.variant"
+        :illustration="stat.illustration"
       />
     </div>
 
@@ -102,6 +103,7 @@ const handleViewDetail = id => {
       :actions="actions"
       v-model:filterValues="filterValues"
       v-model:perPage="perPage"
+      illustration="abc_board"
       :from="from"
       :to="to"
       :total="total"

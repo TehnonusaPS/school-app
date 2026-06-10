@@ -11,7 +11,8 @@ const props = defineProps({
   items: { type: Array, required: true },
   cardClass: { type: String, default: '' },
   contentClass: { type: String, default: 'space-y-4' },
-  delay: { type: Number, default: 0 }
+  delay: { type: Number, default: 0 },
+  illustration: { type: String, default: '' }
 })
 
 const auth = useAuthStore()
@@ -26,6 +27,7 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.de
     :cardClass="cardClass"
     :contentClass="contentClass"
     :delay="delay"
+    :illustration="illustration"
   >
     <div v-for="(item, index) in items" :key="item.label || item.id" class="space-y-1.5">
       <div class="flex items-center justify-between text-sm">

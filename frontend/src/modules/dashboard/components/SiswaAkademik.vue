@@ -28,6 +28,7 @@ const asPesan = (item: unknown) => item as PesanItem
       :icon="TrendingUp"
       contentClass="space-y-4"
       :delay="delay"
+      illustration="graded_paper"
     >
       <div>
         <div class="flex items-baseline gap-1">
@@ -55,6 +56,7 @@ const asPesan = (item: unknown) => item as PesanItem
       listClass="h-[250px] px-4"
       :items="pesan"
       :delay="delay + 150"
+      illustration="paper_plane"
     >
       <template #item="{ item }">
         <div :class="['size-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0', asPesan(item).warna]">

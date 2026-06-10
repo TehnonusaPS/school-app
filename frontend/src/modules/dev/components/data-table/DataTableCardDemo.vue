@@ -140,6 +140,7 @@ const customTableActions = computed(() => [
     :filters="tableFilters"
     :actions="customTableActions"
     v-model:filterValues="filterValues"
+    illustration="graduation_cap"
     v-model:perPage="perPage"
     :from="from"
     :to="to"

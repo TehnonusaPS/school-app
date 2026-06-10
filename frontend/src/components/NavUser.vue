@@ -57,7 +57,7 @@ const confirmLogout = async () => {
   auth.isLoggingOut = true
 
   // 2. Berikan jeda 600ms agar animasi keluar sidebar & topbar selesai bergerak
-  await new Promise((resolve) => setTimeout(resolve, 600))
+  await new Promise(resolve => setTimeout(resolve, 600))
 
   // 3. Jalankan transisi tirai menutup kembali ke login
   if (document.startViewTransition) {
@@ -82,8 +82,6 @@ const confirmLogout = async () => {
   }
 }
 
-
-
 // Nama tema: 'blue' | 'emerald' | 'indigo' | 'bronze' | 'navy' | 'zinc'
 const activeThemeStyle = ref('blue')
 
@@ -97,7 +95,7 @@ const clearThemeClasses = () => {
 }
 
 /** Terapkan class tema ke body */
-const applyThemeClass = (styleName) => {
+const applyThemeClass = styleName => {
   clearThemeClasses()
   document.body.classList.add(`theme-${styleName}`)
 }
@@ -130,7 +128,13 @@ const activeBackgroundStyle = ref('animated')
 const setBackgroundStyle = styleName => {
   const resolvedStyle = styleName === 'school' ? 'solid' : styleName
   activeBackgroundStyle.value = resolvedStyle
-  document.body.classList.remove('bg-animated', 'bg-static_squares', 'bg-glass', 'bg-school', 'bg-solid')
+  document.body.classList.remove(
+    'bg-animated',
+    'bg-static_squares',
+    'bg-glass',
+    'bg-school',
+    'bg-solid'
+  )
   document.body.classList.add(`bg-${resolvedStyle}`)
   localStorage.setItem('backgroundStyle', resolvedStyle)
 
@@ -150,10 +154,10 @@ const cycleBackgroundStyle = () => {
 }
 
 const backgroundNames = {
-  animated: 'Animasi Kotak',
-  static_squares: 'Kotak Statis',
-  glass: 'Apple Glass Image',
-  solid: 'Solid & Vector'
+  animated: 'Animated Squares',
+  static_squares: 'Static Squares',
+  glass: 'Glass Effect',
+  solid: 'School Illustration'
 }
 
 // --- Finish Style Logic (Glossy/Solid) ---
@@ -207,7 +211,10 @@ onMounted(() => {
             class="glass-mini text-sidebar-accent-foreground hover:bg-sidebar-accent/50 data-[state=open]:bg-sidebar-accent/50 data-[state=open]:text-sidebar-accent-foreground transition-all duration-300"
           >
             <Avatar class="h-8 w-8 rounded-lg">
-              <AvatarImage :src="user.avatar" :alt="user.name" />
+              <AvatarImage
+                :src="user.avatar"
+                :alt="user.name"
+              />
               <AvatarFallback class="rounded-lg"> CN </AvatarFallback>
             </Avatar>
             <div class="grid flex-1 text-left text-sm leading-tight">
@@ -228,7 +235,10 @@ onMounted(() => {
           <DropdownMenuLabel class="p-0 font-normal">
             <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
               <Avatar class="h-8 w-8 rounded-lg">
-                <AvatarImage :src="user.avatar" :alt="user.name" />
+                <AvatarImage
+                  :src="user.avatar"
+                  :alt="user.name"
+                />
                 <AvatarFallback class="rounded-lg"> CN </AvatarFallback>
               </Avatar>
               <div class="grid flex-1 text-left text-sm leading-tight">
@@ -242,27 +252,29 @@ onMounted(() => {
             <DropdownMenuLabel class="text-xs text-muted-foreground"
               >Tampilan &amp; Tema</DropdownMenuLabel
             >
-
-
-
+            <!-- Background Style Cycle -->
+            <DropdownMenuItem
+              @select.prevent="cycleBackgroundStyle"
+              class="cursor-pointer"
+            >
+              <Layers class="size-4" />
+              <div class="truncate">
+                Tema:
+                <span class="font-semibold text-primary ml-1">{{
+                  backgroundNames[activeBackgroundStyle] || 'Animated Squares'
+                }}</span>
+              </div>
+            </DropdownMenuItem>
             <!-- Color Theme Cycle -->
-            <DropdownMenuItem @select.prevent="cycleThemeStyle" class="cursor-pointer">
+            <DropdownMenuItem
+              @select.prevent="cycleThemeStyle"
+              class="cursor-pointer"
+            >
               <Palette class="size-4" />
               <div class="truncate">
                 Warna:
                 <span class="font-semibold text-primary ml-1">{{
                   themeNames[activeThemeStyle] || 'Blue'
-                }}</span>
-              </div>
-            </DropdownMenuItem>
-
-            <!-- Background Style Cycle -->
-            <DropdownMenuItem @select.prevent="cycleBackgroundStyle" class="cursor-pointer">
-              <Layers class="size-4" />
-              <div class="truncate">
-                Tema:
-                <span class="font-semibold text-primary ml-1">{{
-                  backgroundNames[activeBackgroundStyle] || 'Animasi Kotak'
                 }}</span>
               </div>
             </DropdownMenuItem>
@@ -292,7 +304,10 @@ onMounted(() => {
   </SidebarMenu>
 
   <!-- Dialog Konfirmasi Logout -->
-  <AlertDialog :open="showLogoutDialog" @update:open="showLogoutDialog = $event">
+  <AlertDialog
+    :open="showLogoutDialog"
+    @update:open="showLogoutDialog = $event"
+  >
     <AlertDialogContent>
       <AlertDialogHeader>
         <AlertDialogTitle>Konfirmasi Keluar</AlertDialogTitle>

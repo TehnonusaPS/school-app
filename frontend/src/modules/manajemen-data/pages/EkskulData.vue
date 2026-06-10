@@ -1,8 +1,7 @@
 <script setup>
-import PlaceholderPage from '@/components/PlaceholderPage.vue'
-import { Award } from 'lucide-vue-next'
+import IndexPage from './ekstrakulikuler/IndexPage.vue'
 </script>
 
 <template>
-  <PlaceholderPage :icon="Award" />
+  <IndexPage />
 </template>

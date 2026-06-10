@@ -122,7 +122,7 @@ const data = {
           roles: ['superadmin', 'admin_yayasan']
         },
         { 
-          title: 'Kelola Hak Akses', 
+          title: 'Pengguna', 
           url: '/manajemen-data/hak-akses',
           roles: ['superadmin']
         },
@@ -442,7 +442,7 @@ const data = {
       excludeRoles: ['tata_usaha', 'guru', 'wali_kelas', 'siswa', 'orang_tua'],
       items: [
         { title: 'Pengaturan Sekolah', url: '/lainnya/pengaturan', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah'] },
-        { title: 'Manajemen Pengguna', url: '/lainnya/pengguna', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah'] },
+        { title: 'Pengguna', url: '/lainnya/pengguna', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah'] },
         { title: 'Backup & Restore', url: '/lainnya/backup', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah'] },
         { title: 'Ruangan', url: '/lainnya/ruangan', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah'] },
         { title: 'Aset', url: '/lainnya/aset', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah'] },

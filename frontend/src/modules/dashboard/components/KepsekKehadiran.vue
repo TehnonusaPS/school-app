@@ -5,6 +5,23 @@ import { kehadiranProgressData, kehadiranQuickStats } from '../data/kepsekKehadi
 const props = defineProps({
   delay: { type: Number, default: 0 }
 })
+
+interface KehadiranProgressStats {
+  hadir_pct: number
+  alpa_pct: number
+  izin_pct: number
+}
+
+interface KehadiranProgressItem {
+  id: string
+  label: string
+  value: string
+  progress: number
+  progressClass: string
+  stats: KehadiranProgressStats
+}
+
+const asKehadiranItem = (item: unknown) => item as KehadiranProgressItem
 </script>
 
 <template>
@@ -18,21 +35,21 @@ const props = defineProps({
     illustration="school_bell"
   >
     <template #value="{ item }">
-      <span class="text-sm font-bold tabular-nums text-foreground">{{ item.value }}</span>
+      <span class="text-sm font-bold tabular-nums text-foreground">{{ asKehadiranItem(item).value }}</span>
     </template>
     <template #item-footer="{ item }">
       <div class="flex items-center gap-4 text-xs text-muted-foreground mt-2">
         <span class="flex items-center gap-1">
           <span class="inline-block size-2 rounded-full bg-emerald-500"></span>
-          Hadir ({{ item.stats.hadir_pct }}%)
+          Hadir ({{ asKehadiranItem(item).stats.hadir_pct }}%)
         </span>
         <span class="flex items-center gap-1">
           <span class="inline-block size-2 rounded-full bg-rose-500"></span>
-          Alpa ({{ item.stats.alpa_pct }}%)
+          Alpa ({{ asKehadiranItem(item).stats.alpa_pct }}%)
         </span>
         <span class="flex items-center gap-1">
           <span class="inline-block size-2 rounded-full bg-amber-400"></span>
-          Izin ({{ item.stats.izin_pct }}%)
+          Izin ({{ asKehadiranItem(item).stats.izin_pct }}%)
         </span>
       </div>
       <div class="border-t my-4" />

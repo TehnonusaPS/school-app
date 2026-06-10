@@ -45,7 +45,7 @@ const chartConfig = {
     cardClass="lg:col-span-3"
     footerClass="flex-col items-start gap-2 text-sm"
     :delay="delay"
-    illustration="globe"
+    illustration="planet"
   >
     <template #header-action>
       <Badge variant="secondary" class="gap-1 text-xs bg-white/10 dark:bg-white/10 backdrop-blur-md border border-white/20 shadow-sm text-foreground">

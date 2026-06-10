@@ -32,7 +32,7 @@ const asKehadiranItem = (item: unknown) => item as KehadiranProgressItem
     contentClass="space-y-5"
     :items="kehadiranProgressData"
     :delay="delay"
-    illustration="school_bell"
+    illustration="bag"
   >
     <template #value="{ item }">
       <span class="text-sm font-bold tabular-nums text-foreground">{{ asKehadiranItem(item).value }}</span>

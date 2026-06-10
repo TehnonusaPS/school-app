@@ -60,7 +60,7 @@ onMounted(() => {
     contentClass="pb-0"
     footerClass="flex-col gap-0 pt-2 border-t"
     :delay="delay"
-    illustration="bag"
+    illustration="textbook"
   >
     <ChartContainer
       :config="chartConfig"

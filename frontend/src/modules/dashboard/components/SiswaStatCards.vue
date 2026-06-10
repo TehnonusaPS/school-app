@@ -10,7 +10,7 @@ import { siswaStatsData } from '../data/siswaStats'
   <StatCardGrid cols="3">
     <StatCard label="Hadir" :value="formatNumber(siswaStatsData.hadir.total)"
       sub="hari kehadiran" :trendDirection="siswaStatsData.hadir.trendDirection" 
-      :icon="UserCheck" illustration="school_bell" variant="emerald" />
+      :icon="UserCheck" illustration="bag" variant="emerald" />
 
     <StatCard label="Izin" :value="formatNumber(siswaStatsData.izin.total)"
       sub="hari izin" :trendDirection="siswaStatsData.izin.trendDirection" 

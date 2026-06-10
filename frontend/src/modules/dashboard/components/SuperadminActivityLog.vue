@@ -39,7 +39,7 @@ const getActivityConfig = (type: string) => {
     :items="activitiesData"
     cardClass="lg:col-span-2"
     :delay="delay"
-    illustration="globe"
+    illustration="paper_plane"
   >
     <template #item="{ item }">
       <!-- Avatar -->

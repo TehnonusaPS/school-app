@@ -19,7 +19,7 @@ const props = defineProps({
       cardClass="lg:col-span-3"
       contentClass="p-0"
       :delay="delay"
-      illustration="globe"
+      illustration="abc_board"
     >
       <!-- Header fixed — tidak ikut scroll -->
       <table class="w-full text-sm border-b">

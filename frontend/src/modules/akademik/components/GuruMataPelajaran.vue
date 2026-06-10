@@ -419,6 +419,7 @@ const handleSave = (savedForm) => {
         :items="filteredItems"
         :filters="filtersConfig"
         v-model:filterValues="filterValues"
+        illustration="open_book"
         :actions="toolbarActions"
         :on-view="viewItem"
         :on-edit="editItem"

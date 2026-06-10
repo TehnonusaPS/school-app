@@ -199,6 +199,7 @@ const handleView = (id) => {
     :items="paginatedItems"
     :filters="filters"
     :actions="actions"
+    illustration="ruler"
     v-model:filterValues="filterValues"
     :page="page"
     :per-page="perPage"

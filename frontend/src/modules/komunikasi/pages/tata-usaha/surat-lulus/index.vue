@@ -252,6 +252,7 @@ function handleSave() {
         :items="paginatedSuratList"
         :filters="filters"
         v-model:filterValues="filterValues"
+        illustration="graduation_cap"
         v-model:perPage="itemsPerPage"
         :from="from"
         :to="to"

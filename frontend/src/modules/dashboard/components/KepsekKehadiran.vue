@@ -15,6 +15,7 @@ const props = defineProps({
     contentClass="space-y-5"
     :items="kehadiranProgressData"
     :delay="delay"
+    illustration="school_bell"
   >
     <template #value="{ item }">
       <span class="text-sm font-bold tabular-nums text-foreground">{{ item.value }}</span>

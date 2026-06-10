@@ -20,6 +20,7 @@ const statusVariant = (s: string) => s === 'Selesai' ? 'default' : 'secondary'
     :icon="ClipboardList"
     contentClass="p-0"
     :delay="delay"
+    illustration="graded_paper"
   >
     <template #header-action>
       <Button variant="ghost" size="sm" class="h-8 text-xs gap-1 text-muted-foreground hover:text-foreground">

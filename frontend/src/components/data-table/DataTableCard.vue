@@ -47,7 +47,11 @@ const props = defineProps({
   //   string   → nama field, misal 'nama' atau 'username'
   //   function → (item) => string, misal item => `${item.nama} (${item.nisn})`
   //   default  → auto-detect field: nama, name, username, title, label
-  deleteLabel: [String, Function]
+  deleteLabel: [String, Function],
+  illustration: {
+    type: String,
+    default: 'textbook'
+  }
 })
 
 const emit = defineEmits(['update:page', 'update:filterValues', 'update:perPage'])
@@ -132,10 +136,9 @@ const resolvedRowActions = computed(() =>
   >
     <!-- Background Watermarks -->
     <div
+      v-if="illustration"
       class="absolute top-[-80px] right-[-90px] size-80 rotate-[-15deg] opacity-[0.15] dark:opacity-[0.22] pointer-events-none select-none bg-primary z-0"
       style="
-        mask-image: url(/images/illustrations/textbook.png);
-        -webkit-mask-image: url(/images/illustrations/textbook.png);
         mask-size: contain;
         -webkit-mask-size: contain;
         mask-repeat: no-repeat;
@@ -143,6 +146,10 @@ const resolvedRowActions = computed(() =>
         mask-position: center;
         -webkit-mask-position: center;
       "
+      :style="{
+        maskImage: `url(/images/illustrations/${illustration}.png)`,
+        webkitMaskImage: `url(/images/illustrations/${illustration}.png)`
+      }"
     />
 
     <DataTableToolbar

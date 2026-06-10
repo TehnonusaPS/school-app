@@ -30,6 +30,7 @@ const badgeVariant = (s: string) =>
     contentClass="p-0"
     footerClass="border-t pt-4 mt-auto"
     :delay="delay"
+    illustration="school_bell"
   >
     <!-- Fixed header row -->
     <div class="border-b border-t bg-muted/50 px-6 py-2 grid grid-cols-3 text-xs font-medium text-muted-foreground">

@@ -89,6 +89,7 @@ const formatDate = (dateStr) => {
     :items="paginatedItems"
     :filters="filters"
     v-model:filterValues="filterValues"
+    illustration="open_book"
     v-model:perPage="perPage"
     :from="from"
     :to="to"

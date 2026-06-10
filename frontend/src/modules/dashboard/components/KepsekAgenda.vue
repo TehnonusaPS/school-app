@@ -25,6 +25,7 @@ const props = defineProps({
     cardClass="lg:col-span-2"
     listClass="h-[320px] px-4"
     :delay="delay"
+    illustration="school_bell"
   >
     <template #item="{ item }">
       <!-- Tanggal box -->

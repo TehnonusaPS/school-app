@@ -288,6 +288,7 @@ function handleSave() {
         :items="paginatedSuratList"
         :filters="filters"
         v-model:filterValues="filterValues"
+        illustration="paper_sheet"
         v-model:perPage="itemsPerPage"
         :from="from"
         :to="to"

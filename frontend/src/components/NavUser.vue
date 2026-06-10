@@ -254,7 +254,7 @@ onMounted(() => {
             </DropdownMenuItem>
 
             <!-- Background Style Cycle -->
-            <DropdownMenuItem v-if="activeThemeFinish !== 'solid'" @select.prevent="cycleBackgroundStyle" class="cursor-pointer">
+            <DropdownMenuItem @select.prevent="cycleBackgroundStyle" class="cursor-pointer">
               <Layers class="size-4" />
               <div class="truncate">
                 Latar:

@@ -103,6 +103,7 @@ const handleViewDetail = id => {
       :actions="actions"
       v-model:filterValues="filterValues"
       v-model:perPage="perPage"
+      illustration="abc_board"
       :from="from"
       :to="to"
       :total="total"

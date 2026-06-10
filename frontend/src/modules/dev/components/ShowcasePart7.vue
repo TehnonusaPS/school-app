@@ -222,6 +222,7 @@ const handleImageChange = (file) => {
         :items="paginatedItems"
         :filters="tableFilters"
         :actions="tableActions"
+        illustration="textbook"
         :from="from"
         :to="to"
         :total="total"

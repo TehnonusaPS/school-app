@@ -181,6 +181,7 @@ const formatFacilities = (facilities) => {
     :items="paginatedItems"
     :filters="filters"
     :actions="actions"
+    illustration="abc_board"
     v-model:filterValues="filterValues"
     :page="page"
     :per-page="perPage"

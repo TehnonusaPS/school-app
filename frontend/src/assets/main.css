@@ -853,16 +853,16 @@
   display: none !important;
 }
 
-/* Munculkan hanya background layer yang aktif sesuai class body (sembunyikan jika solid finish aktif) */
-body.bg-glass:not(.finish-solid) .apple-glass-background {
+/* Munculkan hanya background layer yang aktif sesuai class body */
+body.bg-glass .apple-glass-background {
   display: block !important;
 }
 
-body.bg-animated:not(.finish-solid) .background-squares {
+body.bg-animated .background-squares {
   display: block !important;
 }
 
-body.bg-static_squares:not(.finish-solid) .background-squares-static {
+body.bg-static_squares .background-squares-static {
   display: block !important;
 }
 

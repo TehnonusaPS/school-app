@@ -48,6 +48,7 @@ const chartConfig = {
     description="6 bulan terakhir — dalam juta rupiah"
     footerClass="flex-col items-start gap-2 text-sm"
     :delay="delay"
+    illustration="bag"
   >
     <ChartContainer :config="chartConfig" class="h-[260px] w-full">
       <VisXYContainer :data="activeData" :duration="1000">

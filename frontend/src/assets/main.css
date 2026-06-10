@@ -894,12 +894,12 @@ body.bg-static_squares .background-squares-static {
   mask-position: center;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
-  opacity: 0.12;
+  opacity: 0.32;
   transition: opacity 0.3s ease;
 }
 
 .dark .school-background::before {
-  opacity: 0.10;
+  opacity: 0.25;
 }
 
 /* 🏫 School Theme Sidebar Override (Always Present) */
@@ -1561,4 +1561,21 @@ body.bg-static_squares .background-squares-static {
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* --- Hide watermark illustrations on non-solid (glass) themes --- */
+body:not(.finish-solid) .watermark-illustration {
+  display: none !important;
+}
+
+/* --- Hide school backgrounds on non-solid (glass) themes --- */
+body:not(.finish-solid) .school-background::before,
+body:not(.finish-solid) [data-slot='sidebar-inner']::before,
+body:not(.finish-solid) [data-slot='sidebar'][data-mobile='true']::before {
+  display: none !important;
+}
+
+/* In Solid mode, if there is a watermark illustration, hide the fallback icon watermark */
+body.finish-solid .watermark-illustration ~ .watermark-icon-fallback {
+  display: none !important;
 }

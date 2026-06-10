@@ -89,7 +89,7 @@ function getTrendConfig(direction) {
     <div
       v-if="illustration"
       :class="[
-        'absolute -right-2 -bottom-2 size-16 sm:size-28 opacity-[0.18] dark:opacity-[0.25] rotate-12 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6',
+        'absolute -right-2 -bottom-2 size-10 sm:size-18 opacity-[0.18] dark:opacity-[0.25] rotate-12 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 watermark-illustration',
         getColorClasses(resolvedColor).color
       ]"
       :style="{
@@ -106,10 +106,10 @@ function getTrendConfig(direction) {
     />
     <!-- Fallback Watermark Icon Background -->
     <component
-      v-else-if="icon"
+      v-if="icon"
       :is="icon"
       :class="[
-        'absolute -right-4 -bottom-4 size-12 sm:size-24 opacity-[0.04] rotate-12 transition-transform duration-300 group-hover:scale-110',
+        'absolute -right-4 -bottom-4 size-12 sm:size-24 opacity-[0.04] rotate-12 transition-transform duration-300 group-hover:scale-110 watermark-icon-fallback',
         getColorClasses(resolvedColor).color
       ]"
     />

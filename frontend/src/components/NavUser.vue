@@ -133,6 +133,13 @@ const setBackgroundStyle = styleName => {
   document.body.classList.remove('bg-animated', 'bg-static_squares', 'bg-glass', 'bg-school', 'bg-solid')
   document.body.classList.add(`bg-${resolvedStyle}`)
   localStorage.setItem('backgroundStyle', resolvedStyle)
+
+  // Auto finish and vector visibility based on theme: solid uses solid finish (with vector illustration), others use glass (no illustration)
+  if (resolvedStyle === 'solid') {
+    setThemeFinish('solid')
+  } else {
+    setThemeFinish('glossy')
+  }
 }
 
 const cycleBackgroundStyle = () => {
@@ -146,7 +153,7 @@ const backgroundNames = {
   animated: 'Animasi Kotak',
   static_squares: 'Kotak Statis',
   glass: 'Apple Glass Image',
-  solid: 'Solid Polos'
+  solid: 'Solid & Vector'
 }
 
 // --- Finish Style Logic (Glossy/Solid) ---
@@ -184,13 +191,9 @@ onMounted(() => {
   // Simpan ulang jika ada konversi dari 'tahoe'
   if (savedThemeStyle === 'tahoe') localStorage.setItem('themeStyle', 'blue')
 
-  // Restore background style
+  // Restore background style (which automatically updates the finish)
   const savedBgStyle = localStorage.getItem('backgroundStyle') || 'animated'
   setBackgroundStyle(savedBgStyle)
-
-  // Restore theme finish
-  const savedFinish = localStorage.getItem('themeFinish') || 'glossy'
-  setThemeFinish(savedFinish)
 })
 </script>
 
@@ -246,7 +249,7 @@ onMounted(() => {
             <DropdownMenuItem @select.prevent="cycleThemeStyle" class="cursor-pointer">
               <Palette class="size-4" />
               <div class="truncate">
-                Ganti Tema:
+                Warna:
                 <span class="font-semibold text-primary ml-1">{{
                   themeNames[activeThemeStyle] || 'Blue'
                 }}</span>
@@ -257,20 +260,9 @@ onMounted(() => {
             <DropdownMenuItem @select.prevent="cycleBackgroundStyle" class="cursor-pointer">
               <Layers class="size-4" />
               <div class="truncate">
-                Latar:
+                Tema:
                 <span class="font-semibold text-primary ml-1">{{
                   backgroundNames[activeBackgroundStyle] || 'Animasi Kotak'
-                }}</span>
-              </div>
-            </DropdownMenuItem>
-
-            <!-- Theme Finish Cycle -->
-            <DropdownMenuItem @select.prevent="cycleThemeFinish" class="cursor-pointer">
-              <Sparkles class="size-4" />
-              <div class="truncate">
-                Finish:
-                <span class="font-semibold text-primary ml-1">{{
-                  finishNames[activeThemeFinish] || 'Glossy (Glass)'
                 }}</span>
               </div>
             </DropdownMenuItem>

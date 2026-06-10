@@ -32,7 +32,7 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.de
     <!-- Background Watermark Illustration (Top-Right) -->
     <div
       v-if="illustration"
-      class="absolute top-[-30px] right-[-35px] size-44 rotate-[-15deg] opacity-[0.15] dark:opacity-[0.22] pointer-events-none select-none bg-primary z-0 transition-transform duration-300 group-hover:scale-105 group-hover:rotate-[-10deg]"
+      class="absolute top-[-15px] right-[-18px] size-30 rotate-[-15deg] opacity-[0.15] dark:opacity-[0.22] pointer-events-none select-none bg-primary z-0 transition-transform duration-300 group-hover:scale-105 group-hover:rotate-[-10deg] watermark-illustration"
       style="
         mask-size: contain;
         -webkit-mask-size: contain;

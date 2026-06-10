@@ -137,7 +137,7 @@ const resolvedRowActions = computed(() =>
     <!-- Background Watermarks -->
     <div
       v-if="illustration"
-      class="absolute top-[-80px] right-[-90px] size-80 rotate-[-15deg] opacity-[0.15] dark:opacity-[0.22] pointer-events-none select-none bg-primary z-0"
+      class="absolute top-[-45px] right-[-50px] size-52 rotate-[-15deg] opacity-[0.15] dark:opacity-[0.22] pointer-events-none select-none bg-primary z-0 watermark-illustration"
       style="
         mask-size: contain;
         -webkit-mask-size: contain;

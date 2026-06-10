@@ -207,7 +207,6 @@ const handleEdit = (id, item) => {
         :filters="filters"
         :actions="actions"
         v-model:filterValues="filterValues"
-        illustration="atom"
         :page="page"
         :per-page="perPage"
         :total="schoolMappings.length"

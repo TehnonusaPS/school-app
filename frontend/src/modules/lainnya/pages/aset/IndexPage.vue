@@ -6,8 +6,8 @@ import { Lock } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import PageHeader from '@/components/page-header/PageHeader.vue'
 
-import AsetStatCards from '../components/AsetStatCards.vue'
-import AsetTable from '../components/AsetTable.vue'
+import AsetStatCards from '../../components/AsetStatCards.vue'
+import AsetTable from '../../components/AsetTable.vue'
 import { useAsetStore } from '@/stores/asetStore'
 import { computed } from 'vue'
 import { toast } from 'vue-sonner'
@@ -22,6 +22,48 @@ function handleDelete(id) {
   store.delete(id)
   toast.success('Aset berhasil dihapus!')
 }
+
+import DataSheet from '@/components/data-sheet/DataSheet.vue'
+
+const isDetailSheetOpen = ref(false)
+const selectedItemForDetail = ref(null)
+
+const handleView = (id) => {
+  const item = asets.value.find(a => a.id === id)
+  if (item) {
+    selectedItemForDetail.value = item
+    isDetailSheetOpen.value = true
+  }
+}
+
+const rawDetailItem = computed(() => {
+  if (!selectedItemForDetail.value) return {}
+  return {
+    name: selectedItemForDetail.value.name,
+    condition: selectedItemForDetail.value.condition
+  }
+})
+
+const detailSections = computed(() => {
+  if (!selectedItemForDetail.value) return []
+  const item = selectedItemForDetail.value
+  return [
+    {
+      id: 'info',
+      title: 'Informasi Aset',
+      fields: [
+        { label: 'Nama Aset', value: item.name },
+        { label: 'Kode', value: item.code },
+        { label: 'Kategori', value: item.category },
+        { label: 'Merk/Tipe', value: item.brand || '-' },
+        { label: 'Gedung', value: item.building || '-' },
+        { label: 'Ruangan', value: item.room || '-' },
+        { label: 'Nilai', value: `Rp ${Number(item.value).toLocaleString('id-ID')}` },
+        { label: 'Kondisi', value: item.condition }
+      ]
+    }
+  ]
+})
 </script>
 
 <template>
@@ -35,7 +77,17 @@ function handleDelete(id) {
     <AsetStatCards />
 
     <!-- Data Table & Filters -->
-    <AsetTable :items="asets" @delete="handleDelete" />
+    <AsetTable :items="asets" @delete="handleDelete" @view="handleView" />
+
+    <!-- Detail Sheet -->
+    <DataSheet
+      v-model:open="isDetailSheetOpen"
+      :item="rawDetailItem"
+      title-key="name"
+      :badge="rawDetailItem.condition"
+      :badge-variant="rawDetailItem.condition === 'Baik' ? 'green' : (rawDetailItem.condition === 'Rusak Ringan' ? 'amber' : 'red')"
+      :sections="detailSections"
+    />
   </div>
   
   <div v-else class="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">

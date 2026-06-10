@@ -28,7 +28,7 @@ export default [
   },
   {
     path: 'lainnya/ruangan',
-    component: () => import('./pages/Ruangan.vue'),
+    component: () => import('./pages/ruangan/IndexPage.vue'),
     meta: {
       title: 'Ruangan',
       parent: 'Lainnya',
@@ -37,7 +37,7 @@ export default [
   },
   {
     path: 'lainnya/ruangan/tambah',
-    component: () => import('./pages/AddRuangan.vue'),
+    component: () => import('./pages/ruangan/CreatePage.vue'),
     meta: {
       title: 'Tambah Ruangan',
       parent: 'Lainnya',
@@ -46,7 +46,7 @@ export default [
   },
   {
     path: 'lainnya/ruangan/edit/:id',
-    component: () => import('./pages/EditRuangan.vue'),
+    component: () => import('./pages/ruangan/EditPage.vue'),
     meta: {
       title: 'Edit Ruangan',
       parent: 'Lainnya',
@@ -55,7 +55,7 @@ export default [
   },
   {
     path: 'lainnya/aset',
-    component: () => import('./pages/Aset.vue'),
+    component: () => import('./pages/aset/IndexPage.vue'),
     meta: {
       title: 'Aset',
       parent: 'Lainnya',
@@ -65,7 +65,7 @@ export default [
   },
   {
     path: 'lainnya/aset/tambah',
-    component: () => import('./pages/AddAset.vue'),
+    component: () => import('./pages/aset/CreatePage.vue'),
     meta: {
       title: 'Tambah Aset',
       parent: 'Lainnya',
@@ -75,7 +75,7 @@ export default [
   },
   {
     path: 'lainnya/aset/edit/:id',
-    component: () => import('./pages/EditAset.vue'),
+    component: () => import('./pages/aset/EditPage.vue'),
     meta: {
       title: 'Edit Aset',
       parent: 'Lainnya',
@@ -85,7 +85,7 @@ export default [
   },
   {
     path: 'lainnya/perpustakaan',
-    component: () => import('./pages/Perpustakaan.vue'),
+    component: () => import('./pages/perpustakaan/IndexPage.vue'),
     meta: {
       title: 'Perpustakaan',
       parent: 'Lainnya',
@@ -95,7 +95,7 @@ export default [
   },
   {
     path: 'lainnya/perpustakaan/tambah',
-    component: () => import('./pages/AddPerpustakaan.vue'),
+    component: () => import('./pages/perpustakaan/CreatePage.vue'),
     meta: {
       title: 'Tambah Buku Perpustakaan',
       parent: 'Lainnya',
@@ -105,7 +105,7 @@ export default [
   },
   {
     path: 'lainnya/perpustakaan/edit/:id',
-    component: () => import('./pages/EditPerpustakaan.vue'),
+    component: () => import('./pages/perpustakaan/EditPage.vue'),
     meta: {
       title: 'Edit Buku',
       parent: 'Lainnya',
@@ -115,7 +115,7 @@ export default [
   },
   {
     path: 'lainnya/konfigurasi-global',
-    component: () => import('./pages/KonfigurasiGlobal.vue'),
+    component: () => import('./pages/konfigurasi-global/IndexPage.vue'),
     meta: {
       title: 'Konfigurasi Sistem Global',
       parent: 'Lainnya',
@@ -125,7 +125,7 @@ export default [
   },
   {
     path: 'lainnya/informasi-perpustakaan',
-    component: () => import('./pages/InformasiPerpustakaanSekolah.vue'),
+    component: () => import('./pages/informasi-perpustakaan/IndexPage.vue'),
     meta: {
       title: 'Informasi Perpustakaan Sekolah',
       parent: 'Lainnya',
@@ -135,7 +135,7 @@ export default [
   },
   {
     path: 'lainnya/informasi-aset',
-    component: () => import('./pages/InformasiAsetSekolah.vue'),
+    component: () => import('./pages/informasi-aset/IndexPage.vue'),
     meta: {
       title: 'Informasi Aset Sekolah',
       parent: 'Lainnya',
@@ -145,7 +145,7 @@ export default [
   },
   {
     path: 'lainnya/informasi-ruangan',
-    component: () => import('./pages/InformasiRuanganSekolah.vue'),
+    component: () => import('./pages/informasi-ruangan/IndexPage.vue'),
     meta: {
       title: 'Informasi Ruangan Sekolah',
       parent: 'Lainnya',

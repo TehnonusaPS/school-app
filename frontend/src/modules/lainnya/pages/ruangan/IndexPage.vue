@@ -6,8 +6,8 @@ import { Lock } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 
 import PageHeader from '@/components/page-header/PageHeader.vue'
-import RuanganStatCards from '../components/RuanganStatCards.vue'
-import RuanganTable from '../components/RuanganTable.vue'
+import RuanganStatCards from '../../components/RuanganStatCards.vue'
+import RuanganTable from '../../components/RuanganTable.vue'
 import { useRuanganStore } from '@/stores/ruanganStore'
 import { computed } from 'vue'
 import { toast } from 'vue-sonner'
@@ -22,6 +22,47 @@ function handleDelete(id) {
   store.delete(id)
   toast.success('Ruangan berhasil dihapus!')
 }
+
+import DataSheet from '@/components/data-sheet/DataSheet.vue'
+
+const isDetailSheetOpen = ref(false)
+const selectedItemForDetail = ref(null)
+
+const handleView = (id) => {
+  const item = rooms.value.find(a => a.id === id)
+  if (item) {
+    selectedItemForDetail.value = item
+    isDetailSheetOpen.value = true
+  }
+}
+
+const rawDetailItem = computed(() => {
+  if (!selectedItemForDetail.value) return {}
+  return {
+    name: selectedItemForDetail.value.name,
+    category: selectedItemForDetail.value.category
+  }
+})
+
+const detailSections = computed(() => {
+  if (!selectedItemForDetail.value) return []
+  const item = selectedItemForDetail.value
+  return [
+    {
+      id: 'info',
+      title: 'Informasi Ruangan',
+      fields: [
+        { label: 'Kode', value: item.code },
+        { label: 'Nama Ruangan', value: item.name },
+        { label: 'Tipe', value: item.category },
+        { label: 'Gedung', value: item.building || '-' },
+        { label: 'Kapasitas', value: `${item.capacity} Orang` },
+        { label: 'Luas', value: `${item.area} m²` },
+        { label: 'Fasilitas', value: item.facilities?.join(', ') || '-' }
+      ]
+    }
+  ]
+})
 </script>
 
 <template>
@@ -35,7 +76,17 @@ function handleDelete(id) {
     <RuanganStatCards />
 
     <!-- Data Table & Filters -->
-    <RuanganTable :items="rooms" @delete="handleDelete" />
+    <RuanganTable :items="rooms" @delete="handleDelete" @view="handleView" />
+
+    <!-- Detail Sheet -->
+    <DataSheet
+      v-model:open="isDetailSheetOpen"
+      :item="rawDetailItem"
+      title-key="name"
+      :badge="rawDetailItem.category"
+      :badge-variant="rawDetailItem.category === 'Ruang Kelas' ? 'blue' : (rawDetailItem.category === 'Laboratorium' ? 'amber' : 'green')"
+      :sections="detailSections"
+    />
   </div>
   
   <div v-else class="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">

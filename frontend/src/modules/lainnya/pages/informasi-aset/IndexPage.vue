@@ -16,8 +16,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Package, MapPin, Calendar, Tag, Info, School } from 'lucide-vue-next'
 
-import AsetStatCards from '../components/AsetStatCards.vue'
-import AsetTable from '../components/AsetTable.vue'
+import AsetStatCards from '../../components/AsetStatCards.vue'
+import AsetTable from '../../components/AsetTable.vue'
 import { useAsetStore } from '@/stores/asetStore'
 import PageHeader from '@/components/page-header/PageHeader.vue'
 

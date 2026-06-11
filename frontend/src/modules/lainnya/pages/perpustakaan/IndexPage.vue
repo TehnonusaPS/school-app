@@ -6,8 +6,8 @@ import { Lock } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 
 import PageHeader from '@/components/page-header/PageHeader.vue'
-import PerpustakaanStatCards from '../components/PerpustakaanStatCards.vue'
-import PerpustakaanTable from '../components/PerpustakaanTable.vue'
+import PerpustakaanStatCards from '../../components/PerpustakaanStatCards.vue'
+import PerpustakaanTable from '../../components/PerpustakaanTable.vue'
 import { usePerpustakaanStore } from '@/stores/perpustakaanStore'
 import { computed } from 'vue'
 import { toast } from 'vue-sonner'
@@ -22,6 +22,49 @@ function handleDelete(id) {
   store.delete(id)
   toast.success('Buku berhasil dihapus!')
 }
+
+import DataSheet from '@/components/data-sheet/DataSheet.vue'
+
+const isDetailSheetOpen = ref(false)
+const selectedItemForDetail = ref(null)
+
+const handleView = (id) => {
+  const item = books.value.find(a => a.id === id)
+  if (item) {
+    selectedItemForDetail.value = item
+    isDetailSheetOpen.value = true
+  }
+}
+
+const rawDetailItem = computed(() => {
+  if (!selectedItemForDetail.value) return {}
+  return {
+    name: selectedItemForDetail.value.name,
+    kategori: selectedItemForDetail.value.kategori
+  }
+})
+
+const detailSections = computed(() => {
+  if (!selectedItemForDetail.value) return []
+  const item = selectedItemForDetail.value
+  return [
+    {
+      id: 'info',
+      title: 'Informasi Buku',
+      fields: [
+        { label: 'Judul Buku', value: item.name },
+        { label: 'ISBN', value: item.isbn || '-' },
+        { label: 'Kategori', value: item.kategori },
+        { label: 'Penulis', value: item.penulis || '-' },
+        { label: 'Penerbit', value: item.penerbit || '-' },
+        { label: 'Tahun Terbit', value: item.tahunTerbit || '-' },
+        { label: 'Jumlah Stok', value: `${item.jumlahStok} Buku` },
+        { label: 'Lokasi Rak', value: item.lokasiRak || '-' },
+        { label: 'Deskripsi', value: item.deskripsi || '-' }
+      ]
+    }
+  ]
+})
 </script>
 
 <template>
@@ -35,7 +78,17 @@ function handleDelete(id) {
     <PerpustakaanStatCards />
 
     <!-- Data Table & Filters -->
-    <PerpustakaanTable :items="books" @delete="handleDelete" />
+    <PerpustakaanTable :items="books" @delete="handleDelete" @view="handleView" />
+
+    <!-- Detail Sheet -->
+    <DataSheet
+      v-model:open="isDetailSheetOpen"
+      :item="rawDetailItem"
+      title-key="name"
+      :badge="rawDetailItem.kategori"
+      :badge-variant="rawDetailItem.kategori === 'Sains' ? 'blue' : (rawDetailItem.kategori === 'TIK' ? 'green' : (rawDetailItem.kategori === 'Bahasa' ? 'amber' : 'red'))"
+      :sections="detailSections"
+    />
   </div>
   
   <div v-else class="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">

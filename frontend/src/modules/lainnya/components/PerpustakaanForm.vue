@@ -143,11 +143,12 @@ function submit() {
                 <SelectValue placeholder="Pilih Kategori" />
               </SelectTrigger>
               <SelectContent class="rounded-xl">
-                <SelectItem value="sains">Sains</SelectItem>
-                <SelectItem value="bahasa">Bahasa</SelectItem>
-                <SelectItem value="sosial">Sosial</SelectItem>
-                <SelectItem value="sejarah">Sejarah</SelectItem>
-                <SelectItem value="fiksi">Fiksi</SelectItem>
+                <SelectItem value="Sains">Sains</SelectItem>
+                <SelectItem value="Bahasa">Bahasa</SelectItem>
+                <SelectItem value="Sosial">Sosial</SelectItem>
+                <SelectItem value="Sejarah">Sejarah</SelectItem>
+                <SelectItem value="Fiksi">Fiksi</SelectItem>
+                <SelectItem value="TIK">TIK</SelectItem>
               </SelectContent>
             </Select>            
           </div>

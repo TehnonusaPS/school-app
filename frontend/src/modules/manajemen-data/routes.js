@@ -28,7 +28,7 @@ export default [
   },
   {
     path: 'manajemen-data/kelas',
-    component: () => import('./pages/Kelas.vue'),
+    component: () => import('./pages/data-kelas/IndexPage.vue'),
     meta: {
       title: 'Data Kelas',
       parent: 'Manajemen Data',

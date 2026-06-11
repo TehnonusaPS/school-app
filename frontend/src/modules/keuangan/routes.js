@@ -90,6 +90,15 @@ export default [
     }
   },
   {
+    path: 'keuangan/kelola-dana-yayasan/tambah',
+    component: () => import('./pages/formTambahPengeluaranYayasan.vue'),
+    meta: {
+      title: 'Input Pengeluaran Yayasan',
+      parent: 'Keuangan',
+      description: 'Catat pengeluaran alokasi dana yayasan baru.'
+    }
+  },
+  {
     path: 'keuangan/tarif-spp',
     component: () => import('./pages/TarifSpp.vue'),
     meta: {

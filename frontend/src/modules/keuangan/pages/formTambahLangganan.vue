@@ -1,6 +1,6 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { toast } from 'vue-sonner'
 import PageHeader from '@/components/page-header/PageHeader.vue'
 import DatePicker from '@/components/date-picker/DatePicker.vue'
-import { getLocalTimeZone, today } from '@internationalized/date'
+import { CalendarDate, getLocalTimeZone, today } from '@internationalized/date'
 import { formatDate } from '@/utils/formatDate'
 import { glassFade } from '@/config/motion'
 import {
@@ -39,6 +39,9 @@ import {
 } from 'lucide-vue-next'
 
 const router = useRouter()
+const route = useRoute()
+
+const isEditMode = computed(() => !!route.query.id)
 
 const activeDate = ref(today(getLocalTimeZone()))
 const dueDate = ref(today(getLocalTimeZone()).add({ years: 1 }))
@@ -54,8 +57,93 @@ const form = ref({
   catatan: ''
 })
 
-// Auto-generate Tenant ID on typing Nama Institusi
+// Default data fallback for initialization (aligned with Subscription.vue)
+const defaultSubscriptions = [
+  {
+    id: 'T-10024',
+    name: 'SMA Terpadu Harapan',
+    paket: 'enterprise',
+    status: 'aktif',
+    tglAktivasi: '12 Jan 2024',
+    tglAktivasiRaw: { year: 2024, month: 1, day: 12 },
+    jatuhTempo: '12 Jan 2025',
+    jatuhTempoRaw: { year: 2025, month: 1, day: 12 },
+    nilaiKontrak: 120000000,
+    avatar: 'ST',
+    emailAdmin: 'admin.sma@terpaduharapan.sch.id',
+    telepon: '081234567890',
+    catatan: 'Pembayaran tahunan via transfer bank.'
+  },
+  {
+    id: 'T-09882',
+    name: 'Madrasah Pusat Al-Ikhlas',
+    paket: 'professional',
+    status: 'overdue',
+    tglAktivasi: '05 Okt 2023',
+    tglAktivasiRaw: { year: 2023, month: 10, day: 5 },
+    jatuhTempo: '05 Okt 2024',
+    jatuhTempoRaw: { year: 2024, month: 10, day: 5 },
+    nilaiKontrak: 45000000,
+    avatar: 'MP',
+    emailAdmin: 'info@alikhlas.sch.id',
+    telepon: '082134567890',
+    catatan: 'Hubungi bendahara sebelum jatuh tempo.'
+  },
+  {
+    id: 'T-10255',
+    name: 'SMP IT Al-Azhar',
+    paket: 'basic',
+    status: 'trialing',
+    tglAktivasi: '20 Jun 2024',
+    tglAktivasiRaw: { year: 2024, month: 6, day: 20 },
+    jatuhTempo: '04 Jul 2024',
+    jatuhTempoRaw: { year: 2024, month: 7, day: 4 },
+    nilaiKontrak: 0,
+    avatar: 'AZ',
+    emailAdmin: 'admin@alazhar.sch.id',
+    telepon: '083134567890',
+    catatan: 'Uji coba gratis 14 hari.'
+  }
+]
+
+// Load data if in edit mode
+onMounted(() => {
+  if (isEditMode.value) {
+    const stored = localStorage.getItem('cerdasbangsa_subscriptions')
+    const list = stored ? JSON.parse(stored) : [...defaultSubscriptions]
+    const existing = list.find(sub => sub.id === route.query.id)
+    if (existing) {
+      form.value = {
+        namaInstitusi: existing.name,
+        tenantId: existing.id,
+        paket: existing.paket,
+        status: existing.status,
+        nilaiKontrak: existing.nilaiKontrak,
+        emailAdmin: existing.emailAdmin || '',
+        telepon: existing.telepon || '',
+        catatan: existing.catatan || ''
+      }
+      if (existing.tglAktivasiRaw) {
+        activeDate.value = new CalendarDate(
+          existing.tglAktivasiRaw.year,
+          existing.tglAktivasiRaw.month,
+          existing.tglAktivasiRaw.day
+        )
+      }
+      if (existing.jatuhTempoRaw) {
+        dueDate.value = new CalendarDate(
+          existing.jatuhTempoRaw.year,
+          existing.jatuhTempoRaw.month,
+          existing.jatuhTempoRaw.day
+        )
+      }
+    }
+  }
+})
+
+// Auto-generate Tenant ID on typing Nama Institusi (only when not in edit mode)
 watch(() => form.value.namaInstitusi, (newVal) => {
+  if (isEditMode.value) return
   if (newVal) {
     const clean = newVal
       .toLowerCase()
@@ -209,7 +297,45 @@ const handleSubmit = () => {
   isSubmitting.value = true
   
   setTimeout(() => {
-    toast.success('Pendaftaran Langganan Baru Berhasil!')
+    const stored = localStorage.getItem('cerdasbangsa_subscriptions')
+    let list = stored ? JSON.parse(stored) : [...defaultSubscriptions]
+
+    const subData = {
+      id: form.value.tenantId,
+      name: form.value.namaInstitusi,
+      paket: form.value.paket,
+      status: form.value.status,
+      nilaiKontrak: form.value.nilaiKontrak,
+      tglAktivasi: formatDate(activeDate.value),
+      tglAktivasiRaw: {
+        year: activeDate.value.year,
+        month: activeDate.value.month,
+        day: activeDate.value.day
+      },
+      jatuhTempo: formatDate(dueDate.value),
+      jatuhTempoRaw: {
+        year: dueDate.value.year,
+        month: dueDate.value.month,
+        day: dueDate.value.day
+      },
+      avatar: form.value.namaInstitusi.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'N',
+      emailAdmin: form.value.emailAdmin,
+      telepon: form.value.telepon,
+      catatan: form.value.catatan
+    }
+
+    if (isEditMode.value) {
+      const idx = list.findIndex(sub => sub.id === route.query.id)
+      if (idx !== -1) {
+        list[idx] = subData
+      }
+    } else {
+      list.push(subData)
+    }
+
+    localStorage.setItem('cerdasbangsa_subscriptions', JSON.stringify(list))
+
+    toast.success(isEditMode.value ? 'Detail Langganan Berhasil Diperbarui!' : 'Pendaftaran Langganan Baru Berhasil!')
     isSubmitting.value = false
     router.push('/keuangan/subscription')
   }, 1000)
@@ -225,8 +351,8 @@ const handleSubmit = () => {
   >
     <!-- Header Component (Consistent with overall project theme) -->
     <PageHeader
-      title="Tambah Langganan Baru"
-      description="Lengkapi formulir di bawah ini untuk mendaftarkan institusi/tenant baru ke dalam lisensi CerdasBangsa."
+      :title="isEditMode ? 'Edit Detail Langganan' : 'Tambah Langganan Baru'"
+      :description="isEditMode ? 'Ubah informasi detail langganan institusi di bawah ini.' : 'Lengkapi formulir di bawah ini untuk mendaftarkan institusi/tenant baru ke dalam lisensi CerdasBangsa.'"
       back
       @back="router.push('/keuangan/subscription')"
     />
@@ -433,7 +559,7 @@ const handleSubmit = () => {
                 Menyimpan...
               </span>
               <span v-else class="flex items-center gap-2">
-                Simpan Langganan
+                {{ isEditMode ? 'Simpan Perubahan' : 'Simpan Langganan' }}
                 <CheckCircle2 class="w-4.5 h-4.5" />
               </span>
             </Button>

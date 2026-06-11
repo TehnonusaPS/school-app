@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { computed } from 'vue'
 import { Badge } from '@/components/ui/badge'
 import { GraduationCap } from 'lucide-vue-next'

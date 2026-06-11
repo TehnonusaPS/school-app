@@ -886,8 +886,8 @@ body.bg-static_squares .background-squares-static {
   inset: 0;
   z-index: -1;
   background-color: var(--primary);
-  -webkit-mask-image: url('/images/bg-school.png');
-  mask-image: url('/images/bg-school.png');
+  -webkit-mask-image: url('./images/bg-school.png');
+  mask-image: url('./images/bg-school.png');
   -webkit-mask-size: cover;
   mask-size: cover;
   -webkit-mask-position: center;
@@ -918,8 +918,8 @@ body.bg-static_squares .background-squares-static {
   
   /* Colorized with primary color */
   background-color: var(--primary) !important;
-  -webkit-mask-image: url('/images/bg-school-sidebar.png') !important;
-  mask-image: url('/images/bg-school-sidebar.png') !important;
+  -webkit-mask-image: url('./images/bg-school-sidebar.png') !important;
+  mask-image: url('./images/bg-school-sidebar.png') !important;
   -webkit-mask-size: cover !important;
   mask-size: cover !important;
   -webkit-mask-position: center 50px !important;

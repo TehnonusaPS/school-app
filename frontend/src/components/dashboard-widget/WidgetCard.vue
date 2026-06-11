@@ -20,6 +20,11 @@ import { computed } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 const auth = useAuthStore()
 const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.delay)
+
+const illustrationUrl = computed(() => {
+  if (!props.illustration) return ''
+  return new URL(`../../assets/images/illustrations/${props.illustration}.png`, import.meta.url).href
+})
 </script>
 
 <template>
@@ -42,8 +47,8 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.de
         -webkit-mask-position: center;
       "
       :style="{
-        maskImage: `url(/images/illustrations/${illustration}.png)`,
-        webkitMaskImage: `url(/images/illustrations/${illustration}.png)`
+        maskImage: `url(${illustrationUrl})`,
+        webkitMaskImage: `url(${illustrationUrl})`
       }"
     />
 

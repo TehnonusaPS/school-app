@@ -16,6 +16,11 @@ import DatePickerDemo from './date-picker/DatePickerDemo.vue'
 import BarChartCardDemo from './chart-card/BarChartCardDemo.vue'
 import LineChartCardDemo from './chart-card/LineChartCardDemo.vue'
 import DonutChartCardDemo from './chart-card/DonutChartCardDemo.vue'
+import FormComponentsDemo from './forms/FormComponentsDemo.vue'
+import AppCardDemo from './app-card/AppCardDemo.vue'
+import ActivityCardDemo from './activity-card/ActivityCardDemo.vue'
+import GradeDetailCardDemo from './grade-detail-card/GradeDetailCardDemo.vue'
+import ScoreCircleCardDemo from './score-circle-card/ScoreCircleCardDemo.vue'
 
 const props = defineProps({
   searchQuery: { type: String, default: '' }
@@ -132,6 +137,61 @@ const match = keywords => {
     >
       <ShowcaseItem label="DatePicker Default (Month and Year Selection)">
         <DatePickerDemo />
+      </ShowcaseItem>
+    </ShowcaseSection>
+
+    <!-- FORM COMPONENTS -->
+    <ShowcaseSection
+      v-show="match('form input select date textarea upload section')"
+      title="Form Components"
+      description="Koleksi komponen input formulir kustom terintegrasi dengan gaya visual yang konsisten dan dukungan validasi error."
+    >
+      <ShowcaseItem label="Interactive Registration Form (Demo All Form Components)">
+        <FormComponentsDemo />
+      </ShowcaseItem>
+    </ShowcaseSection>
+
+    <!-- APP CARD -->
+    <ShowcaseSection
+      v-show="match('app card panel container slot')"
+      title="App Card"
+      description="Komponen pembungkus panel (card) serbaguna yang mendukung slot judul, deskripsi, aksi kanan atas, konten, dan footer."
+    >
+      <ShowcaseItem label="AppCard Demos (Varian Default & Custom Layout)">
+        <AppCardDemo />
+      </ShowcaseItem>
+    </ShowcaseSection>
+
+    <!-- ACTIVITY CARD -->
+    <ShowcaseSection
+      v-show="match('activity card aktivitas timeline riwayat')"
+      title="Activity Card"
+      description="Kartu aktivitas modular dengan dua mode utama (Date Mode dan Icon Mode) serta variasi warna latar belakang leading element."
+    >
+      <ShowcaseItem label="ActivityCard Demos (Date Mode & Icon Mode)">
+        <ActivityCardDemo />
+      </ShowcaseItem>
+    </ShowcaseSection>
+
+    <!-- GRADE DETAIL CARD -->
+    <ShowcaseSection
+      v-show="match('grade detail card nilai rapor progress')"
+      title="Grade Detail Card"
+      description="Kartu rincian nilai mata pelajaran terstruktur dengan progress bar per kategori penilaian dan detail sub-item."
+    >
+      <ShowcaseItem label="GradeDetailCard Demos (Matematika & Fisika)">
+        <GradeDetailCardDemo />
+      </ShowcaseItem>
+    </ShowcaseSection>
+
+    <!-- SCORE CIRCLE CARD -->
+    <ShowcaseSection
+      v-show="match('score circle progress donut ring')"
+      title="Score Circle Card"
+      description="Kartu skor melingkar (circular progress) dengan dukungan variasi warna progress ring dan presentase nilai reaktif."
+    >
+      <ShowcaseItem label="ScoreCircleCard Demos (Variasi Warna & Evaluasi)">
+        <ScoreCircleCardDemo />
       </ShowcaseItem>
     </ShowcaseSection>
   </div>

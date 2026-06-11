@@ -363,7 +363,7 @@ const confirmDelete = () => {
 
             <!-- Hapus -->
             <button
-              class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-rose-500 hover:text-rose-600 transition-colors"
+              class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-foreground transition-colors"
               title="Hapus"
               @click="openDeleteConfirm(item)"
             >

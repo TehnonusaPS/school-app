@@ -100,6 +100,7 @@ const data = {
       icon: LayoutDashboard
       // roles: ['superadmin', 'admin_yayasan', 'kepala_sekolah'] <-- Contoh penggunaan
     },
+    
     {
       title: 'Manajemen Data',
       url: '/manajemen-data',
@@ -156,7 +157,7 @@ const data = {
         { 
           title: 'Tahun Ajaran', 
           url: '/manajemen-data/tahun-ajaran',
-          roles: ['admin_sekolah']
+          roles: ['admin_sekolah', 'kepala_sekolah']
         },
         { title: 'Tahun Ajaran', url: '/manajemen-data/tahun-ajaran', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'wali_kelas'] }
       ]

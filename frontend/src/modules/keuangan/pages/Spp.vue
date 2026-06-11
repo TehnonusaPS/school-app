@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useRoute } from 'vue-router'
 import { useRouter } from 'vue-router'
@@ -7,11 +7,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { NativeSelect } from '@/components/ui/native-select'
-import { ClipboardList, CreditCard, CheckCircle2, ArrowRight, CalendarDays, Download, Printer, Search, Wallet, Banknote, Settings, FileText, Mail, RefreshCw, ShieldCheck, BookOpen, HelpCircle } from 'lucide-vue-next'
+import { ClipboardList, CreditCard, CheckCircle2, ArrowRight, CalendarDays, Download, Printer, Search, Wallet, Banknote, Settings, FileText, Mail, RefreshCw, ShieldCheck, BookOpen, HelpCircle, AlertTriangle } from 'lucide-vue-next'
 import CetakKwitansi from './CetakKwitansi.vue'
 import StatCard from '@/components/stat-card/StatCard.vue'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
 
 const auth = useAuthStore()
 const route = useRoute()
@@ -40,6 +41,28 @@ const gotoPengeluaranKecil = () => {
 
 const gotoPenerimaPembayaran = () => {
   router.push('/keuangan/penerimaan-pembayaran')
+}
+
+// State untuk Dashboard Orang Tua
+const paySpp = ref(true)
+const payLab = ref(true)
+const payFieldTrip = ref(true)
+const selectedPaymentMethod = ref('bca')
+
+const totalPayment = computed(() => {
+  let total = 0
+  if (paySpp.value) total += 1200000
+  if (payLab.value) total += 150000
+  if (payFieldTrip.value) total += 100000
+  return total
+})
+
+const formatRupiah = (value) => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0
+  }).format(value)
 }
 </script>
 
@@ -1102,222 +1125,355 @@ const gotoPenerimaPembayaran = () => {
     </Card>
 
     <div v-else-if="isOrangTua" class="space-y-6">
-      <!-- Page Title -->
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl font-bold">Financial Dashboard</h1>
-          <p class="text-sm text-muted-foreground mt-1">Manage tuition fees and educational expenses for Lucas Henderson.</p>
+      <!-- Info Ringkas Siswa & Periode -->
+      <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-muted/40 border border-border/50">
+        <div class="flex items-center gap-3">
+          <div class="bg-primary/10 text-primary rounded-full p-2 flex items-center justify-center shrink-0">
+            <CheckCircle2 class="size-5" />
+          </div>
+          <div>
+            <p class="text-xs text-muted-foreground font-medium">Siswa</p>
+            <p class="text-sm font-bold text-foreground">Lucas Henderson</p>
+          </div>
         </div>
-        <div class="text-right">
-          <p class="text-xs text-muted-foreground">Billing Period</p>
-          <p class="text-lg font-semibold">October 2023</p>
+        <div class="flex items-center gap-3">
+          <div class="bg-secondary text-secondary-foreground rounded-full p-2 flex items-center justify-center shrink-0">
+            <CalendarDays class="size-5" />
+          </div>
+          <div>
+            <p class="text-xs text-muted-foreground font-medium">Periode Tagihan</p>
+            <p class="text-sm font-bold text-foreground">Oktober 2023</p>
+          </div>
         </div>
       </div>
 
-      <!-- Bill Summary + Pay Now Section -->
+      <!-- Ringkasan Tagihan + Pembayaran -->
       <div class="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        <!-- Bill Summary -->
+        <!-- Ringkasan Tagihan -->
         <Card class="p-6">
           <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-bold">Bill Summary</h2>
-            <button class="text-muted-foreground hover:text-primary">📋</button>
+            <h2 class="text-xl font-bold text-foreground">Ringkasan Tagihan</h2>
+            <Button variant="ghost" size="icon" class="text-muted-foreground hover:text-primary">
+              <ClipboardList class="size-5" />
+            </Button>
           </div>
 
-          <!-- Total Outstanding Balance -->
+          <!-- Total Sisa Tagihan -->
           <div class="mb-6 pb-6 border-b">
-            <p class="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-2">Total Outstanding Balance</p>
-            <h3 class="text-4xl font-bold">$1,450.00</h3>
+            <p class="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">Total Sisa Tagihan</p>
+            <h3 class="text-4xl font-extrabold text-foreground">Rp 1.450.000</h3>
           </div>
 
-          <!-- Bill Items -->
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <span class="text-lg">🎓</span>
-                <div>
-                  <p class="font-medium text-sm">SPP (Monthly Tuition)</p>
-                </div>
-              </div>
-              <span class="font-semibold">$1,200.00</span>
-            </div>
+          <!-- Tabel Ringkasan Tagihan -->
+          <div class="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead class="w-[60px] text-center font-semibold text-xs uppercase text-muted-foreground">No</TableHead>
+                  <TableHead class="font-semibold text-xs uppercase text-muted-foreground">Deskripsi Tagihan</TableHead>
+                  <TableHead class="font-semibold text-xs uppercase text-muted-foreground text-center">Keterangan</TableHead>
+                  <TableHead class="font-semibold text-xs uppercase text-muted-foreground text-right">Jumlah</TableHead>
+                  <TableHead class="w-[80px] text-center font-semibold text-xs uppercase text-muted-foreground">Pilih</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <!-- SPP Bulanan -->
+                <TableRow class="hover:bg-accent/30 cursor-pointer" @click="paySpp = !paySpp">
+                  <TableCell class="text-center font-medium">1</TableCell>
+                  <TableCell>
+                    <div class="flex items-center gap-2">
+                      <span class="text-lg">🎓</span>
+                      <span class="font-medium text-foreground">SPP Bulanan</span>
+                    </div>
+                  </TableCell>
+                  <TableCell class="text-center">
+                    <Badge variant="destructive" class="bg-destructive/10 text-destructive border-destructive/20 font-medium">Wajib</Badge>
+                  </TableCell>
+                  <TableCell class="text-right font-semibold text-foreground">Rp 1.200.000</TableCell>
+                  <TableCell>
+                    <div class="flex items-center justify-center">
+                      <Checkbox id="summary-spp" :checked="paySpp" @click.prevent />
+                    </div>
+                  </TableCell>
+                </TableRow>
 
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <span class="text-lg">🔬</span>
-                <div>
-                  <p class="font-medium text-sm">Lab Fees (Science Dept)</p>
-                </div>
-              </div>
-              <span class="font-semibold">$150.00</span>
-            </div>
+                <!-- Biaya Praktikum & Laboratorium -->
+                <TableRow class="hover:bg-accent/30 cursor-pointer" @click="payLab = !payLab">
+                  <TableCell class="text-center font-medium">2</TableCell>
+                  <TableCell>
+                    <div class="flex items-center gap-2">
+                      <span class="text-lg">🔬</span>
+                      <span class="font-medium text-foreground">Biaya Praktikum & Laboratorium</span>
+                    </div>
+                  </TableCell>
+                  <TableCell class="text-center">
+                    <Badge variant="destructive" class="bg-destructive/10 text-destructive border-destructive/20 font-medium">Wajib</Badge>
+                  </TableCell>
+                  <TableCell class="text-right font-semibold text-foreground">Rp 150.000</TableCell>
+                  <TableCell>
+                    <div class="flex items-center justify-center">
+                      <Checkbox id="summary-lab" :checked="payLab" @click.prevent />
+                    </div>
+                  </TableCell>
+                </TableRow>
 
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <span class="text-lg">🚌</span>
-                <div>
-                  <p class="font-medium text-sm">Field Trip - Museum</p>
-                </div>
-              </div>
-              <span class="font-semibold">$100.00</span>
-            </div>
+                <!-- Kunjungan Lapangan (Field Trip) - Museum -->
+                <TableRow class="hover:bg-accent/30 cursor-pointer" @click="payFieldTrip = !payFieldTrip">
+                  <TableCell class="text-center font-medium">3</TableCell>
+                  <TableCell>
+                    <div class="flex items-center gap-2">
+                      <span class="text-lg">🚌</span>
+                      <span class="font-medium text-foreground">Kunjungan Lapangan (Field Trip) - Museum</span>
+                    </div>
+                  </TableCell>
+                  <TableCell class="text-center">
+                    <Badge variant="outline" class="bg-secondary text-secondary-foreground font-medium border-secondary/20">Add-on</Badge>
+                  </TableCell>
+                  <TableCell class="text-right font-semibold text-foreground">Rp 100.000</TableCell>
+                  <TableCell>
+                    <div class="flex items-center justify-center">
+                      <Checkbox id="summary-trip" :checked="payFieldTrip" @click.prevent />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
           </div>
 
-          <!-- Payment Alert -->
-          <div class="mt-6 rounded-lg bg-destructive/10 border border-destructive/20 p-4 flex gap-3">
-            <span class="text-lg">⚠️</span>
-            <p class="text-sm font-medium text-destructive">Payment due in 4 days (October 15, 2023)</p>
+          <!-- Peringatan Pembayaran -->
+          <div class="mt-6 rounded-lg bg-destructive/10 border border-destructive/20 p-4 flex gap-3 items-center">
+            <AlertTriangle class="size-5 text-destructive shrink-0" />
+            <p class="text-sm font-medium text-destructive">Batas pembayaran dalam 4 hari lagi (15 Oktober 2023)</p>
           </div>
         </Card>
 
-        <!-- Pay Now Section -->
+        <!-- Bayar Sekarang -->
         <Card class="p-6">
-          <h2 class="text-xl font-bold mb-6">Pay Now</h2>
+          <h2 class="text-xl font-bold mb-6 text-foreground">Bayar Sekarang</h2>
 
-          <!-- Checkboxes -->
-          <div class="space-y-3 mb-6 pb-6 border-b">
-            <div class="flex items-center gap-3">
-              <input type="checkbox" id="spp" checked class="w-5 h-5 rounded border-border" />
-              <label for="spp" class="flex-1 flex items-center justify-between cursor-pointer">
-                <span class="font-medium">SPP Tuition</span>
-                <span class="font-semibold">$1,200.00</span>
-              </label>
+          <!-- Pilihan Item yang Akan Dibayar (Daftar Dinamis) -->
+          <div v-if="paySpp || payLab || payFieldTrip" class="space-y-3 mb-6 pb-6 border-b">
+            <div v-if="paySpp" class="flex items-center justify-between bg-muted/40 px-3 py-2.5 rounded-lg border border-border/50 transition-all duration-200">
+              <div class="flex items-center gap-2">
+                <span class="text-base">🎓</span>
+                <span class="font-medium text-sm text-foreground">Biaya SPP Sekolah</span>
+              </div>
+              <span class="font-semibold text-sm text-foreground">Rp 1.200.000</span>
             </div>
 
-            <div class="flex items-center gap-3">
-              <input type="checkbox" id="lab" checked class="w-5 h-5 rounded border-border" />
-              <label for="lab" class="flex-1 flex items-center justify-between cursor-pointer">
-                <span class="font-medium">Lab & Activities</span>
-                <span class="font-semibold">$250.00</span>
-              </label>
+            <div v-if="payLab" class="flex items-center justify-between bg-muted/40 px-3 py-2.5 rounded-lg border border-border/50 transition-all duration-200">
+              <div class="flex items-center gap-2">
+                <span class="text-base">🔬</span>
+                <span class="font-medium text-sm text-foreground">Biaya Lab & Praktikum</span>
+              </div>
+              <span class="font-semibold text-sm text-foreground">Rp 150.000</span>
+            </div>
+
+            <div v-if="payFieldTrip" class="flex items-center justify-between bg-muted/40 px-3 py-2.5 rounded-lg border border-border/50 transition-all duration-200">
+              <div class="flex items-center gap-2">
+                <span class="text-base">🚌</span>
+                <span class="font-medium text-sm text-foreground">Kunjungan Lapangan</span>
+              </div>
+              <span class="font-semibold text-sm text-foreground">Rp 100.000</span>
             </div>
           </div>
 
-          <!-- Payment Method Selection -->
+          <!-- Pilihan Metode Pembayaran -->
           <div class="mb-6">
-            <p class="text-sm font-semibold mb-3">Select Payment Method</p>
-            <p class="text-xs text-muted-foreground mb-3">Virtual Account (Bank Transfer)</p>
+            <p class="text-sm font-semibold mb-3 text-foreground">Pilih Metode Pembayaran</p>
+            <p class="text-xs text-muted-foreground mb-3 font-medium">Virtual Account (Transfer Bank)</p>
             
             <div class="grid grid-cols-2 gap-2 mb-4">
-              <button class="border-2 border-border rounded-lg py-2 text-sm font-medium hover:border-primary hover:bg-primary/5 transition">
+              <Button
+                variant="outline"
+                type="button"
+                :class="[
+                  'border-2 py-2 text-sm font-medium transition-all duration-200 justify-center h-10',
+                  selectedPaymentMethod === 'bca'
+                    ? 'border-primary bg-primary/10 text-primary hover:bg-primary/15'
+                    : 'border-border text-muted-foreground hover:border-primary/50 hover:bg-accent'
+                ]"
+                @click="selectedPaymentMethod = 'bca'"
+              >
                 BCA
-              </button>
-              <button class="border-2 border-border rounded-lg py-2 text-sm font-medium hover:border-primary hover:bg-primary/5 transition">
+              </Button>
+              <Button
+                variant="outline"
+                type="button"
+                :class="[
+                  'border-2 py-2 text-sm font-medium transition-all duration-200 justify-center h-10',
+                  selectedPaymentMethod === 'mandiri'
+                    ? 'border-primary bg-primary/10 text-primary hover:bg-primary/15'
+                    : 'border-border text-muted-foreground hover:border-primary/50 hover:bg-accent'
+                ]"
+                @click="selectedPaymentMethod = 'mandiri'"
+              >
                 Mandiri
-              </button>
+              </Button>
             </div>
 
-            <p class="text-xs text-muted-foreground mb-3">E-Wallets</p>
+            <p class="text-xs text-muted-foreground mb-3 font-medium">Dompet Digital (E-Wallet)</p>
             <div class="grid grid-cols-3 gap-2 mb-4">
-              <button class="border-2 border-border rounded-lg py-2 text-sm font-medium hover:border-primary hover:bg-primary/5 transition">
+              <Button
+                variant="outline"
+                type="button"
+                :class="[
+                  'border-2 py-2 text-xs font-medium transition-all duration-200 justify-center h-10',
+                  selectedPaymentMethod === 'ovo'
+                    ? 'border-primary bg-primary/10 text-primary hover:bg-primary/15'
+                    : 'border-border text-muted-foreground hover:border-primary/50 hover:bg-accent'
+                ]"
+                @click="selectedPaymentMethod = 'ovo'"
+              >
                 OVO
-              </button>
-              <button class="border-2 border-border rounded-lg py-2 text-sm font-medium hover:border-primary hover:bg-primary/5 transition">
+              </Button>
+              <Button
+                variant="outline"
+                type="button"
+                :class="[
+                  'border-2 py-2 text-xs font-medium transition-all duration-200 justify-center h-10',
+                  selectedPaymentMethod === 'gopay'
+                    ? 'border-primary bg-primary/10 text-primary hover:bg-primary/15'
+                    : 'border-border text-muted-foreground hover:border-primary/50 hover:bg-accent'
+                ]"
+                @click="selectedPaymentMethod = 'gopay'"
+              >
                 GoPay
-              </button>
-              <button class="border-2 border-border rounded-lg py-2 text-sm font-medium hover:border-primary hover:bg-primary/5 transition">
+              </Button>
+              <Button
+                variant="outline"
+                type="button"
+                :class="[
+                  'border-2 py-2 text-xs font-medium transition-all duration-200 justify-center h-10',
+                  selectedPaymentMethod === 'dana'
+                    ? 'border-primary bg-primary/10 text-primary hover:bg-primary/15'
+                    : 'border-border text-muted-foreground hover:border-primary/50 hover:bg-accent'
+                ]"
+                @click="selectedPaymentMethod = 'dana'"
+              >
                 Dana
-              </button>
+              </Button>
             </div>
 
-            <button class="w-full border-2 border-border rounded-lg py-3 text-sm font-medium flex items-center justify-between px-4 hover:border-primary hover:bg-primary/5 transition">
+            <Button
+              variant="outline"
+              type="button"
+              :class="[
+                'w-full border-2 py-3 text-sm font-medium flex items-center justify-between px-4 transition-all duration-200 h-12',
+                selectedPaymentMethod === 'card'
+                  ? 'border-primary bg-primary/10 text-primary hover:bg-primary/15'
+                  : 'border-border text-muted-foreground hover:border-primary/50 hover:bg-accent'
+              ]"
+              @click="selectedPaymentMethod = 'card'"
+            >
               <div class="flex items-center gap-2">
-                <span>💳</span>
-                <span>Credit / Debit Card</span>
+                <CreditCard class="size-4" />
+                <span>Kartu Kredit / Debit</span>
               </div>
-              <span>›</span>
-            </button>
+              <span class="text-lg">›</span>
+            </Button>
           </div>
 
-          <!-- Complete Payment Button -->
-          <Button class="w-full bg-primary text-primary-foreground hover:bg-primary/90 py-6 font-semibold text-base">
-            Complete Payment ($1,450.00)
+          <!-- Tombol Bayar -->
+          <Button 
+            class="w-full bg-primary text-primary-foreground hover:bg-primary/90 py-6 font-bold text-base transition-all duration-200 shadow-md"
+            :disabled="totalPayment === 0"
+          >
+            <CreditCard class="size-5 mr-2" />
+            Bayar Sekarang ({{ formatRupiah(totalPayment) }})
           </Button>
         </Card>
       </div>
 
-      <!-- Transaction History Section -->
+      <!-- Riwayat Transaksi -->
       <Card class="p-6">
         <div class="flex items-center justify-between mb-6">
-          <h2 class="text-xl font-bold">Transaction History</h2>
-          <button class="text-xs font-medium text-muted-foreground hover:text-primary flex items-center gap-2">
-            ⊕ Filter History
-          </button>
+          <h2 class="text-xl font-bold text-foreground">Riwayat Transaksi</h2>
+          <Button variant="outline" size="sm" class="text-xs font-semibold text-muted-foreground hover:text-primary flex items-center gap-2">
+            <Settings class="size-3.5" /> Filter Riwayat
+          </Button>
         </div>
 
-        <!-- Table -->
+        <!-- Tabel Riwayat -->
         <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead>
-              <tr class="border-b bg-muted/50">
-                <th class="px-4 py-3 text-left text-xs uppercase tracking-[0.2em] text-muted-foreground font-semibold">Date</th>
-                <th class="px-4 py-3 text-left text-xs uppercase tracking-[0.2em] text-muted-foreground font-semibold">Reference No.</th>
-                <th class="px-4 py-3 text-left text-xs uppercase tracking-[0.2em] text-muted-foreground font-semibold">Description</th>
-                <th class="px-4 py-3 text-left text-xs uppercase tracking-[0.2em] text-muted-foreground font-semibold">Amount</th>
-                <th class="px-4 py-3 text-left text-xs uppercase tracking-[0.2em] text-muted-foreground font-semibold">Status</th>
-                <th class="px-4 py-3 text-center text-xs uppercase tracking-[0.2em] text-muted-foreground font-semibold">Receipt</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y">
-              <!-- Transaction 1 -->
-              <tr class="hover:bg-accent">
-                <td class="px-4 py-4">Sep 10, 2023</td>
-                <td class="px-4 py-4 font-medium">INV-882910</td>
-                <td class="px-4 py-4">August Tuition + Library Fee</td>
-                <td class="px-4 py-4 font-semibold">$1,245.00</td>
-                <td class="px-4 py-4">
-                  <span class="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">PAID</span>
-                </td>
-                <td class="px-4 py-4 text-center">
-                  <button class="text-muted-foreground hover:text-primary">👤</button>
-                </td>
-              </tr>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead class="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Tanggal</TableHead>
+                <TableHead class="font-semibold text-xs uppercase tracking-wider text-muted-foreground">No. Referensi</TableHead>
+                <TableHead class="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Deskripsi</TableHead>
+                <TableHead class="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Jumlah</TableHead>
+                <TableHead class="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Status</TableHead>
+                <TableHead class="font-semibold text-xs uppercase tracking-wider text-muted-foreground text-center">Kuitansi</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <!-- Transaksi 1 -->
+              <TableRow class="hover:bg-accent/50">
+                <TableCell class="font-medium text-foreground">10 Sep 2023</TableCell>
+                <TableCell class="font-semibold text-foreground">INV-882910</TableCell>
+                <TableCell class="text-muted-foreground">SPP Agustus + Biaya Perpustakaan</TableCell>
+                <TableCell class="font-bold text-foreground">Rp 1.245.000</TableCell>
+                <TableCell>
+                  <Badge class="bg-primary/10 text-primary border-primary/20 hover:bg-primary/10 font-bold">LUNAS</Badge>
+                </TableCell>
+                <TableCell class="text-center">
+                  <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-primary">
+                    <Download class="size-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
 
-              <!-- Transaction 2 -->
-              <tr class="hover:bg-accent">
-                <td class="px-4 py-4">Aug 12, 2023</td>
-                <td class="px-4 py-4 font-medium">INV-871104</td>
-                <td class="px-4 py-4">Uniform & Books Package</td>
-                <td class="px-4 py-4 font-semibold">$320.00</td>
-                <td class="px-4 py-4">
-                  <span class="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">PAID</span>
-                </td>
-                <td class="px-4 py-4 text-center">
-                  <button class="text-muted-foreground hover:text-primary">👤</button>
-                </td>
-              </tr>
+              <!-- Transaksi 2 -->
+              <TableRow class="hover:bg-accent/50">
+                <TableCell class="font-medium text-foreground">12 Agt 2023</TableCell>
+                <TableCell class="font-semibold text-foreground">INV-871104</TableCell>
+                <TableCell class="text-muted-foreground">Paket Seragam & Buku Sekolah</TableCell>
+                <TableCell class="font-bold text-foreground">Rp 320.000</TableCell>
+                <TableCell>
+                  <Badge class="bg-primary/10 text-primary border-primary/20 hover:bg-primary/10 font-bold">LUNAS</Badge>
+                </TableCell>
+                <TableCell class="text-center">
+                  <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-primary">
+                    <Download class="size-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
 
-              <!-- Transaction 3 -->
-              <tr class="hover:bg-accent">
-                <td class="px-4 py-4">Jul 15, 2023</td>
-                <td class="px-4 py-4 font-medium">INV-860022</td>
-                <td class="px-4 py-4">Registration Fee (Annual)</td>
-                <td class="px-4 py-4 font-semibold">$500.00</td>
-                <td class="px-4 py-4">
-                  <span class="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">PAID</span>
-                </td>
-                <td class="px-4 py-4 text-center">
-                  <button class="text-muted-foreground hover:text-primary">👤</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+              <!-- Transaksi 3 -->
+              <TableRow class="hover:bg-accent/50">
+                <TableCell class="font-medium text-foreground">15 Jul 2023</TableCell>
+                <TableCell class="font-semibold text-foreground">INV-860022</TableCell>
+                <TableCell class="text-muted-foreground">Biaya Pendaftaran (Tahunan)</TableCell>
+                <TableCell class="font-bold text-foreground">Rp 500.000</TableCell>
+                <TableCell>
+                  <Badge class="bg-primary/10 text-primary border-primary/20 hover:bg-primary/10 font-bold">LUNAS</Badge>
+                </TableCell>
+                <TableCell class="text-center">
+                  <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-primary">
+                    <Download class="size-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
         </div>
 
-        <!-- View All History -->
+        <!-- Lihat Semua Riwayat -->
         <div class="mt-6 text-center">
-          <button class="text-sm font-medium text-foreground hover:text-primary">
-            View All History
-          </button>
+          <Button variant="link" class="text-sm font-semibold text-primary hover:underline">
+            Lihat Semua Riwayat
+          </Button>
         </div>
       </Card>
 
-      <!-- Security Notice -->
+      <!-- Informasi Keamanan -->
       <div class="flex items-center gap-3 text-xs text-muted-foreground px-4 py-3 bg-muted/50 rounded-lg">
-        <span>🔒</span>
-        <span>All transactions are encrypted and processed securely by EduFinance Institutional Ledger.</span>
+        <ShieldCheck class="size-4 text-primary shrink-0" />
+        <span>Semua transaksi dienkripsi dan diproses secara aman oleh Sistem Pembayaran Sekolah.</span>
         <div class="flex gap-4 ml-auto">
-          <button class="text-primary hover:underline">Privacy Policy</button>
-          <button class="text-primary hover:underline">Terms of Service</button>
+          <button class="text-primary hover:underline">Kebijakan Privasi</button>
+          <button class="text-primary hover:underline">Syarat & Ketentuan</button>
         </div>
       </div>
     </div>

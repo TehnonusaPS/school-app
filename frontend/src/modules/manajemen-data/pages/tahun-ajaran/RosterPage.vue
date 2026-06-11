@@ -129,7 +129,7 @@ const filteredStudents = computed(() => {
       />
       <StatCard
         label="KELAS"
-        :value="'Kelas ' + selectedKelas"
+        :value="selectedKelas"
         :icon="GraduationCap"
         illustration="school_bell"
         variant="emerald"

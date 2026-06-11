@@ -59,9 +59,7 @@ function generateStudents() {
         const isL = i % 2 === 0
         const namePool = isL ? namesL : namesP
         const baseName = namePool[i % namePool.length]
-        // Make names slightly different depending on year/class to be realistic
-        const suffix = yr.split('/')[0].slice(2) + cls.replace(' ', '')
-        const nama = `${baseName} (${suffix}-${i + 1})`
+        const nama = baseName
         
         const nis = String(10000 + globalId)
         const nisn = '00' + String(12345600 + globalId)

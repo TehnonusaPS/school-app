@@ -26,7 +26,7 @@ export const useAuthStore = defineStore('auth', {
       } else if (normalizedEmail === 'guru@mail.com' && password === '123456') {
         user = { name: 'Guru Pengajar', role: 'guru', roleLabel: 'GURU', email: 'guru@mail.com', unitId: 'S0001' }
       } else if (normalizedEmail === 'walikelas@mail.com' && password === '123456') {
-        user = { name: 'Wali Kelas', role: 'wali_kelas', roleLabel: 'WALI KELAS', email: 'walikelas@mail.com', unitId: 'S0001' }
+        user = { name: 'Wali Kelas', role: 'wali_kelas', roleLabel: 'WALI KELAS', email: 'walikelas@mail.com', unitId: 'S0001', kelasId: 'K0001' }
       } else if (normalizedEmail === 'siswa@mail.com' && password === '123456') {
         user = { id: 1, name: 'Ahmad Wibowo', role: 'siswa', roleLabel: 'SISWA', email: 'siswa@mail.com', kelas: '2 D' }
       } else if (normalizedEmail === 'orangtua@mail.com' && password === '123456') {

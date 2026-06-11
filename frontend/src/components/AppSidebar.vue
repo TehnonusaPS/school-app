@@ -109,7 +109,7 @@ const data = {
         { 
           title: 'Siswa', 
           url: '/manajemen-data/siswa',
-          roles: ['admin_sekolah', 'tata_usaha']
+          roles: ['admin_sekolah', 'tata_usaha', 'kepala_sekolah', 'wali_kelas']
         },
         { 
           title: 'Yayasan', 
@@ -129,7 +129,7 @@ const data = {
         { 
           title: 'Guru dan Staff', 
           url: '/manajemen-data/guru-staff',
-          roles: ['admin_yayasan', 'admin_sekolah', 'kepala_sekolah', 'tata_usaha']
+          roles: ['admin_yayasan', 'admin_sekolah', 'kepala_sekolah']
         },
         { 
           title: 'Monitoring Kelas', 

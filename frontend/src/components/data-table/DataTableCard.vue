@@ -116,6 +116,11 @@ const defaultRowActions = computed(() => {
 const resolvedRowActions = computed(() =>
   props.rowActions?.length ? props.rowActions : defaultRowActions.value
 )
+
+const illustrationUrl = computed(() => {
+  if (!props.illustration) return ''
+  return new URL(`../../assets/images/illustrations/${props.illustration}.png`, import.meta.url).href
+})
 </script>
 
 <template>
@@ -147,8 +152,8 @@ const resolvedRowActions = computed(() =>
         -webkit-mask-position: center;
       "
       :style="{
-        maskImage: `url(/images/illustrations/${illustration}.png)`,
-        webkitMaskImage: `url(/images/illustrations/${illustration}.png)`
+        maskImage: `url(${illustrationUrl})`,
+        webkitMaskImage: `url(${illustrationUrl})`
       }"
     />
 

@@ -13,6 +13,9 @@ import DataTableCardDemo from './data-table/DataTableCardDemo.vue'
 import DataSheetDemo from './data-sheet/DataSheetDemo.vue'
 import FormSheetDemo from './data-sheet/FormSheetDemo.vue'
 import DatePickerDemo from './date-picker/DatePickerDemo.vue'
+import BarChartCardDemo from './chart-card/BarChartCardDemo.vue'
+import LineChartCardDemo from './chart-card/LineChartCardDemo.vue'
+import DonutChartCardDemo from './chart-card/DonutChartCardDemo.vue'
 
 const props = defineProps({
   searchQuery: { type: String, default: '' }
@@ -73,6 +76,25 @@ const match = keywords => {
 
       <ShowcaseItem label="Varian Group (Beberapa Card dalam Grid)">
         <StatCardGroupDemo />
+      </ShowcaseItem>
+    </ShowcaseSection>
+
+    <!-- CHART CARD -->
+    <ShowcaseSection
+      v-show="match('chart card grafis diagram batang garis donat')"
+      title="Chart Card"
+      description="Kartu visualisasi data responsif berbasis Unovis dengan gaya Glassmorphism yang konsisten dengan Stat Card."
+    >
+      <ShowcaseItem label="Bar Chart Card (Grafik Batang Grouped)">
+        <BarChartCardDemo />
+      </ShowcaseItem>
+
+      <ShowcaseItem label="Line Chart Card (Grafik Garis Multi-series)">
+        <LineChartCardDemo />
+      </ShowcaseItem>
+
+      <ShowcaseItem label="Donut Chart Card (Diagram Donat dengan Label Pusat)">
+        <DonutChartCardDemo />
       </ShowcaseItem>
     </ShowcaseSection>
 

@@ -1,7 +1,7 @@
 <script setup>
-import PlaceholderPage from '@/components/PlaceholderPage.vue'
+import IndexPage from './tahun-ajaran/IndexPage.vue'
 </script>
 
 <template>
-  <PlaceholderPage />
+  <IndexPage />
 </template>

@@ -35,6 +35,24 @@ export default [
       description: 'Kelola pembagian dan struktur kelas.'
     }
   },
+  {
+    path: 'manajemen-data/kelas/detail',
+    component: () => import('./pages/data-kelas/DetailPage.vue'),
+    meta: {
+      title: 'Detail Kelas',
+      parent: 'Data Kelas',
+      description: 'Detail anggota kelas dan wali kelas'
+    }
+  },
+  {
+    path: 'manajemen-data/kelas/detail/manage',
+    component: () => import('./pages/data-kelas/ManagePage.vue'),
+    meta: {
+      title: 'Kelola',
+      parent: 'Detail Kelas',
+      description: 'Kelola anggota kelas dan wali kelas'
+    }
+  },
   // MATA PELAJARAN
   {
     path: 'manajemen-data/mata-pelajaran',
@@ -170,13 +188,4 @@ export default [
       description: 'Daftar data jadwal pelajaran kelas dan guru pengajar.'
     }
   },
-  {
-    path: 'manajemen-data/manajemen-kelas',
-    component: () => import('./pages/ManajemenKelas.vue'),
-    meta: {
-      title: 'Manajemen Kelas',
-      parent: 'Manajemen Data',
-      description: 'Kelola alokasi siswa, wali kelas, dan sarana kelas.'
-    }
-  }
 ]

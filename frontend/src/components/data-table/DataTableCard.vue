@@ -51,10 +51,22 @@ const props = defineProps({
   illustration: {
     type: String,
     default: 'textbook'
+  },
+  selectable: {
+  type: Boolean,
+  default: false
+  },
+  selectedRows: {
+    type: Array,
+    default: () => []
+  },
+  rowDisabled: {
+  type: Function,
+  default: null
   }
 })
 
-const emit = defineEmits(['update:page', 'update:filterValues', 'update:perPage'])
+const emit = defineEmits(['update:page', 'update:filterValues', 'update:perPage', 'update:selectedRows'])
 
 const localFilterValues = computed({
   get: () => props.filterValues,
@@ -172,6 +184,10 @@ const illustrationUrl = computed(() => {
       :row-number-offset="(from ?? 1) - 1"
       :min-height="minHeight"
       :per-page="perPage"
+      :selectable="selectable"
+      :selectedRows="selectedRows"
+      @update:selectedRows="emit('update:selectedRows', $event)"
+      :rowDisabled="rowDisabled"
     >
       <!-- Forward all dynamic cell slots -->
       <template

@@ -124,8 +124,7 @@ const handleEdit = () => {
     :page="currentPage"
     @update:page="currentPage = $event"
     @view="handleViewDetail"
-    v-bind="!isKepalaSekolah ? { onEdit: handleEdit } : {}"
-    @delete="deleteItem"
+    v-bind="!isKepalaSekolah ? { onEdit: handleEdit, onDelete: deleteItem } : {}"
   />
 
   </div>

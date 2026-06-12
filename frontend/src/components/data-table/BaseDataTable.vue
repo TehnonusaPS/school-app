@@ -19,6 +19,7 @@ import {
   EmptyTitle
 } from '@/components/ui/empty'
 import { tableRowFade } from '@/config/motion'
+import Checkbox from '@/components/ui/checkbox/Checkbox.vue'
 
 const props = defineProps({
   columns: {
@@ -48,6 +49,18 @@ const props = defineProps({
   perPage: {
     type: Number,
     default: 5
+  },
+  selectable: {
+    type: Boolean,
+    default: false
+  },
+  selectedRows: {
+    type: Array,
+    default: () => []
+  },
+  rowDisabled: {
+    type: Function,
+    default: null
   }
 })
 
@@ -128,6 +141,78 @@ const emptyRowsCount = computed(() => {
   if (!props.perPage || props.items.length === 0) return 0
   return Math.max(0, props.perPage - props.items.length)
 })
+
+// ── Checkbox / Combobox ───────────────────────────────────
+
+const emit = defineEmits([
+  'update:selectedRows'
+])
+
+const isSelected = item => {
+  return props.selectedRows.some(
+    row => row.id === item.id
+  )
+}
+
+const toggleRow = item => {
+  if (isDisabled(item)) return
+
+  const exists = isSelected(item)
+
+  if (exists) {
+    emit(
+      'update:selectedRows',
+      props.selectedRows.filter(
+        row => row.id !== item.id
+      )
+    )
+  } else {
+    emit(
+      'update:selectedRows',
+      [
+        ...props.selectedRows,
+        item
+      ]
+    )
+  }
+}
+
+const isDisabled = item => {
+  return props.rowDisabled?.(item) ?? false
+}
+
+const selectableItems = computed(() => {
+  return props.items.filter(
+    item => !(props.rowDisabled?.(item))
+  )
+})
+
+const allSelected = computed(() => {
+  if (!selectableItems.value.length) return false
+
+  return selectableItems.value.every(
+    item =>
+      props.selectedRows.some(
+        row => row.id === item.id
+      )
+  )
+})
+
+const toggleAll = checked => {
+  if (checked) {
+    emit(
+      'update:selectedRows',
+      [...selectableItems.value]
+    )
+  } else {
+    emit(
+      'update:selectedRows',
+      []
+    )
+  }
+}
+
+
 </script>
 
 <template>
@@ -135,9 +220,18 @@ const emptyRowsCount = computed(() => {
   <Table>
     <TableHeader class="bg-muted/50">
       <TableRow>
+        <TableHead
+          v-if="selectable"
+          class="w-12 text-center"
+        >
+          <Checkbox
+            :model-value="allSelected"
+            @update:model-value="toggleAll"
+          />
+        </TableHead>
         <!-- Kolom Nomor Urut -->
         <TableHead
-          v-if="showRowNumber"
+          v-if="showRowNumber && !selectable"
           class="font-semibold text-xs uppercase text-muted-foreground w-12 text-center"
         >
           No.
@@ -168,9 +262,20 @@ const emptyRowsCount = computed(() => {
           }
         }"
       >
+        <!-- Sel Checkbox -->
+        <TableCell
+          v-if="selectable"
+          class="w-12 text-center"
+        >
+          <Checkbox
+            :disabled="isDisabled(item)"
+            :model-value="isSelected(item)"
+            @update:model-value="() => toggleRow(item)"
+          />
+        </TableCell>
         <!-- Sel Nomor Urut -->
         <TableCell
-          v-if="showRowNumber"
+          v-if="showRowNumber && !selectable"
           class="w-12 text-center text-sm text-muted-foreground tabular-nums"
         >
           {{ rowNumberOffset + rowIndex + 1 }}
@@ -248,7 +353,7 @@ const emptyRowsCount = computed(() => {
       <!-- Empty State / No Data Found -->
       <TableRow v-if="items.length === 0" class="border-none hover:bg-transparent!">
         <TableCell
-          :colspan="columns.length + (showRowNumber ? 1 : 0)"
+        :colspan="columns.length + (showRowNumber ? 1 : 0) +(selectable ? 1 : 0)"
           class="p-0 border-none select-none pointer-events-none"
         >
           <div
@@ -276,6 +381,11 @@ const emptyRowsCount = computed(() => {
         :key="`empty-${i}`"
         class="h-[53px] hover:bg-transparent! border-b border-transparent pointer-events-none"
       >
+        <TableCell
+          v-if="selectable"
+        >
+          &nbsp;
+        </TableCell>
         <!-- Sel Nomor Urut Kosong -->
         <TableCell
           v-if="showRowNumber"

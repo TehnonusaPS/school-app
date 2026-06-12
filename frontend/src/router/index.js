@@ -14,6 +14,7 @@ import komunikasiRoutes from '../modules/komunikasi/routes'
 import laporanRoutes from '../modules/laporan/routes'
 import lainnyaRoutes from '../modules/lainnya/routes'
 import devRoutes from '../modules/dev/routes'
+import akunSettingRoutes from '../modules/akun-setting/routes'
 
 const routes = [
   // Landing page
@@ -87,7 +88,8 @@ const routes = [
       ...komunikasiRoutes,
       ...laporanRoutes,
       ...lainnyaRoutes,
-      ...devRoutes
+      ...devRoutes,
+      ...akunSettingRoutes
     ]
   }
 ]

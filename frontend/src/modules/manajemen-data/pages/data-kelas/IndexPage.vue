@@ -11,6 +11,14 @@ import KelasStatCards from './components/KelasStatCards.vue'
 import KelasTable from './components/KelasTable.vue'
 import KelasForm from './components/KelasForm.vue'
 import { mockKelas } from './data/mock-kelas'
+import router from '@/router/index.js'
+
+import {
+  Eye,
+  Pencil,
+  Trash2,
+  Users
+} from 'lucide-vue-next'
 
 const kelasList = ref(mockKelas)
 
@@ -140,6 +148,29 @@ function handleDelete(id) {
   toast.success('Data kelas berhasil dihapus!')
 }
 
+const rowActions = [
+  {
+    label: 'Detail',
+    icon: Eye,
+    click: item => handleView(item.id)
+  },
+  {
+    label: 'Edit',
+    icon: Pencil,
+    click: item => handleEdit(item)
+  },
+  {
+    label: 'Kelola',
+    icon: Users,
+    click: item => router.push(`/manajemen-data/kelas/detail`)
+  },
+  {
+    label: 'Hapus',
+    icon: Trash2,
+    click: item => handleDelete(item.id)
+  }
+]
+
 </script>
 
 <template>
@@ -156,9 +187,7 @@ function handleDelete(id) {
     <KelasTable 
       :items="kelasList" 
       @create="handleCreate"
-      @edit="handleEdit"
-      @view="handleView"
-      @delete="handleDelete" 
+      :rowActions="rowActions"
     />
 
     <!-- Detail Sheet -->

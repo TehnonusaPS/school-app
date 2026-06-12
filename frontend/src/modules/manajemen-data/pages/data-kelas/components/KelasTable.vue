@@ -13,7 +13,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['delete', 'view', 'edit', 'create'])
+const emit = defineEmits(['create'])
 
 // DataTable state
 const filterValues = ref({})
@@ -127,19 +127,6 @@ const statusLabel = (status) => {
   return status
 }
 
-// Handlers for Row Actions
-const handleEdit = (item) => {
-  emit('edit', item)
-}
-
-const handleDelete = (id) => {
-  emit('delete', id)
-}
-
-const handleView = (id) => {
-  emit('view', id)
-}
-
 </script>
 
 <template>
@@ -156,9 +143,6 @@ const handleView = (id) => {
     :to="Math.min(page * perPage, filteredItems.length)"
     @update:page="page = $event"
     @update:perPage="perPage = $event"
-    :on-edit="handleEdit"
-    :on-delete="handleDelete"
-    :on-view="handleView"
   >
     <!-- Custom Render untuk Kolom Wali Kelas -->
     <template #cell-homeroom_teacher="{ item }">

@@ -147,12 +147,10 @@ const data = {
           url: '/manajemen-data/jadwal',
           roles: ['kepala_sekolah']
         },
-        { 
-          title: 'Manajemen Kelas', 
-          url: '/manajemen-data/manajemen-kelas',
+        { title: 'Kelas', 
+          url: '/manajemen-data/kelas', 
           roles: ['admin_sekolah']
         },
-        { title: 'Data Kelas', url: '/manajemen-data/kelas', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'kepala_sekolah', 'wali_kelas'] },
         { title: 'Mata Pelajaran', url: '/manajemen-data/mata-pelajaran', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'wali_kelas'] },
         { 
           title: 'Tahun Ajaran', 

@@ -181,6 +181,8 @@ const notifications = [
               <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
+                name="nav-search"
+                autocomplete="off"
                 placeholder="Cari sesuatu..."
                 class="pl-9 h-9 w-full bg-muted/50 focus-visible:bg-background transition-colors"
               />

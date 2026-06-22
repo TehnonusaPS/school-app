@@ -76,7 +76,7 @@ class DatabaseSeeder extends Seeder
         $academicYear = AcademicYear::create([
             'school_id'  => $school->id,
             'name'       => '2024/2025',
-            'semester'   => 'even',
+            'semester'   => 'Genap',
             'start_date' => '2025-01-06',
             'end_date'   => '2025-06-30',
             'is_active'  => true,

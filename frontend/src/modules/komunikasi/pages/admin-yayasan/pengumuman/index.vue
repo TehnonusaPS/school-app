@@ -124,6 +124,7 @@ function deleteAnnouncement() {
         label="Total Pengumuman"
         :value="announcements.length"
         :icon="Megaphone"
+        illustration="paper_plane"
         variant="primary"
       />
     </div>

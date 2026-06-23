@@ -27,6 +27,7 @@ const asPesan = (item: unknown) => item as PesanItem
       :description="`${kelas.length} kelas yang Anda ampu`"
       :icon="Users"
       :delay="delay"
+      illustration="abc_board"
     >
       <div class="grid grid-cols-2 gap-3">
         <div
@@ -52,6 +53,7 @@ const asPesan = (item: unknown) => item as PesanItem
       listClass="h-[300px] px-4"
       :items="pesan"
       :delay="delay + 150"
+      illustration="paper_plane"
     >
       <template #item="{ item }">
         <!-- Avatar inisial -->

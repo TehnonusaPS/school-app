@@ -24,6 +24,7 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.de
     cardClass="flex flex-col justify-between"
     contentClass="flex flex-col gap-4 flex-1 justify-between"
     :delay="delay"
+    illustration="bag"
   >
     <template #header-action>
       <Badge variant="destructive" class="text-xs">{{ sppData.status }}</Badge>

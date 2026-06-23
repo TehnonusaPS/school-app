@@ -37,6 +37,7 @@ const nilaiColor = (v: number) =>
     contentClass="space-y-4"
     footerClass="border-t pt-4"
     :delay="delay"
+    illustration="star"
   >
     <template #header-action>
       <Select v-model="semester">

@@ -13,12 +13,18 @@ const props = defineProps({
   footerClass: { type: String, default: '' },
   cardClass: { type: String, default: '' },
   delay: { type: Number, default: 0 },
+  illustration: { type: String, default: '' },
 })
 
 import { computed } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 const auth = useAuthStore()
 const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.delay)
+
+const illustrationUrl = computed(() => {
+  if (!props.illustration) return ''
+  return new URL(`../../assets/images/illustrations/${props.illustration}.png`, import.meta.url).href
+})
 </script>
 
 <template>
@@ -27,6 +33,25 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.de
     :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: computedDelay } }"
     class="flex flex-col relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-white/40 group glass-ui"
     :class="cardClass">
+    
+    <!-- Background Watermark Illustration (Top-Right) -->
+    <div
+      v-if="illustration"
+      class="absolute top-[-15px] right-[-18px] size-30 rotate-[-15deg] opacity-[0.15] dark:opacity-[0.22] pointer-events-none select-none bg-primary z-0 transition-transform duration-300 group-hover:scale-105 group-hover:rotate-[-10deg] watermark-illustration"
+      style="
+        mask-size: contain;
+        -webkit-mask-size: contain;
+        mask-repeat: no-repeat;
+        -webkit-mask-repeat: no-repeat;
+        mask-position: center;
+        -webkit-mask-position: center;
+      "
+      :style="{
+        maskImage: `url(${illustrationUrl})`,
+        webkitMaskImage: `url(${illustrationUrl})`
+      }"
+    />
+
     <CardHeader class="pb-2 relative z-10">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">

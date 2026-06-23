@@ -47,10 +47,26 @@ const props = defineProps({
   //   string   → nama field, misal 'nama' atau 'username'
   //   function → (item) => string, misal item => `${item.nama} (${item.nisn})`
   //   default  → auto-detect field: nama, name, username, title, label
-  deleteLabel: [String, Function]
+  deleteLabel: [String, Function],
+  illustration: {
+    type: String,
+    default: 'textbook'
+  },
+  selectable: {
+  type: Boolean,
+  default: false
+  },
+  selectedRows: {
+    type: Array,
+    default: () => []
+  },
+  rowDisabled: {
+  type: Function,
+  default: null
+  }
 })
 
-const emit = defineEmits(['update:page', 'update:filterValues', 'update:perPage'])
+const emit = defineEmits(['update:page', 'update:filterValues', 'update:perPage', 'update:selectedRows'])
 
 const localFilterValues = computed({
   get: () => props.filterValues,
@@ -101,7 +117,8 @@ const cancelDelete = () => {
  */
 const defaultRowActions = computed(() => {
   const actions = []
-  if (props.onView) actions.push({ label: 'Detail', icon: Eye, click: item => props.onView(item.id, item) })
+  if (props.onView)
+    actions.push({ label: 'Detail', icon: Eye, click: item => props.onView(item.id, item) })
   if (props.onEdit) actions.push({ label: 'Edit', icon: Pencil, click: props.onEdit })
   if (props.onDelete) actions.push({ label: 'Hapus', icon: Trash2, click: requestDelete })
   return actions
@@ -111,12 +128,17 @@ const defaultRowActions = computed(() => {
 const resolvedRowActions = computed(() =>
   props.rowActions?.length ? props.rowActions : defaultRowActions.value
 )
+
+const illustrationUrl = computed(() => {
+  if (!props.illustration) return ''
+  return new URL(`../../assets/images/illustrations/${props.illustration}.png`, import.meta.url).href
+})
 </script>
 
 <template>
   <Card
     v-motion
-    class="w-full min-w-0"
+    class="w-full min-w-0 relative overflow-hidden"
     :initial="{ opacity: 0, y: 20 }"
     :visible-once="{
       opacity: 1,
@@ -129,19 +151,43 @@ const resolvedRowActions = computed(() =>
       }
     }"
   >
+    <!-- Background Watermarks -->
+    <div
+      v-if="illustration"
+      class="absolute top-[-45px] right-[-50px] size-52 rotate-[-15deg] opacity-[0.15] dark:opacity-[0.22] pointer-events-none select-none bg-primary z-0 watermark-illustration"
+      style="
+        mask-size: contain;
+        -webkit-mask-size: contain;
+        mask-repeat: no-repeat;
+        -webkit-mask-repeat: no-repeat;
+        mask-position: center;
+        -webkit-mask-position: center;
+      "
+      :style="{
+        maskImage: `url(${illustrationUrl})`,
+        webkitMaskImage: `url(${illustrationUrl})`
+      }"
+    />
+
     <DataTableToolbar
+      class="relative z-10"
       :filters="filters"
       :actions="actions"
       v-model:filterValues="localFilterValues"
     />
 
     <BaseDataTable
+      class="relative z-10"
       :columns="columns"
       :items="items"
       :row-actions="resolvedRowActions"
       :row-number-offset="(from ?? 1) - 1"
       :min-height="minHeight"
       :per-page="perPage"
+      :selectable="selectable"
+      :selectedRows="selectedRows"
+      @update:selectedRows="emit('update:selectedRows', $event)"
+      :rowDisabled="rowDisabled"
     >
       <!-- Forward all dynamic cell slots -->
       <template
@@ -156,6 +202,7 @@ const resolvedRowActions = computed(() =>
     </BaseDataTable>
 
     <DataTablePagination
+      class="relative z-10"
       :from="from"
       :to="to"
       :total="total"
@@ -193,6 +240,5 @@ const resolvedRowActions = computed(() =>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-
   </Card>
 </template>

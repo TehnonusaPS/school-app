@@ -110,6 +110,7 @@ const customTableActions = computed(() => [
     :filters="filters"
     :actions="customTableActions"
     v-model:filterValues="filterValues"
+    illustration="paper_sheet"
     v-model:perPage="perPage"
     :from="from"
     :to="to"

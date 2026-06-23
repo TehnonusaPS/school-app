@@ -11,7 +11,7 @@ const chars = computed(() => {
   return String(props.value).split('').map(char => {
     // Check if it's a digit (0-9)
     if (char.trim() === '' || isNaN(Number(char))) {
-      return { isDigit: false, value: char }
+      return { isDigit: false, value: char === ' ' ? '\u00A0' : char }
     }
     
     // Generate a column of random digits to spin through

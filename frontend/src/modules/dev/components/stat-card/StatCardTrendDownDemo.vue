@@ -12,6 +12,7 @@ import { Users } from 'lucide-vue-next'
     :trend="statCardDemosData.pendaftaran.trend"
     :trendDirection="statCardDemosData.pendaftaran.trendDirection"
     :icon="Users"
+    illustration="star"
     color="amber"
     variant="down"
   />

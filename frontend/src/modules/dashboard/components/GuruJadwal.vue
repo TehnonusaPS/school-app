@@ -22,6 +22,7 @@ const today = new Date().toLocaleDateString('id-ID', {
     cardClass="lg:col-span-3"
     contentClass="space-y-2 pb-4"
     :delay="delay"
+    illustration="school_bell"
   >
     <template #header-action>
       <Badge variant="outline" class="text-xs font-semibold text-primary">

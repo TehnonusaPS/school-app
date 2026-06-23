@@ -55,9 +55,9 @@ const filters = computed(() => {
     type: 'select',
     placeholder: 'Pilih Tipe Ruangan',
     options: [
-      { label: 'Ruang Kelas', value: 'kelas' },
-      { label: 'Laboratorium', value: 'lab' },
-      { label: 'Ruang Fasilitas', value: 'fasilitas' }
+      { label: 'Ruang Kelas', value: 'Ruang Kelas' },
+      { label: 'Laboratorium', value: 'Laboratorium' },
+      { label: 'Ruang Fasilitas', value: 'Ruang Fasilitas' }
     ]
   })
 
@@ -146,11 +146,11 @@ const paginatedItems = computed(() => {
 
 const typeBadgeClass = (type) => {
   switch (type?.toLowerCase()) {
-    case 'kelas':
+    case 'ruang kelas':
       return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shadow-xs'
-    case 'lab':
+    case 'laboratorium':
       return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-xs'
-    case 'fasilitas':
+    case 'ruang fasilitas':
       return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs'
     default:
       return 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/20 shadow-xs'
@@ -159,12 +159,7 @@ const typeBadgeClass = (type) => {
 
 const formatType = (type) => {
   if (!type) return '-'
-  const map = {
-    'kelas': 'RUANG KELAS',
-    'lab': 'LABORATORIUM',
-    'fasilitas': 'RUANG FASILITAS'
-  }
-  return map[type.toLowerCase()] || type.toUpperCase()
+  return type.toUpperCase()
 }
 
 const formatFacilities = (facilities) => {
@@ -181,6 +176,7 @@ const formatFacilities = (facilities) => {
     :items="paginatedItems"
     :filters="filters"
     :actions="actions"
+    illustration="abc_board"
     v-model:filterValues="filterValues"
     :page="page"
     :per-page="perPage"
@@ -191,7 +187,7 @@ const formatFacilities = (facilities) => {
     @update:perPage="perPage = $event"
     :on-edit="!readonly ? (item) => router.push(`/lainnya/ruangan/edit/${item.id}`) : undefined"
     :on-delete="!readonly ? (id) => emit('delete', id) : undefined"
-    :on-view="readonly ? (id) => emit('view', id) : undefined"
+    :on-view="(id) => emit('view', id)"
   >
     <template #cell-category="{ item }">
       <Badge :class="typeBadgeClass(item.category)" class="rounded-full px-2.5 py-0.5 font-bold uppercase tracking-wider text-[9px]">

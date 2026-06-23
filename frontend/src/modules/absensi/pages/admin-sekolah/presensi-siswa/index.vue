@@ -15,19 +15,31 @@ import {
   ShieldCheck,
   LogIn,
   LogOut,
+  Maximize2,
+  Minimize2,
+  Lock,
 } from 'lucide-vue-next'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { getStudents, getLogs, postScan } from '@/services/api/absensi'
 import { glassSlide, glassFade } from '@/config/motion'
+import { useAuthStore } from '@/stores/authStore'
 
 const router = useRouter()
+const auth = useAuthStore()
 
 // ─── State ──────────────────────────────────────────────
 const scanType = ref('Otomatis') // 'Otomatis' | 'Masuk' | 'Keluar'
 const absensiData = ref([])
 const scanResults = ref([])
 const cooldowns = ref({}) // Format: { [studentId]: timestamp }
+
+// ─── Fullscreen State ────────────────────────────────────
+const isFullscreen = ref(false)
+const isPasswordGuardOpen = ref(false)
+const passwordInput = ref('')
+const passwordError = ref('')
+const passwordShake = ref(false)
 
 // ─── Clock State ─────────────────────────────────────────
 const currentTime = ref('')
@@ -87,11 +99,13 @@ function getInitials(nama) {
 async function startCamera() {
   cameraStatus.value = 'loading'
   cameraError.value = ''
+  
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
       audio: false,
     })
+    
     mediaStream.value = stream
     cameraStatus.value = 'active'
     await nextTick()
@@ -99,7 +113,9 @@ async function startCamera() {
       videoRef.value.srcObject = stream
       videoRef.value.play()
     }
+
     startFaceScanSimulation()
+
   } catch (err) {
     mediaStream.value = null
     cameraStatus.value = 'error'
@@ -230,6 +246,61 @@ function executeSuccessfulScan(siswaId, source) {
     })
 }
 
+// ─── Fullscreen Functions ────────────────────────────────
+function enterFullscreen() {
+  document.documentElement.requestFullscreen().catch(() => {})
+}
+
+function onFullscreenChange() {
+  const isNowFullscreen = !!document.fullscreenElement
+  if (!isNowFullscreen && isFullscreen.value) {
+    // User baru saja keluar dari fullscreen (ESC / F11 / browser control)
+    isPasswordGuardOpen.value = true
+    passwordInput.value = ''
+    passwordError.value = ''
+  }
+  isFullscreen.value = isNowFullscreen
+}
+
+function submitPasswordGuard() {
+  // Password sama dengan yang didefinisikan di authStore
+  const correctPassword = '123456'
+  if (passwordInput.value === correctPassword) {
+    isPasswordGuardOpen.value = false
+    passwordInput.value = ''
+    passwordError.value = ''
+    // Jika halaman masih dalam fullscreen (misal trigger dari F12),
+    // keluar dari fullscreen setelah password terverifikasi
+    if (isFullscreen.value && document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {})
+      // Reset flag supaya onFullscreenChange tidak membuka modal lagi
+      isFullscreen.value = false
+    }
+  } else {
+    passwordError.value = 'Password salah. Coba lagi.'
+    passwordShake.value = true
+    passwordInput.value = ''
+    setTimeout(() => (passwordShake.value = false), 600)
+  }
+}
+
+function goBackToFullscreen() {
+  isPasswordGuardOpen.value = false
+  passwordInput.value = ''
+  passwordError.value = ''
+  enterFullscreen()
+}
+
+// Tangkap F12 — tampilkan password guard
+function onKeyDown(e) {
+  if (e.key === 'F12') {
+    e.preventDefault()
+    isPasswordGuardOpen.value = true
+    passwordInput.value = ''
+    passwordError.value = ''
+  }
+}
+
 // ─── Lifecycle ──────────────────────────────────────────
 onMounted(() => {
   loadData()
@@ -259,6 +330,10 @@ onMounted(() => {
   }
 
   logPollInterval = setInterval(fetchLogsOnly, 5000)
+
+  // Daftarkan listener fullscreen & keyboard guard
+  document.addEventListener('fullscreenchange', onFullscreenChange)
+  document.addEventListener('keydown', onKeyDown)
 })
 
 onUnmounted(() => {
@@ -266,6 +341,8 @@ onUnmounted(() => {
   if (clockInterval) clearInterval(clockInterval)
   if (logPollInterval) clearInterval(logPollInterval)
   if (scanTimeout) clearTimeout(scanTimeout)
+  document.removeEventListener('fullscreenchange', onFullscreenChange)
+  document.removeEventListener('keydown', onKeyDown)
 })
 
 const filteredStudents = computed(() => absensiData.value)
@@ -275,20 +352,75 @@ const filteredStudents = computed(() => absensiData.value)
   <div class="kiosk-root">
     <!-- ══ TOP HEADER BAR ══ -->
     <header class="kiosk-header">
-      <button class="back-btn" @click="router.push('/absensi/siswa')">
+      <button v-if="!isFullscreen" class="back-btn" @click="router.push('/absensi/siswa')">
         <ArrowLeft class="size-4" />
         Kembali
       </button>
+      <div v-else class="back-btn-placeholder" />
       <div class="header-center">
         <h1 class="header-title">Absensi & Presensi</h1>
         <p class="header-sub">Sistem Presensi</p>
       </div>
-      <div class="header-status">
-        <span class="status-pulse" />
-        <span class="status-label">Sistem Aktif</span>
-        <ShieldCheck class="size-4" style="color: var(--primary)" />
+      <div class="header-right">
+        <div class="header-status">
+          <span class="status-pulse" />
+          <span class="status-label">Sistem Aktif</span>
+          <ShieldCheck class="size-4" style="color: var(--primary)" />
+        </div>
+        <!-- Fullscreen Toggle Button (hidden when in fullscreen) -->
+        <button
+          v-if="!isFullscreen"
+          class="fullscreen-btn"
+          title="Masuk Mode Fullscreen"
+          @click="enterFullscreen"
+        >
+          <Maximize2 class="size-4" />
+          <span>Fullscreen</span>
+        </button>
       </div>
     </header>
+
+    <!-- ══ PASSWORD GUARD MODAL ══ -->
+    <Teleport to="body">
+      <div v-if="isPasswordGuardOpen" class="pg-overlay">
+        <div class="pg-card" :class="{ 'pg-shake': passwordShake }">
+          <!-- Icon -->
+          <div class="pg-icon">
+            <Lock class="size-8" />
+          </div>
+
+          <!-- Title -->
+          <h2 class="pg-title">Verifikasi Admin</h2>
+          <p class="pg-desc">
+            Anda keluar dari mode fullscreen. Masukkan password Admin Sekolah
+            untuk melanjutkan, atau kembali ke mode fullscreen.
+          </p>
+
+          <!-- Password Input -->
+          <input
+            v-model="passwordInput"
+            type="password"
+            class="pg-input"
+            :class="{ 'pg-input--error': passwordError }"
+            placeholder="Masukkan password..."
+            autofocus
+            @keyup.enter="submitPasswordGuard"
+          />
+          <p v-if="passwordError" class="pg-error">{{ passwordError }}</p>
+
+          <!-- Actions -->
+          <div class="pg-actions">
+            <button class="pg-btn-fullscreen" @click="goBackToFullscreen">
+              <Maximize2 class="size-4" />
+              Kembali Fullscreen
+            </button>
+            <button class="pg-btn-confirm" @click="submitPasswordGuard">
+              Konfirmasi
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
 
     <!-- ══ MAIN CONTENT ══ -->
     <main class="kiosk-main">
@@ -544,6 +676,11 @@ const filteredStudents = computed(() => absensiData.value)
   background: var(--accent);
   color: var(--accent-foreground);
   border-color: var(--primary);
+}
+.back-btn-placeholder {
+  /* Invisible spacer with same approximate width as back-btn to keep title centered */
+  width: 90px;
+  flex-shrink: 0;
 }
 .header-center { text-align: center; }
 .header-title {
@@ -1090,6 +1227,196 @@ const filteredStudents = computed(() => absensiData.value)
 @keyframes kslideIn { from { transform: translateY(-5px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes kzoomIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @keyframes kbounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes pg-enter {
+  from { opacity: 0; transform: scale(0.9) translateY(20px); }
+  to   { opacity: 1; transform: scale(1)   translateY(0); }
+}
+@keyframes pg-shake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-10px); }
+  40%      { transform: translateX(10px); }
+  60%      { transform: translateX(-7px); }
+  80%      { transform: translateX(7px); }
+}
+
+/* ══════════════════════════════════════════
+   FULLSCREEN BUTTON
+   ══════════════════════════════════════════ */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.fullscreen-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid var(--border);
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.fullscreen-btn:hover {
+  background: var(--accent);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.fullscreen-btn--active {
+  background: color-mix(in oklch, var(--primary) 10%, transparent);
+  border-color: color-mix(in oklch, var(--primary) 40%, transparent);
+  color: var(--primary);
+}
+
+/* ══════════════════════════════════════════
+   PASSWORD GUARD OVERLAY
+   ══════════════════════════════════════════ */
+.pg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.pg-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  animation: pg-enter 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pg-shake {
+  animation: pg-shake 0.55s ease !important;
+}
+
+.pg-icon {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: color-mix(in oklch, var(--destructive) 12%, transparent);
+  border: 1px solid color-mix(in oklch, var(--destructive) 30%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--destructive);
+  margin-bottom: 0.25rem;
+}
+
+.pg-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--foreground);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.pg-desc {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  text-align: center;
+  line-height: 1.65;
+  margin: 0;
+  max-width: 320px;
+}
+
+.pg-input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--muted);
+  color: var(--foreground);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+}
+.pg-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 15%, transparent);
+}
+.pg-input--error {
+  border-color: var(--destructive);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--destructive) 12%, transparent);
+}
+
+.pg-error {
+  font-size: 0.75rem;
+  color: var(--destructive);
+  margin: -0.25rem 0 0;
+  align-self: flex-start;
+  font-weight: 600;
+}
+
+.pg-actions {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+.pg-btn-fullscreen {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.pg-btn-fullscreen:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: color-mix(in oklch, var(--primary) 8%, transparent);
+}
+
+.pg-btn-confirm {
+  flex: 1;
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  border: none;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  font-family: inherit;
+}
+.pg-btn-confirm:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+.pg-btn-confirm:active {
+  transform: translateY(0);
+}
 
 .cam-state-wrap {
   position: absolute; inset: 0; z-index: 20;

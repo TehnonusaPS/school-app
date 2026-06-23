@@ -1,0 +1,10 @@
+export const mockAset = [
+  { id: '1', code: 'TV-01', name: 'TV Samsung 32"', category: 'Elektronik', brand: 'Samsung', building: 'Gedung Utama', floor: '1', room: 'Laboratorium Multimedia', condition: 'Baik', date: '2023-01-01', value: '5000000', school_name: 'SD TEHNONUSA 1' },
+  { id: '2', code: 'TV-02', name: 'TV LG 43"', category: 'Elektronik', brand: 'LG', building: 'Gedung Utama', floor: '1', room: 'Laboratorium Multimedia', condition: 'Rusak Ringan', date: '2023-02-15', value: '4500000', school_name: 'SD TEHNONUSA 1' },
+  { id: '3', code: 'TV-03', name: 'TV Polytron 32"', category: 'Elektronik', brand: 'Polytron', building: 'Gedung Utama', floor: '1', room: 'Laboratorium Multimedia', condition: 'Rusak Ringan', date: '2023-03-10', value: '3000000', school_name: 'SD TEHNONUSA 1' },
+  { id: '4', code: 'TV-04', name: 'TV Sharp 40"', category: 'Elektronik', brand: 'Sharp', building: 'Gedung Utama', floor: '1', room: 'Laboratorium Multimedia', condition: 'Rusak Berat', date: '2022-11-20', value: '4000000', school_name: 'SD TEHNONUSA 1' },
+  { id: '5', code: 'TV-05', name: 'TV Sony 55"', category: 'Elektronik', brand: 'Sony', building: 'Gedung Utama', floor: '1', room: 'Laboratorium Multimedia', condition: 'Baik', date: '2024-01-05', value: '6000000', school_name: 'SD TEHNONUSA 1' },
+  { id: '6', code: 'PC-01', name: 'PC Desktop HP', category: 'Elektronik', brand: 'HP', building: 'Gedung B', floor: '2', room: 'Lab Komputer', condition: 'Baik', date: '2023-06-10', value: '8000000', school_name: 'SD TEHNONUSA 2' },
+  { id: '7', code: 'MJ-01', name: 'Meja Belajar Siswa', category: 'Furniture', brand: 'Chitose', building: 'Gedung A', floor: '1', room: 'Kelas 7A', condition: 'Baik', date: '2022-07-01', value: '500000', school_name: 'SMP TEHNONUSA 1' },
+  { id: '8', code: 'PR-01', name: 'Proyektor Epson EB-X05', category: 'Elektronik', brand: 'Epson', building: 'Gedung A', floor: '1', room: 'Ruang Guru', condition: 'Rusak Ringan', date: '2023-01-15', value: '7500000', school_name: 'SMA TEHNONUSA 1' }
+]

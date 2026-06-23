@@ -47,6 +47,7 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + 100)
       trend="+2.4% dari bulan lalu"
       trendDirection="up"
       :icon="TrendingUp"
+      illustration="pencil"
       variant="emerald"
     />
 
@@ -57,6 +58,7 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + 100)
       trend="Deadline: 2 hari"
       trendDirection="down"
       :icon="ClipboardCheck"
+      illustration="ruler"
       variant="amber"
     />
   </StatCardGrid>

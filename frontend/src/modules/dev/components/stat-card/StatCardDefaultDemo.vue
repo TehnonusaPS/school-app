@@ -10,6 +10,7 @@ import { Users } from 'lucide-vue-next'
     :value="statCardDemosData.siswa.total"
     :sub="statCardDemosData.siswa.sub"
     :icon="Users"
+    illustration="graduation_cap"
     variant="default"
     color="blue"
   />

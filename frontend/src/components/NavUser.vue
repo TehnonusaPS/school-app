@@ -4,11 +4,9 @@ import {
   Bell,
   ChevronsUpDown,
   LogOut,
-  Sun,
-  Moon,
-  Monitor,
   Palette,
-  Layers
+  Layers,
+  Sparkles
 } from 'lucide-vue-next'
 import { onMounted, ref, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
@@ -59,7 +57,7 @@ const confirmLogout = async () => {
   auth.isLoggingOut = true
 
   // 2. Berikan jeda 600ms agar animasi keluar sidebar & topbar selesai bergerak
-  await new Promise((resolve) => setTimeout(resolve, 600))
+  await new Promise(resolve => setTimeout(resolve, 600))
 
   // 3. Jalankan transisi tirai menutup kembali ke login
   if (document.startViewTransition) {
@@ -84,27 +82,6 @@ const confirmLogout = async () => {
   }
 }
 
-// --- Color Mode Logic (System/Light/Dark) ---
-const colorMode = ref('system')
-
-const applyColorMode = (mode) => {
-  if (mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    document.documentElement.classList.add('dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-  }
-}
-
-const cycleColorMode = () => {
-  const modes = ['system', 'light', 'dark']
-  const nextMode = modes[(modes.indexOf(colorMode.value) + 1) % modes.length]
-  colorMode.value = nextMode
-  localStorage.setItem('theme', nextMode)
-  applyColorMode(nextMode)
-}
-
-const colorModeNames = { system: 'Sistem', light: 'Terang', dark: 'Gelap' }
-
 // Nama tema: 'blue' | 'emerald' | 'indigo' | 'bronze' | 'navy' | 'zinc'
 const activeThemeStyle = ref('blue')
 
@@ -118,7 +95,7 @@ const clearThemeClasses = () => {
 }
 
 /** Terapkan class tema ke body */
-const applyThemeClass = (styleName) => {
+const applyThemeClass = styleName => {
   clearThemeClasses()
   document.body.classList.add(`theme-${styleName}`)
 }
@@ -149,10 +126,24 @@ const themeNames = {
 const activeBackgroundStyle = ref('animated')
 
 const setBackgroundStyle = styleName => {
-  activeBackgroundStyle.value = styleName
-  document.body.classList.remove('bg-animated', 'bg-static_squares', 'bg-glass', 'bg-solid')
-  document.body.classList.add(`bg-${styleName}`)
-  localStorage.setItem('backgroundStyle', styleName)
+  const resolvedStyle = styleName === 'school' ? 'solid' : styleName
+  activeBackgroundStyle.value = resolvedStyle
+  document.body.classList.remove(
+    'bg-animated',
+    'bg-static_squares',
+    'bg-glass',
+    'bg-school',
+    'bg-solid'
+  )
+  document.body.classList.add(`bg-${resolvedStyle}`)
+  localStorage.setItem('backgroundStyle', resolvedStyle)
+
+  // Auto finish and vector visibility based on theme: solid uses solid finish (with vector illustration), others use glass (no illustration)
+  if (resolvedStyle === 'solid') {
+    setThemeFinish('solid')
+  } else {
+    setThemeFinish('glossy')
+  }
 }
 
 const cycleBackgroundStyle = () => {
@@ -163,18 +154,38 @@ const cycleBackgroundStyle = () => {
 }
 
 const backgroundNames = {
-  animated: 'Animasi Kotak',
-  static_squares: 'Kotak Statis',
-  glass: 'Apple Glass Image',
-  solid: 'Solid Polos'
+  animated: 'Animated Squares',
+  static_squares: 'Static Squares',
+  glass: 'Glass Effect',
+  solid: 'School Illustration'
+}
+
+// --- Finish Style Logic (Glossy/Solid) ---
+const activeThemeFinish = ref('glossy')
+
+const setThemeFinish = finishName => {
+  activeThemeFinish.value = finishName
+  if (finishName === 'solid') {
+    document.body.classList.add('finish-solid')
+  } else {
+    document.body.classList.remove('finish-solid')
+  }
+  localStorage.setItem('themeFinish', finishName)
+}
+
+const cycleThemeFinish = () => {
+  const finishes = ['glossy', 'solid']
+  const currentIndex = finishes.indexOf(activeThemeFinish.value)
+  const newFinish = finishes[(currentIndex + 1) % finishes.length]
+  setThemeFinish(newFinish)
+}
+
+const finishNames = {
+  glossy: 'Glossy (Glass)',
+  solid: 'Solid (Flat)'
 }
 
 onMounted(() => {
-  // Restore Color Mode (Terang/Gelap/Sistem)
-  const savedTheme = localStorage.getItem('theme') || 'system'
-  colorMode.value = savedTheme
-  applyColorMode(savedTheme)
-
   // Restore theme style (support legacy 'tahoe' → map ke 'blue')
   const savedThemeStyle = localStorage.getItem('themeStyle') || 'blue'
   const mappedStyle = savedThemeStyle === 'tahoe' ? 'blue' : savedThemeStyle
@@ -184,7 +195,7 @@ onMounted(() => {
   // Simpan ulang jika ada konversi dari 'tahoe'
   if (savedThemeStyle === 'tahoe') localStorage.setItem('themeStyle', 'blue')
 
-  // Restore background style
+  // Restore background style (which automatically updates the finish)
   const savedBgStyle = localStorage.getItem('backgroundStyle') || 'animated'
   setBackgroundStyle(savedBgStyle)
 })
@@ -200,7 +211,10 @@ onMounted(() => {
             class="glass-mini text-sidebar-accent-foreground hover:bg-sidebar-accent/50 data-[state=open]:bg-sidebar-accent/50 data-[state=open]:text-sidebar-accent-foreground transition-all duration-300"
           >
             <Avatar class="h-8 w-8 rounded-lg">
-              <AvatarImage :src="user.avatar" :alt="user.name" />
+              <AvatarImage
+                :src="user.avatar"
+                :alt="user.name"
+              />
               <AvatarFallback class="rounded-lg"> CN </AvatarFallback>
             </Avatar>
             <div class="grid flex-1 text-left text-sm leading-tight">
@@ -221,7 +235,10 @@ onMounted(() => {
           <DropdownMenuLabel class="p-0 font-normal">
             <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
               <Avatar class="h-8 w-8 rounded-lg">
-                <AvatarImage :src="user.avatar" :alt="user.name" />
+                <AvatarImage
+                  :src="user.avatar"
+                  :alt="user.name"
+                />
                 <AvatarFallback class="rounded-lg"> CN </AvatarFallback>
               </Avatar>
               <div class="grid flex-1 text-left text-sm leading-tight">
@@ -235,45 +252,36 @@ onMounted(() => {
             <DropdownMenuLabel class="text-xs text-muted-foreground"
               >Tampilan &amp; Tema</DropdownMenuLabel
             >
-
-            <!-- Color Mode Cycle -->
-            <DropdownMenuItem @select.prevent="cycleColorMode" class="cursor-pointer">
-              <Monitor v-if="colorMode === 'system'" class="size-4" />
-              <Sun v-else-if="colorMode === 'light'" class="size-4" />
-              <Moon v-else class="size-4" />
-              <div class="truncate">
-                Mode:
-                <span class="font-semibold text-primary ml-1">{{
-                  colorModeNames[colorMode]
-                }}</span>
-              </div>
-            </DropdownMenuItem>
-
-            <!-- Color Theme Cycle -->
-            <DropdownMenuItem @select.prevent="cycleThemeStyle" class="cursor-pointer">
-              <Palette class="size-4" />
-              <div class="truncate">
-                Ganti Tema:
-                <span class="font-semibold text-primary ml-1">{{
-                  themeNames[activeThemeStyle] || 'Blue'
-                }}</span>
-              </div>
-            </DropdownMenuItem>
-
             <!-- Background Style Cycle -->
-            <DropdownMenuItem @select.prevent="cycleBackgroundStyle" class="cursor-pointer">
+            <DropdownMenuItem
+              @select.prevent="cycleBackgroundStyle"
+              class="cursor-pointer"
+            >
               <Layers class="size-4" />
               <div class="truncate">
-                Latar:
+                Tema:
                 <span class="font-semibold text-primary ml-1">{{
-                  backgroundNames[activeBackgroundStyle] || 'Animasi Kotak'
+                  backgroundNames[activeBackgroundStyle] || 'Animated Squares'
+                }}</span>
+              </div>
+            </DropdownMenuItem>
+            <!-- Color Theme Cycle -->
+            <DropdownMenuItem
+              @select.prevent="cycleThemeStyle"
+              class="cursor-pointer"
+            >
+              <Palette class="size-4" />
+              <div class="truncate">
+                Warna:
+                <span class="font-semibold text-primary ml-1">{{
+                  themeNames[activeThemeStyle] || 'Blue'
                 }}</span>
               </div>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem>
+            <DropdownMenuItem @click="router.push('/akun-setting')" class="cursor-pointer">
               <BadgeCheck />
               Account
             </DropdownMenuItem>
@@ -296,7 +304,10 @@ onMounted(() => {
   </SidebarMenu>
 
   <!-- Dialog Konfirmasi Logout -->
-  <AlertDialog :open="showLogoutDialog" @update:open="showLogoutDialog = $event">
+  <AlertDialog
+    :open="showLogoutDialog"
+    @update:open="showLogoutDialog = $event"
+  >
     <AlertDialogContent>
       <AlertDialogHeader>
         <AlertDialogTitle>Konfirmasi Keluar</AlertDialogTitle>

@@ -460,6 +460,7 @@ function getStatusLabel(status) {
         :value="studentStats.hadir"
         sub="Hari"
         :icon="UserCheck"
+        illustration="school_bell"
         variant="emerald"
       />
       <StatCard
@@ -467,6 +468,7 @@ function getStatusLabel(status) {
         :value="studentStats.sakit"
         sub="Hari"
         :icon="Activity"
+        illustration="atom"
         variant="blue"
       />
       <StatCard
@@ -474,6 +476,7 @@ function getStatusLabel(status) {
         :value="studentStats.izin"
         sub="Hari"
         :icon="Coffee"
+        illustration="paper_sheet"
         variant="violet"
       />
       <StatCard
@@ -481,6 +484,7 @@ function getStatusLabel(status) {
         :value="studentStats.alpa"
         sub="Hari"
         :icon="AlertCircle"
+        illustration="star"
         variant="amber"
       />
     </StatCardGrid>

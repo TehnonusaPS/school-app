@@ -233,24 +233,28 @@ const tableActions = computed(() => {
         :label="isPersonalView ? 'Total Hadir' : 'Total Siswa'"
         :value="isLoading ? '-' : (isPersonalView ? totalPersonalHadir : totalSiswa)"
         :icon="Database"
+        :illustration="isPersonalView ? 'school_bell' : 'graduation_cap'"
         variant="primary"
       />
       <StatCard
         :label="isPersonalView ? 'Sakit' : 'Sudah Hadir'"
         :value="isLoading ? '-' : (isPersonalView ? totalPersonalSakit : sudahHadir)"
         :icon="Database"
+        :illustration="isPersonalView ? 'atom' : 'school_bell'"
         :variant="isPersonalView ? 'blue' : 'emerald'"
       />
       <StatCard
         :label="isPersonalView ? 'Izin' : 'Belum Scan'"
         :value="isLoading ? '-' : (isPersonalView ? totalPersonalIzin : belumScan)"
         :icon="Database"
+        :illustration="isPersonalView ? 'paper_sheet' : 'pencil'"
         :variant="isPersonalView ? 'violet' : 'amber'"
       />
       <StatCard
         :label="isPersonalView ? 'Tanpa Keterangan' : 'Terlambat'"
         :value="isLoading ? '-' : (isPersonalView ? totalPersonalAlpa : terlambat)"
         :icon="Database"
+        :illustration="isPersonalView ? 'star' : 'ruler'"
         variant="amber"
       />
     </StatCardGrid>
@@ -264,6 +268,7 @@ const tableActions = computed(() => {
         :actions="tableActions"
         v-model:filterValues="filterValues"
         v-model:perPage="perPage"
+        illustration="school_bell"
         :from="from"
         :to="to"
         :total="total"

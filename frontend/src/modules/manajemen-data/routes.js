@@ -2,9 +2,9 @@ export default [
   // SISWA
   {
     path: 'manajemen-data/siswa',
-    component: () => import('./pages/siswa/DataSiswa.vue'),
+    component: () => import('./pages/siswa/IndexPage.vue'),
     meta: {
-      title: 'Data Siswa',
+      title: 'Siswa',
       parent: 'Manajemen Data',
       description: 'Kelola data seluruh siswa aktif.'
       // roles: ['superadmin', 'admin_sekolah'] <-- Contoh cara membatasi rute
@@ -12,35 +12,51 @@ export default [
   },
   {
     path: 'manajemen-data/siswa/tambah',
-    component: () => import('./pages/siswa/TambahSiswa.vue'),
+    component: () => import('./pages/siswa/CreatePage.vue'),
     meta: {
       title: 'Tambah Siswa',
-      parent: 'Data Siswa'
+      parent: 'Siswa'
     }
   },
-  // GURU DAN STAFF
   {
-    path: 'manajemen-data/guru-staff',
-    component: () => import('./pages/GuruStaff.vue'),
+    path: 'manajemen-data/siswa/edit',
+    component: () => import('./pages/siswa/EditPage.vue'),
     meta: {
-      title: 'Data Guru dan Staff',
-      parent: 'Manajemen Data',
-      description: 'Kelola data guru dan tenaga kependidikan.'
+      title: 'Edit Siswa',
+      parent: 'Siswa'
     }
   },
   {
     path: 'manajemen-data/kelas',
-    component: () => import('./pages/Kelas.vue'),
+    component: () => import('./pages/data-kelas/IndexPage.vue'),
     meta: {
       title: 'Data Kelas',
       parent: 'Manajemen Data',
       description: 'Kelola pembagian dan struktur kelas.'
     }
   },
+  {
+    path: 'manajemen-data/kelas/detail',
+    component: () => import('./pages/data-kelas/DetailPage.vue'),
+    meta: {
+      title: 'Detail Kelas',
+      parent: 'Data Kelas',
+      description: 'Detail anggota kelas dan wali kelas'
+    }
+  },
+  {
+    path: 'manajemen-data/kelas/detail/manage',
+    component: () => import('./pages/data-kelas/ManagePage.vue'),
+    meta: {
+      title: 'Kelola',
+      parent: 'Detail Kelas',
+      description: 'Kelola anggota kelas dan wali kelas'
+    }
+  },
   // MATA PELAJARAN
   {
     path: 'manajemen-data/mata-pelajaran',
-    component: () => import('./pages/MataPelajaran.vue'),
+    component: () => import('./pages/mata-pelajaran/IndexPage.vue'),
     meta: {
       title: 'Mata Pelajaran',
       parent: 'Manajemen Data',
@@ -121,8 +137,8 @@ export default [
   },
   // GURU & STAFF
   {
-    path: 'manajemen-data/guru-staff-yayasan',
-    component: () => import('./pages/guru-staff-yayasan/IndexPage.vue'),
+    path: 'manajemen-data/guru-staff',
+    component: () => import('./pages/guru-staff/IndexPage.vue'),
     meta: {
       title: 'Guru dan Staff',
       parent: 'Manajemen Data',
@@ -130,11 +146,19 @@ export default [
     }
   },
   {
-    path: 'manajemen-data/guru-staff-yayasan/tambah',
-    component: () => import('./pages/guru-staff-yayasan/CreatePage.vue'),
+    path: 'manajemen-data/guru-staff/tambah',
+    component: () => import('./pages/guru-staff/CreatePage.vue'),
     meta: {
       title: 'Tambah Guru/Staff',
-      parent: 'Data Guru dan Staff Yayasan'
+      parent: 'Guru dan Staff'
+    }
+  },
+  {
+    path: 'manajemen-data/guru-staff/edit',
+    component: () => import('./pages/guru-staff/EditPage.vue'),
+    meta: {
+      title: 'Edit Guru/Staff',
+      parent: 'Guru dan Staff'
     }
   },
   {
@@ -164,13 +188,4 @@ export default [
       description: 'Daftar data jadwal pelajaran kelas dan guru pengajar.'
     }
   },
-  {
-    path: 'manajemen-data/manajemen-kelas',
-    component: () => import('./pages/ManajemenKelas.vue'),
-    meta: {
-      title: 'Manajemen Kelas',
-      parent: 'Manajemen Data',
-      description: 'Kelola alokasi siswa, wali kelas, dan sarana kelas.'
-    }
-  }
 ]

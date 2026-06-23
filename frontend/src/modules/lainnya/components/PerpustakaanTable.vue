@@ -54,10 +54,10 @@ const filters = computed(() => {
     type: 'select',
     placeholder: 'Semua Kategori',
     options: [
-      { label: 'Sains', value: 'sains' },
-      { label: 'TIK', value: 'tik' },
-      { label: 'Bahasa', value: 'bahasa' },
-      { label: 'Sejarah', value: 'sejarah' }
+      { label: 'Sains', value: 'Sains' },
+      { label: 'TIK', value: 'TIK' },
+      { label: 'Bahasa', value: 'Bahasa' },
+      { label: 'Sejarah', value: 'Sejarah' }
     ]
   })
 
@@ -128,7 +128,7 @@ const filteredItems = computed(() => {
       book.name?.toLowerCase().includes(fSearch) ||
       book.isbn?.toLowerCase().includes(fSearch)
       
-    const matchesCategory = fCategory === 'all' || book.kategori?.toLowerCase() === fCategory.toLowerCase()
+    const matchesCategory = fCategory === 'all' || book.kategori === fCategory
     
     let matchesSchool = true
     if (props.isYayasan && fSchool !== 'all') {
@@ -143,6 +143,23 @@ const paginatedItems = computed(() => {
   const start = (page.value - 1) * perPage.value
   return filteredItems.value.slice(start, start + perPage.value)
 })
+
+import { Badge } from '@/components/ui/badge'
+
+const kategoriBadgeClass = (kategori) => {
+  switch (kategori) {
+    case 'Sains':
+      return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shadow-xs'
+    case 'TIK':
+      return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs'
+    case 'Bahasa':
+      return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-xs'
+    case 'Sejarah':
+      return 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 shadow-xs'
+    default:
+      return 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/20 shadow-xs'
+  }
+}
 </script>
 
 <template>
@@ -151,6 +168,7 @@ const paginatedItems = computed(() => {
     :items="paginatedItems"
     :filters="filters"
     :actions="actions"
+    illustration="textbook"
     v-model:filterValues="filterValues"
     :page="page"
     :per-page="perPage"
@@ -161,10 +179,12 @@ const paginatedItems = computed(() => {
     @update:perPage="perPage = $event"
     :on-edit="!readonly ? (item) => router.push(`/lainnya/perpustakaan/edit/${item.id}`) : undefined"
     :on-delete="!readonly ? (id) => emit('delete', id) : undefined"
-    :on-view="readonly ? (id) => emit('view', id) : undefined"
+    :on-view="(id) => emit('view', id)"
   >
     <template #cell-kategori="{ item }">
-      <span class="uppercase">{{ item.kategori }}</span>
+      <Badge :class="kategoriBadgeClass(item.kategori)" class="rounded-full px-2.5 py-0.5 font-bold uppercase tracking-wider text-[9px]">
+        {{ item.kategori }}
+      </Badge>
     </template>
     
     <template #cell-jumlahStok="{ item }">

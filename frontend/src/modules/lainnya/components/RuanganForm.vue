@@ -151,9 +151,9 @@ function submit() {
                 <SelectValue placeholder="Pilih Tipe Ruangan" />
               </SelectTrigger>
               <SelectContent class="rounded-xl">
-                <SelectItem value="kelas">Ruang Kelas</SelectItem>
-                <SelectItem value="lab">Laboratorium</SelectItem>
-                <SelectItem value="fasilitas">Ruang Fasilitas</SelectItem>
+                <SelectItem value="Ruang Kelas">Ruang Kelas</SelectItem>
+                <SelectItem value="Laboratorium">Laboratorium</SelectItem>
+                <SelectItem value="Ruang Fasilitas">Ruang Fasilitas</SelectItem>
               </SelectContent>
             </Select>
           </div>

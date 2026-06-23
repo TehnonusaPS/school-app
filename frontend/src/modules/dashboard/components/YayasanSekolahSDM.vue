@@ -19,6 +19,7 @@ const props = defineProps({
       cardClass="lg:col-span-3"
       contentClass="p-0"
       :delay="delay"
+      illustration="abc_board"
     >
       <!-- Header fixed — tidak ikut scroll -->
       <table class="w-full text-sm border-b">
@@ -93,6 +94,7 @@ const props = defineProps({
       cardClass="lg:col-span-2"
       :items="sdmProgressData"
       :delay="delay + 100"
+      illustration="graduation_cap"
     >
       <!-- Divider / Ringkasan -->
       <div class="border-t pt-4">

@@ -67,7 +67,7 @@ const handleLogin = async () => {
       error.value = 'Email atau password salah.'
     }
   } catch (e) {
-    error.value = 'Terjadi kesalahan saat login.'
+    error.value = e.message || 'Terjadi kesalahan saat login.'
   } finally {
     isLoading.value = false
   }
@@ -92,7 +92,7 @@ onMounted(async () => {
 
   // Bersihkan class tema/background yang mungkin terbawa dari halaman lain
   document.body.classList.forEach(cls => {
-    if (cls.startsWith('theme-') || ['bg-animated', 'bg-static_squares', 'bg-glass', 'bg-solid'].includes(cls)) {
+    if (cls.startsWith('theme-') || ['bg-animated', 'bg-static_squares', 'bg-glass', 'bg-school', 'bg-solid', 'finish-solid'].includes(cls)) {
       document.body.classList.remove(cls)
     }
   })

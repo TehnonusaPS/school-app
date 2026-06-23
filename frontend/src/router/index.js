@@ -15,6 +15,7 @@ import laporanRoutes from '../modules/laporan/routes'
 import lainnyaRoutes from '../modules/lainnya/routes'
 import devRoutes from '../modules/dev/routes'
 import administrasiRoutes from '../modules/administrasi/routes'
+import akunSettingRoutes from '../modules/akun-setting/routes'
 
 const routes = [
   // Landing page
@@ -89,7 +90,8 @@ const routes = [
       ...laporanRoutes,
       ...lainnyaRoutes,
       ...devRoutes,
-      ...administrasiRoutes
+      ...administrasiRoutes,
+      ...akunSettingRoutes
     ]
   }
 ]

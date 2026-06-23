@@ -126,12 +126,12 @@ const handleImageChange = (file) => {
         </p>
       </div>
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 p-6 border rounded-xl bg-card">
-        <StatCard label="Total Siswa" value="402" sub="siswa aktif" trend="+12 bulan ini" trendDirection="up" :icon="Users" variant="blue" />
-        <StatCard label="Total Kelas" value="18" sub="rombel aktif" trend="Semester Ganjil" trendDirection="neutral" :icon="LayoutGrid" variant="violet" />
-        <StatCard label="Absensi Hari Ini" value="378" sub="94% hadir" trend="+2% dari kemarin" trendDirection="up" :icon="UserCheck" variant="emerald" />
-        <StatCard label="SPP Terkumpul" value="82.2%" sub="Target Rp 2,4M" trend="+5.1% bulan ini" trendDirection="up" :icon="Wallet" variant="amber" />
-        <StatCard label="Alpa Hari Ini" value="0" sub="tidak hadir tanpa ket." trendDirection="neutral" variant="primary" />
-        <StatCard label="Total Anggaran" value="Rp 1,2M" sub="Realisasi Anggaran" :progress="78.5" :icon="Wallet" variant="emerald" />
+        <StatCard label="Total Siswa" value="402" sub="siswa aktif" trend="+12 bulan ini" trendDirection="up" :icon="Users" illustration="graduation_cap" variant="blue" />
+        <StatCard label="Total Kelas" value="18" sub="rombel aktif" trend="Semester Ganjil" trendDirection="neutral" :icon="LayoutGrid" illustration="abc_board" variant="violet" />
+        <StatCard label="Absensi Hari Ini" value="378" sub="94% hadir" trend="+2% dari kemarin" trendDirection="up" :icon="UserCheck" illustration="school_bell" variant="emerald" />
+        <StatCard label="SPP Terkumpul" value="82.2%" sub="Target Rp 2,4M" trend="+5.1% bulan ini" trendDirection="up" :icon="Wallet" illustration="bag" variant="amber" />
+        <StatCard label="Alpa Hari Ini" value="0" sub="tidak hadir tanpa ket." trendDirection="neutral" illustration="star" variant="primary" />
+        <StatCard label="Total Anggaran" value="Rp 1,2M" sub="Realisasi Anggaran" :progress="78.5" :icon="Wallet" illustration="open_book" variant="emerald" />
       </div>
     </section>
 
@@ -222,6 +222,7 @@ const handleImageChange = (file) => {
         :items="paginatedItems"
         :filters="tableFilters"
         :actions="tableActions"
+        illustration="textbook"
         :from="from"
         :to="to"
         :total="total"

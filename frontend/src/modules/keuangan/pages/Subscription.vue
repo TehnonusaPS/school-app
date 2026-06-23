@@ -1,4 +1,5 @@
 <script setup>
+import { ref, computed, onMounted } from 'vue'
 import {
   Banknote,
   Building2,
@@ -7,7 +8,7 @@ import {
   Plus,
   Download,
   Pencil,
-  Ban,
+  Trash2,
   MoreVertical,
   ShieldCheck,
   RefreshCw,
@@ -24,6 +25,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { toast } from 'vue-sonner'
 
 // Data for StatCard
 const kpiData = [
@@ -33,6 +35,7 @@ const kpiData = [
     trend: '+8.4% bln ini',
     trendDirection: 'up',
     icon: Banknote,
+    illustration: 'bag',
     variant: 'emerald'
   },
   {
@@ -41,6 +44,7 @@ const kpiData = [
     trend: '+12 Baru',
     trendDirection: 'up',
     icon: Building2,
+    illustration: 'globe',
     variant: 'blue'
   },
   {
@@ -49,6 +53,7 @@ const kpiData = [
     trend: '-0.5% (Sehat)',
     trendDirection: 'down',
     icon: UserMinus,
+    illustration: 'star',
     variant: 'amber'
   },
   {
@@ -56,6 +61,7 @@ const kpiData = [
     value: '99.9%',
     progress: 99.9,
     icon: Cloud,
+    illustration: 'abc_board',
     variant: 'primary'
   }
 ]
@@ -64,6 +70,115 @@ const router = useRouter()
 
 const formLangganan = () => {
   router.push('/keuangan/subscription/tambah')
+}
+
+// Reactive subscriptions state & CRUD
+const selectedPaket = ref('semua')
+const selectedStatus = ref('semua')
+const subscriptions = ref([])
+
+const defaultSubscriptions = [
+  {
+    id: 'T-10024',
+    name: 'SMA Terpadu Harapan',
+    paket: 'enterprise',
+    status: 'aktif',
+    tglAktivasi: '12 Jan 2024',
+    tglAktivasiRaw: { year: 2024, month: 1, day: 12 },
+    jatuhTempo: '12 Jan 2025',
+    jatuhTempoRaw: { year: 2025, month: 1, day: 12 },
+    nilaiKontrak: 120000000,
+    avatar: 'ST',
+    emailAdmin: 'admin.sma@terpaduharapan.sch.id',
+    telepon: '081234567890',
+    catatan: 'Pembayaran tahunan via transfer bank.'
+  },
+  {
+    id: 'T-09882',
+    name: 'Madrasah Pusat Al-Ikhlas',
+    paket: 'professional',
+    status: 'overdue',
+    tglAktivasi: '05 Okt 2023',
+    tglAktivasiRaw: { year: 2023, month: 10, day: 5 },
+    jatuhTempo: '05 Okt 2024',
+    jatuhTempoRaw: { year: 2024, month: 10, day: 5 },
+    nilaiKontrak: 45000000,
+    avatar: 'MP',
+    emailAdmin: 'info@alikhlas.sch.id',
+    telepon: '082134567890',
+    catatan: 'Hubungi bendahara sebelum jatuh tempo.'
+  },
+  {
+    id: 'T-10255',
+    name: 'SMP IT Al-Azhar',
+    paket: 'basic',
+    status: 'trialing',
+    tglAktivasi: '20 Jun 2024',
+    tglAktivasiRaw: { year: 2024, month: 6, day: 20 },
+    jatuhTempo: '04 Jul 2024',
+    jatuhTempoRaw: { year: 2024, month: 7, day: 4 },
+    nilaiKontrak: 0,
+    avatar: 'AZ',
+    emailAdmin: 'admin@alazhar.sch.id',
+    telepon: '083134567890',
+    catatan: 'Uji coba gratis 14 hari.'
+  }
+]
+
+onMounted(() => {
+  const stored = localStorage.getItem('cerdasbangsa_subscriptions')
+  if (stored) {
+    subscriptions.value = JSON.parse(stored)
+  } else {
+    subscriptions.value = [...defaultSubscriptions]
+    localStorage.setItem('cerdasbangsa_subscriptions', JSON.stringify(subscriptions.value))
+  }
+})
+
+const filteredSubscriptions = computed(() => {
+  return subscriptions.value.filter(sub => {
+    const matchPaket = selectedPaket.value === 'semua' || sub.paket.toLowerCase() === selectedPaket.value.toLowerCase()
+    const matchStatus = selectedStatus.value === 'semua' || sub.status.toLowerCase() === selectedStatus.value.toLowerCase()
+    return matchPaket && matchStatus
+  })
+})
+
+const editSubscription = (id) => {
+  router.push(`/keuangan/subscription/tambah?id=${id}`)
+}
+
+const deleteSubscription = (id) => {
+  if (confirm('Apakah Anda yakin ingin menghapus data langganan ini?')) {
+    subscriptions.value = subscriptions.value.filter(sub => sub.id !== id)
+    localStorage.setItem('cerdasbangsa_subscriptions', JSON.stringify(subscriptions.value))
+    toast.success('Data langganan berhasil dihapus!')
+  }
+}
+
+const formatContractValue = (val) => {
+  if (val === 0) return 'Rp 0 (Trial)'
+  return `Rp ${new Intl.NumberFormat('id-ID').format(val)}`
+}
+
+const formatDateWithBr = (dateStr) => {
+  if (!dateStr) return ''
+  const parts = dateStr.split(' ')
+  if (parts.length >= 3) {
+    return `${parts[0]} ${parts[1]}<br/>${parts[2]}`
+  }
+  return dateStr
+}
+
+const getAvatarClass = (avatar) => {
+  if (avatar === 'ST') {
+    return 'bg-primary text-primary-foreground'
+  } else if (avatar === 'MP') {
+    return 'bg-muted text-muted-foreground'
+  } else if (avatar === 'AZ') {
+    return 'bg-muted-foreground/20 text-foreground'
+  } else {
+    return 'bg-primary/10 text-primary'
+  }
 }
 </script>
 
@@ -80,6 +195,7 @@ const formLangganan = () => {
         :icon="stat.icon"
         :progress="stat.progress"
         :variant="stat.variant"
+        :illustration="stat.illustration"
       />
     </div>
     
@@ -88,7 +204,7 @@ const formLangganan = () => {
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-2">
             <span class="text-sm font-medium text-muted-foreground">Filter Paket:</span>
-            <Select>
+            <Select v-model="selectedPaket">
               <SelectTrigger class="w-[140px] h-8">
                 <SelectValue placeholder="Semua Paket" />
               </SelectTrigger>
@@ -102,7 +218,7 @@ const formLangganan = () => {
           </div>
           <div class="flex items-center gap-2">
             <span class="text-sm font-medium text-muted-foreground">Status:</span>
-            <Select>
+            <Select v-model="selectedStatus">
               <SelectTrigger class="w-[140px] h-8">
                 <SelectValue placeholder="Semua Status" />
               </SelectTrigger>
@@ -128,6 +244,7 @@ const formLangganan = () => {
       <Table>
         <TableHeader class="bg-muted/50">
           <TableRow>
+            <TableHead class="font-semibold text-xs uppercase text-muted-foreground text-center w-[50px]">NO</TableHead>
             <TableHead class="font-semibold text-xs uppercase text-muted-foreground">INSTITUSI (TENANT)</TableHead>
             <TableHead class="font-semibold text-xs uppercase text-muted-foreground">PAKET</TableHead>
             <TableHead class="font-semibold text-xs uppercase text-muted-foreground">STATUS</TableHead>
@@ -138,112 +255,69 @@ const formLangganan = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow>
+          <TableRow v-for="(sub, index) in filteredSubscriptions" :key="sub.id">
+            <TableCell class="text-center font-medium text-muted-foreground">
+              {{ index + 1 }}
+            </TableCell>
             <TableCell>
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs">ST</div>
+                <div :class="[
+                  'w-10 h-10 rounded flex items-center justify-center font-bold text-xs shrink-0',
+                  getAvatarClass(sub.avatar)
+                ]">
+                  {{ sub.avatar }}
+                </div>
                 <div>
-                  <div class="font-bold text-foreground">SMA Terpadu Harapan</div>
-                  <div class="text-xs text-muted-foreground">ID: T-10024</div>
+                  <div class="font-bold text-foreground">{{ sub.name }}</div>
+                  <div class="text-xs text-muted-foreground">ID: {{ sub.id }}</div>
                 </div>
               </div>
             </TableCell>
             <TableCell>
-              <Badge class="bg-primary hover:bg-primary/90 text-primary-foreground rounded-[4px] text-[10px] px-2 py-0.5">ENTERPRISE</Badge>
+              <Badge :variant="sub.paket === 'enterprise' ? 'default' : sub.paket === 'professional' ? 'secondary' : 'outline'" :class="[
+                sub.paket === 'enterprise' ? 'bg-primary hover:bg-primary/90 text-primary-foreground' : '',
+                'rounded-[4px] text-[10px] px-2 py-0.5 uppercase'
+              ]">{{ sub.paket }}</Badge>
             </TableCell>
             <TableCell>
-              <Badge variant="outline" class="text-emerald-600 bg-emerald-50 border-emerald-100 px-2 py-0.5 font-medium" showDot>Aktif</Badge>
+              <Badge variant="outline" :class="[
+                sub.status === 'aktif' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' :
+                sub.status === 'overdue' ? 'text-red-500 bg-red-50 border-red-100' :
+                'text-blue-600 bg-blue-50 border-blue-100',
+                'px-2 py-0.5 font-medium'
+              ]" showDot>{{ sub.status === 'aktif' ? 'Aktif' : sub.status === 'overdue' ? 'Overdue' : 'Trialing' }}</Badge>
             </TableCell>
             <TableCell>
-              <div class="text-sm text-muted-foreground text-center">12 Jan<br/>2024</div>
+              <div class="text-sm text-muted-foreground text-center" v-html="formatDateWithBr(sub.tglAktivasi)"></div>
             </TableCell>
             <TableCell>
-              <div class="text-sm text-muted-foreground text-center">12 Jan<br/>2025</div>
+              <div :class="[
+                sub.status === 'overdue' ? 'text-red-500 font-bold' : 'text-muted-foreground',
+                'text-sm text-center'
+              ]" v-html="formatDateWithBr(sub.jatuhTempo)"></div>
             </TableCell>
             <TableCell>
-              <div class="font-bold text-foreground">Rp 120.000.000</div>
+              <div class="font-bold text-foreground">{{ formatContractValue(sub.nilaiKontrak) }}</div>
             </TableCell>
             <TableCell>
               <div class="flex items-center gap-3 text-muted-foreground">
-                <button class="hover:text-foreground"><Pencil class="w-4 h-4" /></button>
-                <button class="hover:text-foreground"><Ban class="w-4 h-4" /></button>
+                <button @click="editSubscription(sub.id)" class="hover:text-foreground"><Pencil class="w-4 h-4" /></button>
+                <button @click="deleteSubscription(sub.id)" class="hover:text-destructive"><Trash2 class="w-4 h-4" /></button>
                 <button class="hover:text-foreground"><MoreVertical class="w-4 h-4" /></button>
               </div>
             </TableCell>
           </TableRow>
-
-          <TableRow>
-            <TableCell>
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded bg-muted text-muted-foreground flex items-center justify-center font-bold text-xs">MP</div>
-                <div>
-                  <div class="font-bold text-foreground">Madrasah Pusat Al-Ikhlas</div>
-                  <div class="text-xs text-muted-foreground">ID: T-09882</div>
-                </div>
-              </div>
-            </TableCell>
-            <TableCell>
-              <Badge variant="secondary" class="rounded-[4px] text-[10px] px-2 py-0.5">PROFESSIONAL</Badge>
-            </TableCell>
-            <TableCell>
-              <Badge variant="outline" class="text-red-500 bg-red-50 border-red-100 px-2 py-0.5 font-medium" showDot>Overdue</Badge>
-            </TableCell>
-            <TableCell>
-              <div class="text-sm text-muted-foreground text-center">05 Okt<br/>2023</div>
-            </TableCell>
-            <TableCell>
-              <div class="text-sm font-bold text-red-500 text-center">05 Okt<br/>2024</div>
-            </TableCell>
-            <TableCell>
-              <div class="font-bold text-foreground">Rp 45.000.000</div>
-            </TableCell>
-            <TableCell>
-              <div class="flex items-center gap-3 text-muted-foreground">
-                <button class="hover:text-foreground"><Pencil class="w-4 h-4" /></button>
-                <button class="hover:text-foreground"><Ban class="w-4 h-4" /></button>
-                <button class="hover:text-foreground"><MoreVertical class="w-4 h-4" /></button>
-              </div>
-            </TableCell>
-          </TableRow>
-
-          <TableRow>
-            <TableCell>
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded bg-muted-foreground/20 text-foreground flex items-center justify-center font-bold text-xs">AZ</div>
-                <div>
-                  <div class="font-bold text-foreground">SMP IT Al-Azhar</div>
-                  <div class="text-xs text-muted-foreground">ID: T-10255</div>
-                </div>
-              </div>
-            </TableCell>
-            <TableCell>
-              <Badge variant="outline" class="rounded-[4px] text-[10px] px-2 py-0.5 text-muted-foreground font-medium">BASIC</Badge>
-            </TableCell>
-            <TableCell>
-              <Badge variant="outline" class="text-blue-600 bg-blue-50 border-blue-100 px-2 py-0.5 font-medium" showDot>Trialing</Badge>
-            </TableCell>
-            <TableCell>
-              <div class="text-sm text-muted-foreground text-center">20 Jun<br/>2024</div>
-            </TableCell>
-            <TableCell>
-              <div class="text-sm text-muted-foreground text-center">04 Jul<br/>2024</div>
-            </TableCell>
-            <TableCell>
-              <div class="font-bold text-foreground">Rp 0 (Trial)</div>
-            </TableCell>
-            <TableCell>
-              <div class="flex items-center gap-3 text-muted-foreground">
-                <button class="hover:text-foreground"><Pencil class="w-4 h-4" /></button>
-                <button class="hover:text-foreground"><Ban class="w-4 h-4" /></button>
-                <button class="hover:text-foreground"><MoreVertical class="w-4 h-4" /></button>
-              </div>
+          
+          <TableRow v-if="filteredSubscriptions.length === 0">
+            <TableCell colspan="8" class="text-center py-8 text-muted-foreground font-medium">
+              Tidak ada data langganan yang cocok dengan filter.
             </TableCell>
           </TableRow>
         </TableBody>
       </Table>
       
       <div class="p-4 border-t flex justify-between items-center text-sm text-muted-foreground">
-        <div>Menampilkan 1-10 dari 142 Institusi</div>
+        <div>Menampilkan {{ filteredSubscriptions.length }} dari {{ subscriptions.length }} Institusi</div>
         <div class="flex items-center gap-1">
           <Button variant="outline" class="w-8 h-8 p-0">&lt;</Button>
           <Button class="w-8 h-8 p-0">1</Button>

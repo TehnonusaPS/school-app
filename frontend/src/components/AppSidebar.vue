@@ -100,6 +100,7 @@ const data = {
       icon: LayoutDashboard
       // roles: ['superadmin', 'admin_yayasan', 'kepala_sekolah'] <-- Contoh penggunaan
     },
+    
     {
       title: 'Manajemen Data',
       url: '/manajemen-data',
@@ -109,7 +110,7 @@ const data = {
         { 
           title: 'Siswa', 
           url: '/manajemen-data/siswa',
-          roles: ['admin_sekolah', 'tata_usaha']
+          roles: ['admin_sekolah', 'tata_usaha', 'kepala_sekolah', 'wali_kelas']
         },
         { 
           title: 'Yayasan', 
@@ -122,14 +123,14 @@ const data = {
           roles: ['superadmin', 'admin_yayasan']
         },
         { 
-          title: 'Kelola Hak Akses', 
+          title: 'Pengguna', 
           url: '/manajemen-data/hak-akses',
           roles: ['superadmin']
         },
         { 
           title: 'Guru dan Staff', 
-          url: '/manajemen-data/guru-staff-yayasan',
-          roles: ['admin_yayasan']
+          url: '/manajemen-data/guru-staff',
+          roles: ['admin_yayasan', 'admin_sekolah', 'kepala_sekolah']
         },
         { 
           title: 'Monitoring Kelas', 
@@ -146,18 +147,15 @@ const data = {
           url: '/manajemen-data/jadwal',
           roles: ['kepala_sekolah']
         },
-        { 
-          title: 'Manajemen Kelas', 
-          url: '/manajemen-data/manajemen-kelas',
+        { title: 'Kelas', 
+          url: '/manajemen-data/kelas', 
           roles: ['admin_sekolah']
         },
-        { title: 'Guru dan Staff', url: '/manajemen-data/guru-staff', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'wali_kelas'] },
-        { title: 'Data Kelas', url: '/manajemen-data/kelas', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'kepala_sekolah', 'wali_kelas'] },
         { title: 'Mata Pelajaran', url: '/manajemen-data/mata-pelajaran', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'wali_kelas'] },
         { 
           title: 'Tahun Ajaran', 
           url: '/manajemen-data/tahun-ajaran',
-          roles: ['admin_sekolah']
+          roles: ['admin_sekolah', 'kepala_sekolah']
         },
         { title: 'Tahun Ajaran', url: '/manajemen-data/tahun-ajaran', excludeRoles: ['tata_usaha', 'superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'wali_kelas'] }
       ]
@@ -456,7 +454,7 @@ const data = {
       excludeRoles: ['tata_usaha', 'guru', 'wali_kelas', 'siswa', 'orang_tua'],
       items: [
         { title: 'Pengaturan Sekolah', url: '/lainnya/pengaturan', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah'] },
-        { title: 'Manajemen Pengguna', url: '/lainnya/pengguna', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah'] },
+        { title: 'Pengguna', url: '/lainnya/pengguna', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah'] },
         { title: 'Backup & Restore', url: '/lainnya/backup', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah'] },
         { title: 'Ruangan', url: '/lainnya/ruangan', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah'] },
         { title: 'Aset', url: '/lainnya/aset', excludeRoles: ['superadmin', 'admin_yayasan', 'kepala_sekolah'] },

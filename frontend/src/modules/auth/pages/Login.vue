@@ -67,7 +67,7 @@ const handleLogin = async () => {
       error.value = 'Email atau password salah.'
     }
   } catch (e) {
-    error.value = 'Terjadi kesalahan saat login.'
+    error.value = e.message || 'Terjadi kesalahan saat login.'
   } finally {
     isLoading.value = false
   }

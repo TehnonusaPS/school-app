@@ -61,6 +61,10 @@ const props = defineProps({
   rowDisabled: {
     type: Function,
     default: null
+  },
+  fixedHeight: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -138,7 +142,7 @@ const resolveCellClass = column => {
 
 // ── Filler Rows & Empty State ──────────────────────────────────────────────────
 const emptyRowsCount = computed(() => {
-  if (!props.perPage || props.items.length === 0) return 0
+  if (!props.fixedHeight || !props.perPage || props.items.length === 0) return 0
   return Math.max(0, props.perPage - props.items.length)
 })
 

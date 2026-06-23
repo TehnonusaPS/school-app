@@ -91,6 +91,7 @@ import { Badge } from '@/components/ui/badge'
         <Table>
           <TableHeader class="bg-muted/30">
             <TableRow class="hover:bg-transparent">
+              <TableHead class="font-semibold text-muted-foreground py-4 w-[50px] text-center">No</TableHead>
               <TableHead class="font-semibold text-muted-foreground py-4 w-[100px]">Tanggal</TableHead>
               <TableHead class="font-semibold text-muted-foreground py-4">Deskripsi</TableHead>
               <TableHead class="font-semibold text-muted-foreground py-4">Kategori</TableHead>
@@ -101,6 +102,7 @@ import { Badge } from '@/components/ui/badge'
           <TableBody>
             <!-- Row 1 -->
             <TableRow>
+              <TableCell class="text-center align-middle">1</TableCell>
               <TableCell class="py-4 text-sm text-foreground">
                 14 Mar<br/>2024
               </TableCell>
@@ -121,6 +123,7 @@ import { Badge } from '@/components/ui/badge'
             
             <!-- Row 2 -->
             <TableRow>
+              <TableCell class="text-center align-middle">2</TableCell>
               <TableCell class="py-4 text-sm text-foreground">
                 12 Mar<br/>2024
               </TableCell>
@@ -141,6 +144,7 @@ import { Badge } from '@/components/ui/badge'
 
             <!-- Row 3 -->
             <TableRow>
+              <TableCell class="text-center align-middle">3</TableCell>
               <TableCell class="py-4 text-sm text-foreground">
                 10 Mar<br/>2024
               </TableCell>
@@ -161,6 +165,7 @@ import { Badge } from '@/components/ui/badge'
 
             <!-- Row 4 -->
             <TableRow>
+              <TableCell class="text-center align-middle">4</TableCell>
               <TableCell class="py-4 text-sm text-foreground">
                 08 Mar<br/>2024
               </TableCell>

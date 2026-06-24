@@ -50,4 +50,31 @@ class Foundation extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    /**
+     * Get all subscriptions for this foundation.
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(FoundationSubscription::class);
+    }
+
+    /**
+     * Get all payments/invoices for this foundation.
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(FoundationPayment::class);
+    }
+
+    /**
+     * Get the current active subscription for this foundation.
+     */
+    public function activeSubscription()
+    {
+        return $this->hasOne(FoundationSubscription::class)
+            ->whereIn('status', ['active', 'trial'])
+            ->where('ends_at', '>=', now()->toDateString())
+            ->latestOfMany();
+    }
 }

@@ -128,4 +128,12 @@ class User extends Authenticatable
     {
         return $this->role && in_array($this->role->name, $roleNames);
     }
+
+    /**
+     * Check if the user is a superadmin.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole('superadmin');
+    }
 }

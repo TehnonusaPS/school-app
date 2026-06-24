@@ -12,10 +12,7 @@ import {
   MoreVertical,
   ShieldCheck,
   RefreshCw,
-  Upload,
-  TrendingUp,
-  PlusCircle,
-  TrendingDown
+  Upload
 } from 'lucide-vue-next'
 import StatCard from '@/components/stat-card/StatCard.vue'
 
@@ -26,45 +23,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'vue-sonner'
-
-// Data for StatCard
-const kpiData = [
-  {
-    label: 'TOTAL MRR',
-    value: 'Rp 485.200k',
-    trend: '+8.4% bln ini',
-    trendDirection: 'up',
-    icon: Banknote,
-    illustration: 'bag',
-    variant: 'emerald'
-  },
-  {
-    label: 'TENANT AKTIF',
-    value: '142 Institusi',
-    trend: '+12 Baru',
-    trendDirection: 'up',
-    icon: Building2,
-    illustration: 'globe',
-    variant: 'blue'
-  },
-  {
-    label: 'CHURN RATE',
-    value: '1.2%',
-    trend: '-0.5% (Sehat)',
-    trendDirection: 'down',
-    icon: UserMinus,
-    illustration: 'star',
-    variant: 'amber'
-  },
-  {
-    label: 'PLATFORM HEALTH',
-    value: '99.9%',
-    progress: 99.9,
-    icon: Cloud,
-    illustration: 'abc_board',
-    variant: 'primary'
-  }
-]
+import * as financeService from '@/services/superAdminFinanceService'
 
 const router = useRouter()
 
@@ -72,67 +31,168 @@ const formLangganan = () => {
   router.push('/keuangan/subscription/tambah')
 }
 
-// Reactive subscriptions state & CRUD
+// Stats & KPI
+const kpiData = ref([
+  {
+    label: 'TOTAL MRR',
+    value: 'Rp 0',
+    trend: 'Bulan ini',
+    trendDirection: 'up',
+    icon: Banknote,
+    illustration: 'bag',
+    variant: 'emerald'
+  },
+  {
+    label: 'TENANT AKTIF',
+    value: '0 Institusi',
+    trend: 'Aktif di platform',
+    trendDirection: 'up',
+    icon: Building2,
+    illustration: 'globe',
+    variant: 'blue'
+  },
+  {
+    label: 'VERIFIKASI PENDING',
+    value: '0 Pembayaran',
+    trend: 'Butuh tindakan',
+    trendDirection: 'down',
+    icon: UserMinus,
+    illustration: 'star',
+    variant: 'amber'
+  },
+  {
+    label: 'TOTAL REVENUE',
+    value: 'Rp 0',
+    trend: 'Akumulasi pendapatan',
+    trendDirection: 'up',
+    icon: Cloud,
+    illustration: 'abc_board',
+    variant: 'primary'
+  }
+])
+
+// State
 const selectedPaket = ref('semua')
 const selectedStatus = ref('semua')
 const subscriptions = ref([])
+const activities = ref([])
+const isLoading = ref(false)
 
-const defaultSubscriptions = [
-  {
-    id: 'T-10024',
-    name: 'SMA Terpadu Harapan',
-    paket: 'enterprise',
-    status: 'aktif',
-    tglAktivasi: '12 Jan 2024',
-    tglAktivasiRaw: { year: 2024, month: 1, day: 12 },
-    jatuhTempo: '12 Jan 2025',
-    jatuhTempoRaw: { year: 2025, month: 1, day: 12 },
-    nilaiKontrak: 120000000,
-    avatar: 'ST',
-    emailAdmin: 'admin.sma@terpaduharapan.sch.id',
-    telepon: '081234567890',
-    catatan: 'Pembayaran tahunan via transfer bank.'
-  },
-  {
-    id: 'T-09882',
-    name: 'Madrasah Pusat Al-Ikhlas',
-    paket: 'professional',
-    status: 'overdue',
-    tglAktivasi: '05 Okt 2023',
-    tglAktivasiRaw: { year: 2023, month: 10, day: 5 },
-    jatuhTempo: '05 Okt 2024',
-    jatuhTempoRaw: { year: 2024, month: 10, day: 5 },
-    nilaiKontrak: 45000000,
-    avatar: 'MP',
-    emailAdmin: 'info@alikhlas.sch.id',
-    telepon: '082134567890',
-    catatan: 'Hubungi bendahara sebelum jatuh tempo.'
-  },
-  {
-    id: 'T-10255',
-    name: 'SMP IT Al-Azhar',
-    paket: 'basic',
-    status: 'trialing',
-    tglAktivasi: '20 Jun 2024',
-    tglAktivasiRaw: { year: 2024, month: 6, day: 20 },
-    jatuhTempo: '04 Jul 2024',
-    jatuhTempoRaw: { year: 2024, month: 7, day: 4 },
-    nilaiKontrak: 0,
-    avatar: 'AZ',
-    emailAdmin: 'admin@alazhar.sch.id',
-    telepon: '083134567890',
-    catatan: 'Uji coba gratis 14 hari.'
+const formatCurrency = (val) => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0
+  }).format(val)
+}
+
+const loadData = async () => {
+  isLoading.value = true
+  try {
+    // 1. Fetch dashboard stats
+    const dashRes = await financeService.getDashboard()
+    if (dashRes.status === 'success' && dashRes.data) {
+      const stats = dashRes.data.stats
+      kpiData.value[0].value = formatCurrency(stats.monthly_recurring_revenue)
+      kpiData.value[1].value = `${stats.active_subscriptions_count} Institusi`
+      kpiData.value[2].value = `${stats.pending_verifications_count} Pembayaran`
+      kpiData.value[3].value = formatCurrency(stats.total_revenue)
+
+      // Map recent activities/logs
+      const tempActivities = []
+      
+      // Process recent subscriptions
+      if (dashRes.data.recent_subscriptions) {
+        dashRes.data.recent_subscriptions.forEach(sub => {
+          const createdAt = new Date(sub.created_at)
+          const timeStr = createdAt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB'
+          tempActivities.push({
+            id: 'sub-' + sub.id,
+            time: timeStr,
+            title: `Registrasi Tenant Baru: ${sub.foundation?.name || 'Yayasan'}`,
+            desc: `ID: F-${sub.foundation_id} | Paket: ${sub.plan?.name || 'Custom'}`,
+            badge: 'SIGNUP',
+            badgeClass: 'bg-emerald-100 hover:bg-emerald-100 text-emerald-700',
+            icon: ShieldCheck,
+            iconClass: 'text-emerald-600',
+            timestamp: createdAt.getTime()
+          })
+        })
+      }
+
+      // Process recent payments
+      if (dashRes.data.recent_payments) {
+        dashRes.data.recent_payments.forEach(pay => {
+          const payDate = new Date(pay.created_at)
+          const timeStr = payDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB'
+          const isPaid = pay.status === 'paid'
+          
+          tempActivities.push({
+            id: 'pay-' + pay.id,
+            time: timeStr,
+            title: `Invoice ${pay.invoice_number}`,
+            desc: `${pay.foundation?.name || 'Yayasan'} | Status: ${pay.status.toUpperCase()}`,
+            amount: isPaid ? `+ ${formatCurrency(pay.amount)}` : formatCurrency(pay.amount),
+            amountClass: isPaid ? 'text-emerald-600' : 'text-amber-600',
+            badge: pay.status.toUpperCase(),
+            badgeClass: isPaid 
+              ? 'bg-emerald-100 hover:bg-emerald-100 text-emerald-700' 
+              : pay.status === 'pending'
+                ? 'bg-amber-100 hover:bg-amber-100 text-amber-700'
+                : 'bg-red-100 hover:bg-red-100 text-red-700',
+            icon: isPaid ? RefreshCw : Upload,
+            iconClass: isPaid ? 'text-emerald-600' : 'text-amber-500',
+            timestamp: payDate.getTime()
+          })
+        })
+      }
+
+      // Sort activities latest first
+      activities.value = tempActivities.sort((a, b) => b.timestamp - a.timestamp)
+    }
+
+    // 2. Fetch subscriptions
+    const subRes = await financeService.getSubscriptions()
+    if (subRes.status === 'success' && subRes.data) {
+      // Map API subscriptions to table rows structure
+      const items = Array.isArray(subRes.data) ? subRes.data : (subRes.data.data || [])
+      subscriptions.value = items.map(sub => {
+        const startsAt = new Date(sub.starts_at)
+        const endsAt = new Date(sub.ends_at)
+        
+        const option = { day: 'numeric', month: 'short', year: 'numeric' }
+        const startsAtStr = startsAt.toLocaleDateString('id-ID', option)
+        const endsAtStr = endsAt.toLocaleDateString('id-ID', option)
+
+        const name = sub.foundation?.name || 'Yayasan Tanpa Nama'
+        const avatar = name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'N'
+
+        return {
+          id: sub.id,
+          name: name,
+          paket: sub.plan?.name || 'Custom',
+          status: sub.status === 'active' ? 'aktif' : sub.status === 'trial' ? 'trialing' : sub.status,
+          tglAktivasi: startsAtStr,
+          jatuhTempo: endsAtStr,
+          nilaiKontrak: parseFloat(sub.plan?.price || 0),
+          avatar: avatar,
+          emailAdmin: sub.foundation?.email || '-',
+          telepon: sub.foundation?.phone || '-',
+          catatan: sub.notes || ''
+        }
+      })
+    }
+  } catch (error) {
+    toast.error('Gagal mengambil data dari server', {
+      description: error.message || 'Koneksi ke backend bermasalah.'
+    })
+  } finally {
+    isLoading.value = false
   }
-]
+}
 
 onMounted(() => {
-  const stored = localStorage.getItem('cerdasbangsa_subscriptions')
-  if (stored) {
-    subscriptions.value = JSON.parse(stored)
-  } else {
-    subscriptions.value = [...defaultSubscriptions]
-    localStorage.setItem('cerdasbangsa_subscriptions', JSON.stringify(subscriptions.value))
-  }
+  loadData()
 })
 
 const filteredSubscriptions = computed(() => {
@@ -147,17 +207,24 @@ const editSubscription = (id) => {
   router.push(`/keuangan/subscription/tambah?id=${id}`)
 }
 
-const deleteSubscription = (id) => {
+const deleteSubscription = async (id) => {
   if (confirm('Apakah Anda yakin ingin menghapus data langganan ini?')) {
-    subscriptions.value = subscriptions.value.filter(sub => sub.id !== id)
-    localStorage.setItem('cerdasbangsa_subscriptions', JSON.stringify(subscriptions.value))
-    toast.success('Data langganan berhasil dihapus!')
+    try {
+      await financeService.deleteSubscription(id)
+      subscriptions.value = subscriptions.value.filter(sub => sub.id !== id)
+      toast.success('Data langganan berhasil dihapus!')
+      loadData() // reload dashboard stats too
+    } catch (error) {
+      toast.error('Gagal menghapus langganan', {
+        description: error.message || 'Terjadi kesalahan pada server.'
+      })
+    }
   }
 }
 
 const formatContractValue = (val) => {
   if (val === 0) return 'Rp 0 (Trial)'
-  return `Rp ${new Intl.NumberFormat('id-ID').format(val)}`
+  return formatCurrency(val)
 }
 
 const formatDateWithBr = (dateStr) => {
@@ -184,6 +251,7 @@ const getAvatarClass = (avatar) => {
 
 <template>
   <div class="space-y-6 w-full mx-auto px-0">
+    <!-- Stat Cards -->
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <StatCard
         v-for="(stat, index) in kpiData"
@@ -199,6 +267,7 @@ const getAvatarClass = (avatar) => {
       />
     </div>
     
+    <!-- Table Card -->
     <Card>
       <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b gap-4">
         <div class="flex items-center gap-4">
@@ -241,6 +310,7 @@ const getAvatarClass = (avatar) => {
         </div>
       </div>
       
+      <!-- Subscriptions Table -->
       <Table>
         <TableHeader class="bg-muted/50">
           <TableRow>
@@ -269,13 +339,13 @@ const getAvatarClass = (avatar) => {
                 </div>
                 <div>
                   <div class="font-bold text-foreground">{{ sub.name }}</div>
-                  <div class="text-xs text-muted-foreground">ID: {{ sub.id }}</div>
+                  <div class="text-xs text-muted-foreground">ID Sub: {{ sub.id }}</div>
                 </div>
               </div>
             </TableCell>
             <TableCell>
-              <Badge :variant="sub.paket === 'enterprise' ? 'default' : sub.paket === 'professional' ? 'secondary' : 'outline'" :class="[
-                sub.paket === 'enterprise' ? 'bg-primary hover:bg-primary/90 text-primary-foreground' : '',
+              <Badge :variant="sub.paket.toLowerCase() === 'enterprise' ? 'default' : sub.paket.toLowerCase() === 'professional' ? 'secondary' : 'outline'" :class="[
+                sub.paket.toLowerCase() === 'enterprise' ? 'bg-primary hover:bg-primary/90 text-primary-foreground' : '',
                 'rounded-[4px] text-[10px] px-2 py-0.5 uppercase'
               ]">{{ sub.paket }}</Badge>
             </TableCell>
@@ -310,7 +380,7 @@ const getAvatarClass = (avatar) => {
           
           <TableRow v-if="filteredSubscriptions.length === 0">
             <TableCell colspan="8" class="text-center py-8 text-muted-foreground font-medium">
-              Tidak ada data langganan yang cocok dengan filter.
+              {{ isLoading ? 'Memuat data dari server...' : 'Tidak ada data langganan yang cocok dengan filter.' }}
             </TableCell>
           </TableRow>
         </TableBody>
@@ -319,61 +389,37 @@ const getAvatarClass = (avatar) => {
       <div class="p-4 border-t flex justify-between items-center text-sm text-muted-foreground">
         <div>Menampilkan {{ filteredSubscriptions.length }} dari {{ subscriptions.length }} Institusi</div>
         <div class="flex items-center gap-1">
-          <Button variant="outline" class="w-8 h-8 p-0">&lt;</Button>
-          <Button class="w-8 h-8 p-0">1</Button>
-          <Button variant="outline" class="w-8 h-8 p-0">2</Button>
-          <Button variant="outline" class="w-8 h-8 p-0">3</Button>
-          <Button variant="outline" class="w-8 h-8 p-0">&gt;</Button>
+          <Button variant="outline" class="w-8 h-8 p-0" :disabled="isLoading">&lt;</Button>
+          <Button class="w-8 h-8 p-0" :disabled="isLoading">1</Button>
+          <Button variant="outline" class="w-8 h-8 p-0" :disabled="isLoading">&gt;</Button>
         </div>
       </div>
     </Card>
 
+    <!-- Activity Log Card -->
     <Card>
       <CardHeader class="border-b pb-4 pt-5">
         <CardTitle class="text-xl font-bold">Log Aktivitas Langganan</CardTitle>
       </CardHeader>
       <CardContent class="p-0">
         <div class="divide-y text-sm border-border">
-          <div class="flex items-center justify-between p-5">
+          <div v-for="act in activities" :key="act.id" class="flex items-center justify-between p-5">
             <div class="flex items-center gap-8">
-              <div class="text-muted-foreground w-24">14:45 WIB</div>
+              <div class="text-muted-foreground w-24">{{ act.time }}</div>
               <div>
-                <div class="font-bold text-foreground text-base">Registrasi Tenant Baru: SMP IT Al-Azhar</div>
-                <div class="text-muted-foreground italic text-xs mt-0.5">ID: T-10255 | Paket: Basic (Trial)</div>
+                <div class="font-bold text-foreground text-base">{{ act.title }}</div>
+                <div class="text-muted-foreground italic text-xs mt-0.5">{{ act.desc }}</div>
               </div>
             </div>
             <div class="flex items-center gap-4">
-              <Badge class="bg-emerald-100 hover:bg-emerald-100 text-emerald-700 border-none font-semibold px-2 text-[10px]">SIGNUP</Badge>
-              <ShieldCheck class="w-5 h-5 text-emerald-600" />
+              <span v-if="act.amount" :class="[act.amountClass, 'font-medium']">{{ act.amount }}</span>
+              <Badge :class="[act.badgeClass, 'border-none font-semibold px-2 text-[10px]']">{{ act.badge }}</Badge>
+              <component :is="act.icon" :class="['w-5 h-5', act.iconClass]" />
             </div>
           </div>
           
-          <div class="flex items-center justify-between p-5">
-            <div class="flex items-center gap-8">
-              <div class="text-muted-foreground w-24">12:30 WIB</div>
-              <div>
-                <div class="font-bold text-foreground text-base">Pembaruan Langganan: SMA Negeri 1 Pusat</div>
-                <div class="text-muted-foreground italic text-xs mt-0.5">ID: T-08442 | Paket: Professional (Tahunan)</div>
-              </div>
-            </div>
-            <div class="flex items-center gap-4">
-              <span class="text-emerald-600 font-medium">+ Rp 18.000.000</span>
-              <RefreshCw class="w-5 h-5 text-emerald-600" />
-            </div>
-          </div>
-          
-          <div class="flex items-center justify-between p-5">
-            <div class="flex items-center gap-8">
-              <div class="text-muted-foreground w-24">09:15 WIB</div>
-              <div>
-                <div class="font-bold text-foreground text-base">Upgrade Paket: SMK Teknik Global</div>
-                <div class="text-muted-foreground italic text-xs mt-0.5">ID: T-09110 | Basic &rarr; Professional</div>
-              </div>
-            </div>
-            <div class="flex items-center gap-4">
-              <span class="font-medium text-foreground">+ Rp 1.500.000 (Prorated)</span>
-              <Upload class="w-5 h-5 text-foreground" />
-            </div>
+          <div v-if="activities.length === 0" class="p-8 text-center text-muted-foreground font-medium">
+            {{ isLoading ? 'Memuat aktivitas...' : 'Belum ada aktivitas terbaru.' }}
           </div>
         </div>
       </CardContent>

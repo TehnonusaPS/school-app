@@ -34,6 +34,15 @@ Route::get('/test-db', function () {
     }
 });
 
+Route::get('/env-check', function () {
+    return [
+        'DB_CONNECTION' => env('DB_CONNECTION'),
+        'DB_HOST' => env('DB_HOST'),
+        'DB_PORT' => env('DB_PORT'),
+        'DB_DATABASE' => env('DB_DATABASE'),
+    ];
+});
+
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
 

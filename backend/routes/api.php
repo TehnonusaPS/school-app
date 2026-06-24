@@ -15,6 +15,25 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// routes/api.php
+
+use Illuminate\Support\Facades\DB;
+
+Route::get('/test-db', function () {
+    try {
+        DB::connection()->getPdo();
+
+        return response()->json([
+            'status' => 'connected'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
+
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
 

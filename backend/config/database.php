@@ -102,7 +102,7 @@ return [
             'search_path' => 'public',
 
             // Supabase wajib SSL
-            'sslmode' => 'require',
+            'sslmode' => env('DB_SSLMODE', 'require'),
         ],
 
         'sqlsrv' => [

@@ -39,7 +39,7 @@ export default [
     path: 'laporan/konsolidasi',
     component: () => import('./pages/Konsolidasi.vue'),
     meta: {
-      title: 'Laporan Konsolidasi Seluruh Yayasan',
+      title: 'Konsolidasi Yayasan',
       parent: 'Laporan',
       description: 'Akses integrasi seluruh laporan keuangan & akademik sekolah di bawah yayasan.'
     }
@@ -57,7 +57,7 @@ export default [
     path: 'laporan/keuangan-yayasan',
     component: () => import('./pages/KeuanganYayasan.vue'),
     meta: {
-      title: 'Keuangan',
+      title: 'Keuangan Yayasan',
       parent: 'Laporan',
       description: 'Laporan komprehensif pemasukan dan transaksi keuangan unit sekolah.'
     }
@@ -66,7 +66,7 @@ export default [
     path: 'laporan/akademik-yayasan',
     component: () => import('./pages/AkademikYayasan.vue'),
     meta: {
-      title: 'Akademik',
+      title: 'Akademik Yayasan',
       parent: 'Laporan',
       description: 'Rekapitulasi kurikulum dan prestasi belajar per unit sekolah.'
     }
@@ -120,7 +120,7 @@ export default [
     path: 'laporan/kehadiran-siswa',
     component: () => import('./pages/LaporanKehadiranSiswa.vue'),
     meta: {
-      title: 'Laporan Kehadiran Siswa',
+      title: 'Kehadiran',
       parent: 'Laporan',
       description: 'Rekapitulasi persentase dan daftar ketidakhadiran siswa.'
     }
@@ -129,7 +129,7 @@ export default [
     path: 'laporan/raport',
     component: () => import('./pages/LaporanRaportSiswa.vue'),
     meta: {
-      title: 'Laporan Raport Siswa',
+      title: 'Raport Siswa',
       parent: 'Laporan',
       description: 'Rekapitulasi nilai akhir semester dan pencetakan rapor siswa perwalian.'
     }
@@ -138,7 +138,7 @@ export default [
     path: 'laporan/perkembangan',
     component: () => import('./pages/PerkembanganAnak.vue'),
     meta: {
-      title: 'Perkembangan Anak',
+      title: 'Perkembangan',
       parent: 'Laporan',
       description: 'Pantau grafik perkembangan nilai, kehadiran, dan kedisiplinan anak.'
     }

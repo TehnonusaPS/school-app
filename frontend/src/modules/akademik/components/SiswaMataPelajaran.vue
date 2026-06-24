@@ -11,9 +11,17 @@ import {
 import AppCard from '@/components/app-card/AppCard.vue'
 import StatCard from '@/components/stat-card/StatCard.vue'
 import ActivityCard from '@/components/activity-card/ActivityCard.vue'
+import GradeDetailCard from '@/components/grade-detail-card/GradeDetailCard.vue'
+import ScoreCircleCard from '@/components/score-circle-card/ScoreCircleCard.vue'
 import { siswaStatsData } from '../data/mockSiswaStatCards'
 import { mockAktivitas } from '../data/mockSiswaAktivitas'
 import { mockMateriList } from '../data/mockSiswaMateri'
+import {
+  gradeDetailIcon,
+  gradeDetailCategories,
+  averageScoreData,
+  attendanceData
+} from '../data/mockSiswaNilai'
 import { formatNumber, formatDelta } from '@/utils/formatNumber'
 
 const selectedMapel = ref('matematika')
@@ -27,23 +35,23 @@ const selectedMateri = ref('')
     <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
       <StatCard label="Nilai Asal-asalan" :value="formatNumber(siswaStatsData.nilaiAsal.total)"
         sub="naik dari semester sebelumnya" :trend="`${formatDelta(siswaStatsData.nilaiAsal.growthPercent)}%`"
-        :trendDirection="siswaStatsData.nilaiAsal.trendDirection" :icon="Book" variant="blue" />
+        :trendDirection="siswaStatsData.nilaiAsal.trendDirection" :icon="Book" illustration="apple" variant="blue" />
 
       <StatCard label="Jumlah Tugas Terselesaikan" :value="formatNumber(siswaStatsData.tugas.total)"
         sub="turun dari semester sebelumnya" :trend="`${formatDelta(siswaStatsData.tugas.growthPercent)}%`"
-        :trendDirection="siswaStatsData.tugas.trendDirection" :icon="Book" variant="violet" />
+        :trendDirection="siswaStatsData.tugas.trendDirection" :icon="Book" illustration="open_book" variant="violet" />
 
       <StatCard label="Nilai Ujian Matematika" :value="formatNumber(siswaStatsData.nilaiMtk.total)"
         sub="naik dari semester sebelumnya" :trend="`${formatDelta(siswaStatsData.nilaiMtk.growthPercent)}%`"
-        :trendDirection="siswaStatsData.nilaiMtk.trendDirection" :icon="Book" variant="emerald" />
+        :trendDirection="siswaStatsData.nilaiMtk.trendDirection" :icon="Book" illustration="protractor" variant="emerald" />
 
       <StatCard label="Jumlah Ujian Terselesaikan" :value="formatNumber(siswaStatsData.ujian.total)"
         sub="turun dari semester sebelumnya" :trend="`${formatDelta(siswaStatsData.ujian.growthPercent)}%`"
-        :trendDirection="siswaStatsData.ujian.trendDirection" :icon="Book" variant="amber" />
+        :trendDirection="siswaStatsData.ujian.trendDirection" :icon="Book" illustration="graded_paper" variant="amber" />
 
       <StatCard label="Jumlah Kuis Terselesaikan" :value="formatNumber(siswaStatsData.kuis.total)"
         sub="turun dari semester sebelumnya" :trend="`${formatDelta(siswaStatsData.kuis.growthPercent)}%`"
-        :trendDirection="siswaStatsData.kuis.trendDirection" :icon="Book" variant="primary" />
+        :trendDirection="siswaStatsData.kuis.trendDirection" :icon="Book" illustration="star" variant="primary" />
     </div>
 
     <!-- Header: Mata Pelajaran + Filters -->
@@ -130,6 +138,36 @@ const selectedMateri = ref('')
           :variant="item.variant"
         />
       </AppCard>
+    </div>
+
+    <!-- Grade Detail Section: Detail Nilai + Rata-rata + Kehadiran -->
+    <div class="grid gap-6 lg:grid-cols-3">
+      <!-- Left: Detail Nilai dengan Progress Bar -->
+      <GradeDetailCard
+        title="Detail Nilai Mata Pelajaran Matematika"
+        :icon="gradeDetailIcon"
+        :categories="gradeDetailCategories"
+      />
+
+      <!-- Center: Rata-rata Nilai (Circle biru) -->
+      <ScoreCircleCard
+        :title="averageScoreData.title"
+        :score="averageScoreData.score"
+        :label="averageScoreData.label"
+        :description="averageScoreData.description"
+        :percentage="averageScoreData.percentage"
+        :variant="averageScoreData.variant"
+      />
+
+      <!-- Right: Persentase Kehadiran (Circle hijau) -->
+      <ScoreCircleCard
+        :title="attendanceData.title"
+        :score="attendanceData.score"
+        :label="attendanceData.label"
+        :description="attendanceData.description"
+        :percentage="attendanceData.percentage"
+        :variant="attendanceData.variant"
+      />
     </div>
   </div>
 </template>

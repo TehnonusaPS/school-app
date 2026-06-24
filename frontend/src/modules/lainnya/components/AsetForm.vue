@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { Camera, X } from 'lucide-vue-next'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -28,6 +28,13 @@ const props = defineProps({
 
 const emit = defineEmits(['submit', 'cancel'])
 
+import { useRuanganStore } from '@/stores/ruanganStore'
+const ruanganStore = useRuanganStore()
+
+const availableRooms = computed(() => {
+  return [...new Set(ruanganStore.items.map(r => r.name))]
+})
+
 const form = ref({
   name: props.initialData.name || '',
   code: props.initialData.code || '',
@@ -36,7 +43,7 @@ const form = ref({
   building: props.initialData.building || '',
   floor: props.initialData.floor || '',
   room: props.initialData.room || '',
-  condition: props.initialData.condition || 'baik',
+  condition: props.initialData.condition || 'Baik',
   date: props.initialData.date || '',
   value: props.initialData.value || ''
 })
@@ -111,13 +118,13 @@ function submit() {
                 <SelectValue placeholder="Pilih Kategori" />
               </SelectTrigger>
               <SelectContent class="rounded-xl">
-                <SelectItem value="elektronik">Elektronik</SelectItem>
-                <SelectItem value="furniture">Furniture</SelectItem>
-                <SelectItem value="alat_pembelajaran">Alat Pembelajaran</SelectItem>
-                <SelectItem value="alat_kebersihan">Alat Kebersihan</SelectItem>
-                <SelectItem value="peralatan_kantor">Peralatan Kantor</SelectItem>
-                <SelectItem value="peralatan_olahraga">Peralatan Olahraga</SelectItem>
-                <SelectItem value="peralatan_laboratorium">Peralatan Laboratorium</SelectItem>
+                <SelectItem value="Elektronik">Elektronik</SelectItem>
+                <SelectItem value="Furniture">Furniture</SelectItem>
+                <SelectItem value="Peralatan Pembelajaran">Alat Pembelajaran</SelectItem>
+                <SelectItem value="Alat Kebersihan">Alat Kebersihan</SelectItem>
+                <SelectItem value="Peralatan Kantor">Peralatan Kantor</SelectItem>
+                <SelectItem value="Peralatan Olahraga">Peralatan Olahraga</SelectItem>
+                <SelectItem value="Peralatan Laboratorium">Peralatan Laboratorium</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -153,7 +160,16 @@ function submit() {
           </div>
           <div class="space-y-2">
             <Label class="text-xs sm:text-sm font-semibold">Ruangan</Label>
-            <Input v-model="form.room" placeholder="Contoh : Lab IPA" class="rounded-xl h-11" />
+            <Select v-model="form.room">
+              <SelectTrigger class="w-full rounded-xl !h-11 bg-background">
+                <SelectValue placeholder="Pilih Ruangan" />
+              </SelectTrigger>
+              <SelectContent class="rounded-xl">
+                <SelectItem v-for="room in availableRooms" :key="room" :value="room">
+                  {{ room }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -169,15 +185,15 @@ function submit() {
             <div class="h-11 flex items-center bg-background border border-border rounded-xl px-4 shadow-sm overflow-x-auto">
               <RadioGroup v-model="form.condition" class="flex items-center gap-4 sm:gap-6 w-full min-w-max">
                 <div class="flex items-center space-x-2">
-                  <RadioGroupItem id="baik" value="baik" class="size-4 shrink-0" />
+                  <RadioGroupItem id="baik" value="Baik" class="size-4 shrink-0" />
                   <Label for="baik" class="text-sm cursor-pointer font-medium m-0">Baik</Label>
                 </div>
                 <div class="flex items-center space-x-2">
-                  <RadioGroupItem id="rusak_ringan" value="rusak ringan" class="size-4 shrink-0" />
+                  <RadioGroupItem id="rusak_ringan" value="Rusak Ringan" class="size-4 shrink-0" />
                   <Label for="rusak_ringan" class="text-sm cursor-pointer font-medium m-0 whitespace-nowrap">Rusak Ringan</Label>
                 </div>
                 <div class="flex items-center space-x-2">
-                  <RadioGroupItem id="rusak_berat" value="rusak berat" class="size-4 shrink-0" />
+                  <RadioGroupItem id="rusak_berat" value="Rusak Berat" class="size-4 shrink-0" />
                   <Label for="rusak_berat" class="text-sm cursor-pointer font-medium m-0 whitespace-nowrap">Rusak Berat</Label>
                 </div>
               </RadioGroup>

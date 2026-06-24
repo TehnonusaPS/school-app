@@ -117,7 +117,8 @@ const jenjangColor = { SD: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 
         <Table>
           <TableHeader>
             <TableRow class="bg-muted/50">
-              <TableHead class="font-semibold">Unit Sekolah</TableHead>
+                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
+                <TableHead class="font-semibold">Unit Sekolah</TableHead>
               <TableHead class="font-semibold">Jenjang</TableHead>
               <TableHead class="font-semibold text-right">SPP</TableHead>
               <TableHead class="font-semibold text-right">BOS</TableHead>
@@ -132,10 +133,14 @@ const jenjangColor = { SD: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 
           </TableHeader>
           <TableBody>
             <template v-if="isLoading">
-              <TableRow v-for="i in 4" :key="i"><TableCell v-for="j in 11" :key="j"><Skeleton class="h-5 w-full" /></TableCell></TableRow>
+              <TableRow v-for="(i, index) in 4" :key="i">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
+                <TableCell v-for="j in 12" :key="j"><Skeleton class="h-5 w-full" /></TableCell>
+              </TableRow>
             </template>
             <template v-else>
-              <TableRow v-for="s in data" :key="s.id" class="hover:bg-muted/30 transition-colors">
+              <TableRow v-for="(s, index) in data" :key="s.id" class="hover:bg-muted/30 transition-colors">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
                 <TableCell class="font-semibold text-sm">{{ s.sekolah }}</TableCell>
                 <TableCell><Badge :class="jenjangColor[s.jenjang]">{{ s.jenjang }}</Badge></TableCell>
                 <TableCell class="text-right text-sm">{{ formatRp(s.spp) }}</TableCell>
@@ -149,7 +154,7 @@ const jenjangColor = { SD: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 
                 <TableCell class="text-right font-bold" :class="getSaldo(s) >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400'">{{ formatRp(getSaldo(s)) }}</TableCell>
               </TableRow>
               <TableRow class="bg-muted/50 font-bold border-t-2">
-                <TableCell colspan="2" class="font-bold">TOTAL</TableCell>
+                <TableCell colspan="3" class="font-bold">TOTAL</TableCell>
                 <TableCell class="text-right font-bold">{{ formatRp(data.reduce((s,k)=>s+k.spp,0)) }}</TableCell>
                 <TableCell class="text-right font-bold">{{ formatRp(data.reduce((s,k)=>s+k.bos,0)) }}</TableCell>
                 <TableCell class="text-right font-bold">{{ formatRp(data.reduce((s,k)=>s+k.donasi,0)) }}</TableCell>

@@ -105,6 +105,7 @@ const tingkatColor = { Nasional: 'bg-red-100 text-red-700 dark:bg-red-900/40 dar
           <Table>
             <TableHeader>
               <TableRow class="bg-muted/50">
+                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
                 <TableHead class="font-semibold">Unit Sekolah</TableHead>
                 <TableHead class="font-semibold">Jenjang</TableHead>
                 <TableHead class="font-semibold text-center">Siswa</TableHead>
@@ -115,9 +116,11 @@ const tingkatColor = { Nasional: 'bg-red-100 text-red-700 dark:bg-red-900/40 dar
               </TableRow>
             </TableHeader>
             <TableBody>
-              <template v-if="isLoading"><TableRow v-for="i in 4" :key="i"><TableCell v-for="j in 7" :key="j"><Skeleton class="h-5 w-full" /></TableCell></TableRow></template>
+              <template v-if="isLoading"><TableRow v-for="(i, index) in 4" :key="i">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell><TableCell v-for="j in 8" :key="j"><Skeleton class="h-5 w-full" /></TableCell></TableRow></template>
               <template v-else>
-                <TableRow v-for="s in data" :key="s.id" class="hover:bg-muted/30 transition-colors">
+                <TableRow v-for="(s, index) in data" :key="s.id" class="hover:bg-muted/30 transition-colors">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
                   <TableCell class="font-semibold text-sm">{{ s.sekolah }}</TableCell>
                   <TableCell><Badge :class="jenjangColor[s.jenjang]">{{ s.jenjang }}</Badge></TableCell>
                   <TableCell class="text-center font-medium">{{ s.siswa }}</TableCell>
@@ -136,6 +139,7 @@ const tingkatColor = { Nasional: 'bg-red-100 text-red-700 dark:bg-red-900/40 dar
           <Table>
             <TableHeader>
               <TableRow class="bg-muted/50">
+                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
                 <TableHead class="font-semibold">Nama Lomba / Prestasi</TableHead>
                 <TableHead class="font-semibold">Unit Sekolah</TableHead>
                 <TableHead class="font-semibold text-center">Tingkat</TableHead>
@@ -144,9 +148,11 @@ const tingkatColor = { Nasional: 'bg-red-100 text-red-700 dark:bg-red-900/40 dar
               </TableRow>
             </TableHeader>
             <TableBody>
-              <template v-if="isLoading"><TableRow v-for="i in 4" :key="i"><TableCell v-for="j in 5" :key="j"><Skeleton class="h-5 w-full" /></TableCell></TableRow></template>
+              <template v-if="isLoading"><TableRow v-for="(i, index) in 4" :key="i">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell><TableCell v-for="j in 6" :key="j"><Skeleton class="h-5 w-full" /></TableCell></TableRow></template>
               <template v-else>
-                <TableRow v-for="p in prestasiData" :key="p.id" class="hover:bg-muted/30 transition-colors">
+                <TableRow v-for="(p, index) in prestasiData" :key="p.id" class="hover:bg-muted/30 transition-colors">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
                   <TableCell class="font-medium text-sm">{{ p.nama }}</TableCell>
                   <TableCell class="text-sm text-muted-foreground">{{ p.sekolah }}</TableCell>
                   <TableCell class="text-center"><Badge :class="tingkatColor[p.tingkat]">{{ p.tingkat }}</Badge></TableCell>

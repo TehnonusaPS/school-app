@@ -3,6 +3,19 @@ import { AlertCircle, CheckCircle2, PlusCircle, Settings } from 'lucide-vue-next
 import WidgetList from '@/components/dashboard-widget/WidgetList.vue'
 import { activitiesData } from '../data/superadminActivityLogData'
 
+const props = defineProps({
+  delay: { type: Number, default: 0 }
+})
+
+interface ActivityItem {
+  title: string
+  desc: string
+  time: string
+  type: string
+}
+
+const asActivity = (item: unknown) => item as ActivityItem
+
 const getInitials = (title: string) => {
   return title.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()
 }
@@ -25,23 +38,25 @@ const getActivityConfig = (type: string) => {
     footerText="Lihat semua log"
     :items="activitiesData"
     cardClass="lg:col-span-2"
+    :delay="delay"
+    illustration="paper_plane"
   >
     <template #item="{ item }">
       <!-- Avatar -->
       <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/20 backdrop-blur-md border border-primary/20 text-[10px] font-bold text-primary drop-shadow-sm">
-        {{ getInitials(item.title) }}
+        {{ getInitials(asActivity(item).title) }}
       </div>
       <!-- Content -->
       <div class="min-w-0 flex-1">
         <div class="flex items-center justify-between gap-2">
-          <p class="truncate text-sm font-medium">{{ item.title }}</p>
+          <p class="truncate text-sm font-medium">{{ asActivity(item).title }}</p>
           <component
-            :is="getActivityConfig(item.type).icon"
-            :class="['size-3.5 shrink-0 drop-shadow-sm', getActivityConfig(item.type).color]"
+            :is="getActivityConfig(asActivity(item).type).icon"
+            :class="['size-3.5 shrink-0 drop-shadow-sm', getActivityConfig(asActivity(item).type).color]"
           />
         </div>
-        <p class="mt-0.5 truncate text-xs text-muted-foreground">{{ item.desc }}</p>
-        <p class="mt-1 text-[10px] text-muted-foreground/70">{{ item.time }}</p>
+        <p class="mt-0.5 truncate text-xs text-muted-foreground">{{ asActivity(item).desc }}</p>
+        <p class="mt-1 text-[10px] text-muted-foreground/70">{{ asActivity(item).time }}</p>
       </div>
     </template>
   </WidgetList>

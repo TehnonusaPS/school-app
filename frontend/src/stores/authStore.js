@@ -1,48 +1,57 @@
 import { defineStore } from 'pinia'
+import * as authService from '@/services/authService'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: JSON.parse(localStorage.getItem('user')) || null
+    user: JSON.parse(localStorage.getItem('user')) || null,
+    token: localStorage.getItem('token') || null,
+    isJustLoggedIn: false,
+    isLoggingOut: false
   }),
 
   actions: {
-    login(email, password) {
-      let user = null
+    /**
+     * Login melalui API backend Laravel Sanctum.
+     * Mengirim email & password, menerima token + data user.
+     */
+    async login(email, password) {
+      try {
+        const data = await authService.login(email, password)
 
-      const normalizedEmail = email.toLowerCase().trim()
+        // Simpan token dan user ke state & localStorage
+        this.token = data.access_token
+        this.user = data.user
+        this.isJustLoggedIn = true
 
-      if (normalizedEmail === 'superadmin@mail.com' && password === '123456') {
-        user = { name: 'Super Admin', role: 'superadmin', roleLabel: 'SUPERADMIN', email: 'superadmin@mail.com' }
-      } else if (normalizedEmail === 'adminyayasan@mail.com' && password === '123456') {
-        user = { name: 'Admin Yayasan', role: 'admin_yayasan', roleLabel: 'ADMIN YAYASAN', email: 'adminyayasan@mail.com' }
-      } else if (normalizedEmail === 'kepalasekolah@mail.com' && password === '123456') {
-        user = { name: 'Kepala Sekolah', role: 'kepala_sekolah', roleLabel: 'KEPALA SEKOLAH', email: 'kepalasekolah@mail.com' }
-      } else if (normalizedEmail === 'adminsekolah@mail.com' && password === '123456') {
-        user = { name: 'Admin Sekolah', role: 'admin_sekolah', roleLabel: 'ADMIN SEKOLAH', email: 'adminsekolah@mail.com' }
-      } else if (normalizedEmail === 'tatausaha@mail.com' && password === '123456') {
-        user = { name: 'Tata Usaha', role: 'tata_usaha', roleLabel: 'TATA USAHA', email: 'tatausaha@mail.com' }
-      } else if (normalizedEmail === 'guru@mail.com' && password === '123456') {
-        user = { name: 'Guru Pengajar', role: 'guru', roleLabel: 'GURU', email: 'guru@mail.com' }
-      } else if (normalizedEmail === 'walikelas@mail.com' && password === '123456') {
-        user = { name: 'Wali Kelas', role: 'wali_kelas', roleLabel: 'WALI KELAS', email: 'walikelas@mail.com' }
-      } else if (normalizedEmail === 'siswa@mail.com' && password === '123456') {
-        user = { name: 'Siswa', role: 'siswa', roleLabel: 'SISWA', email: 'siswa@mail.com' }
-      } else if (normalizedEmail === 'orangtua@mail.com' && password === '123456') {
-        user = { name: 'Orang Tua / Wali', role: 'orang_tua', roleLabel: 'ORANG TUA/WALI', email: 'orangtua@mail.com' }
+        localStorage.setItem('token', data.access_token)
+        localStorage.setItem('user', JSON.stringify(data.user))
+
+        return data.user
+      } catch (error) {
+        // Jika backend mengembalikan error (401, 403, 422), lempar pesan error
+        if (error.response) {
+          throw new Error(error.response.data.message || 'Login gagal.')
+        }
+        throw new Error('Tidak dapat terhubung ke server.')
       }
-
-      if (user) {
-        this.user = user
-        localStorage.setItem('user', JSON.stringify(user))
-        return user
-      }
-
-      return null
     },
 
-    logout() {
-      this.user = null
-      localStorage.removeItem('user')
+    /**
+     * Logout — hapus token di server dan bersihkan data lokal.
+     */
+    async logout() {
+      try {
+        if (this.token) {
+          await authService.logout()
+        }
+      } catch (error) {
+        // Abaikan error saat logout (misal token sudah expired)
+      } finally {
+        this.user = null
+        this.token = null
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+      }
     }
   }
 })

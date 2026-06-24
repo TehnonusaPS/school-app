@@ -6,6 +6,9 @@ import SheetDescription from '@/components/ui/sheet/SheetDescription.vue'
 import SheetHeader from '@/components/ui/sheet/SheetHeader.vue'
 import SheetTitle from '@/components/ui/sheet/SheetTitle.vue'
 import { SIDEBAR_WIDTH_MOBILE, useSidebar } from './utils'
+import { sidebarSlide } from '@/config/motion'
+import { computed } from 'vue'
+import { useAuthStore } from '@/stores/authStore'
 
 defineOptions({
   inheritAttrs: false,
@@ -18,6 +21,9 @@ const props = withDefaults(defineProps<SidebarProps>(), {
 })
 
 const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+
+const auth = useAuthStore()
+const computedSidebarDelay = computed(() => auth.isJustLoggedIn ? 1000 : 100)
 </script>
 
 <template>
@@ -89,9 +95,15 @@ const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
       v-bind="$attrs"
     >
       <div
+        v-motion
+        :initial="sidebarSlide.initial"
+        :enter="{ ...sidebarSlide.enter, transition: { ...sidebarSlide.enter.transition, delay: computedSidebarDelay } }"
         data-sidebar="sidebar"
         data-slot="sidebar-inner"
-        class="bg-sidebar group-data-[variant=floating]:ring-sidebar-border group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 flex size-full flex-col"
+        :class="[
+          'bg-sidebar group-data-[variant=floating]:ring-sidebar-border group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 flex size-full flex-col',
+          auth.isLoggingOut ? 'sidebar-exit-active' : ''
+        ]"
       >
         <slot />
       </div>

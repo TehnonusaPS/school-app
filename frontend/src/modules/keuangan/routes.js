@@ -3,7 +3,7 @@ export default [
     path: 'keuangan/spp',
     component: () => import('./pages/Spp.vue'),
     meta: {
-      title: 'SPP Siswa',
+      title: 'SPP',
       parent: 'Keuangan',
       description: 'Kelola pembayaran SPP bulanan siswa.'
     }
@@ -12,7 +12,7 @@ export default [
     path: 'keuangan/tagihan',
     component: () => import('./pages/RiwayatKeuangan.vue'),
     meta: {
-      title: 'Tagihan & Pembayaran',
+      title: 'Transaksi',
       parent: 'Keuangan',
       description: 'Riwayat dan status tagihan pembayaran.'
     }
@@ -48,16 +48,25 @@ export default [
     path: 'keuangan/subscription',
     component: () => import('./pages/Subscription.vue'),
     meta: {
-      title: 'Monitoring Subscription',
+      title: 'Subscription',
       parent: 'Keuangan',
       description: 'Pantau status langganan dan tagihan lisensi sekolah.'
+    }
+  },
+  {
+    path: 'keuangan/subscription/tambah',
+    component: () => import('./pages/formTambahLangganan.vue'),
+    meta: {
+      title: 'Tambah Langganan Baru',
+      parent: 'Keuangan',
+      description: 'Daftarkan institusi baru ke dalam paket langganan.'
     }
   },
   {
     path: 'keuangan/monitoring-yayasan',
     component: () => import('./pages/MonitoringYayasan.vue'),
     meta: {
-      title: 'Halaman Monitoring Keuangan Yayasan',
+      title: 'Keuangan Yayasan',
       parent: 'Keuangan',
       description: 'Pantau rekap dan arus kas keuangan seluruh unit sekolah di bawah yayasan.'
     }
@@ -66,7 +75,7 @@ export default [
     path: 'keuangan/paket-subscription',
     component: () => import('./pages/PaketSubscription.vue'),
     meta: {
-      title: 'Halaman Menu Paket Subcription',
+      title: 'Paket Subcription',
       parent: 'Keuangan',
       description: 'Kelola paket langganan dan tagihan lisensi aplikasi CerdasBangsa.'
     }
@@ -75,9 +84,27 @@ export default [
     path: 'keuangan/kelola-dana-yayasan',
     component: () => import('./pages/MengelolaDanaYayasan.vue'),
     meta: {
-      title: 'Mengelola Dana Yayasan',
+      title: 'Dana Yayasan',
       parent: 'Keuangan',
       description: 'Manajemen alokasi dan penggunaan dana hibah yayasan.'
+    }
+  },
+  {
+    path: 'keuangan/kelola-dana-yayasan/tambah',
+    component: () => import('./pages/formTambahPengeluaranYayasan.vue'),
+    meta: {
+      title: 'Input Pengeluaran Yayasan',
+      parent: 'Keuangan',
+      description: 'Catat pengeluaran alokasi dana yayasan baru.'
+    }
+  },
+  {
+    path: 'keuangan/tarif-spp',
+    component: () => import('./pages/TarifSpp.vue'),
+    meta: {
+      title: 'Pengaturan Tarif SPP',
+      parent: 'Keuangan',
+      description: 'Manajemen pengaturan tarif SPP dan biaya sekolah.'
     }
   },
   {

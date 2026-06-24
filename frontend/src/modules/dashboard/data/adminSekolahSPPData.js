@@ -1,10 +1,11 @@
 export const sppData = [
-  { status: 'sudah', nilai: 120, fill: 'var(--color-sudah)' },
-  { status: 'belum', nilai: 300, fill: 'var(--color-belum)' }
+  { status: 'sudah', nilai: 320, fill: 'var(--color-sudah)' },
+  { status: 'belum', nilai: 80, fill: 'var(--color-belum)' }
 ]
 
 export const sppSummary = {
-  sudah: 'Rp 120 Jt',
-  belum: 'Rp 300 Jt',
-  total: 'Rp 420 Jt'
+  sudah: 'Rp 320 Jt',
+  belum: 'Rp 80 Jt',
+  total: 'Rp 400 Jt'
 }
+

@@ -1,7 +1,9 @@
+import { useAuthStore } from '@/stores/authStore'
+
 export default [
   {
     path: 'komunikasi/pengumuman',
-    component: () => import('./pages/Pengumuman.vue'),
+    component: () => import('./pages/admin-yayasan/pengumuman/index.vue'),
     meta: {
       title: 'Pengumuman',
       parent: 'Komunikasi',
@@ -10,7 +12,7 @@ export default [
   },
   {
     path: 'komunikasi/berita-kegiatan',
-    component: () => import('./pages/BeritaKegiatan.vue'),
+    component: () => import('./pages/kepala-sekolah/berita-kegiatan/index.vue'),
     meta: {
       title: 'Berita Kegiatan',
       parent: 'Komunikasi',
@@ -18,37 +20,10 @@ export default [
     }
   },
   {
-    path: 'komunikasi/berita-kegiatan/buat',
-    component: () => import('./pages/BuatBeritaKegiatan.vue'),
-    meta: {
-      title: 'Buat Berita Kegiatan',
-      parent: 'Komunikasi',
-      description: 'Buat berita kegiatan baru.'
-    }
-  },
-  {
-    path: 'komunikasi/berita-kegiatan/edit/:id',
-    component: () => import('./pages/EditBeritaKegiatan.vue'),
-    meta: {
-      title: 'Edit Berita Kegiatan',
-      parent: 'Komunikasi',
-      description: 'Edit berita kegiatan.'
-    }
-  },
-  {
-    path: 'komunikasi/berita-kegiatan/lihat/:id',
-    component: () => import('./pages/DetailBeritaKegiatan.vue'),
-    meta: {
-      title: 'Detail Berita Kegiatan',
-      parent: 'Komunikasi',
-      description: 'Detail informasi berita kegiatan.'
-    }
-  },
-  {
     path: 'komunikasi/feedback',
-    component: () => import('./pages/FeedbackOrangTua.vue'),
+    component: () => import('./pages/Feedback.vue'),
     meta: {
-      title: 'Feedback Orang Tua',
+      title: 'Feedback',
       parent: 'Komunikasi',
       description: 'Daftar masukan dan saran dari orang tua murid.'
     }
@@ -59,7 +34,9 @@ export default [
     meta: {
       title: 'Pesan Internal',
       parent: 'Komunikasi',
-      description: 'Pesan internal antar warga sekolah.'
+      description: 'Pesan internal antar warga sekolah.',
+      requiresAuth: true,
+      roles: ['guru', 'wali_kelas', 'siswa', 'orang_tua']
     }
   },
   {
@@ -73,18 +50,63 @@ export default [
   },
   {
     path: 'komunikasi/chat',
-    component: () => import('./pages/Chat.vue'),
     meta: {
-      title: 'Chat',
-      parent: 'Komunikasi',
-      description: 'Pesan dan percakapan antara guru dan wali murid.',
       requiresAuth: true,
-      roles: ['guru', 'siswa']
+      roles: ['guru', 'siswa', 'wali_kelas', 'orang_tua']
+    },
+    redirect: to => {
+      const auth = useAuthStore()
+      const role = auth.user?.role
+      if (role === 'guru') return '/komunikasi/guru/chat'
+      if (role === 'wali_kelas') return '/komunikasi/wali-kelas/chat'
+      if (role === 'siswa') return '/komunikasi/siswa/chat'
+      if (role === 'orang_tua') return '/komunikasi/orang-tua/chat'
+      return '/dashboard'
+    }
+  },
+  {
+    path: 'komunikasi/guru/chat',
+    component: () => import('./pages/guru/chat/index.vue'),
+    meta: {
+      title: 'Chat Guru',
+      parent: 'Komunikasi',
+      requiresAuth: true,
+      roles: ['guru']
+    }
+  },
+  {
+    path: 'komunikasi/wali-kelas/chat',
+    component: () => import('./pages/wali-kelas/chat/index.vue'),
+    meta: {
+      title: 'Chat Wali Kelas',
+      parent: 'Komunikasi',
+      requiresAuth: true,
+      roles: ['wali_kelas']
+    }
+  },
+  {
+    path: 'komunikasi/siswa/chat',
+    component: () => import('./pages/siswa/chat/index.vue'),
+    meta: {
+      title: 'Chat Siswa',
+      parent: 'Komunikasi',
+      requiresAuth: true,
+      roles: ['siswa']
+    }
+  },
+  {
+    path: 'komunikasi/orang-tua/chat',
+    component: () => import('./pages/orang-tua/chat/index.vue'),
+    meta: {
+      title: 'Chat Orang Tua',
+      parent: 'Komunikasi',
+      requiresAuth: true,
+      roles: ['orang_tua']
     }
   },
   {
     path: 'komunikasi/persuratan/aktif',
-    component: () => import('./pages/SuratKeteranganAktif.vue'),
+    component: () => import('./pages/tata-usaha/surat-aktif/index.vue'),
     meta: {
       title: 'Surat Keterangan Aktif',
       parent: 'Komunikasi',
@@ -94,63 +116,19 @@ export default [
     }
   },
   {
-    path: 'komunikasi/persuratan/aktif/buat',
-    component: () => import('./pages/BuatSuratAktif.vue'),
-    meta: {
-      title: 'Buat Surat Keterangan Aktif',
-      parent: 'Komunikasi',
-      description: 'Form pembuatan surat keterangan siswa aktif.',
-      requiresAuth: true,
-      roles: ['tata_usaha']
-    }
-  },
-  {
-    path: 'komunikasi/persuratan/aktif/edit/:id',
-    component: () => import('./pages/EditSuratAktif.vue'),
-    meta: {
-      title: 'Edit Surat Keterangan Aktif',
-      parent: 'Komunikasi',
-      description: 'Form edit surat keterangan siswa aktif.',
-      requiresAuth: true,
-      roles: ['tata_usaha']
-    }
-  },
-  {
     path: 'komunikasi/persuratan/dispensasi',
-    component: () => import('./pages/SuratDispensasi.vue'),
+    component: () => import('./pages/tata-usaha/surat-dispensasi/index.vue'),
     meta: {
       title: 'Surat Dispensasi',
       parent: 'Komunikasi',
-      description: 'Manajemen surat izin dan dispensasi kegiatan siswa.',
-      requiresAuth: true,
-      roles: ['tata_usaha']
-    }
-  },
-  {
-    path: 'komunikasi/persuratan/dispensasi/buat',
-    component: () => import('./pages/BuatSuratDispensasi.vue'),
-    meta: {
-      title: 'Buat Surat Dispensasi',
-      parent: 'Komunikasi',
-      description: 'Form pembuatan surat izin atau dispensasi siswa.',
-      requiresAuth: true,
-      roles: ['tata_usaha']
-    }
-  },
-  {
-    path: 'komunikasi/persuratan/dispensasi/edit/:id',
-    component: () => import('./pages/EditSuratDispensasi.vue'),
-    meta: {
-      title: 'Edit Surat Dispensasi',
-      parent: 'Komunikasi',
-      description: 'Form edit surat izin atau dispensasi siswa.',
+      description: 'Manajemen surat izin and dispensasi kegiatan siswa.',
       requiresAuth: true,
       roles: ['tata_usaha']
     }
   },
   {
     path: 'komunikasi/persuratan/lulus',
-    component: () => import('./pages/SuratKeteranganLulus.vue'),
+    component: () => import('./pages/tata-usaha/surat-lulus/index.vue'),
     meta: {
       title: 'Surat Keterangan Lulus',
       parent: 'Komunikasi',
@@ -160,56 +138,12 @@ export default [
     }
   },
   {
-    path: 'komunikasi/persuratan/lulus/buat',
-    component: () => import('./pages/BuatSuratLulus.vue'),
-    meta: {
-      title: 'Buat Surat Keterangan Lulus',
-      parent: 'Komunikasi',
-      description: 'Form pembuatan Surat Keterangan Lulus (SKL) sementara.',
-      requiresAuth: true,
-      roles: ['tata_usaha']
-    }
-  },
-  {
-    path: 'komunikasi/persuratan/lulus/edit/:id',
-    component: () => import('./pages/EditSuratLulus.vue'),
-    meta: {
-      title: 'Edit Surat Keterangan Lulus',
-      parent: 'Komunikasi',
-      description: 'Form edit Surat Keterangan Lulus (SKL) sementara.',
-      requiresAuth: true,
-      roles: ['tata_usaha']
-    }
-  },
-  {
     path: 'komunikasi/persuratan/peringatan',
-    component: () => import('./pages/SuratPeringatan.vue'),
+    component: () => import('./pages/tata-usaha/surat-peringatan/index.vue'),
     meta: {
-      title: 'Surat Peringatan & Tunggakan',
+      title: 'Peringatan',
       parent: 'Komunikasi',
       description: 'Manajemen surat peringatan, tagihan, dan pemanggilan.',
-      requiresAuth: true,
-      roles: ['tata_usaha']
-    }
-  },
-  {
-    path: 'komunikasi/persuratan/peringatan/buat',
-    component: () => import('./pages/BuatSuratPeringatan.vue'),
-    meta: {
-      title: 'Buat Surat Peringatan & Tunggakan',
-      parent: 'Komunikasi',
-      description: 'Form pembuatan surat peringatan, tagihan, dan pemanggilan.',
-      requiresAuth: true,
-      roles: ['tata_usaha']
-    }
-  },
-  {
-    path: 'komunikasi/persuratan/peringatan/edit/:id',
-    component: () => import('./pages/EditSuratPeringatan.vue'),
-    meta: {
-      title: 'Edit Surat Peringatan & Tunggakan',
-      parent: 'Komunikasi',
-      description: 'Form edit surat peringatan, tagihan, dan pemanggilan.',
       requiresAuth: true,
       roles: ['tata_usaha']
     }

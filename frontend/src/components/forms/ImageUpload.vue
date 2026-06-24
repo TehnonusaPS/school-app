@@ -25,7 +25,7 @@ const handleFileChange = (event) => {
 <template>
   <div class="space-y-3">
     <label
-      class="flex flex-col items-center justify-center w-64 aspect-square mx-auto rounded-xl border-2 border-dashed cursor-pointer transition hover:bg-muted/50 overflow-hidden"
+      class="flex flex-col items-center justify-center sm:w-32 md:w-40 lg:w-64 aspect-square mx-auto rounded-xl border-2 border-dashed cursor-pointer transition hover:bg-muted/50 overflow-hidden"
       :class="[
         error
           ? 'border-destructive'
@@ -38,7 +38,7 @@ const handleFileChange = (event) => {
 
       <template v-else>
         <div class="flex flex-col items-center gap-3 text-muted-foreground">
-          <ImagePlus class="w-10 h-10" />
+          <ImagePlus class="w-8 h-8 md:w-8 md:h-8 lg:w-10 lg:h-10" />
           <div class="text-sm text-center">Klik untuk upload gambar</div>
         </div>
       </template>

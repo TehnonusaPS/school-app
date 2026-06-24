@@ -14,6 +14,7 @@ import komunikasiRoutes from '../modules/komunikasi/routes'
 import laporanRoutes from '../modules/laporan/routes'
 import lainnyaRoutes from '../modules/lainnya/routes'
 import devRoutes from '../modules/dev/routes'
+import akunSettingRoutes from '../modules/akun-setting/routes'
 
 const routes = [
   // Landing page
@@ -33,10 +34,43 @@ const routes = [
   // ─── Halaman Presensi (Fullscreen, tanpa Sidebar) ───
   {
     path: '/absensi/siswa/scan',
-    component: () => import('../modules/absensi/pages/PresensiSiswa.vue'),
+    component: () => import('../modules/absensi/pages/admin-sekolah/presensi-siswa/index.vue'),
     meta: {
       requiresAuth: true,
+      roles: ['admin_sekolah'],
       title: 'Kiosk Presensi Siswa'
+    }
+  },
+  {
+    path: '/absensi/input/print',
+    name: 'CetakKehadiran',
+    meta: {
+      requiresAuth: true,
+      roles: ['guru', 'wali_kelas']
+    },
+    redirect: () => {
+      const auth = useAuthStore()
+      if (auth.user?.role === 'guru') return '/absensi/guru/input-kehadiran/print'
+      if (auth.user?.role === 'wali_kelas') return '/absensi/wali-kelas/input-kehadiran/print'
+      return '/dashboard'
+    }
+  },
+  {
+    path: '/absensi/guru/input-kehadiran/print',
+    component: () => import('../modules/absensi/pages/guru/input-kehadiran/print.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['guru'],
+      title: 'Cetak Kehadiran Siswa'
+    }
+  },
+  {
+    path: '/absensi/wali-kelas/input-kehadiran/print',
+    component: () => import('../modules/absensi/pages/wali-kelas/input-kehadiran/print.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['wali_kelas'],
+      title: 'Cetak Kehadiran Siswa'
     }
   },
 
@@ -54,7 +88,8 @@ const routes = [
       ...komunikasiRoutes,
       ...laporanRoutes,
       ...lainnyaRoutes,
-      ...devRoutes
+      ...devRoutes,
+      ...akunSettingRoutes
     ]
   }
 ]
@@ -82,7 +117,7 @@ router.beforeEach((to, from) => {
   if (to.meta.roles && !to.meta.roles.includes(auth.user?.role)) {
     return '/login'
   }
-  
+
   // Vue Router 4+: Tidak me-return apapun (atau return true) akan otomatis melanjutkan rute
 })
 

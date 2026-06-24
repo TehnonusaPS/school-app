@@ -9,16 +9,16 @@ export const mockMateriList = [
     trailingIcon: Download
   },
   {
-    title: 'Bab 1 : Lorem Ipsum Lored De',
+    title: 'Ujian : "Bab 1 - Lorem Ipsum Lored De"',
     description: 'Dua hari yang lalu · Nilai : 80',
-    variant: 'yellow',
+    variant: 'purple',
     leadingIcon: FileText,
     trailingIcon: null
   },
   {
-    title: 'Bab 1 : Lorem Ipsum Lored De',
+    title: 'Tugas : "Bab 1 - Lorem Ipsum Lored De"',
     description: 'Dua hari yang lalu · Nilai : 80',
-    variant: 'blue',
+    variant: 'amber',
     leadingIcon: FileText,
     trailingIcon: null
   }

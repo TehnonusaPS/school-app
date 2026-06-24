@@ -5,6 +5,10 @@ import { Badge } from '@/components/ui/badge'
 import WidgetCard from '@/components/dashboard-widget/WidgetCard.vue'
 import { jadwalData as jadwal } from '../data/guruJadwalData'
 
+const props = defineProps({
+  delay: { type: Number, default: 0 }
+})
+
 const today = new Date().toLocaleDateString('id-ID', {
   weekday: 'long', day: '2-digit', month: 'short', year: 'numeric'
 }).toUpperCase()
@@ -17,6 +21,8 @@ const today = new Date().toLocaleDateString('id-ID', {
     :icon="CalendarDays"
     cardClass="lg:col-span-3"
     contentClass="space-y-2 pb-4"
+    :delay="delay"
+    illustration="school_bell"
   >
     <template #header-action>
       <Badge variant="outline" class="text-xs font-semibold text-primary">

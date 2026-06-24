@@ -3,6 +3,11 @@ import { Badge } from '@/components/ui/badge'
 import WidgetCard from '@/components/dashboard-widget/WidgetCard.vue'
 import WidgetProgressList from '@/components/dashboard-widget/WidgetProgressList.vue'
 import { sekolahData, sdmProgressData, sdmQuickStats } from '../data/yayasanSekolahSDMData'
+import { tableRowFade } from '@/config/motion'
+
+const props = defineProps({
+  delay: { type: Number, default: 0 }
+})
 </script>
 
 <template>
@@ -13,6 +18,8 @@ import { sekolahData, sdmProgressData, sdmQuickStats } from '../data/yayasanSeko
       description="Sekolah yang terdaftar di bawah yayasan ini"
       cardClass="lg:col-span-3"
       contentClass="p-0"
+      :delay="delay"
+      illustration="abc_board"
     >
       <!-- Header fixed — tidak ikut scroll -->
       <table class="w-full text-sm border-b">
@@ -51,6 +58,9 @@ import { sekolahData, sdmProgressData, sdmQuickStats } from '../data/yayasanSeko
             <tr
               v-for="(s, i) in sekolahData"
               :key="i"
+              v-motion
+              :initial="tableRowFade.initial"
+              :visible-once="{ ...tableRowFade.visible, transition: { ...tableRowFade.visible.transition, delay: props.delay + 100 + (i * 50) } }"
               class="border-b transition-colors hover:bg-muted/50 cursor-default"
             >
               <td class="pl-6 py-3 font-medium text-sm">{{ s.nama }}</td>
@@ -78,12 +88,13 @@ import { sekolahData, sdmProgressData, sdmQuickStats } from '../data/yayasanSeko
       </div>
     </WidgetCard>
 
-    <!-- Distribusi SDM -->
     <WidgetProgressList
       title="Distribusi SDM"
       description="Komposisi tenaga pendidik & staff"
       cardClass="lg:col-span-2"
       :items="sdmProgressData"
+      :delay="delay + 100"
+      illustration="graduation_cap"
     >
       <!-- Divider / Ringkasan -->
       <div class="border-t pt-4">

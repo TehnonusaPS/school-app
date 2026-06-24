@@ -4,6 +4,10 @@ import { Badge } from '@/components/ui/badge'
 import WidgetCard from '@/components/dashboard-widget/WidgetCard.vue'
 import { absensiData as absensi } from '../data/adminSekolahAbsensiData'
 
+const props = defineProps({
+  delay: { type: Number, default: 0 }
+})
+
 const statusVariant = (s: string) =>
   s === 'Hadir'     ? 'default'   :
   s === 'Terlambat' ? 'secondary' :
@@ -18,6 +22,8 @@ const statusVariant = (s: string) =>
     :icon="ClipboardList"
     cardClass="lg:col-span-3"
     contentClass="p-0"
+    :delay="delay"
+    illustration="school_bell"
   >
     <!-- Fixed header -->
     <table class="w-full text-sm border-b">

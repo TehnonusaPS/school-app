@@ -10,7 +10,17 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import WidgetCard from '@/components/dashboard-widget/WidgetCard.vue'
+import RollingNumber from '@/components/ui/rolling-number/RollingNumber.vue'
+import { useAuthStore } from '@/stores/authStore'
+import { tableRowFade } from '@/config/motion'
 import { dataPerSemester, catatanGuruWali } from '../data/orangTuaPerformaData'
+
+const props = defineProps({
+  delay: { type: Number, default: 0 }
+})
+
+const auth = useAuthStore()
+const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.delay)
 
 const semester = ref('ganjil-2026')
 
@@ -26,6 +36,8 @@ const nilaiColor = (v: number) =>
     description="Nilai per mata pelajaran semester ini"
     contentClass="space-y-4"
     footerClass="border-t pt-4"
+    :delay="delay"
+    illustration="star"
   >
     <template #header-action>
       <Select v-model="semester">
@@ -41,18 +53,23 @@ const nilaiColor = (v: number) =>
     </template>
 
     <div
-      v-for="m in mapel"
+      v-for="(m, index) in mapel"
       :key="m.nama"
+      v-motion
+      :initial="tableRowFade.initial"
+      :visible-once="{ ...tableRowFade.visible, transition: { ...tableRowFade.visible.transition, delay: computedDelay + 100 + (index * 50) } }"
       class="space-y-1.5 transition-all duration-300"
     >
       <div class="flex items-center justify-between text-sm">
         <span class="font-medium">{{ m.nama }}</span>
         <div class="flex items-center gap-2">
-          <span :class="['font-bold tabular-nums text-xs', nilaiColor(m.nilai)]">{{ m.nilai }}%</span>
+          <span :class="['font-bold tabular-nums text-xs', nilaiColor(m.nilai)]">
+            <RollingNumber :value="m.nilai + '%'" :delay="computedDelay + 150 + (index * 50)" />
+          </span>
           <ChevronRight class="size-3.5 text-muted-foreground" />
         </div>
       </div>
-      <Progress :model-value="m.nilai" class="h-2" />
+      <Progress :model-value="m.nilai" :delay="computedDelay + 250 + (index * 50)" class="h-2" />
     </div>
 
     <template #footer>

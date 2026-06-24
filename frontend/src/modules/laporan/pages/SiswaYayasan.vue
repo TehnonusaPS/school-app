@@ -135,7 +135,8 @@ const jenjangColor = { SD: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 
         <Table>
           <TableHeader>
             <TableRow class="bg-muted/50">
-              <TableHead class="font-semibold cursor-pointer select-none" @click="toggleSort('sekolah')">
+                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
+                <TableHead class="font-semibold cursor-pointer select-none" @click="toggleSort('sekolah')">
                 <div class="flex items-center gap-1">Unit Sekolah <component :is="sortField==='sekolah'&&sortDir==='desc'?ChevronDown:ChevronUp" :class="['size-3',sortField==='sekolah'?'text-primary':'text-muted-foreground/40']" /></div>
               </TableHead>
               <TableHead class="font-semibold">Jenjang</TableHead>
@@ -152,10 +153,12 @@ const jenjangColor = { SD: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 
           </TableHeader>
           <TableBody>
             <template v-if="isLoading">
-              <TableRow v-for="i in 4" :key="i"><TableCell v-for="j in 9" :key="j"><Skeleton class="h-5 w-full" /></TableCell></TableRow>
+              <TableRow v-for="(i, index) in 4" :key="i">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell><TableCell v-for="j in 10" :key="j"><Skeleton class="h-5 w-full" /></TableCell></TableRow>
             </template>
             <template v-else>
-              <TableRow v-for="s in filteredData" :key="s.id" class="hover:bg-muted/30 transition-colors">
+              <TableRow v-for="(s, index) in filteredData" :key="s.id" class="hover:bg-muted/30 transition-colors">
+                <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
                 <TableCell class="font-semibold text-sm">{{ s.sekolah }}</TableCell>
                 <TableCell><Badge :class="jenjangColor[s.jenjang]">{{ s.jenjang }}</Badge></TableCell>
                 <TableCell class="text-center font-bold text-primary">{{ s.total }}</TableCell>

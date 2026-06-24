@@ -1,30 +1,249 @@
 <script setup>
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { computed } from 'vue'
+import { FolderOpen } from 'lucide-vue-next'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle
+} from '@/components/ui/empty'
+import { tableRowFade } from '@/config/motion'
+import Checkbox from '@/components/ui/checkbox/Checkbox.vue'
 
-defineProps({
+const props = defineProps({
   columns: {
     type: Array,
     default: () => []
   },
-
   items: {
     type: Array,
     default: () => []
+  },
+  rowActions: {
+    type: Array,
+    default: () => []
+  },
+  showRowNumber: {
+    type: Boolean,
+    default: true
+  },
+  rowNumberOffset: {
+    type: Number,
+    default: 0
+  },
+  minHeight: {
+    type: String,
+    default: '240px'
+  },
+  perPage: {
+    type: Number,
+    default: 5
+  },
+  selectable: {
+    type: Boolean,
+    default: false
+  },
+  selectedRows: {
+    type: Array,
+    default: () => []
+  },
+  rowDisabled: {
+    type: Function,
+    default: null
+  },
+  fixedHeight: {
+    type: Boolean,
+    default: false
   }
 })
+
+// ── Inisial dari nama ──────────────────────────────────────────────────────────
+const getInitials = name => {
+  if (!name) return '?'
+  const parts = String(name).trim().split(/\s+/)
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+}
+
+// ── Resolve badge variant ─────────────────────────────────────────────────────
+const resolveBadgeVariant = (column, value) => {
+  if (!column.badgeVariant) return 'default'
+  if (typeof column.badgeVariant === 'function') return column.badgeVariant(value)
+  if (typeof column.badgeVariant === 'object') return column.badgeVariant[value] || 'default'
+  return column.badgeVariant
+}
+
+/**
+ * Resolve class untuk <TableHead>.
+ * Alignment diputuskan otomatis berdasarkan tipe/fitur kolom:
+ *   - actions          → selalu center
+ *   - badge            → selalu center
+ *   - type: 'number'   → selalu center
+ */
+const resolveHeaderClass = column => {
+  const classes = ['font-semibold text-xs uppercase text-muted-foreground']
+  const isCentered = column.key === 'actions' || column.badge || column.type === 'number'
+  if (isCentered) classes.push('text-center')
+  return classes
+}
+
+/**
+ * Resolve class untuk <TableCell>.
+ * Semua keputusan layout diambil otomatis dari props semantik:
+ *
+ *   type: 'number' → tabular-nums font-semibold, center
+ *   type: 'date'   → text-xs text-muted-foreground whitespace-nowrap
+ *   type: 'code'   → font-mono text-xs
+ *   type: 'muted'  → text-xs text-muted-foreground
+ *   badge: true    → center
+ *   key=actions    → center
+ *   truncate: true → truncate dengan max-width standar
+ */
+const resolveCellClass = column => {
+  const classes = []
+
+  // Alignment otomatis
+  if (column.key === 'actions' || column.badge || column.type === 'number') {
+    classes.push('text-center')
+  }
+
+  // Styling per tipe semantik
+  switch (column.type) {
+    case 'number':
+      classes.push('tabular-nums font-semibold')
+      break
+    case 'date':
+      classes.push('text-xs text-muted-foreground whitespace-nowrap')
+      break
+    case 'code':
+      classes.push('font-mono text-xs')
+      break
+    case 'muted':
+      classes.push('text-xs text-muted-foreground')
+      break
+  }
+
+  // Truncate — max-w-xs sebagai batas standar yang wajar untuk kolom terpotong
+  if (column.truncate) classes.push('truncate max-w-xs')
+
+  return classes
+}
+
+// ── Filler Rows & Empty State ──────────────────────────────────────────────────
+const emptyRowsCount = computed(() => {
+  if (!props.fixedHeight || !props.perPage || props.items.length === 0) return 0
+  return Math.max(0, props.perPage - props.items.length)
+})
+
+// ── Checkbox / Combobox ───────────────────────────────────
+
+const emit = defineEmits([
+  'update:selectedRows'
+])
+
+const isSelected = item => {
+  return props.selectedRows.some(
+    row => row.id === item.id
+  )
+}
+
+const toggleRow = item => {
+  if (isDisabled(item)) return
+
+  const exists = isSelected(item)
+
+  if (exists) {
+    emit(
+      'update:selectedRows',
+      props.selectedRows.filter(
+        row => row.id !== item.id
+      )
+    )
+  } else {
+    emit(
+      'update:selectedRows',
+      [
+        ...props.selectedRows,
+        item
+      ]
+    )
+  }
+}
+
+const isDisabled = item => {
+  return props.rowDisabled?.(item) ?? false
+}
+
+const selectableItems = computed(() => {
+  return props.items.filter(
+    item => !(props.rowDisabled?.(item))
+  )
+})
+
+const allSelected = computed(() => {
+  if (!selectableItems.value.length) return false
+
+  return selectableItems.value.every(
+    item =>
+      props.selectedRows.some(
+        row => row.id === item.id
+      )
+  )
+})
+
+const toggleAll = checked => {
+  if (checked) {
+    emit(
+      'update:selectedRows',
+      [...selectableItems.value]
+    )
+  } else {
+    emit(
+      'update:selectedRows',
+      []
+    )
+  }
+}
+
+
 </script>
 
 <template>
+  <div class="relative w-full min-w-0" :style="items.length === 0 && !perPage ? { minHeight } : {}">
   <Table>
     <TableHeader class="bg-muted/50">
       <TableRow>
         <TableHead
+          v-if="selectable"
+          class="w-12 text-center"
+        >
+          <Checkbox
+            :model-value="allSelected"
+            @update:model-value="toggleAll"
+          />
+        </TableHead>
+        <!-- Kolom Nomor Urut -->
+        <TableHead
+          v-if="showRowNumber && !selectable"
+          class="font-semibold text-xs uppercase text-muted-foreground w-12 text-center"
+        >
+          No.
+        </TableHead>
+        <TableHead
           v-for="column in columns"
           :key="column.key"
-          :class="[
-            'font-semibold text-xs uppercase text-muted-foreground',
-            column.headerClass
-          ]"
+          :class="resolveHeaderClass(column)"
         >
           {{ column.label }}
         </TableHead>
@@ -32,24 +251,161 @@ defineProps({
     </TableHeader>
 
     <TableBody>
+      <!-- Data Rows -->
       <TableRow
         v-for="(item, rowIndex) in items"
-        :key="rowIndex"
+        :key="item.id || rowIndex"
+        class="h-[53px]"
+        v-motion
+        :initial="tableRowFade.initial"
+        :visible-once="{
+          ...tableRowFade.visible,
+          transition: {
+            ...tableRowFade.visible.transition,
+            delay: 80 + rowIndex * 70
+          }
+        }"
       >
+        <!-- Sel Checkbox -->
+        <TableCell
+          v-if="selectable"
+          class="w-12 text-center"
+        >
+          <Checkbox
+            :disabled="isDisabled(item)"
+            :model-value="isSelected(item)"
+            @update:model-value="() => toggleRow(item)"
+          />
+        </TableCell>
+        <!-- Sel Nomor Urut -->
+        <TableCell
+          v-if="showRowNumber && !selectable"
+          class="w-12 text-center text-sm text-muted-foreground tabular-nums"
+        >
+          {{ rowNumberOffset + rowIndex + 1 }}
+        </TableCell>
+
         <TableCell
           v-for="column in columns"
           :key="column.key"
-          :class="column.cellClass"
+          :class="resolveCellClass(column)"
         >
           <slot
             :name="`cell-${column.key}`"
             :item="item"
             :value="item[column.key]"
+            :index="rowIndex"
           >
-            {{ item[column.key] }}
+            <!-- AVATAR + TEKS -->
+            <template v-if="column.avatar">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <Avatar
+                  data-size="sm"
+                  class="shrink-0"
+                >
+                  <!-- Tampilkan foto dari backend jika tersedia -->
+                  <AvatarImage
+                    v-if="column.avatarKey && item[column.avatarKey]"
+                    :src="item[column.avatarKey]"
+                    :alt="item[column.key]"
+                  />
+                  <!-- Fallback ke inisial jika tidak ada foto -->
+                  <AvatarFallback class="text-[11px] font-bold">
+                    {{ getInitials(item[column.key]) }}
+                  </AvatarFallback>
+                </Avatar>
+                <span class="truncate text-sm font-medium">{{ item[column.key] }}</span>
+              </div>
+            </template>
+
+            <!-- BADGE -->
+            <template v-else-if="column.badge">
+              <Badge :variant="resolveBadgeVariant(column, item[column.key])">
+                {{ item[column.key] }}
+              </Badge>
+            </template>
+
+            <!-- AKSI BARIS -->
+            <template v-else-if="column.key === 'actions' && rowActions && rowActions.length">
+              <div class="flex items-center justify-center gap-3">
+                <button
+                  v-for="action in rowActions"
+                  :key="action.label"
+                  class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-foreground transition-colors"
+                  :title="action.label"
+                  @click="action.click(item)"
+                >
+                  <component
+                    :is="action.icon"
+                    class="size-4 transition-transform group-hover/btn:scale-110"
+                  />
+                  <span class="text-[9px] font-semibold leading-none">{{ action.label }}</span>
+                </button>
+              </div>
+            </template>
+
+            <!-- TEKS BIASA -->
+            <template v-else>
+              <div :class="{ 'truncate max-w-xs': column.truncate }">
+                {{ item[column.key] }}
+              </div>
+            </template>
           </slot>
+        </TableCell>
+      </TableRow>
+
+      <!-- Empty State / No Data Found -->
+      <TableRow v-if="items.length === 0" class="border-none hover:bg-transparent!">
+        <TableCell
+        :colspan="columns.length + (showRowNumber ? 1 : 0) +(selectable ? 1 : 0)"
+          class="p-0 border-none select-none pointer-events-none"
+        >
+          <div
+            class="flex flex-col items-center justify-center text-center p-6 w-full"
+            :style="{ height: `${(perPage || 5) * 53}px` }"
+          >
+            <Empty class="border-none bg-transparent">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <FolderOpen class="w-10 h-10 text-muted-foreground/30" />
+                </EmptyMedia>
+                <EmptyTitle class="text-sm font-semibold text-foreground/80 mt-2">Tidak Ada Data</EmptyTitle>
+                <EmptyDescription class="text-xs text-muted-foreground/50 max-w-xs mt-1">
+                  Tidak ada data yang ditemukan atau belum ditambahkan ke tabel ini.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          </div>
+        </TableCell>
+      </TableRow>
+
+      <!-- Filler Rows -->
+      <TableRow
+        v-for="i in emptyRowsCount"
+        :key="`empty-${i}`"
+        class="h-[53px] hover:bg-transparent! border-b border-transparent pointer-events-none"
+      >
+        <TableCell
+          v-if="selectable"
+        >
+          &nbsp;
+        </TableCell>
+        <!-- Sel Nomor Urut Kosong -->
+        <TableCell
+          v-if="showRowNumber"
+          class="w-12 text-center"
+        >
+          &nbsp;
+        </TableCell>
+        <TableCell
+          v-for="column in columns"
+          :key="column.key"
+          :class="resolveCellClass(column)"
+        >
+          &nbsp;
         </TableCell>
       </TableRow>
     </TableBody>
   </Table>
+  </div>
 </template>

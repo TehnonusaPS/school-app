@@ -10,12 +10,15 @@ import {
 defineProps({
   title: String,
   description: String,
-  icon: Object
+  icon: {
+    type: [Object, Function],
+    default: null,
+  },
 })
 </script>
 
 <template>
-  <Card class="shadow-sm">
+  <Card class="shadow-sm flex flex-col">
     <CardHeader class="pb-4">
       <div
         v-if="icon || title"
@@ -34,6 +37,6 @@ defineProps({
       </CardDescription>
     </CardHeader>
 
-    <CardContent class="space-y-4"><slot /></CardContent>
+    <CardContent class="space-y-4 flex-1 flex flex-col"><slot /></CardContent>
   </Card>
 </template>

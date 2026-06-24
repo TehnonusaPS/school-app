@@ -1,4 +1,6 @@
 <script setup>
+import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import {
   Wallet,
   Banknote,
@@ -14,6 +16,94 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
+import StatCard from '@/components/stat-card/StatCard.vue'
+
+const router = useRouter()
+
+const goToTambahPengeluaran = () => {
+  router.push('/keuangan/kelola-dana-yayasan/tambah')
+}
+
+const defaultPengeluaran = [
+  {
+    id: 'TRX-101',
+    tanggal: '14 Mar 2024',
+    tanggalRaw: { year: 2024, month: 3, day: 14 },
+    deskripsi: 'Renovasi Lab Komputer',
+    kategori: 'Infrastruktur',
+    jumlah: 45000000,
+    status: 'APPROVED'
+  },
+  {
+    id: 'TRX-102',
+    tanggal: '12 Mar 2024',
+    tanggalRaw: { year: 2024, month: 3, day: 12 },
+    deskripsi: 'Gaji Guru Honorer Mar',
+    kategori: 'Salaries',
+    jumlah: 128500000,
+    status: 'APPROVED'
+  },
+  {
+    id: 'TRX-103',
+    tanggal: '10 Mar 2024',
+    tanggalRaw: { year: 2024, month: 3, day: 10 },
+    deskripsi: 'Seminar Pendidikan Karakter',
+    kategori: 'Events',
+    jumlah: 12000000,
+    status: 'PENDING'
+  },
+  {
+    id: 'TRX-104',
+    tanggal: '08 Mar 2024',
+    tanggalRaw: { year: 2024, month: 3, day: 8 },
+    deskripsi: 'Pengadaan Buku Perpustakaan',
+    kategori: 'Infrastruktur',
+    jumlah: 35200000,
+    status: 'APPROVED'
+  }
+]
+
+const pengeluaranList = ref([])
+
+onMounted(() => {
+  const stored = localStorage.getItem('cerdasbangsa_dana_yayasan_pengeluaran')
+  if (stored) {
+    pengeluaranList.value = JSON.parse(stored)
+  } else {
+    pengeluaranList.value = [...defaultPengeluaran]
+    localStorage.setItem('cerdasbangsa_dana_yayasan_pengeluaran', JSON.stringify(pengeluaranList.value))
+  }
+})
+
+const formatDateWithBr = (dateStr) => {
+  if (!dateStr) return ''
+  const parts = dateStr.split(' ')
+  if (parts.length >= 3) {
+    return `${parts[0]} ${parts[1]}<br/>${parts[2]}`
+  }
+  return dateStr
+}
+
+const formatDescWithBr = (descStr) => {
+  if (!descStr) return ''
+  return descStr.replace(/\s/g, ' ')
+}
+
+const formatAmount = (val) => {
+  return new Intl.NumberFormat('id-ID').format(val)
+}
+
+// Calculate total used and remaining dynamically
+const totalAlokasi = 2450000000
+const totalTerpakai = computed(() => {
+  return pengeluaranList.value.reduce((acc, curr) => acc + curr.jumlah, 0)
+})
+const sisaAnggaran = computed(() => {
+  return totalAlokasi - totalTerpakai.value
+})
+const realisasiPersen = computed(() => {
+  return Math.round((totalTerpakai.value / totalAlokasi) * 100)
+})
 </script>
 
 <template>
@@ -24,57 +114,40 @@ import { Badge } from '@/components/ui/badge'
         <h1 class="text-3xl font-bold tracking-tight text-foreground">Manajemen Dana Yayasan</h1>
         <p class="text-sm text-muted-foreground mt-1">Unit Sekolah: SMA Unggul Bangsa</p>
       </div>
-      <Button class="bg-foreground text-background hover:bg-foreground/90 font-semibold px-4">
-        <PlusCircle class="w-4 h-4 mr-2" /> Input Pengeluaran Baru
+      <Button @click="goToTambahPengeluaran" class="bg-foreground text-background hover:bg-foreground/90 font-semibold px-4">
+        <PlusCircle class="w-4 h-4 mr-2" /> Pengeluaran Baru
       </Button>
     </div>
 
     <!-- Top Cards Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <!-- Card 1 -->
-      <Card class="shadow-sm border-border p-5 flex flex-col justify-between">
-        <div class="flex justify-between items-start mb-4">
-          <div class="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
-            <Wallet class="w-5 h-5 text-foreground" />
-          </div>
-          <span class="text-xs font-semibold text-muted-foreground mt-1">Tahun Ajaran 2024/2025</span>
-        </div>
-        <div>
-          <p class="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Total Alokasi Dana</p>
-          <p class="text-2xl lg:text-3xl font-extrabold tracking-tight text-foreground">Rp 2.450.000.000</p>
-        </div>
-      </Card>
+      <StatCard
+        label="Total Alokasi Dana"
+        value="Rp 2.450.000.000"
+        sub="Tahun Ajaran 2024/2025"
+        variant="blue"
+        :icon="Wallet"
+      />
 
       <!-- Card 2 -->
-      <Card class="shadow-sm border-border p-5 flex flex-col justify-between">
-        <div class="flex justify-between items-start mb-4">
-          <div class="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
-            <Banknote class="w-5 h-5 text-foreground" />
-          </div>
-          <Badge class="bg-destructive/15 text-destructive hover:bg-destructive/25 border-none font-bold shadow-none px-2.5 py-0.5 rounded-[4px]">- 42%</Badge>
-        </div>
-        <div>
-          <p class="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Dana Terpakai</p>
-          <p class="text-2xl lg:text-3xl font-extrabold tracking-tight text-foreground">Rp 1.029.000.000</p>
-          <div class="h-[3px] w-full bg-secondary mt-3 rounded-full overflow-hidden">
-             <div class="h-full bg-foreground" style="width: 42%;"></div>
-          </div>
-        </div>
-      </Card>
+      <StatCard
+        label="Dana Terpakai"
+        :value="'Rp ' + formatAmount(totalTerpakai)"
+        sub="Realisasi Anggaran"
+        :progress="realisasiPersen"
+        variant="primary"
+        :icon="Banknote"
+      />
 
       <!-- Card 3 -->
-      <Card class="shadow-sm border-border p-5 flex flex-col justify-between">
-        <div class="flex justify-between items-start mb-4">
-          <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-            <PiggyBank class="w-5 h-5 text-primary" />
-          </div>
-          <Badge class="bg-primary/20 text-primary hover:bg-primary/30 border-none font-bold shadow-none px-2.5 py-0.5 rounded-[4px]">Tersedia</Badge>
-        </div>
-        <div>
-          <p class="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Sisa Anggaran</p>
-          <p class="text-2xl lg:text-3xl font-extrabold tracking-tight text-primary">Rp 1.421.000.000</p>
-        </div>
-      </Card>
+      <StatCard
+        label="Sisa Anggaran"
+        :value="'Rp ' + formatAmount(sisaAnggaran)"
+        sub="Anggaran Tersedia"
+        variant="emerald"
+        :icon="PiggyBank"
+      />
     </div>
 
     <!-- Middle Section -->
@@ -91,6 +164,7 @@ import { Badge } from '@/components/ui/badge'
         <Table>
           <TableHeader class="bg-muted/30">
             <TableRow class="hover:bg-transparent">
+              <TableHead class="font-semibold text-muted-foreground py-4 w-[50px] text-center">No</TableHead>
               <TableHead class="font-semibold text-muted-foreground py-4 w-[100px]">Tanggal</TableHead>
               <TableHead class="font-semibold text-muted-foreground py-4">Deskripsi</TableHead>
               <TableHead class="font-semibold text-muted-foreground py-4">Kategori</TableHead>
@@ -99,83 +173,37 @@ import { Badge } from '@/components/ui/badge'
             </TableRow>
           </TableHeader>
           <TableBody>
-            <!-- Row 1 -->
-            <TableRow>
-              <TableCell class="py-4 text-sm text-foreground">
-                14 Mar<br/>2024
+            <TableRow v-for="(item, index) in pengeluaranList" :key="item.id">
+              <TableCell class="py-4 text-sm text-foreground text-center font-medium">
+                {{ index + 1 }}
+              </TableCell>
+              <TableCell class="py-4 text-sm text-foreground" v-html="formatDateWithBr(item.tanggal)"></TableCell>
+              <TableCell class="py-4">
+                <p class="font-bold text-foreground text-sm" v-html="formatDescWithBr(item.deskripsi)"></p>
               </TableCell>
               <TableCell class="py-4">
-                <p class="font-bold text-foreground text-sm">Renovasi Lab<br/>Komputer</p>
-              </TableCell>
-              <TableCell class="py-4">
-                <Badge variant="secondary" class="font-medium rounded text-[10px] bg-secondary text-secondary-foreground shadow-none">Infrastruktur</Badge>
-              </TableCell>
-              <TableCell class="py-4">
-                <p class="text-[10px] text-muted-foreground font-semibold">Rp</p>
-                <p class="font-bold text-foreground">45.000.000</p>
-              </TableCell>
-              <TableCell class="text-right py-4">
-                <Badge class="bg-primary/15 hover:bg-primary/15 text-primary border-none px-2 rounded-[4px] font-bold text-[9px] tracking-widest uppercase">APPROVED</Badge>
-              </TableCell>
-            </TableRow>
-            
-            <!-- Row 2 -->
-            <TableRow>
-              <TableCell class="py-4 text-sm text-foreground">
-                12 Mar<br/>2024
-              </TableCell>
-              <TableCell class="py-4">
-                <p class="font-bold text-foreground text-sm">Gaji Guru<br/>Honorer Mar</p>
-              </TableCell>
-              <TableCell class="py-4">
-                <Badge variant="secondary" class="font-medium rounded text-[10px] bg-secondary text-secondary-foreground shadow-none">Salaries</Badge>
+                <Badge variant="secondary" :class="[
+                  'font-medium rounded text-[10px] shadow-none uppercase',
+                  item.kategori === 'Infrastruktur' ? 'bg-indigo-500/10 text-indigo-500' :
+                  item.kategori === 'Salaries' ? 'bg-amber-500/10 text-amber-500' :
+                  item.kategori === 'Events' ? 'bg-pink-500/10 text-pink-500' : 'bg-emerald-500/10 text-emerald-500'
+                ]">{{ item.kategori }}</Badge>
               </TableCell>
               <TableCell class="py-4">
                 <p class="text-[10px] text-muted-foreground font-semibold">Rp</p>
-                <p class="font-bold text-foreground">128.500.000</p>
+                <p class="font-bold text-foreground">{{ formatAmount(item.jumlah) }}</p>
               </TableCell>
               <TableCell class="text-right py-4">
-                <Badge class="bg-primary/15 hover:bg-primary/15 text-primary border-none px-2 rounded-[4px] font-bold text-[9px] tracking-widest uppercase">APPROVED</Badge>
+                <Badge :class="[
+                  item.status === 'APPROVED' ? 'bg-primary/15 text-primary' : 'bg-blue-500/15 text-blue-600',
+                  'border-none px-2.5 py-0.5 rounded-[4px] font-bold text-[9px] tracking-widest uppercase hover:bg-opacity-20'
+                ]">{{ item.status }}</Badge>
               </TableCell>
             </TableRow>
 
-            <!-- Row 3 -->
-            <TableRow>
-              <TableCell class="py-4 text-sm text-foreground">
-                10 Mar<br/>2024
-              </TableCell>
-              <TableCell class="py-4">
-                <p class="font-bold text-foreground text-sm">Seminar<br/>Pendidikan<br/>Karakter</p>
-              </TableCell>
-              <TableCell class="py-4">
-                <Badge variant="secondary" class="font-medium rounded text-[10px] bg-secondary text-secondary-foreground shadow-none">Events</Badge>
-              </TableCell>
-              <TableCell class="py-4">
-                <p class="text-[10px] text-muted-foreground font-semibold">Rp</p>
-                <p class="font-bold text-foreground">12.000.000</p>
-              </TableCell>
-              <TableCell class="text-right py-4">
-                <Badge class="bg-blue-500/15 hover:bg-blue-500/15 text-blue-600 border-none px-2.5 py-0.5 rounded-[4px] font-bold text-[9px] tracking-widest uppercase">PENDING</Badge>
-              </TableCell>
-            </TableRow>
-
-            <!-- Row 4 -->
-            <TableRow>
-              <TableCell class="py-4 text-sm text-foreground">
-                08 Mar<br/>2024
-              </TableCell>
-              <TableCell class="py-4">
-                <p class="font-bold text-foreground text-sm">Pengadaan<br/>Buku<br/>Perpustakaan</p>
-              </TableCell>
-              <TableCell class="py-4">
-                <Badge variant="secondary" class="font-medium rounded text-[10px] bg-secondary text-secondary-foreground shadow-none">Infrastruktur</Badge>
-              </TableCell>
-              <TableCell class="py-4">
-                <p class="text-[10px] text-muted-foreground font-semibold">Rp</p>
-                <p class="font-bold text-foreground">35.200.000</p>
-              </TableCell>
-              <TableCell class="text-right py-4">
-                <Badge class="bg-primary/15 hover:bg-primary/15 text-primary border-none px-2 rounded-[4px] font-bold text-[9px] tracking-widest uppercase">APPROVED</Badge>
+            <TableRow v-if="pengeluaranList.length === 0">
+              <TableCell colspan="6" class="text-center py-8 text-muted-foreground font-medium">
+                Belum ada data pengeluaran.
               </TableCell>
             </TableRow>
           </TableBody>

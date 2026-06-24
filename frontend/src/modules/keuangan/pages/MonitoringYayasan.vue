@@ -23,32 +23,36 @@ import { Badge } from '@/components/ui/badge'
 const kpiData = [
   {
     label: 'Total Pendapatan Konsolidasi',
-    value: 'Rp 4.285.000.000',
+    value: 'Rp 4.285 Jt',
     trend: '12.5% dari tahun lalu',
     trendDirection: 'up',
     icon: TrendingUp,
+    illustration: 'globe',
     variant: 'blue'
   },
   {
     label: 'Total Beban Operasional',
-    value: 'Rp 2.140.000.000',
+    value: 'Rp 2.140 Jt',
     trend: '50% Rasio Pengeluaran',
     trendDirection: 'up',
     icon: FileText,
+    illustration: 'ruler',
     variant: 'amber'
   },
   {
     label: 'Posisi Kas Bersih',
-    value: 'Rp 2.145.000.000',
+    value: 'Rp 2.145 Jt',
     trend: 'Likuiditas Sehat',
     trendDirection: 'up',
     icon: CheckCircle2,
+    illustration: 'star',
     variant: 'emerald'
   },
   {
     label: 'Rerata Penagihan SPP',
     value: '92.4%',
     progress: 92.4,
+    illustration: 'abc_board',
     variant: 'primary'
   }
 ]
@@ -90,6 +94,7 @@ const kpiData = [
         :icon="stat.icon"
         :progress="stat.progress"
         :variant="stat.variant"
+        :illustration="stat.illustration"
       />
     </div>
 
@@ -353,25 +358,25 @@ const kpiData = [
       </Card>
 
       <!-- Kepatuhan Audit -->
-      <Card class="bg-primary text-primary-foreground relative overflow-hidden flex flex-col justify-between p-7 shadow-md">
+      <Card class="bg-primary relative overflow-hidden flex flex-col justify-between p-7 shadow-md border-border/80">
         <!-- Giant faint watermark icon (Shield) -->
-        <ShieldCheck class="absolute -right-10 -top-10 w-64 h-64 text-primary-foreground/5" />
+        <ShieldCheck class="absolute -right-10 -top-10 w-64 h-64 text-slate-900/5 dark:text-white/5 pointer-events-none" />
         
         <div class="relative z-10 space-y-4">
-          <h2 class="text-2xl font-bold tracking-tight">Kepatuhan Audit & Transparansi</h2>
-          <p class="text-sm text-primary-foreground/80 leading-relaxed max-w-sm">
+          <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Kepatuhan Audit & Transparansi</h2>
+          <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed max-w-sm">
             Sistem EduFinance menjamin integritas data keuangan yayasan melalui enkripsi audit trail real-time di semua unit sekolah.
           </p>
         </div>
         
         <div class="relative z-10 flex items-end justify-between mt-16">
           <div>
-            <p class="text-[10px] uppercase text-primary-foreground/60 font-bold tracking-widest">STATUS AUDIT TERAKHIR</p>
-            <p class="text-base font-bold mt-1.5">Lulus Tanpa Pengecualian</p>
+            <p class="text-[10px] uppercase text-slate-500 dark:text-slate-400 font-bold tracking-widest">STATUS AUDIT TERAKHIR</p>
+            <p class="text-base font-bold mt-1.5 text-slate-900 dark:text-white">Lulus Tanpa Pengecualian</p>
           </div>
           <div class="text-right">
-            <p class="text-[10px] uppercase text-primary-foreground/60 font-bold tracking-widest">SKOR KESEHATAN FINANSIAL</p>
-            <p class="text-3xl font-extrabold mt-1 tracking-tighter">98<span class="text-primary-foreground/60 text-xl font-bold">/100</span></p>
+            <p class="text-[10px] uppercase text-slate-500 dark:text-slate-400 font-bold tracking-widest">SKOR KESEHATAN FINANSIAL</p>
+            <p class="text-3xl font-extrabold mt-1 tracking-tighter text-slate-900 dark:text-white">98<span class="text-slate-500 dark:text-slate-400 text-xl font-bold">/100</span></p>
           </div>
         </div>
       </Card>

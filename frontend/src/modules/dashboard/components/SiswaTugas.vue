@@ -5,6 +5,10 @@ import { Badge } from '@/components/ui/badge'
 import WidgetCard from '@/components/dashboard-widget/WidgetCard.vue'
 import { tugasData as tugas } from '../data/siswaTugasData'
 
+const props = defineProps({
+  delay: { type: Number, default: 0 }
+})
+
 const statusVariant = (s: string) => s === 'Selesai' ? 'default' : 'secondary'
 </script>
 
@@ -14,6 +18,8 @@ const statusVariant = (s: string) => s === 'Selesai' ? 'default' : 'secondary'
     description="Daftar tugas dan ujian yang perlu diselesaikan"
     :icon="BookOpen"
     contentClass="p-0"
+    :delay="delay"
+    illustration="pencil"
   >
     <template #header-action>
       <Button variant="ghost" size="sm" class="h-8 text-xs gap-1 text-muted-foreground hover:text-foreground">

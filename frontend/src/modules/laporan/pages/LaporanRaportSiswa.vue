@@ -1,111 +1,189 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import {
   FileBarChart,
-  Search,
   Download,
   Printer,
   BookOpen,
   User,
   Calendar,
   GraduationCap,
-  ChevronRight,
-  Eye,
+  Eye
 } from 'lucide-vue-next'
-import { Skeleton } from '@/components/ui/skeleton'
+import { toast } from 'vue-sonner'
+
+// Common Components
+import PageHeader from '@/components/page-header/PageHeader.vue'
+import StatCard from '@/components/stat-card/StatCard.vue'
+import StatCardGrid from '@/components/stat-card/StatCardGrid.vue'
+import DataTableCard from '@/components/data-table/DataTableCard.vue'
+import { glassSlide, glassFade } from '@/config/motion'
+
+// UI Components
 import { Button } from '@/components/ui/button'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog'
-import { Separator } from '@/components/ui/separator'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
-const mataPelajaranList = ['Matematika', 'Fisika', 'Kimia', 'Biologi', 'Bahasa Indonesia', 'Bahasa Inggris', 'Sejarah', 'PJOK']
+const mataPelajaranList = [
+  'Matematika',
+  'Fisika',
+  'Kimia',
+  'Biologi',
+  'Bahasa Indonesia',
+  'Bahasa Inggris',
+  'Sejarah',
+  'PJOK'
+]
 
 const mockRaportData = [
   {
-    id: 1, nisn: '0051234567', nama: 'Ahmad Fadil', kelas: 'XI IPA 1', waliKelas: 'Bu Sari Dewi, S.Pd',
-    tp: '2025/2026', semester: '1',
-    nilai: { Matematika: 88, Fisika: 82, Kimia: 90, Biologi: 85, 'Bahasa Indonesia': 88, 'Bahasa Inggris': 79, Sejarah: 85, PJOK: 90 },
+    id: 1,
+    nisn: '0051234567',
+    nama: 'Ahmad Fadil',
+    kelas: 'XI IPA 1',
+    waliKelas: 'Bu Sari Dewi, S.Pd',
+    tp: '2025/2026',
+    semester: '1',
+    nilai: {
+      Matematika: 88,
+      Fisika: 82,
+      Kimia: 90,
+      Biologi: 85,
+      'Bahasa Indonesia': 88,
+      'Bahasa Inggris': 79,
+      Sejarah: 85,
+      PJOK: 90
+    },
     kehadiran: { hadir: 95, terlambat: 4, izin: 2, sakit: 1, alpa: 0 },
-    catatan: 'Ahmad menunjukkan kemajuan yang baik di bidang sains. Perlu meningkatkan kemampuan bahasa Inggris.'
+    catatan:
+      'Ahmad menunjukkan kemajuan yang baik di bidang sains. Perlu meningkatkan kemampuan bahasa Inggris.'
   },
   {
-    id: 2, nisn: '0069876543', nama: 'Bunga Citra', kelas: 'XI IPA 1', waliKelas: 'Bu Sari Dewi, S.Pd',
-    tp: '2025/2026', semester: '1',
-    nilai: { Matematika: 92, Fisika: 88, Kimia: 85, Biologi: 91, 'Bahasa Indonesia': 90, 'Bahasa Inggris': 87, Sejarah: 88, PJOK: 85 },
+    id: 2,
+    nisn: '0069876543',
+    nama: 'Bunga Citra',
+    kelas: 'XI IPA 1',
+    waliKelas: 'Bu Sari Dewi, S.Pd',
+    tp: '2025/2026',
+    semester: '1',
+    nilai: {
+      Matematika: 92,
+      Fisika: 88,
+      Kimia: 85,
+      Biologi: 91,
+      'Bahasa Indonesia': 90,
+      'Bahasa Inggris': 87,
+      Sejarah: 88,
+      PJOK: 85
+    },
     kehadiran: { hadir: 100, terlambat: 1, izin: 1, sakit: 0, alpa: 0 },
-    catatan: 'Siswa berprestasi dengan nilai konsisten di semua mata pelajaran. Direkomendasikan untuk program pengembangan bakat.'
+    catatan:
+      'Siswa berprestasi dengan nilai konsisten di semua mata pelajaran. Direkomendasikan untuk program pengembangan bakat.'
   },
   {
-    id: 3, nisn: '0054321987', nama: 'Cakra Khan', kelas: 'XI IPA 1', waliKelas: 'Bu Sari Dewi, S.Pd',
-    tp: '2025/2026', semester: '1',
-    nilai: { Matematika: 72, Fisika: 68, Kimia: 74, Biologi: 70, 'Bahasa Indonesia': 75, 'Bahasa Inggris': 65, Sejarah: 73, PJOK: 80 },
+    id: 3,
+    nisn: '0054321987',
+    nama: 'Cakra Khan',
+    kelas: 'XI IPA 1',
+    waliKelas: 'Bu Sari Dewi, S.Pd',
+    tp: '2025/2026',
+    semester: '1',
+    nilai: {
+      Matematika: 72,
+      Fisika: 68,
+      Kimia: 74,
+      Biologi: 70,
+      'Bahasa Indonesia': 75,
+      'Bahasa Inggris': 65,
+      Sejarah: 73,
+      PJOK: 80
+    },
     kehadiran: { hadir: 78, terlambat: 8, izin: 5, sakit: 4, alpa: 7 },
-    catatan: 'Perlu peningkatan di banyak aspek terutama kedisiplinan. Disarankan untuk mengikuti program remedial.'
+    catatan:
+      'Perlu peningkatan di banyak aspek terutama kedisiplinan. Disarankan untuk mengikuti program remedial.'
   },
   {
-    id: 4, nisn: '0061122334', nama: 'Dian Sastro', kelas: 'XI IPA 1', waliKelas: 'Bu Sari Dewi, S.Pd',
-    tp: '2025/2026', semester: '1',
-    nilai: { Matematika: 95, Fisika: 93, Kimia: 88, Biologi: 92, 'Bahasa Indonesia': 89, 'Bahasa Inggris': 91, Sejarah: 90, PJOK: 88 },
+    id: 4,
+    nisn: '0061122334',
+    nama: 'Dian Sastro',
+    kelas: 'XI IPA 1',
+    waliKelas: 'Bu Sari Dewi, S.Pd',
+    tp: '2025/2026',
+    semester: '1',
+    nilai: {
+      Matematika: 95,
+      Fisika: 93,
+      Kimia: 88,
+      Biologi: 92,
+      'Bahasa Indonesia': 89,
+      'Bahasa Inggris': 91,
+      Sejarah: 90,
+      PJOK: 88
+    },
     kehadiran: { hadir: 100, terlambat: 0, izin: 2, sakit: 0, alpa: 0 },
-    catatan: 'Siswa terbaik di kelas dengan dedikasi tinggi. Kandidat kuat untuk beasiswa berprestasi.'
+    catatan:
+      'Siswa terbaik di kelas dengan dedikasi tinggi. Kandidat kuat untuk beasiswa berprestasi.'
   },
   {
-    id: 5, nisn: '0055566778', nama: 'Elsa Novita', kelas: 'XI IPA 2', waliKelas: 'Pak Rahmat, M.Pd',
-    tp: '2025/2026', semester: '1',
-    nilai: { Matematika: 80, Fisika: 75, Kimia: 82, Biologi: 78, 'Bahasa Indonesia': 82, 'Bahasa Inggris': 70, Sejarah: 79, PJOK: 85 },
+    id: 5,
+    nisn: '0055566778',
+    nama: 'Elsa Novita',
+    kelas: 'XI IPA 2',
+    waliKelas: 'Pak Rahmat, M.Pd',
+    tp: '2025/2026',
+    semester: '1',
+    nilai: {
+      Matematika: 80,
+      Fisika: 75,
+      Kimia: 82,
+      Biologi: 78,
+      'Bahasa Indonesia': 82,
+      'Bahasa Inggris': 70,
+      Sejarah: 79,
+      PJOK: 85
+    },
     kehadiran: { hadir: 100, terlambat: 0, izin: 0, sakit: 2, alpa: 0 },
     catatan: 'Siswa yang rajin dan disiplin. Nilai konsisten di atas KKM.'
   },
   {
-    id: 6, nisn: '0068899001', nama: 'Farhan Ramdan', kelas: 'XI IPA 2', waliKelas: 'Pak Rahmat, M.Pd',
-    tp: '2025/2026', semester: '1',
-    nilai: { Matematika: 65, Fisika: 60, Kimia: 68, Biologi: 63, 'Bahasa Indonesia': 70, 'Bahasa Inggris': 55, Sejarah: 67, PJOK: 78 },
+    id: 6,
+    nisn: '0068899001',
+    nama: 'Farhan Ramdan',
+    kelas: 'XI IPA 2',
+    waliKelas: 'Pak Rahmat, M.Pd',
+    tp: '2025/2026',
+    semester: '1',
+    nilai: {
+      Matematika: 65,
+      Fisika: 60,
+      Kimia: 68,
+      Biologi: 63,
+      'Bahasa Indonesia': 70,
+      'Bahasa Inggris': 55,
+      Sejarah: 67,
+      PJOK: 78
+    },
     kehadiran: { hadir: 68, terlambat: 10, izin: 5, sakit: 8, alpa: 11 },
-    catatan: 'Perlu perhatian khusus. Kehadiran dan nilai jauh di bawah standar. Disarankan konsultasi dengan orang tua.'
-  },
+    catatan:
+      'Perlu perhatian khusus. Kehadiran dan nilai jauh di bawah standar. Disarankan konsultasi dengan orang tua.'
+  }
 ]
 
 const KKM = 75
 const isLoading = ref(true)
 const raportData = ref([])
-const searchQuery = ref('')
-const selectedKelas = ref('semua')
-const selectedSemester = ref('1')
-const currentPage = ref(1)
-const itemsPerPage = 8
 const selectedRaport = ref(null)
 const isDetailOpen = ref(false)
+
+// State filter & pagination
+const page = ref(1)
+const perPage = ref(10)
+const filterValues = ref({
+  search: '',
+  kelas: 'all',
+  semester: '1'
+})
 
 onMounted(() => {
   setTimeout(() => {
@@ -114,7 +192,15 @@ onMounted(() => {
   }, 600)
 })
 
-const kelasList = computed(() => {
+watch(
+  () => filterValues.value,
+  () => {
+    page.value = 1
+  },
+  { deep: true }
+)
+
+const classList = computed(() => {
   const set = new Set(raportData.value.map(d => d.kelas))
   return Array.from(set).sort()
 })
@@ -136,17 +222,20 @@ function getPredikat(rata) {
 
 function getPredikatClass(rata) {
   const r = parseFloat(rata)
-  if (r >= 90) return 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'
-  if (r >= 80) return 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400'
-  if (r >= 70) return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400'
-  return 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
+  if (r >= 90)
+    return 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 border-none font-bold'
+  if (r >= 80)
+    return 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 border-none font-bold'
+  if (r >= 70)
+    return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400 border-none font-bold'
+  return 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border-none font-bold'
 }
 
 function getNilaiClass(val) {
   if (!val) return 'text-muted-foreground'
   if (val >= 90) return 'text-green-600 dark:text-green-400'
   if (val >= KKM) return 'text-foreground'
-  return 'text-red-600 dark:text-red-400'
+  return 'text-red-600 dark:text-red-400 font-bold'
 }
 
 function getKehadiranPct(siswa) {
@@ -157,400 +246,588 @@ function getKehadiranPct(siswa) {
 
 const filteredData = computed(() => {
   return raportData.value.filter(item => {
-    const matchKelas = selectedKelas.value === 'semua' || item.kelas === selectedKelas.value
-    const matchSemester = item.semester === selectedSemester.value
+    const matchKelas = filterValues.value.kelas === 'all' || item.kelas === filterValues.value.kelas
+    const matchSemester =
+      filterValues.value.semester === 'all' || item.semester === filterValues.value.semester
     const matchSearch =
-      !searchQuery.value ||
-      item.nama.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      item.nisn.includes(searchQuery.value)
+      !filterValues.value.search ||
+      item.nama.toLowerCase().includes(filterValues.value.search.toLowerCase()) ||
+      item.nisn.includes(filterValues.value.search)
     return matchKelas && matchSearch && matchSemester
   })
 })
 
-const totalPages = computed(() => Math.ceil(filteredData.value.length / itemsPerPage))
 const paginatedData = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  return filteredData.value.slice(start, start + itemsPerPage)
+  const start = (page.value - 1) * perPage.value
+  return filteredData.value.slice(start, start + perPage.value)
 })
 
-function openDetail(siswa) {
-  selectedRaport.value = siswa
+const total = computed(() => filteredData.value.length)
+const from = computed(() => (total.value === 0 ? 0 : (page.value - 1) * perPage.value + 1))
+const to = computed(() => Math.min(page.value * perPage.value, total.value))
+
+// Stats calculations
+const totalSiswa = computed(() => filteredData.value.length)
+const naikKelasCount = computed(
+  () => filteredData.value.filter(s => parseFloat(getRataRata(s)) >= KKM).length
+)
+const rataRataKelas = computed(() => {
+  const data = filteredData.value
+  if (!data.length) return '-'
+  const sum = data.reduce((acc, s) => acc + parseFloat(getRataRata(s)), 0)
+  return (sum / data.length).toFixed(1)
+})
+
+function getFase(kelas) {
+  if (!kelas) return '-'
+  if (kelas.includes('XI') || kelas.includes('11') || kelas.includes('XII') || kelas.includes('12'))
+    return 'F'
+  if (kelas.includes('X') || kelas.includes('10')) return 'E'
+  if (
+    kelas.includes('VII') ||
+    kelas.includes('7') ||
+    kelas.includes('VIII') ||
+    kelas.includes('8') ||
+    kelas.includes('IX') ||
+    kelas.includes('9')
+  )
+    return 'D'
+  if (kelas.includes('V') || kelas.includes('5') || kelas.includes('VI') || kelas.includes('6'))
+    return 'C'
+  if (kelas.includes('III') || kelas.includes('3') || kelas.includes('IV') || kelas.includes('4'))
+    return 'B'
+  if (kelas.includes('I') || kelas.includes('1') || kelas.includes('II') || kelas.includes('2'))
+    return 'A'
+  return '-'
+}
+
+function getCapaianKompetensi(mapel, nilai) {
+  if (nilai === undefined || nilai === null) return '-'
+  if (nilai >= 85) {
+    return `Menunjukkan penguasaan yang sangat baik dalam menganalisis konsep dasar ${mapel} serta terampil mengaplikasikannya dalam penyelesaian tugas.`
+  } else if (nilai >= KKM) {
+    return `Menunjukkan penguasaan yang baik dalam memahami materi pokok ${mapel} dan mampu menyelesaikan sebagian besar tugas dengan mandiri.`
+  } else {
+    return `Perlu bimbingan dan latihan lebih intensif dalam meningkatkan pemahaman materi dasar ${mapel} untuk mencapai kriteria ketuntasan.`
+  }
+}
+
+function openDetail(item) {
+  selectedRaport.value = item
   isDetailOpen.value = true
 }
 
-function handlePrint() {
+function printSingleRaport() {
+  const printableArea = document.getElementById('printable-area-raport')
+  if (!printableArea) return
+
+  const iframe = document.createElement('iframe')
+  iframe.style.position = 'absolute'
+  iframe.style.width = '0'
+  iframe.style.height = '0'
+  iframe.style.border = 'none'
+  document.body.appendChild(iframe)
+
+  const styles = Array.from(document.styleSheets)
+    .map(styleSheet => {
+      try {
+        return Array.from(styleSheet.cssRules)
+          .map(rule => rule.cssText)
+          .join('')
+      } catch (e) {
+        return ''
+      }
+    })
+    .join('\n')
+
+  const doc = iframe.contentWindow.document
+  doc.open()
+  doc.write(`
+    <html>
+      <head>
+        <title>Print Raport Siswa</title>
+        <style>
+          ${styles}
+          body { 
+            background-color: white !important; 
+            margin: 0; 
+            padding: 0;
+            color: black !important;
+            font-family: serif;
+          }
+          ::-webkit-scrollbar { display: none; }
+        </style>
+      </head>
+      <body>
+        <div style="padding: 1cm; max-width: 210mm; margin: auto;">
+          ${printableArea.innerHTML}
+        </div>
+      </body>
+    </html>
+  `)
+  doc.close()
+
+  setTimeout(() => {
+    iframe.contentWindow.focus()
+    iframe.contentWindow.print()
+    setTimeout(() => {
+      document.body.removeChild(iframe)
+    }, 1000)
+  }, 500)
+}
+
+function handlePrintAll() {
   window.print()
 }
+
+// Configs for DataTableCard
+const tableColumns = [
+  { key: 'nama', label: 'Nama Siswa' },
+  { key: 'kelas', label: 'Kelas' },
+  { key: 'waliKelas', label: 'Wali Kelas' },
+  { key: 'rataRata', label: 'Rata-rata', type: 'number' },
+  { key: 'kehadiran', label: 'Kehadiran', type: 'number' },
+  { key: 'predikat', label: 'Predikat', badge: true },
+  { key: 'status', label: 'Status', badge: true },
+  { key: 'actions', label: 'Aksi' }
+]
+
+const filtersConfig = computed(() => [
+  {
+    key: 'search',
+    type: 'search',
+    placeholder: 'Cari Nama / NISN...'
+  },
+  {
+    key: 'semester',
+    label: 'Semester',
+    type: 'select',
+    placeholder: 'Pilih Semester',
+    options: [
+      { value: '1', label: 'Semester 1' },
+      { value: '2', label: 'Semester 2' }
+    ]
+  },
+  {
+    key: 'kelas',
+    label: 'Kelas',
+    type: 'select',
+    placeholder: 'Semua Kelas',
+    options: classList.value.map(k => ({ value: k, label: k }))
+  }
+])
+
+const pageHeaderActions = computed(() => [
+  {
+    label: 'Cetak Semua',
+    icon: Printer,
+    variant: 'outline',
+    click: handlePrintAll
+  },
+  {
+    label: 'Ekspor PDF',
+    icon: Download,
+    variant: 'default',
+    click: () => {
+      toast.success('Ekspor PDF Berhasil', {
+        description: 'Laporan rekapitulasi raport siswa telah diekspor ke PDF.'
+      })
+    }
+  }
+])
+
+const rowActions = [
+  {
+    label: 'Detail',
+    icon: Eye,
+    click: item => openDetail(item)
+  }
+]
 </script>
 
 <template>
-  <div class="space-y-6 animate-in fade-in duration-300">
+  <div
+    v-motion
+    :initial="glassFade.initial"
+    :visible-once="glassFade.visible"
+    class="space-y-6 max-w-[1400px] mx-auto pb-8 text-left"
+  >
     <!-- Header -->
-    <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between border-b pb-4">
-      <div>
-        <h1 class="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-          <FileBarChart class="size-6 text-primary" />
-          Laporan Raport Siswa
-        </h1>
-        <p class="text-muted-foreground mt-1 text-sm">
-          Rekapitulasi nilai akhir semester dan pencetakan rapor siswa perwalian.
-        </p>
-      </div>
-      <div class="flex items-center gap-2 shrink-0">
-        <Button id="btn-print-raport" variant="outline" size="sm" class="gap-2" @click="handlePrint">
-          <Printer class="size-4" />
-          Cetak Semua
-        </Button>
-        <Button id="btn-export-raport" size="sm" class="gap-2">
-          <Download class="size-4" />
-          Ekspor PDF
-        </Button>
-      </div>
-    </div>
+    <PageHeader
+      title="Raport Siswa"
+      description="Rekapitulasi nilai akhir semester dan pencetakan raport siswa perwalian."
+      :actions="pageHeaderActions"
+    />
 
     <!-- Stats -->
-    <div class="grid gap-4 grid-cols-2 lg:grid-cols-4">
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Siswa</span>
-          <div class="p-1.5 bg-muted rounded-lg">
-            <User class="size-4 text-muted-foreground" />
-          </div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-8 w-12" />
-        <div v-else class="text-3xl font-bold tracking-tight">{{ raportData.length }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Siswa terdaftar</p>
-      </Card>
-
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Naik Kelas</span>
-          <div class="p-1.5 bg-green-50 dark:bg-green-950/40 rounded-lg">
-            <GraduationCap class="size-4 text-green-600" />
-          </div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-8 w-12" />
-        <div v-else class="text-3xl font-bold tracking-tight text-green-600 dark:text-green-400">
-          {{ raportData.filter(s => parseFloat(getRataRata(s)) >= KKM).length }}
-        </div>
-        <p class="text-xs text-muted-foreground mt-1">Di atas rata-rata KKM</p>
-      </Card>
-
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Rata-rata Kelas</span>
-          <div class="p-1.5 bg-primary/10 rounded-lg">
-            <BookOpen class="size-4 text-primary" />
-          </div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-8 w-14" />
-        <div v-else class="text-3xl font-bold tracking-tight text-primary">
-          {{ raportData.length ? (raportData.reduce((sum, s) => sum + parseFloat(getRataRata(s)), 0) / raportData.length).toFixed(1) : '-' }}
-        </div>
-        <p class="text-xs text-muted-foreground mt-1">Nilai rata-rata</p>
-      </Card>
-
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Tahun Pelajaran</span>
-          <div class="p-1.5 bg-muted rounded-lg">
-            <Calendar class="size-4 text-muted-foreground" />
-          </div>
-        </div>
-        <div class="text-xl font-bold tracking-tight mt-2">2025/2026</div>
-        <p class="text-xs text-muted-foreground mt-1">Semester {{ selectedSemester }}</p>
-      </Card>
-    </div>
-
-    <!-- Filters -->
-    <div class="flex flex-wrap items-end gap-3">
-      <div class="flex flex-col gap-1.5">
-        <Label class="text-xs text-muted-foreground">Semester</Label>
-        <Select v-model="selectedSemester">
-          <SelectTrigger id="select-semester-raport" class="w-[140px]">
-            <SelectValue placeholder="Pilih Semester" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="1">Semester 1</SelectItem>
-            <SelectItem value="2">Semester 2</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div class="flex flex-col gap-1.5">
-        <Label class="text-xs text-muted-foreground">Kelas</Label>
-        <Select v-model="selectedKelas">
-          <SelectTrigger id="select-kelas-raport" class="w-[140px]">
-            <SelectValue placeholder="Semua Kelas" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="semua">Semua Kelas</SelectItem>
-            <SelectItem v-for="k in kelasList" :key="k" :value="k">{{ k }}</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div class="flex-1 min-w-[180px] relative">
-        <Label class="text-xs text-muted-foreground">Cari Siswa</Label>
-        <div class="relative mt-1.5">
-          <Search class="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
-          <Input
-            id="search-raport"
-            v-model="searchQuery"
-            type="text"
-            placeholder="Nama / NISN..."
-            class="pl-9 h-9"
-            @input="currentPage = 1"
-          />
-        </div>
-      </div>
+    <div
+      v-motion
+      :initial="glassSlide.initial"
+      :visible-once="{
+        ...glassSlide.visible,
+        transition: { ...glassSlide.visible.transition, delay: 100 }
+      }"
+    >
+      <StatCardGrid cols="4">
+        <StatCard
+          label="Total Siswa"
+          :value="isLoading ? 0 : totalSiswa"
+          sub="Siswa terdaftar di kelas"
+          :icon="User"
+          variant="default"
+        />
+        <StatCard
+          label="Naik Kelas"
+          :value="isLoading ? 0 : naikKelasCount"
+          sub="Di atas rata-rata KKM"
+          :icon="GraduationCap"
+          variant="emerald"
+        />
+        <StatCard
+          label="Rata-rata Kelas"
+          :value="isLoading ? '-' : rataRataKelas"
+          sub="Nilai rata-rata kelas"
+          :icon="BookOpen"
+          variant="violet"
+        />
+        <StatCard
+          label="Tahun Pelajaran"
+          value="2025/2026"
+          :sub="
+            filterValues.semester === 'all' ? 'Semua Semester' : `Semester ${filterValues.semester}`
+          "
+          :icon="Calendar"
+          variant="amber"
+        />
+      </StatCardGrid>
     </div>
 
     <!-- Table -->
-    <Card class="overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow class="bg-muted/50">
-            <TableHead class="font-semibold w-8">#</TableHead>
-            <TableHead class="font-semibold">Nama Siswa</TableHead>
-            <TableHead class="font-semibold">Kelas</TableHead>
-            <TableHead class="font-semibold">Wali Kelas</TableHead>
-            <TableHead class="font-semibold text-center">Rata-rata</TableHead>
-            <TableHead class="font-semibold text-center">Kehadiran</TableHead>
-            <TableHead class="font-semibold text-center">Predikat</TableHead>
-            <TableHead class="font-semibold text-center">Status</TableHead>
-            <TableHead class="font-semibold w-[80px]">Aksi</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <template v-if="isLoading">
-            <TableRow v-for="i in 6" :key="`skel-${i}`">
-              <TableCell v-for="j in 9" :key="j"><Skeleton class="h-5 w-full" /></TableCell>
-            </TableRow>
-          </template>
+    <div
+      v-motion
+      :initial="glassSlide.initial"
+      :visible-once="{
+        ...glassSlide.visible,
+        transition: { ...glassSlide.visible.transition, delay: 200 }
+      }"
+    >
+      <DataTableCard
+        :columns="tableColumns"
+        :items="paginatedData"
+        :filters="filtersConfig"
+        v-model:filterValues="filterValues"
+        :row-actions="rowActions"
+        :from="from"
+        :to="to"
+        :total="total"
+        :page="page"
+        :per-page="perPage"
+        @update:page="page = $event"
+        @update:perPage="perPage = $event"
+        illustration="textbook"
+      >
+        <!-- Overrides cells -->
+        <template #cell-nama="{ item }">
+          <div>
+            <div class="font-semibold text-sm text-foreground">{{ item.nama }}</div>
+            <div class="text-xs text-muted-foreground font-mono mt-0.5">{{ item.nisn }}</div>
+          </div>
+        </template>
 
-          <template v-else>
-            <TableRow
-              v-for="(siswa, idx) in paginatedData"
-              :key="siswa.id"
-              class="hover:bg-muted/30 transition-colors"
-            >
-              <TableCell class="text-muted-foreground text-xs">{{ (currentPage - 1) * itemsPerPage + idx + 1 }}</TableCell>
-              <TableCell>
-                <div class="font-medium text-sm">{{ siswa.nama }}</div>
-                <div class="text-xs text-muted-foreground">{{ siswa.nisn }}</div>
-              </TableCell>
-              <TableCell>
-                <Badge variant="outline" class="text-xs font-normal">{{ siswa.kelas }}</Badge>
-              </TableCell>
-              <TableCell class="text-sm text-muted-foreground">{{ siswa.waliKelas }}</TableCell>
-              <TableCell class="text-center font-bold text-sm" :class="getNilaiClass(parseFloat(getRataRata(siswa)))">
-                {{ getRataRata(siswa) }}
-              </TableCell>
-              <TableCell class="text-center">
-                <Badge :class="[
-                  'text-xs',
-                  getKehadiranPct(siswa) >= 90 ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' :
-                  getKehadiranPct(siswa) >= 75 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' :
-                  'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
-                ]">
-                  {{ getKehadiranPct(siswa) }}%
-                </Badge>
-              </TableCell>
-              <TableCell class="text-center">
-                <Badge :class="getPredikatClass(getRataRata(siswa))">
-                  {{ getPredikat(getRataRata(siswa)).label }} — {{ getPredikat(getRataRata(siswa)).desc }}
-                </Badge>
-              </TableCell>
-              <TableCell class="text-center">
-                <Badge :class="parseFloat(getRataRata(siswa)) >= KKM
-                  ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'
-                  : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
-                ">
-                  {{ parseFloat(getRataRata(siswa)) >= KKM ? 'Naik Kelas' : 'Perlu Remedial' }}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <div class="flex gap-1">
-                  <Button
-                    :id="`btn-view-raport-${siswa.id}`"
-                    variant="ghost"
-                    size="icon"
-                    class="h-8 w-8"
-                    @click="openDetail(siswa)"
-                    title="Lihat Detail Raport"
-                  >
-                    <Eye class="size-4" />
-                  </Button>
-                  <Button
-                    :id="`btn-print-raport-${siswa.id}`"
-                    variant="ghost"
-                    size="icon"
-                    class="h-8 w-8"
-                    title="Cetak Raport"
-                    @click="handlePrint"
-                  >
-                    <Printer class="size-4" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
+        <template #cell-kelas="{ item }">
+          <Badge
+            variant="outline"
+            class="text-xs font-normal border-white/10 dark:border-white/5 bg-background/50"
+          >
+            {{ item.kelas }}
+          </Badge>
+        </template>
 
-            <TableRow v-if="paginatedData.length === 0">
-              <TableCell colspan="9" class="h-32 text-center text-muted-foreground">
-                <div class="flex flex-col items-center justify-center gap-2">
-                  <FileBarChart class="size-8 text-muted-foreground/40" />
-                  <p class="text-sm">Tidak ada data raport ditemukan.</p>
-                </div>
-              </TableCell>
-            </TableRow>
-          </template>
-        </TableBody>
-      </Table>
-    </Card>
+        <template #cell-rataRata="{ item }">
+          <span
+            class="font-bold text-sm"
+            :class="getNilaiClass(parseFloat(getRataRata(item)))"
+          >
+            {{ getRataRata(item) }}
+          </span>
+        </template>
 
-    <!-- Pagination -->
-    <div class="flex items-center justify-between text-sm text-muted-foreground" v-if="filteredData.length > 0">
-      <span>Menampilkan {{ paginatedData.length }} dari {{ filteredData.length }} siswa</span>
-      <div class="flex items-center gap-1">
-        <Button id="btn-prev-raport" variant="outline" size="sm" :disabled="currentPage === 1" @click="currentPage--">Prev</Button>
-        <Button v-for="p in totalPages" :key="p" :variant="p === currentPage ? 'default' : 'outline'" size="sm" @click="currentPage = p">{{ p }}</Button>
-        <Button id="btn-next-raport" variant="outline" size="sm" :disabled="currentPage === totalPages" @click="currentPage++">Next</Button>
-      </div>
+        <template #cell-kehadiran="{ item }">
+          <Badge
+            variant="outline"
+            :class="[
+              'text-xs font-bold border-none px-2.5 py-0.5 rounded-full',
+              getKehadiranPct(item) >= 90
+                ? 'bg-green-500/10 text-green-500'
+                : getKehadiranPct(item) >= 75
+                  ? 'bg-yellow-500/10 text-yellow-500'
+                  : 'bg-red-500/10 text-red-500'
+            ]"
+          >
+            {{ getKehadiranPct(item) }}%
+          </Badge>
+        </template>
+
+        <template #cell-predikat="{ item }">
+          <Badge :class="getPredikatClass(getRataRata(item))">
+            {{ getPredikat(getRataRata(item)).label }} — {{ getPredikat(getRataRata(item)).desc }}
+          </Badge>
+        </template>
+
+        <template #cell-status="{ item }">
+          <Badge
+            :class="[
+              'text-xs font-bold border-none rounded-full px-2.5 py-0.5',
+              parseFloat(getRataRata(item)) >= KKM
+                ? 'bg-green-500/10 text-green-500'
+                : 'bg-red-500/10 text-red-500'
+            ]"
+          >
+            {{ parseFloat(getRataRata(item)) >= KKM ? 'Naik Kelas' : 'Perlu Remedial' }}
+          </Badge>
+        </template>
+      </DataTableCard>
     </div>
   </div>
 
   <!-- Detail Raport Dialog -->
   <Dialog v-model:open="isDetailOpen">
-    <DialogContent class="max-w-2xl">
-      <DialogHeader>
-        <DialogTitle class="flex items-center gap-2">
+    <DialogContent
+      class="sm:max-w-4xl p-0 overflow-hidden bg-slate-100 dark:bg-slate-900 border-none rounded-xl"
+    >
+      <DialogHeader
+        class="px-6 py-4 border-b border-border/40 bg-white dark:bg-slate-950 flex flex-row items-center justify-between sticky top-0 z-10 print:hidden"
+      >
+        <DialogTitle class="text-xl font-bold flex items-center gap-2">
           <FileBarChart class="size-5 text-primary" />
-          Detail Raport Siswa
+          Preview Laporan Hasil Belajar (Raport)
         </DialogTitle>
-        <DialogDescription v-if="selectedRaport">
-          {{ selectedRaport.nama }} — {{ selectedRaport.kelas }} | Semester {{ selectedRaport.semester }} TP {{ selectedRaport.tp }}
-        </DialogDescription>
+        <div class="flex gap-2">
+          <Button
+            @click="printSingleRaport"
+            class="gap-2 rounded-full px-6 shadow-sm bg-emerald-600 hover:bg-emerald-700 text-white"
+          >
+            <Printer class="size-4" />
+            Cetak Raport
+          </Button>
+        </div>
       </DialogHeader>
 
-      <ScrollArea class="max-h-[65vh]">
-        <div v-if="selectedRaport" class="space-y-5 pr-2">
-          <!-- Info Siswa -->
-          <div class="grid grid-cols-2 gap-3 p-4 bg-muted/30 rounded-xl border">
-            <div>
-              <p class="text-xs text-muted-foreground">Nama Lengkap</p>
-              <p class="font-semibold text-sm mt-0.5">{{ selectedRaport.nama }}</p>
+      <ScrollArea
+        class="h-[80vh] bg-slate-100/50 dark:bg-slate-900/50 p-6 sm:p-10 print:h-auto print:p-0 print:bg-transparent"
+      >
+        <div v-if="selectedRaport">
+          <!-- Paper Sheet -->
+          <div
+            id="printable-area-raport"
+            class="bg-white text-black max-w-[210mm] min-h-[297mm] mx-auto p-12 shadow-md print:shadow-none print:m-0 print:p-8 rounded-sm font-sans"
+          >
+            <!-- TITLE -->
+            <div class="text-center mb-8">
+              <h1 class="text-lg font-bold uppercase tracking-wide">
+                LAPORAN HASIL BELAJAR (RAPORT)
+              </h1>
             </div>
-            <div>
-              <p class="text-xs text-muted-foreground">NISN</p>
-              <p class="font-semibold text-sm mt-0.5">{{ selectedRaport.nisn }}</p>
-            </div>
-            <div>
-              <p class="text-xs text-muted-foreground">Kelas</p>
-              <p class="font-semibold text-sm mt-0.5">{{ selectedRaport.kelas }}</p>
-            </div>
-            <div>
-              <p class="text-xs text-muted-foreground">Wali Kelas</p>
-              <p class="font-semibold text-sm mt-0.5">{{ selectedRaport.waliKelas }}</p>
-            </div>
-          </div>
 
-          <!-- Tabel Nilai -->
-          <div>
-            <h3 class="text-sm font-semibold mb-2 flex items-center gap-1.5">
-              <GraduationCap class="size-4 text-primary" />
-              Nilai Per Mata Pelajaran
-            </h3>
-            <div class="rounded-xl border overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow class="bg-muted/50">
-                    <TableHead class="font-semibold">Mata Pelajaran</TableHead>
-                    <TableHead class="font-semibold text-center">Nilai</TableHead>
-                    <TableHead class="font-semibold text-center">Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow v-for="mapel in mataPelajaranList" :key="mapel">
-                    <TableCell class="text-sm">{{ mapel }}</TableCell>
-                    <TableCell class="text-center font-bold" :class="getNilaiClass(selectedRaport.nilai[mapel])">
+            <!-- STUDENT & SCHOOL HEADER INFO -->
+            <table class="w-full text-xs mb-6 table-fixed border-collapse">
+              <colgroup>
+                <col class="w-[140px]" />
+                <col class="w-[15px]" />
+                <col class="w-[38%]" />
+                <col class="w-[120px]" />
+                <col class="w-[15px]" />
+                <col class="w-[20%]" />
+              </colgroup>
+              <tbody>
+                <tr class="align-top">
+                  <td class="py-1 font-semibold text-left whitespace-nowrap">Nama Peserta Didik</td>
+                  <td class="py-1 text-center">:</td>
+                  <td class="py-1 text-left font-bold">{{ selectedRaport.nama }}</td>
+                  <td class="py-1 pl-6 font-semibold text-left whitespace-nowrap">Kelas</td>
+                  <td class="py-1 text-center">:</td>
+                  <td class="py-1 text-left font-medium">{{ selectedRaport.kelas }}</td>
+                </tr>
+                <tr class="align-top">
+                  <td class="py-1 font-semibold text-left whitespace-nowrap">NISN</td>
+                  <td class="py-1 text-center">:</td>
+                  <td class="py-1 text-left font-mono">{{ selectedRaport.nisn }}</td>
+                  <td class="py-1 pl-6 font-semibold text-left whitespace-nowrap">Fase</td>
+                  <td class="py-1 text-center">:</td>
+                  <td class="py-1 text-left font-medium">{{ getFase(selectedRaport.kelas) }}</td>
+                </tr>
+                <tr class="align-top">
+                  <td class="py-1 font-semibold text-left whitespace-nowrap">Sekolah</td>
+                  <td class="py-1 text-center">:</td>
+                  <td class="py-1 text-left font-medium">SDN TEHNONUSA PRIMA I</td>
+                  <td class="py-1 pl-6 font-semibold text-left whitespace-nowrap">Semester</td>
+                  <td class="py-1 text-center">:</td>
+                  <td class="py-1 text-left font-medium">{{ selectedRaport.semester }}</td>
+                </tr>
+                <tr class="align-top">
+                  <td class="py-1 font-semibold text-left whitespace-nowrap">Alamat</td>
+                  <td class="py-1 text-center">:</td>
+                  <td class="py-1 text-left leading-relaxed break-words">
+                    Jl. Pendidikan No. 1, Kec. Ilmu, Kota Pengetahuan
+                  </td>
+                  <td class="py-1 pl-6 font-semibold text-left whitespace-nowrap">
+                    Tahun Pelajaran
+                  </td>
+                  <td class="py-1 text-center">:</td>
+                  <td class="py-1 text-left font-medium">{{ selectedRaport.tp }}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- TABLE 1: HASIL BELAJAR -->
+            <div class="mb-6">
+              <table class="w-full border-collapse border border-black text-[11px] leading-normal">
+                <thead>
+                  <tr class="bg-gray-100 text-center font-bold">
+                    <th class="border border-black py-2 px-1 w-[40px]">No.</th>
+                    <th class="border border-black py-2 px-2 text-left w-[240px]">
+                      Mata Pelajaran
+                    </th>
+                    <th class="border border-black py-2 px-1 w-[80px]">Nilai Akhir</th>
+                    <th class="border border-black py-2 px-2 text-left">Capaian Kompetensi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(mapel, index) in mataPelajaranList"
+                    :key="mapel"
+                  >
+                    <td class="border border-black py-2 px-1 text-center">{{ index + 1 }}</td>
+                    <td class="border border-black py-2 px-2 text-left">{{ mapel }}</td>
+                    <td class="border border-black py-2 px-1 text-center font-bold">
                       {{ selectedRaport.nilai[mapel] ?? '-' }}
-                    </TableCell>
-                    <TableCell class="text-center">
-                      <Badge :class="selectedRaport.nilai[mapel] >= KKM
-                        ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'
-                        : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
-                      " class="text-xs">
-                        {{ selectedRaport.nilai[mapel] >= KKM ? 'Tuntas' : 'Remedial' }}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow class="bg-muted/50">
-                    <TableCell class="font-bold">Rata-rata</TableCell>
-                    <TableCell class="text-center font-bold text-primary">{{ getRataRata(selectedRaport) }}</TableCell>
-                    <TableCell class="text-center">
-                      <Badge :class="getPredikatClass(getRataRata(selectedRaport))">
-                        Predikat {{ getPredikat(getRataRata(selectedRaport)).label }}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+                    </td>
+                    <td class="border border-black py-2 px-2 text-left text-[10px] leading-relaxed">
+                      {{ getCapaianKompetensi(mapel, selectedRaport.nilai[mapel]) }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-          </div>
 
-          <Separator />
+            <!-- TABLE 2: EKSTRAKURIKULER -->
+            <div class="mb-6">
+              <table class="w-full border-collapse border border-black text-[11px]">
+                <thead>
+                  <tr class="bg-gray-100 text-center font-bold">
+                    <th class="border border-black py-2 px-1 w-[40px]">No.</th>
+                    <th class="border border-black py-2 px-2 text-left w-[240px]">
+                      Ekstrakurikuler
+                    </th>
+                    <th class="border border-black py-2 px-2 text-left">Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="border border-black py-2 px-1 text-center">1</td>
+                    <td class="border border-black py-2 px-2 text-left font-medium">Pramuka</td>
+                    <td class="border border-black py-2 px-2 text-left text-[10px] leading-relaxed">
+                      Aktif berpartisipasi dalam setiap kegiatan Pramuka and menunjukkan sikap
+                      disiplin, mandiri, serta kerja sama yang sangat baik dalam regu.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-black py-2 px-1 text-center">2</td>
+                    <td class="border border-black py-2 px-2 text-left font-medium">
+                      Silat (Bela Diri)
+                    </td>
+                    <td class="border border-black py-2 px-2 text-left text-[10px] leading-relaxed">
+                      Menunjukkan penguasaan teknik dasar bela diri pencak silat yang baik dan
+                      konsisten selama mengikuti latihan rutin mingguan.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-black py-2 px-1 text-center">dst.</td>
+                    <td class="border border-black py-2 px-2 text-left text-muted-foreground">-</td>
+                    <td class="border border-black py-2 px-2 text-left text-muted-foreground">-</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
-          <!-- Rekap Kehadiran -->
-          <div>
-            <h3 class="text-sm font-semibold mb-3 flex items-center gap-1.5">
-              <Calendar class="size-4 text-primary" />
-              Rekap Kehadiran
-            </h3>
-            <div class="grid grid-cols-5 gap-2">
-              <div class="text-center p-3 bg-green-50 dark:bg-green-950/20 rounded-xl border border-green-100 dark:border-green-900/30">
-                <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ selectedRaport.kehadiran.hadir }}</div>
-                <p class="text-xs text-muted-foreground mt-1">Hadir</p>
+            <!-- ATTENDANCE & DATE PLACE (SIDE BY SIDE) -->
+            <div class="grid grid-cols-2 gap-8 items-start mb-8">
+              <!-- Ketidakhadiran Table -->
+              <div>
+                <table class="w-[260px] border-collapse border border-black text-[11px]">
+                  <thead>
+                    <tr class="bg-gray-100 font-bold">
+                      <th
+                        colspan="2"
+                        class="border border-black py-1.5 px-3 text-center uppercase tracking-wide"
+                      >
+                        Ketidakhadiran
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="border border-black py-1 px-3 w-[140px] text-left">Sakit</td>
+                      <td class="border border-black py-1 px-3 text-center font-bold">
+                        {{ selectedRaport.kehadiran.sakit }} hari
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="border border-black py-1 px-3 text-left">Izin</td>
+                      <td class="border border-black py-1 px-3 text-center font-bold">
+                        {{ selectedRaport.kehadiran.izin }} hari
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="border border-black py-1 px-3 text-left text-red-600 font-medium">
+                        Tanpa Keterangan (Alpa)
+                      </td>
+                      <td class="border border-black py-1 px-3 text-center font-bold text-red-600">
+                        {{ selectedRaport.kehadiran.alpa }} hari
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-              <div class="text-center p-3 bg-yellow-50 dark:bg-yellow-950/20 rounded-xl border border-yellow-100 dark:border-yellow-900/30">
-                <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ selectedRaport.kehadiran.terlambat }}</div>
-                <p class="text-xs text-muted-foreground mt-1">Terlambat</p>
-              </div>
-              <div class="text-center p-3 bg-indigo-50 dark:bg-indigo-950/20 rounded-xl border border-indigo-100 dark:border-indigo-900/30">
-                <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ selectedRaport.kehadiran.izin }}</div>
-                <p class="text-xs text-muted-foreground mt-1">Izin</p>
-              </div>
-              <div class="text-center p-3 bg-blue-50 dark:bg-blue-950/20 rounded-xl border border-blue-100 dark:border-blue-900/30">
-                <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ selectedRaport.kehadiran.sakit }}</div>
-                <p class="text-xs text-muted-foreground mt-1">Sakit</p>
-              </div>
-              <div class="text-center p-3 bg-red-50 dark:bg-red-950/20 rounded-xl border border-red-100 dark:border-red-900/30">
-                <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ selectedRaport.kehadiran.alpa }}</div>
-                <p class="text-xs text-muted-foreground mt-1">Alpa</p>
+
+              <!-- Date info -->
+              <div class="text-right text-xs pr-4 pt-1 font-medium">
+                <p>
+                  Jakarta,
+                  {{
+                    new Date().toLocaleDateString('id-ID', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric'
+                    })
+                  }}
+                </p>
               </div>
             </div>
-          </div>
 
-          <Separator />
+            <!-- SIGNATURES SECTION -->
+            <div>
+              <!-- Signature: Parents & Teacher -->
+              <div class="grid grid-cols-2 text-center text-xs mb-10">
+                <div>
+                  <p class="mb-20">Orang Tua/Wali Murid</p>
+                  <div class="border-b border-black w-44 mx-auto"></div>
+                </div>
+                <div>
+                  <p class="mb-20">Wali Kelas</p>
+                  <p class="font-bold underline">{{ selectedRaport.waliKelas.split(',')[0] }}</p>
+                  <p class="text-[10px] text-muted-foreground">NIP. -</p>
+                </div>
+              </div>
 
-          <!-- Catatan -->
-          <div>
-            <h3 class="text-sm font-semibold mb-2">Catatan Wali Kelas</h3>
-            <p class="text-sm text-muted-foreground bg-muted/30 p-3 rounded-xl border italic">
-              "{{ selectedRaport.catatan }}"
-            </p>
-          </div>
-
-          <!-- Actions -->
-          <div class="flex justify-end gap-2 pt-2">
-            <Button variant="outline" class="gap-2" @click="handlePrint">
-              <Printer class="size-4" />
-              Cetak Raport
-            </Button>
-            <Button class="gap-2">
-              <Download class="size-4" />
-              Unduh PDF
-            </Button>
+              <!-- Signature: Headmaster -->
+              <div class="text-center text-xs">
+                <p>Mengetahui,</p>
+                <p class="mb-20">Kepala Sekolah</p>
+                <p class="font-bold underline">Dr. H. Ahmad Dahlan, M.Pd.</p>
+                <p class="text-[10px] text-muted-foreground">NIP. 19700101 199512 1 001</p>
+              </div>
+            </div>
           </div>
         </div>
       </ScrollArea>

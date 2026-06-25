@@ -8,8 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'vue-sonner'
 import PageHeader from '@/components/page-header/PageHeader.vue'
-import DatePicker from '@/components/date-picker/DatePicker.vue'
-import { CalendarDate, getLocalTimeZone, today } from '@internationalized/date'
+import { getLocalTimeZone, today } from '@internationalized/date'
 import { formatDate } from '@/utils/formatDate'
 import { glassFade } from '@/config/motion'
 import {
@@ -25,7 +24,6 @@ import {
 } from '@/components/ui/input-group'
 import {
   Building2,
-  Banknote,
   CheckCircle2,
   Sparkles,
   ShieldCheck,
@@ -35,8 +33,10 @@ import {
   Phone,
   HelpCircle,
   Key,
-  Layers
+  Layers,
+  Calendar
 } from 'lucide-vue-next'
+import * as financeService from '@/services/superAdminFinanceService'
 
 const router = useRouter()
 const route = useRoute()
@@ -44,148 +44,77 @@ const route = useRoute()
 const isEditMode = computed(() => !!route.query.id)
 
 const activeDate = ref(today(getLocalTimeZone()))
-const dueDate = ref(today(getLocalTimeZone()).add({ years: 1 }))
+const plans = ref([])
+const foundations = ref([])
+const selectedPlan = ref(null)
+const selectedFoundation = ref(null)
 
 const form = ref({
+  foundation_id: '',
+  subscription_plan_id: '',
+  status: 'aktif',
+  catatan: '',
+
+  // Preview properties
   namaInstitusi: '',
   tenantId: '',
-  paket: 'professional',
-  status: 'aktif',
-  nilaiKontrak: 45000000,
+  paket: '',
+  nilaiKontrak: 0,
   emailAdmin: '',
-  telepon: '',
-  catatan: ''
+  telepon: ''
 })
 
-// Default data fallback for initialization (aligned with Subscription.vue)
-const defaultSubscriptions = [
-  {
-    id: 'T-10024',
-    name: 'SMA Terpadu Harapan',
-    paket: 'enterprise',
-    status: 'aktif',
-    tglAktivasi: '12 Jan 2024',
-    tglAktivasiRaw: { year: 2024, month: 1, day: 12 },
-    jatuhTempo: '12 Jan 2025',
-    jatuhTempoRaw: { year: 2025, month: 1, day: 12 },
-    nilaiKontrak: 120000000,
-    avatar: 'ST',
-    emailAdmin: 'admin.sma@terpaduharapan.sch.id',
-    telepon: '081234567890',
-    catatan: 'Pembayaran tahunan via transfer bank.'
-  },
-  {
-    id: 'T-09882',
-    name: 'Madrasah Pusat Al-Ikhlas',
-    paket: 'professional',
-    status: 'overdue',
-    tglAktivasi: '05 Okt 2023',
-    tglAktivasiRaw: { year: 2023, month: 10, day: 5 },
-    jatuhTempo: '05 Okt 2024',
-    jatuhTempoRaw: { year: 2024, month: 10, day: 5 },
-    nilaiKontrak: 45000000,
-    avatar: 'MP',
-    emailAdmin: 'info@alikhlas.sch.id',
-    telepon: '082134567890',
-    catatan: 'Hubungi bendahara sebelum jatuh tempo.'
-  },
-  {
-    id: 'T-10255',
-    name: 'SMP IT Al-Azhar',
-    paket: 'basic',
-    status: 'trialing',
-    tglAktivasi: '20 Jun 2024',
-    tglAktivasiRaw: { year: 2024, month: 6, day: 20 },
-    jatuhTempo: '04 Jul 2024',
-    jatuhTempoRaw: { year: 2024, month: 7, day: 4 },
-    nilaiKontrak: 0,
-    avatar: 'AZ',
-    emailAdmin: 'admin@alazhar.sch.id',
-    telepon: '083134567890',
-    catatan: 'Uji coba gratis 14 hari.'
+const dueDate = computed(() => {
+  if (!selectedPlan.value) return activeDate.value.add({ years: 1 })
+  const cycle = selectedPlan.value.billing_cycle
+  if (cycle === 'monthly') {
+    return activeDate.value.add({ months: 1 })
+  } else if (cycle === 'yearly') {
+    return activeDate.value.add({ years: 1 })
+  } else if (cycle === 'lifetime') {
+    return activeDate.value.add({ years: 100 })
   }
-]
+  return activeDate.value.add({ years: 1 })
+})
 
-// Load data if in edit mode
-onMounted(() => {
-  if (isEditMode.value) {
-    const stored = localStorage.getItem('cerdasbangsa_subscriptions')
-    const list = stored ? JSON.parse(stored) : [...defaultSubscriptions]
-    const existing = list.find(sub => sub.id === route.query.id)
-    if (existing) {
-      form.value = {
-        namaInstitusi: existing.name,
-        tenantId: existing.id,
-        paket: existing.paket,
-        status: existing.status,
-        nilaiKontrak: existing.nilaiKontrak,
-        emailAdmin: existing.emailAdmin || '',
-        telepon: existing.telepon || '',
-        catatan: existing.catatan || ''
-      }
-      if (existing.tglAktivasiRaw) {
-        activeDate.value = new CalendarDate(
-          existing.tglAktivasiRaw.year,
-          existing.tglAktivasiRaw.month,
-          existing.tglAktivasiRaw.day
-        )
-      }
-      if (existing.jatuhTempoRaw) {
-        dueDate.value = new CalendarDate(
-          existing.jatuhTempoRaw.year,
-          existing.jatuhTempoRaw.month,
-          existing.jatuhTempoRaw.day
-        )
-      }
+// Load options from backend
+onMounted(async () => {
+  try {
+    const plansRes = await financeService.getPlans()
+    if (plansRes.status === 'success') {
+      plans.value = plansRes.data
     }
-  }
-})
 
-// Auto-generate Tenant ID on typing Nama Institusi (only when not in edit mode)
-watch(() => form.value.namaInstitusi, (newVal) => {
-  if (isEditMode.value) return
-  if (newVal) {
-    const clean = newVal
-      .toLowerCase()
-      .replace(/[^a-z0-9 ]/g, '')
-      .split(' ')
-      .filter(Boolean)
-      .map(w => w.slice(0, 3))
-      .join('-')
-    form.value.tenantId = `T-${clean || 'new'}-${Math.floor(1000 + Math.random() * 9000)}`
-  } else {
-    form.value.tenantId = ''
-  }
-})
-
-// Autoselect contract value and date on change of package type
-const updatePackageDetails = (val) => {
-  form.value.paket = val
-  if (val === 'enterprise') {
-    form.value.nilaiKontrak = 120000000
-    form.value.status = 'aktif'
-  } else if (val === 'professional') {
-    form.value.nilaiKontrak = 45000000
-    form.value.status = 'aktif'
-  } else if (val === 'basic') {
-    form.value.nilaiKontrak = 15000000
-    form.value.status = 'aktif'
-  } else if (val === 'trial') {
-    form.value.nilaiKontrak = 0
-    form.value.status = 'trialing'
-  }
-}
-
-// Watch active date & package selection to calculate due date
-watch([activeDate, () => form.value.paket], () => {
-  if (activeDate.value) {
-    if (form.value.paket === 'trial') {
-      dueDate.value = activeDate.value.add({ days: 14 })
-    } else {
-      dueDate.value = activeDate.value.add({ years: 1 })
+    const foundationsRes = await financeService.getFoundations()
+    if (foundationsRes.status === 'success') {
+      foundations.value = foundationsRes.data
     }
+  } catch (error) {
+    toast.error('Gagal mengambil data dari server.')
   }
-}, { immediate: true })
+})
+
+// Watch foundation to populate preview
+watch(() => form.value.foundation_id, (newId) => {
+  const found = foundations.value.find(f => f.id === newId)
+  if (found) {
+    selectedFoundation.value = found
+    form.value.namaInstitusi = found.name
+    form.value.tenantId = found.code || `F-${found.id}`
+    form.value.emailAdmin = found.email || `${found.name.toLowerCase().replace(/[^a-z0-9]/g, '')}@nusantara.sch.id`
+    form.value.telepon = found.phone || '-'
+  }
+})
+
+// Watch plan to populate preview
+watch(() => form.value.subscription_plan_id, (newId) => {
+  const plan = plans.value.find(p => p.id === newId)
+  if (plan) {
+    selectedPlan.value = plan
+    form.value.paket = plan.name
+    form.value.nilaiKontrak = parseFloat(plan.price)
+  }
+})
 
 const formatCurrency = (val) => {
   return new Intl.NumberFormat('id-ID', {
@@ -196,17 +125,16 @@ const formatCurrency = (val) => {
 }
 
 const packageBadgeStyle = (pkg) => {
-  switch (pkg) {
-    case 'enterprise':
-      return 'bg-violet-500/20 text-violet-300 border border-violet-500/30 text-[10px] px-2.5 py-0.5 font-semibold tracking-wider'
-    case 'professional':
-      return 'bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] px-2.5 py-0.5 font-semibold tracking-wider'
-    case 'basic':
-      return 'bg-slate-500/20 text-slate-300 border border-slate-500/30 text-[10px] px-2.5 py-0.5 font-semibold tracking-wider'
-    case 'trial':
-      return 'bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] px-2.5 py-0.5 font-semibold tracking-wider'
-    default:
-      return 'bg-slate-500/25 text-slate-300 text-[10px]'
+  if (!pkg) return 'bg-slate-500/25 text-slate-300 text-[10px]'
+  const name = pkg.toLowerCase()
+  if (name.includes('enterprise')) {
+    return 'bg-violet-500/20 text-violet-300 border border-violet-500/30 text-[10px] px-2.5 py-0.5 font-semibold tracking-wider'
+  } else if (name.includes('premium') || name.includes('professional')) {
+    return 'bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] px-2.5 py-0.5 font-semibold tracking-wider'
+  } else if (name.includes('basic')) {
+    return 'bg-slate-500/20 text-slate-300 border border-slate-500/30 text-[10px] px-2.5 py-0.5 font-semibold tracking-wider'
+  } else {
+    return 'bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] px-2.5 py-0.5 font-semibold tracking-wider'
   }
 }
 
@@ -224,121 +152,81 @@ const statusBadgeStyle = (status) => {
 }
 
 const packageFeatures = computed(() => {
-  switch (form.value.paket) {
-    case 'enterprise':
-      return {
-        title: 'Enterprise Plan',
-        desc: 'Untuk yayasan besar dengan banyak cabang unit sekolah.',
-        benefits: [
-          'Multi-unit & Yayasan Hub Terintegrasi',
-          'Jumlah Siswa & Guru tidak terbatas',
-          'Penyimpanan Awan 100 GB (Premium)',
-          'Dukungan SLA Prioritas 24/7'
-        ],
-        icon: Zap,
-        color: 'text-violet-500 bg-violet-500/10 border-violet-500/20'
-      }
-    case 'professional':
-      return {
-        title: 'Professional Plan',
-        desc: 'Untuk unit sekolah tunggal dengan administrasi lengkap.',
-        benefits: [
-          'Seluruh fitur Akademik, Absensi, & Keuangan',
-          'Maksimum 1.000 Siswa aktif',
-          'Penyimpanan Awan 25 GB',
-          'Dukungan Jam Kerja (Email & Live Chat)'
-        ],
-        icon: Sparkles,
-        color: 'text-blue-500 bg-blue-500/10 border-blue-500/20'
-      }
-    case 'basic':
-      return {
-        title: 'Basic Plan',
-        desc: 'Fitur standar untuk sekolah berkembang.',
-        benefits: [
-          'Fitur Akademik & Kasir Pembayaran Dasar',
-          'Maksimum 300 Siswa aktif',
-          'Penyimpanan Awan 5 GB',
-          'Dukungan melalui Pusat Bantuan Online'
-        ],
-        icon: ShieldCheck,
-        color: 'text-slate-500 bg-slate-500/10 border-slate-500/20'
-      }
-    case 'trial':
-      return {
-        title: 'Free Trial',
-        desc: 'Uji coba gratis seluruh fitur professional.',
-        benefits: [
-          'Akses fitur Professional lengkap',
-          'Berlaku 14 hari sejak aktivasi',
-          'Batas input data s/d 50 siswa',
-          'Konversi otomatis ke berbayar'
-        ],
-        icon: Info,
-        color: 'text-amber-500 bg-amber-500/10 border-amber-500/20'
-      }
-    default:
-      return null
+  if (!selectedPlan.value) return null
+  const plan = selectedPlan.value
+  const name = plan.name.toLowerCase()
+
+  let icon = ShieldCheck
+  let color = 'text-slate-500 bg-slate-500/10 border-slate-500/20'
+
+  if (name.includes('enterprise')) {
+    icon = Zap
+    color = 'text-violet-500 bg-violet-500/10 border-violet-500/20'
+  } else if (name.includes('premium') || name.includes('professional')) {
+    icon = Sparkles
+    color = 'text-blue-500 bg-blue-500/10 border-blue-500/20'
+  }
+
+  return {
+    title: plan.name,
+    desc: `Fitur untuk paket ${plan.name}.`,
+    benefits: plan.features || [
+      `Maksimal ${plan.max_schools} unit sekolah`,
+      `Maksimal ${plan.max_students} siswa`,
+      `Siklus Tagihan: ${plan.billing_cycle}`
+    ],
+    icon,
+    color
   }
 })
 
 const isSubmitting = ref(false)
 
-const handleSubmit = () => {
-  if (!form.value.namaInstitusi) {
-    toast.error('Mohon isi nama institusi!')
+const handleSubmit = async () => {
+  if (!form.value.foundation_id) {
+    toast.error('Mohon pilih institusi / yayasan!')
     return
   }
-  if (!form.value.emailAdmin) {
-    toast.error('Mohon isi email administrator!')
+  if (!form.value.subscription_plan_id) {
+    toast.error('Mohon pilih paket langganan!')
     return
   }
-  
+
   isSubmitting.value = true
-  
-  setTimeout(() => {
-    const stored = localStorage.getItem('cerdasbangsa_subscriptions')
-    let list = stored ? JSON.parse(stored) : [...defaultSubscriptions]
 
-    const subData = {
-      id: form.value.tenantId,
-      name: form.value.namaInstitusi,
-      paket: form.value.paket,
-      status: form.value.status,
-      nilaiKontrak: form.value.nilaiKontrak,
-      tglAktivasi: formatDate(activeDate.value),
-      tglAktivasiRaw: {
-        year: activeDate.value.year,
-        month: activeDate.value.month,
-        day: activeDate.value.day
-      },
-      jatuhTempo: formatDate(dueDate.value),
-      jatuhTempoRaw: {
-        year: dueDate.value.year,
-        month: dueDate.value.month,
-        day: dueDate.value.day
-      },
-      avatar: form.value.namaInstitusi.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'N',
-      emailAdmin: form.value.emailAdmin,
-      telepon: form.value.telepon,
-      catatan: form.value.catatan
-    }
+  try {
+    // 1. Create manual pending invoice/payment
+    const invRes = await financeService.createInvoice({
+      foundation_id: form.value.foundation_id,
+      subscription_plan_id: form.value.subscription_plan_id,
+      notes: form.value.catatan || 'Manual subscription activation invoice'
+    })
 
-    if (isEditMode.value) {
-      const idx = list.findIndex(sub => sub.id === route.query.id)
-      if (idx !== -1) {
-        list[idx] = subData
+    if (invRes.status === 'success' && invRes.data) {
+      const paymentId = invRes.data.id
+
+      // 2. If status set to 'aktif', immediately verify payment as 'paid' to activate subscription
+      if (form.value.status === 'aktif') {
+        await financeService.verifyPayment(paymentId, {
+          status: 'paid',
+          notes: 'Auto-approved and activated by Administrator.'
+        })
+        toast.success('Pendaftaran Langganan Baru Berhasil & Diaktifkan!')
+      } else {
+        toast.success('Invoice Tagihan Langganan Berhasil Dibuat (Pending)!')
       }
+
+      router.push('/keuangan/subscription')
     } else {
-      list.push(subData)
+      throw new Error(invRes.message || 'Gagal membuat tagihan.')
     }
-
-    localStorage.setItem('cerdasbangsa_subscriptions', JSON.stringify(list))
-
-    toast.success(isEditMode.value ? 'Detail Langganan Berhasil Diperbarui!' : 'Pendaftaran Langganan Baru Berhasil!')
+  } catch (error) {
+    toast.error('Gagal menyimpan langganan', {
+      description: error.message || 'Terjadi kesalahan saat memproses API.'
+    })
+  } finally {
     isSubmitting.value = false
-    router.push('/keuangan/subscription')
-  }, 1000)
+  }
 }
 </script>
 
@@ -349,15 +237,13 @@ const handleSubmit = () => {
     :visible-once="glassFade.visible"
     class="h-full space-y-6 text-foreground pb-10 max-w-6xl mx-auto w-full text-left"
   >
-    <!-- Header Component (Consistent with overall project theme) -->
     <PageHeader
       :title="isEditMode ? 'Edit Detail Langganan' : 'Tambah Langganan Baru'"
-      :description="isEditMode ? 'Ubah informasi detail langganan institusi di bawah ini.' : 'Lengkapi formulir di bawah ini untuk mendaftarkan institusi/tenant baru ke dalam lisensi CerdasBangsa.'"
+      description="Lengkapi formulir di bawah ini untuk mendaftarkan institusi/tenant baru ke dalam lisensi CerdasBangsa melalui backend."
       back
       @back="router.push('/keuangan/subscription')"
     />
 
-    <!-- Main Content Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6 items-start">
       <!-- Left Column: Form -->
       <Card class="shadow-sm border-border bg-card/60 backdrop-blur-md overflow-hidden rounded-xl">
@@ -383,16 +269,16 @@ const handleSubmit = () => {
             <Field>
               <FieldLabel>Nama Institusi / Sekolah <span class="text-destructive">*</span></FieldLabel>
               <FieldContent>
-                <InputGroup>
-                  <InputGroupText>
-                    <Building2 class="w-4 h-4 text-muted-foreground" />
-                  </InputGroupText>
-                  <InputGroupInput
-                    v-model="form.namaInstitusi"
-                    placeholder="Contoh: SMA Terpadu Harapan"
-                    required
-                  />
-                </InputGroup>
+                <Select v-model="form.foundation_id" required>
+                  <SelectTrigger class="h-11 bg-background/50 border-border">
+                    <SelectValue placeholder="Pilih Institusi / Yayasan" />
+                  </SelectTrigger>
+                  <SelectContent class="bg-card border-border">
+                    <SelectItem v-for="f in foundations" :key="f.id" :value="f.id">
+                      {{ f.name }} ({{ f.code }})
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </FieldContent>
             </Field>
 
@@ -419,17 +305,16 @@ const handleSubmit = () => {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Paket Langganan -->
             <Field>
-              <FieldLabel>Paket Langganan</FieldLabel>
+              <FieldLabel>Paket Langganan <span class="text-destructive">*</span></FieldLabel>
               <FieldContent>
-                <Select :model-value="form.paket" @update:modelValue="updatePackageDetails">
+                <Select v-model="form.subscription_plan_id" required>
                   <SelectTrigger class="h-11 bg-background/50 border-border">
-                    <SelectValue placeholder="Pilih Paket" />
+                    <SelectValue placeholder="Pilih Paket Langganan" />
                   </SelectTrigger>
                   <SelectContent class="bg-card border-border">
-                    <SelectItem value="trial">Free Trial (14 Hari)</SelectItem>
-                    <SelectItem value="basic">Basic (Rp 15.000.000 / Thn)</SelectItem>
-                    <SelectItem value="professional">Professional (Rp 45.000.000 / Thn)</SelectItem>
-                    <SelectItem value="enterprise">Enterprise (Rp 120.000.000 / Thn)</SelectItem>
+                    <SelectItem v-for="p in plans" :key="p.id" :value="p.id">
+                      {{ p.name }} ({{ formatCurrency(p.price) }} / {{ p.billing_cycle }})
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </FieldContent>
@@ -444,9 +329,8 @@ const handleSubmit = () => {
                     <SelectValue placeholder="Pilih Status" />
                   </SelectTrigger>
                   <SelectContent class="bg-card border-border">
-                    <SelectItem value="aktif">Aktif</SelectItem>
-                    <SelectItem value="trialing">Trialing</SelectItem>
-                    <SelectItem value="overdue">Overdue / Telat</SelectItem>
+                    <SelectItem value="aktif">Aktif Langsung (Paid)</SelectItem>
+                    <SelectItem value="pending">Menunggu Pembayaran (Pending)</SelectItem>
                   </SelectContent>
                 </Select>
               </FieldContent>
@@ -460,39 +344,60 @@ const handleSubmit = () => {
               <InputGroup>
                 <InputGroupText class="font-bold text-xs">Rp</InputGroupText>
                 <InputGroupInput
-                  v-model.number="form.nilaiKontrak"
-                  type="number"
+                  :model-value="form.nilaiKontrak"
+                  type="text"
                   placeholder="0"
-                  min="0"
+                  disabled
+                  class="bg-muted/60 text-muted-foreground cursor-not-allowed"
                 />
               </InputGroup>
             </FieldContent>
             <FieldDescription class="flex items-center gap-1">
               <HelpCircle class="w-3 h-3 shrink-0" />
-              Sesuaikan nilai jika terdapat penyesuaian khusus (diskon, subsidi yayasan, dll).
+              Sesuai dengan tarif dasar paket yang dipilih.
             </FieldDescription>
           </Field>
 
-          <!-- Tanggal Aktivasi & Jatuh Tempo (Menggunakan DatePicker standar) -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
-            <DatePicker
-              v-model="activeDate"
-              label="Tanggal Aktivasi"
-              placeholder="Pilih Tanggal Aktivasi"
-            />
+          <!-- Tanggal Aktivasi & Jatuh Tempo -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Field>
+              <FieldLabel>Tanggal Aktivasi (Hari Ini)</FieldLabel>
+              <FieldContent>
+                <InputGroup>
+                  <InputGroupText>
+                    <Calendar class="w-4 h-4 text-muted-foreground" />
+                  </InputGroupText>
+                  <InputGroupInput
+                    :model-value="formatDate(activeDate)"
+                    disabled
+                    class="bg-muted/60 text-muted-foreground cursor-not-allowed"
+                  />
+                </InputGroup>
+              </FieldContent>
+            </Field>
             
-            <DatePicker
-              v-model="dueDate"
-              label="Tanggal Jatuh Tempo"
-              placeholder="Pilih Tanggal Jatuh Tempo"
-            />
+            <Field>
+              <FieldLabel>Tanggal Jatuh Tempo (Kalkulasi Paket)</FieldLabel>
+              <FieldContent>
+                <InputGroup>
+                  <InputGroupText>
+                    <Calendar class="w-4 h-4 text-muted-foreground" />
+                  </InputGroupText>
+                  <InputGroupInput
+                    :model-value="formatDate(dueDate)"
+                    disabled
+                    class="bg-muted/60 text-muted-foreground cursor-not-allowed"
+                  />
+                </InputGroup>
+              </FieldContent>
+            </Field>
           </div>
 
           <!-- Admin Contact Info -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Email Admin -->
             <Field>
-              <FieldLabel>Email Administrator <span class="text-destructive">*</span></FieldLabel>
+              <FieldLabel>Email Administrator</FieldLabel>
               <FieldContent>
                 <InputGroup>
                   <InputGroupText>
@@ -502,7 +407,8 @@ const handleSubmit = () => {
                     v-model="form.emailAdmin"
                     type="email"
                     placeholder="admin.sekolah@email.com"
-                    required
+                    disabled
+                    class="bg-muted/60 text-muted-foreground cursor-not-allowed"
                   />
                 </InputGroup>
               </FieldContent>
@@ -520,6 +426,8 @@ const handleSubmit = () => {
                     v-model="form.telepon"
                     type="tel"
                     placeholder="Contoh: 081234567890"
+                    disabled
+                    class="bg-muted/60 text-muted-foreground cursor-not-allowed"
                   />
                 </InputGroup>
               </FieldContent>
@@ -532,7 +440,7 @@ const handleSubmit = () => {
             <FieldContent>
               <Textarea
                 v-model="form.catatan"
-                placeholder="Tambahkan informasi khusus seperti metode termin pembayaran, penanggung jawab yayasan, dll..."
+                placeholder="Tambahkan informasi khusus seperti nomor referensi transfer bank, penanggung jawab yayasan, dll..."
                 class="min-h-[100px] resize-none bg-background/50 border-border focus-visible:ring-primary/20 text-sm"
               />
             </FieldContent>
@@ -567,9 +475,9 @@ const handleSubmit = () => {
         </form>
       </Card>
 
-      <!-- Right Column: Interactive Premium Preview & Plan Feature Details -->
+      <!-- Right Column: Card Preview -->
       <div class="space-y-6">
-        <!-- Live Subscription membership-like Card (styled with the theme's active primary color) -->
+        <!-- Live Subscription Preview Card -->
         <div 
           class="relative overflow-hidden rounded-2xl shadow-xl border border-primary/20 bg-gradient-to-br from-primary via-primary/90 to-primary/75 p-6 text-primary-foreground transition-all duration-300 hover:scale-[1.02]"
         >
@@ -579,7 +487,6 @@ const handleSubmit = () => {
 
           <!-- Card Content -->
           <div class="relative z-10 space-y-6 flex flex-col justify-between min-h-[260px]">
-            <!-- Top section -->
             <div class="flex justify-between items-start gap-4">
               <div class="space-y-1.5 flex-1 min-w-0 pr-2">
                 <span class="text-[9px] tracking-widest font-black uppercase text-primary-foreground/70">KARTU ANGGOTA LISENSI</span>
@@ -591,7 +498,6 @@ const handleSubmit = () => {
                 </div>
               </div>
               
-              <!-- Glass-like Building Icon Box -->
               <div class="w-11 h-11 rounded-xl bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner shrink-0">
                 <Building2 class="w-5.5 h-5.5 text-primary-foreground" />
               </div>
@@ -603,12 +509,12 @@ const handleSubmit = () => {
                 <p class="text-[9px] uppercase tracking-wider text-primary-foreground/75 font-semibold">Tipe Paket</p>
                 <div class="mt-1 flex items-center">
                   <Badge :class="packageBadgeStyle(form.paket)">
-                    {{ form.paket.toUpperCase() }}
+                    {{ form.paket ? form.paket.toUpperCase() : 'BELUM DIPILIH' }}
                   </Badge>
                 </div>
               </div>
               <div class="text-right">
-                <p class="text-[9px] uppercase tracking-wider text-primary-foreground/75 font-semibold">Nilai Kontrak</p>
+                <p class="text-[9px] uppercase tracking-wider text-primary-foreground/75 font-semibold">Tarif Paket</p>
                 <p class="text-xl font-black mt-0.5 tracking-tight">
                   {{ formatCurrency(form.nilaiKontrak || 0) }}
                 </p>
@@ -618,24 +524,20 @@ const handleSubmit = () => {
             <!-- Bottom section: Dates & Status -->
             <div class="flex justify-between items-end gap-4">
               <div class="space-y-3">
-                <!-- Date range -->
                 <div class="grid grid-cols-2 gap-x-4 gap-y-1">
                   <div>
                     <span class="text-[8px] uppercase text-primary-foreground/60 block">Aktivasi</span>
                     <span class="text-[11px] font-bold text-white/95 flex items-center gap-1 mt-0.5">
-                      <Calendar class="w-3 h-3 text-white/50" />
                       {{ formatDate(activeDate) }}
                     </span>
                   </div>
                   <div>
                     <span class="text-[8px] uppercase text-primary-foreground/60 block">Jatuh Tempo</span>
                     <span class="text-[11px] font-bold text-white/95 flex items-center gap-1 mt-0.5">
-                      <Calendar class="w-3 h-3 text-white/50" />
                       {{ formatDate(dueDate) }}
                     </span>
                   </div>
                 </div>
-                <!-- Admin contact -->
                 <div class="border-t border-white/10 pt-2 min-w-0">
                   <span class="text-[8px] uppercase text-primary-foreground/60 block">Admin Sekolah</span>
                   <span class="text-[10px] font-semibold truncate block mt-0.5 text-white/90">
@@ -644,7 +546,6 @@ const handleSubmit = () => {
                 </div>
               </div>
               
-              <!-- Status Badge -->
               <Badge :class="statusBadgeStyle(form.status)" class="shrink-0 mb-0.5 shadow-sm">
                 ● {{ form.status.toUpperCase() }}
               </Badge>
@@ -652,7 +553,7 @@ const handleSubmit = () => {
           </div>
         </div>
 
-        <!-- Dynamic Package Feature Information (Styled to match form card theme) -->
+        <!-- Dynamic Package Feature Information -->
         <div v-if="packageFeatures" class="bg-card/40 border border-border/60 p-5 rounded-xl shadow-sm space-y-4">
           <div class="flex items-center gap-3">
             <div class="p-2.5 rounded-lg border" :class="packageFeatures.color">
@@ -677,15 +578,3 @@ const handleSubmit = () => {
     </div>
   </div>
 </template>
-
-<style scoped>
-/* Force dynamic over-ride on the child DatePicker trigger to keep layout uniform and responsive */
-:deep([data-slot=select-trigger]) {
-  width: 100% !important;
-  height: 2.75rem !important; /* matches h-11 */
-  background-color: var(--background);
-  border-color: var(--border);
-  padding-left: 0.875rem !important;
-  border-radius: var(--radius) !important;
-}
-</style>

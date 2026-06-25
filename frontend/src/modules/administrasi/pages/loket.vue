@@ -99,7 +99,7 @@ const totalDiterima = computed(() => dataList.value.filter(s => s.status === 'Di
       </StatCardGrid>
       <Button @click="daftarkanSiswa" class="shrink-0 h-9">
         <Plus class="w-4 h-4 mr-1" />
-        Daftarkan Siswa Baru
+        Daftarkan Siswa Baruuu
       </Button>
     </div>
 

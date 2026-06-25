@@ -99,4 +99,75 @@ Jangan memanggil `fetch` atau `axios` langsung di dalam komponen `.vue`. Gunakan
 *   **Dark Mode Support**: Persistensi tema disimpan di `localStorage` dan dikelola melalui `AppSidebar`.
 
 ---
+
+## ⚡ Realtime Chat Setup (Laravel Reverb)
+
+Fitur chat komunikasi antar role (Guru, Wali Kelas, Siswa, Orang Tua) menggunakan **Laravel Reverb** sebagai WebSocket Server bawaan Laravel untuk memfasilitasi komunikasi secara real-time.
+
+### 1. Library / Dependencies yang Digunakan
+
+Fitur ini menggunakan pustaka-pustaka berikut:
+*   **Backend (Composer)**:
+    *   `laravel/reverb`: Server WebSocket bawaan Laravel.
+    *   `pusher/pusher-php-server`: Pusher PHP SDK yang digunakan Laravel untuk komunikasi protokol Reverb.
+    
+    *Command instalasi (dijalankan di folder `backend`)*:
+    ```bash
+    composer require laravel/reverb pusher/pusher-php-server
+    ```
+
+*   **Frontend (NPM)**:
+    *   `laravel-echo`: Client library untuk mempermudah subscribe channel & listen event.
+    *   `pusher-js`: Client driver WebSocket yang dibutuhkan oleh Laravel Echo.
+    
+    *Command instalasi (dijalankan di folder `frontend`)*:
+    ```bash
+    npm install --save-dev laravel-echo pusher-js
+    ```
+
+### 2. Konfigurasi Lingkungan (`.env`)
+
+Tambahkan atau sesuaikan konfigurasi berikut di file `backend/.env` Anda:
+
+```env
+# Mengaktifkan driver broadcast Reverb
+BROADCAST_CONNECTION=reverb
+
+# Kredensial WebSocket Server Reverb
+REVERB_APP_ID=school_chat_app
+REVERB_APP_KEY=schoolkey
+REVERB_APP_SECRET=schoolsecret
+REVERB_HOST="127.0.0.1"
+REVERB_PORT=8090              # Menggunakan port 8090 untuk menghindari konflik port bawaan Windows (8080)
+REVERB_SCHEME=http
+
+# Kredensial yang di-inject ke Frontend Vite
+VITE_REVERB_APP_KEY="${REVERB_APP_KEY}"
+VITE_REVERB_HOST="${REVERB_HOST}"
+VITE_REVERB_PORT="${REVERB_PORT}"
+VITE_REVERB_SCHEME="${REVERB_SCHEME}"
+```
+
+### 3. Cara Menjalankan Aplikasi
+
+Kami telah meng-override command `php artisan serve` agar otomatis menjalankan WebSocket Server Laravel Reverb secara asinkron di background. Anda tidak perlu repot menjalankan command reverb terpisah.
+
+Cukup jalankan dua command berikut:
+
+*   **Terminal Backend**:
+    ```bash
+    php artisan serve
+    ```
+    *(Command ini akan secara otomatis men-start server web Laravel dan server WebSocket Reverb pada port 8090).*
+
+*   **Terminal Frontend**:
+    ```bash
+    npm run dev
+    ```
+
+### 4. Info Arsitektur Chat Realtime
+*   **Instant Broadcasting (`ShouldBroadcastNow`)**: Event `MessageSent` dan `MessageRead` menggunakan interface `ShouldBroadcastNow` agar data terkirim langsung tanpa perlu mengonfigurasi/menjalankan queue worker (`php artisan queue:work`).
+*   **Autentikasi Channel Privat**: Autentikasi channel privat (`private-chat.{userId}`) ditangani oleh endpoint `/api/broadcasting/auth` menggunakan middleware `auth:sanctum`.
+
+---
 © 2024 School App Development Team.

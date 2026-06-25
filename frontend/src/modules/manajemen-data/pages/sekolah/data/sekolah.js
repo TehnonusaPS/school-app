@@ -242,11 +242,15 @@ export const allItems = computed(() => [
 export const statusOptions = [
   {
     label: 'Aktif',
-    value: '1'
+    value: 'Active'
   },
   {
     label: 'Tidak Aktif',
-    value: '0'
+    value: 'Inactive'
+  },
+  {
+    label: 'Trial',
+    value: 'Trial'
   }
 ]
 

@@ -220,6 +220,19 @@ const data = {
       ]
     },
     {
+      title: 'Administrasi',
+      url: '/administrasi',
+      icon: Mail,
+      allowedRoles: ['tata_usaha'],
+      items: [
+        { 
+          title: 'Loket', 
+          url: '/administrasi/loket', 
+          roles: ['tata_usaha']
+        }
+      ]
+    },
+    {
       title: 'Keuangan',
       url: '/keuangan',
       icon: Wallet,

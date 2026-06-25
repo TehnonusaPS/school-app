@@ -37,38 +37,40 @@ import {
   UserX
 } from 'lucide-vue-next'
 import {
-  getPengguna,
-  savePengguna,
   columns,
   filters,
-  ROLE_LABELS,
-  ROLE_OPTIONS
+  ROLE_LABELS
 } from './data/mockPengguna'
 import { glassSlide, glassFade } from '@/config/motion'
+import { getUsers, createUser, updateUser, deleteUser, getRoles, getFoundations, getSchools } from '@/services/managementService'
+import { useAuthStore } from '@/stores/authStore'
 
-// Import data Yayasan & Sekolah
-import { items as yayasanSource } from '@/modules/manajemen-data/pages/yayasan/data/yayasan.js'
-import { allItems as sekolahSource } from '@/modules/manajemen-data/pages/sekolah/data/sekolah.js'
+const authStore = useAuthStore()
 
 // --- State ---
 const penggunaList = ref([])
+const roleOptions = ref([])
+const yayasanList = ref([])
+const sekolahList = ref([])
+const isLoading = ref(false)
+
 const perPage = ref(5)
+const currentPage = ref(1)
+const total = ref(0)
+const from = ref(1)
+const to = ref(1)
+
 const filterValues = ref({
   search: '',
   role: 'all',
   status: 'all'
 })
 
-onMounted(() => {
-  penggunaList.value = getPengguna()
-})
-
 // --- Computed Stats ---
-const totalCount = computed(() => penggunaList.value.length)
-const aktifCount = computed(() => penggunaList.value.filter(p => p.status === 'aktif').length)
-const nonaktifCount = computed(() => penggunaList.value.filter(p => p.status === 'nonaktif').length)
+const totalCount = ref(0)
+const aktifCount = ref(0)
+const nonaktifCount = ref(0)
 
-// --- Helpers ---
 function getRoleLabel(role) {
   return ROLE_LABELS[role] || role
 }
@@ -83,49 +85,100 @@ function getStatusBadgeVariant(status) {
 
 // --- Options for Yayasan & Sekolah ---
 const yayasanOptions = computed(() => {
-  const list = yayasanSource.value || []
   return [
     { label: '-', value: '-' },
-    ...list.map(y => ({ label: y.nama, value: y.nama }))
+    ...yayasanList.value.map(y => ({ label: y.name, value: String(y.id) }))
   ]
 })
 
 const filteredSekolahOptions = computed(() => {
   const selectedYayasan = formItem.value.yayasan
-  let list = sekolahSource.value || []
+  let list = sekolahList.value
   if (selectedYayasan && selectedYayasan !== '-') {
-    list = list.filter(s => s.namaYayasan === selectedYayasan)
+    list = list.filter(s => String(s.foundation_id) === String(selectedYayasan))
   }
   return [
     { label: '-', value: '-' },
-    ...list.map(s => ({ label: s.nama, value: s.nama }))
+    ...list.map(s => ({ label: s.name, value: String(s.id) }))
   ]
 })
 
-// --- Search & Filter ---
-const filteredItems = computed(() => {
-  return penggunaList.value.filter(item => {
-    const searchVal = filterValues.value.search?.trim().toLowerCase() || ''
-    const searchMatch =
-      !searchVal ||
-      item.nama.toLowerCase().includes(searchVal) ||
-      item.email.toLowerCase().includes(searchVal)
+// --- Fetch Data ---
+const fetchUsers = async () => {
+  isLoading.value = true
+  try {
+    const params = {
+      page: currentPage.value,
+      per_page: perPage.value,
+      search: filterValues.value.search,
+    }
+    if (filterValues.value.role !== 'all') {
+      const selectedRole = roleOptions.value.find(r => r.name === filterValues.value.role)
+      if (selectedRole) params.role_id = selectedRole.id
+    }
+    if (filterValues.value.status !== 'all') {
+      params.is_active = filterValues.value.status === 'aktif' ? 1 : 0
+    }
+    const res = await getUsers(params)
+    penggunaList.value = res.data.data.map(user => ({
+      id: user.id,
+      nama: user.name,
+      email: user.email,
+      role: user.role ? user.role.name : '',
+      yayasan: user.foundation ? user.foundation.name : '-',
+      sekolah: user.school ? user.school.name : '-',
+      status: user.is_active ? 'aktif' : 'nonaktif',
+      foundation_id: user.foundation_id,
+      school_id: user.school_id,
+      role_id: user.role_id,
+      phone: user.phone,
+      photo: user.photo,
+      ...user
+    }))
+    total.value = res.data.total
+    from.value = res.data.from || 1
+    to.value = res.data.to || 1
 
-    const roleVal = filterValues.value.role
-    const roleMatch = !roleVal || roleVal === 'all' || item.role === roleVal
+    // Quick stats count
+    totalCount.value = res.data.total
+    aktifCount.value = penggunaList.value.filter(p => p.status === 'aktif').length
+    nonaktifCount.value = penggunaList.value.filter(p => p.status === 'nonaktif').length
+  } catch (err) {
+    toast.error('Gagal mengambil data pengguna')
+  } finally {
+    isLoading.value = false
+  }
+}
 
-    const statusVal = filterValues.value.status
-    const statusMatch = !statusVal || statusVal === 'all' || item.status === statusVal
+onMounted(async () => {
+  try {
+    const resRoles = await getRoles()
+    roleOptions.value = resRoles.data
 
-    return searchMatch && roleMatch && statusMatch
-  })
+    const resFoundations = await getFoundations()
+    yayasanList.value = resFoundations.data.data
+
+    const resSchools = await getSchools()
+    sekolahList.value = resSchools.data.data
+
+    // Dynamic filters
+    const roleFilter = filters.find(f => f.key === 'role')
+    if (roleFilter) {
+      roleFilter.options = [
+        { label: 'Semua Peran', value: 'all' },
+        ...roleOptions.value.map(r => ({ label: r.label, value: r.name }))
+      ]
+    }
+  } catch (err) {
+    console.error('Error loading dropdown lists', err)
+  }
+
+  fetchUsers()
 })
 
-const { currentPage, total, from, to, paginatedItems } = usePagination(filteredItems, perPage)
-
-watch(filteredItems, () => {
-  currentPage.value = 1
-})
+watch([currentPage, perPage, filterValues], () => {
+  fetchUsers()
+}, { deep: true })
 
 // --- Header Actions ---
 const headerActions = computed(() => [
@@ -147,7 +200,8 @@ const formItem = ref({
   role: '',
   yayasan: '-',
   sekolah: '-',
-  status: 'aktif'
+  status: 'aktif',
+  password: ''
 })
 
 function handleCreate() {
@@ -160,7 +214,8 @@ function handleCreate() {
     role: '',
     yayasan: '-',
     sekolah: '-',
-    status: 'aktif'
+    status: 'aktif',
+    password: ''
   }
   isFormSheetOpen.value = true
 }
@@ -173,9 +228,10 @@ function handleEdit(item) {
     nama: item.nama,
     email: item.email,
     role: item.role,
-    yayasan: item.yayasan || '-',
-    sekolah: item.sekolah || '-',
-    status: item.status
+    yayasan: item.foundation_id ? String(item.foundation_id) : '-',
+    sekolah: item.school_id ? String(item.school_id) : '-',
+    status: item.status,
+    password: ''
   }
   isFormSheetOpen.value = true
 }
@@ -188,57 +244,66 @@ function validateForm() {
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formItem.value.email.trim())) {
     errors.email = 'Format email tidak valid.'
   }
+  if (!isEditMode.value && !formItem.value.password) {
+    errors.password = 'Password wajib diisi.'
+  }
   if (!formItem.value.role) errors.role = 'Peran wajib dipilih.'
   if (!formItem.value.status) errors.status = 'Status wajib dipilih.'
   formErrors.value = errors
   return Object.keys(errors).length === 0
 }
 
-function handleSave() {
+async function handleSave() {
+  formErrors.value = {}
   if (!validateForm()) {
     toast.error('Gagal Menyimpan', { description: 'Harap lengkapi semua field yang wajib diisi.' })
     return
   }
 
-  const email = formItem.value.email.trim().toLowerCase()
-
-  // Cek duplikat email
-  const isDuplicate = penggunaList.value.some(p => {
-    const sameEmail = p.email.toLowerCase() === email
-    return isEditMode.value ? sameEmail && p.id !== formItem.value.id : sameEmail
-  })
-
-  if (isDuplicate) {
-    formErrors.value.email = `Email "${email}" sudah terdaftar.`
-    toast.error('Email Sudah Digunakan', { description: `Pengguna dengan email "${email}" sudah ada.` })
+  const selectedRole = roleOptions.value.find(r => r.name === formItem.value.role)
+  if (!selectedRole) {
+    toast.error('Gagal', { description: 'Peran tidak valid.' })
     return
   }
 
   const payload = {
-    nama: formItem.value.nama.trim(),
-    email,
-    role: formItem.value.role,
-    yayasan: formItem.value.yayasan,
-    sekolah: formItem.value.sekolah,
-    status: formItem.value.status
+    name: formItem.value.nama.trim(),
+    email: formItem.value.email.trim().toLowerCase(),
+    role_id: selectedRole.id,
+    foundation_id: formItem.value.yayasan !== '-' ? Number(formItem.value.yayasan) : null,
+    school_id: formItem.value.sekolah !== '-' ? Number(formItem.value.sekolah) : null,
+    is_active: formItem.value.status === 'aktif',
   }
 
-  if (isEditMode.value) {
-    const updated = penggunaList.value.map(p =>
-      p.id === formItem.value.id ? { ...p, ...payload } : p
-    )
-    penggunaList.value = updated
-    savePengguna(updated)
-    toast.success('Berhasil Diperbarui', { description: `Pengguna "${payload.nama}" telah diperbarui.` })
-  } else {
-    const newItem = { id: String(Date.now()), ...payload }
-    const updated = [newItem, ...penggunaList.value]
-    penggunaList.value = updated
-    savePengguna(updated)
-    toast.success('Berhasil Ditambahkan', { description: `Pengguna "${payload.nama}" telah ditambahkan.` })
+  if (formItem.value.password) {
+    payload.password = formItem.value.password
   }
 
-  isFormSheetOpen.value = false
+  try {
+    if (isEditMode.value) {
+      await updateUser(formItem.value.id, payload)
+      toast.success('Berhasil Diperbarui', { description: `Pengguna "${payload.name}" telah diperbarui.` })
+    } else {
+      await createUser(payload)
+      toast.success('Berhasil Ditambahkan', { description: `Pengguna "${payload.name}" telah ditambahkan.` })
+    }
+    isFormSheetOpen.value = false
+    fetchUsers()
+  } catch (err) {
+    if (err.response?.status === 422 && err.response?.data?.errors) {
+      const serverErrors = err.response.data.errors
+      const localErrors = {}
+      if (serverErrors.name) localErrors.nama = serverErrors.name[0]
+      if (serverErrors.email) localErrors.email = serverErrors.email[0]
+      if (serverErrors.password) localErrors.password = serverErrors.password[0]
+      if (serverErrors.role_id) localErrors.role = serverErrors.role_id[0]
+      formErrors.value = localErrors
+      toast.error('Gagal Menyimpan', { description: 'Terdapat kesalahan validasi.' })
+    } else {
+      const errorMsg = err.response?.data?.message || 'Gagal menyimpan pengguna.'
+      toast.error('Gagal', { description: errorMsg })
+    }
+  }
 }
 
 // --- Detail Sheet ---
@@ -281,17 +346,26 @@ const detailSections = computed(() => {
 })
 
 // --- Toggle Status ---
-function handleToggleStatus(item) {
-  const nextStatus = item.status === 'aktif' ? 'nonaktif' : 'aktif'
-  const updated = penggunaList.value.map(p =>
-    p.id === item.id ? { ...p, status: nextStatus } : p
-  )
-  penggunaList.value = updated
-  savePengguna(updated)
-  toast.success(
-    nextStatus === 'aktif' ? 'Akun Diaktifkan' : 'Akun Dinonaktifkan',
-    { description: `Pengguna "${item.nama}" kini berstatus ${nextStatus}.` }
-  )
+async function handleToggleStatus(item) {
+  const nextActive = item.status !== 'aktif'
+  const selectedRole = roleOptions.value.find(r => r.name === item.role)
+  const payload = {
+    name: item.nama,
+    email: item.email,
+    role_id: selectedRole ? selectedRole.id : item.role_id,
+    is_active: nextActive
+  }
+
+  try {
+    await updateUser(item.id, payload)
+    toast.success(
+      nextActive ? 'Akun Diaktifkan' : 'Akun Dinonaktifkan',
+      { description: `Pengguna "${item.nama}" kini berstatus ${nextActive ? 'Aktif' : 'Nonaktif'}.` }
+    )
+    fetchUsers()
+  } catch (err) {
+    toast.error('Gagal memperbarui status akun')
+  }
 }
 
 // --- Delete ---
@@ -303,14 +377,17 @@ function openDeleteConfirm(item) {
   isDeleteConfirmOpen.value = true
 }
 
-function confirmDelete() {
+async function confirmDelete() {
   if (!selectedItemToDelete.value) return
-  const updated = penggunaList.value.filter(p => p.id !== selectedItemToDelete.value.id)
-  penggunaList.value = updated
-  savePengguna(updated)
-  isDeleteConfirmOpen.value = false
-  toast.success('Berhasil Dihapus', { description: `Pengguna "${selectedItemToDelete.value.nama}" telah dihapus.` })
-  selectedItemToDelete.value = null
+  try {
+    await deleteUser(selectedItemToDelete.value.id)
+    isDeleteConfirmOpen.value = false
+    toast.success('Berhasil Dihapus', { description: `Pengguna "${selectedItemToDelete.value.nama}" telah dihapus.` })
+    selectedItemToDelete.value = null
+    fetchUsers()
+  } catch (err) {
+    toast.error('Gagal menghapus pengguna')
+  }
 }
 </script>
 
@@ -363,7 +440,7 @@ function confirmDelete() {
     >
       <DataTableCard
         :columns="columns"
-        :items="paginatedItems"
+        :items="penggunaList"
         :filters="filters"
         v-model:filterValues="filterValues"
         v-model:perPage="perPage"
@@ -412,21 +489,21 @@ function confirmDelete() {
 
             <!-- Toggle Status -->
             <button
-              class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none transition-colors"
-              :class="item.status === 'aktif' ? 'text-emerald-500 hover:text-emerald-600' : 'text-muted-foreground hover:text-foreground'"
+              class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-foreground transition-colors"
               :title="item.status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan'"
               @click="handleToggleStatus(item)"
             >
               <component
                 :is="item.status === 'aktif' ? ToggleRight : ToggleLeft"
                 class="size-4 transition-transform group-hover/btn:scale-110"
+                :class="item.status === 'aktif' ? 'text-primary' : 'text-muted-foreground'"
               />
               <span class="text-[9px] font-semibold leading-none">
-                {{ item.status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }}
+                {{ item.status === 'aktif' ? 'Mati' : 'Hidup' }}
               </span>
             </button>
 
-            <!-- Hapus (Tanpa warna mencolok, menggunakan class text-muted-foreground) -->
+            <!-- Delete -->
             <button
               class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-foreground transition-colors"
               title="Hapus"
@@ -488,6 +565,19 @@ function confirmDelete() {
             <p v-if="formErrors.email" class="text-[10px] text-rose-500">{{ formErrors.email }}</p>
           </div>
 
+          <!-- Password (Only on Create Mode) -->
+          <div v-if="!isEditMode" class="space-y-1.5">
+            <label class="text-xs font-semibold text-muted-foreground">Password <span class="text-rose-500">*</span></label>
+            <Input
+              v-model="formItem.password"
+              type="password"
+              placeholder="Masukkan password..."
+              class="h-10 rounded-xl"
+              :class="formErrors.password ? 'border-rose-500' : ''"
+            />
+            <p v-if="formErrors.password" class="text-[10px] text-rose-500">{{ formErrors.password }}</p>
+          </div>
+
           <!-- Peran & Status -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="space-y-1.5">
@@ -498,9 +588,9 @@ function confirmDelete() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem
-                    v-for="opt in ROLE_OPTIONS"
-                    :key="opt.value"
-                    :value="opt.value"
+                    v-for="opt in roleOptions"
+                    :key="opt.name"
+                    :value="opt.name"
                   >
                     {{ opt.label }}
                   </SelectItem>
@@ -617,4 +707,3 @@ function confirmDelete() {
     </Dialog>
   </div>
 </template>
-

@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     zip
 
-RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql
+RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql pcntl
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
@@ -17,16 +17,12 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
 
-<<<<<<< Updated upstream
 RUN php artisan config:clear
 
 EXPOSE 10000
 
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
-=======
 CMD if [ "$RUN_ROLE" = "websocket" ]; then \
         php artisan reverb:start --host=0.0.0.0 --port=$PORT; \
     else \
         php artisan serve --host=0.0.0.0 --port=$PORT; \
     fi
->>>>>>> Stashed changes

@@ -1,8 +1,13 @@
 import axios from 'axios'
 
 const api = axios.create({
+<<<<<<< Updated upstream
   baseURL: 'http://127.0.0.1:8000/api',
   //  baseURL: 'https://school-app-ewoy.onrender.com/api',
+=======
+  // baseURL: 'http://127.0.0.1:8000/api',
+  baseURL: 'https://school-app-ewoy.onrender.com/api',
+>>>>>>> Stashed changes
   headers: {
     'Accept': 'application/json'
   }

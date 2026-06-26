@@ -1,11 +1,15 @@
 <?php
 
+<?php
+
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\SuperAdmin\FinanceController;
 use App\Http\Controllers\Api\FoundationController;
 use App\Http\Controllers\Api\SchoolController;
 use App\Http\Controllers\Api\UserController;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +22,7 @@ use Illuminate\Support\Facades\Route;
 |
 |
 */
+
 
 // routes/api.php
 
@@ -47,6 +52,11 @@ Route::get('/env-check', function () {
     ];
 });
 
+// Broadcasting auth via Sanctum token (for Laravel Echo with Bearer token)
+Route::post('/broadcasting/auth', [\Illuminate\Broadcasting\BroadcastController::class, 'authenticate'])
+    ->middleware('auth:sanctum')
+    ->name('broadcasting.auth');
+
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -54,6 +64,13 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Chat routes
+    Route::get('/chat/contacts', [\App\Http\Controllers\Api\ChatController::class, 'getContacts']);
+    Route::get('/chat/unread-count', [\App\Http\Controllers\Api\ChatController::class, 'getUnreadCount']);
+    Route::get('/chat/messages/{recipient_id}', [\App\Http\Controllers\Api\ChatController::class, 'getMessages']);
+    Route::post('/chat/messages', [\App\Http\Controllers\Api\ChatController::class, 'sendMessage']);
+    Route::post('/chat/messages/{message_id}/read', [\App\Http\Controllers\Api\ChatController::class, 'markAsRead']);
 
     // Super Admin Finance Routes
     Route::middleware('role:superadmin')->prefix('superadmin/finance')->group(function () {

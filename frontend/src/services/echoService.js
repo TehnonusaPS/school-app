@@ -16,7 +16,7 @@ export function connectEcho(token) {
   echo = new Echo({
     broadcaster: 'reverb',
     key: import.meta.env.VITE_REVERB_APP_KEY || 'schoolkey', // Standard key used by Reverb config
-    wsHost: import.meta.env.VITE_REVERB_HOST || '127.0.0.1',
+    wsHost: import.meta.env.VITE_REVERB_HOST || 'school-app-reverb.onrender.com',
     wsPort: import.meta.env.VITE_REVERB_PORT || 8090,
     wssPort: import.meta.env.VITE_REVERB_PORT || 8090,
     forceTLS: false, // Local development

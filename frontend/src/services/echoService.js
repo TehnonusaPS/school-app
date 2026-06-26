@@ -35,7 +35,7 @@ export function connectEcho(token) {
     disconnectEcho()
   }
 
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://school-app-ewoy.onrender.com/api'
   const broadcaster = import.meta.env.VITE_BROADCASTER || 'reverb'
 
   if (broadcaster === 'pusher') {

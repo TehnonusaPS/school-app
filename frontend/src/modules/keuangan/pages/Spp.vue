@@ -512,17 +512,19 @@ const formatRupiah = (value) => {
           <table class="w-full text-sm">
             <thead>
               <tr class="border-b bg-muted/50">
-                <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground">NAMA SISWA</th>
-                <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground">KELAS</th>
-                <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground">BULAN</th>
-                <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground">JUMLAH</th>
-                <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground">STATUS</th>
-                <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground">AKSI</th>
+                <th class="px-4 py-3 text-center font-semibold text-xs uppercase text-muted-foreground w-[50px]">No</th>
+                <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground w-[200px]">NAMA SISWA</th>
+                <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground w-[100px]">KELAS</th>
+                <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground w-[120px]">BULAN</th>
+                <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground w-[120px]">JUMLAH</th>
+                <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground w-[100px]">STATUS</th>
+                <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground w-[100px]">AKSI</th>
               </tr>
             </thead>
             <tbody>
               <!-- Row 1 -->
               <tr class="border-b hover:bg-muted/50">
+                <td class="px-4 py-4 text-center w-[50px]">1</td>
                 <td class="px-4 py-4">
                   <div class="flex items-center gap-2">
                     <div class="bg-secondary text-secondary-foreground rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">AS</div>
@@ -533,13 +535,16 @@ const formatRupiah = (value) => {
                 <td class="px-4 py-4">Oktober 2023</td>
                 <td class="px-4 py-4">Rp 750.000</td>
                 <td class="px-4 py-4"><span class="bg-secondary text-secondary-foreground px-2 py-1 rounded text-xs font-semibold">PENDING</span></td>
-                <td class="px-4 py-4 flex gap-2">
-                  <button class="bg-primary text-primary-foreground px-3 py-1 rounded text-xs font-semibold hover:bg-primary/90">Proses</button>
-                  <button class="border border-border text-foreground px-3 py-1 rounded text-xs hover:bg-accent">📄</button>
+                <td class="px-4 py-4">
+                  <div class="flex gap-2">
+                    <button class="bg-primary text-primary-foreground px-3 py-1 rounded text-xs font-semibold hover:bg-primary/90">Proses</button>
+                    <button class="border border-border text-foreground px-3 py-1 rounded text-xs hover:bg-accent">📄</button>
+                  </div>
                 </td>
               </tr>
               <!-- Row 2 -->
               <tr class="border-b hover:bg-muted/50">
+                <td class="px-4 py-4 text-center align-middle">2</td>
                 <td class="px-4 py-4">
                   <div class="flex items-center gap-2">
                     <div class="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">BN</div>
@@ -550,13 +555,16 @@ const formatRupiah = (value) => {
                 <td class="px-4 py-4">Oktober 2023</td>
                 <td class="px-4 py-4">Rp 650.000</td>
                 <td class="px-4 py-4"><span class="bg-primary/10 text-primary px-2 py-1 rounded text-xs font-semibold">PAID</span></td>
-                <td class="px-4 py-4 flex gap-2">
-                  <button class="border border-border text-foreground px-3 py-1 rounded text-xs hover:bg-accent">Selesai</button>
-                  <button class="border border-border text-foreground px-3 py-1 rounded text-xs hover:bg-accent">⚙️</button>
+                <td class="px-4 py-4">
+                  <div class="flex gap-2">
+                    <button class="border border-border text-foreground px-3 py-1 rounded text-xs hover:bg-accent">Selesai</button>
+                    <button class="border border-border text-foreground px-3 py-1 rounded text-xs hover:bg-accent">⚙️</button>
+                  </div>
                 </td>
               </tr>
               <!-- Row 3 -->
               <tr class="border-b hover:bg-muted/50">
+                <td class="px-4 py-4 text-center align-middle">3</td>
                 <td class="px-4 py-4">
                   <div class="flex items-center gap-2">
                     <div class="bg-muted-foreground text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">DW</div>
@@ -567,13 +575,16 @@ const formatRupiah = (value) => {
                 <td class="px-4 py-4">Oktober 2023</td>
                 <td class="px-4 py-4">Rp 750.000</td>
                 <td class="px-4 py-4"><span class="bg-destructive/10 text-destructive px-2 py-1 rounded text-xs font-semibold">OVERDUE</span></td>
-                <td class="px-4 py-4 flex gap-2">
-                  <button class="bg-primary text-primary-foreground px-3 py-1 rounded text-xs font-semibold hover:bg-primary/90">Proses</button>
-                  <button class="border border-border text-foreground px-3 py-1 rounded text-xs hover:bg-accent">✉️</button>
+                <td class="px-4 py-4">
+                  <div class="flex gap-2">
+                    <button class="bg-primary text-primary-foreground px-3 py-1 rounded text-xs font-semibold hover:bg-primary/90">Proses</button>
+                    <button class="border border-border text-foreground px-3 py-1 rounded text-xs hover:bg-accent">✉️</button>
+                  </div>
                 </td>
               </tr>
               <!-- Row 4 -->
               <tr class="border-b hover:bg-muted/50">
+                <td class="px-4 py-4 text-center">4</td>
                 <td class="px-4 py-4">
                   <div class="flex items-center gap-2">
                     <div class="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">FL</div>
@@ -584,9 +595,11 @@ const formatRupiah = (value) => {
                 <td class="px-4 py-4">Oktober 2023</td>
                 <td class="px-4 py-4">Rp 750.000</td>
                 <td class="px-4 py-4"><span class="bg-secondary text-secondary-foreground px-2 py-1 rounded text-xs font-semibold">PENDING</span></td>
-                <td class="px-4 py-4 flex gap-2">
-                  <button class="bg-primary text-primary-foreground px-3 py-1 rounded text-xs font-semibold hover:bg-primary/90">Proses</button>
-                  <button class="border border-border text-foreground px-3 py-1 rounded text-xs hover:bg-accent">📄</button>
+                <td class="px-4 py-4">
+                  <div class="flex gap-2">
+                    <button class="bg-primary text-primary-foreground px-3 py-1 rounded text-xs font-semibold hover:bg-primary/90">Proses</button>
+                    <button class="border border-border text-foreground px-3 py-1 rounded text-xs hover:bg-accent">📄</button>
+                  </div>
                 </td>
               </tr>
             </tbody>

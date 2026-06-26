@@ -1,10 +1,17 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
-import { Check, CheckCheck, Search } from 'lucide-vue-next'
+import { computed, ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { Check, CheckCheck, Search, ArrowLeft, User } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import Avatar from '@/components/ui/avatar/Avatar.vue'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { useAuthStore } from '@/stores/authStore'
+import { getContacts, getMessages, sendMessage, markAsRead } from '@/services/chatService'
+
+function getPhotoUrl(photo) {
+  if (!photo) return null
+  if (photo.startsWith('http://') || photo.startsWith('https://')) return photo
+  return `http://127.0.0.1:8000/${photo.startsWith('/') ? photo.slice(1) : photo}`
+}
 
 const props = defineProps({
   role: {
@@ -30,185 +37,32 @@ const filters = [
   { label: 'Siswa', value: 'siswa' }
 ]
 
-const conversationsByRole = {
-  guru: [
-    {
-      id: 1,
-      name: 'Bpk. Budi Santoso',
-      role: 'orang_tua',
-      roleLabel: 'Orang Tua',
-      detail: 'Andi - 3 C',
-      preview: 'Selamat pagi, Pak Guru.',
-      unread: 2,
-      time: '13:14',
-      messages: [
-        {
-          id: 1,
-          from: 'other',
-          text: 'Selamat pagi, Pak Guru. Saya ingin menanyakan terkait jadwal ujian praktek biologi minggu depan, apakah ada perubahan jadwal?',
-          time: '10:00'
-        },
-        {
-          id: 2,
-          from: 'me',
-          text: 'Selamat pagi, Pak Budi. Untuk jadwal ujian praktik biologi tetap sesuai rencana yaitu hari Kamis jam 08.00. Mohon Andi dipersiapkan dengan baik ya, Pak.',
-          time: '10:14',
-          status: 'read'
-        },
-        {
-          id: 3,
-          from: 'other',
-          text: 'Baik, terima kasih atas informasinya, Pak. Nanti saya sampaikan ke Andi langsung saat ia pulang.',
-          time: '12:24'
-        },
-        {
-          id: 4,
-          from: 'me',
-          text: 'Sama - Sama',
-          time: '13:14',
-          status: 'sent'
-        }
-      ]
-    },
-    {
-      id: 2,
-      name: 'Andi Ahmad',
-      role: 'siswa',
-      roleLabel: 'Siswa',
-      detail: 'Andi - 3 C',
-      preview: 'Terima kasih informasinya.',
-      unread: 0,
-      time: '17:14',
-      messages: [
-        {
-          id: 1,
-          from: 'other',
-          text: 'Selamat pagi, Pak Guru. Saya ingin menanyakan terkait Tugas praktek biologi, untuk materi yang akan diuji apa saja ya?',
-          time: '09:14'
-        },
-        {
-          id: 2,
-          from: 'me',
-          text: 'Selamat pagi, Untuk tugas praktek biologi materi yang akan diuji dari Bab I - Bab III, Mohon Andi dipersiapkan dengan baik ya, Pak.',
-          time: '10:14',
-          status: 'read'
-        },
-        {
-          id: 3,
-          from: 'other',
-          text: 'Baik, terima kasih atas informasinya, Pak.',
-          time: '12:24'
-        },
-        {
-          id: 4,
-          from: 'me',
-          text: 'Sama - sama',
-          time: '17:14',
-          status: 'read'
-        }
-      ]
-    }
-  ],
-  siswa: [
-    {
-      id: 1,
-      name: 'Bpk. Budi Santoso',
-      role: 'guru',
-      roleLabel: 'Guru',
-      detail: 'Biologi',
-      preview: 'Selamat pagi, Pak Guru.',
-      unread: 2,
-      time: '13:14',
-      messages: [
-        {
-          id: 1,
-          from: 'other',
-          text: 'Selamat pagi, Pak Guru. Saya ingin menanyakan terkait jadwal ujian praktik biologi minggu depan, apakah ada perubahan jadwal?',
-          time: '10:00'
-        },
-        {
-          id: 2,
-          from: 'me',
-          text: 'Selamat pagi, Pak Budi. Untuk jadwal ujian praktik biologi tetap sesuai rencana yaitu hari Kamis jam 08.00. Mohon Andi dipersiapkan dengan baik ya, Pak.',
-          time: '10:14',
-          status: 'read'
-        },
-        {
-          id: 3,
-          from: 'other',
-          text: 'Baik, terima kasih atas informasinya, Pak. Nanti saya sampaikan ke Andi langsung saat ia pulang.',
-          time: '12:24'
-        },
-        {
-          id: 4,
-          from: 'me',
-          text: 'Sama - Sama',
-          time: '13:14',
-          status: 'sent'
-        }
-      ]
-    },
-    {
-      id: 2,
-      name: 'Ibu Dewi Sartika',
-      role: 'guru',
-      roleLabel: 'Guru',
-      detail: 'Matematika',
-      preview: 'Mohon cek latihan nomor 3.',
-      unread: 0,
-      time: '17:14',
-      messages: [
-        {
-          id: 1,
-          from: 'other',
-          text: 'Andi, mohon cek latihan nomor 3 ya. Ada yang perlu dibetulkan.',
-          time: '09:10'
-        },
-        {
-          id: 2,
-          from: 'me',
-          text: 'Baik Bu, nanti saya kirim ulang jawabannya.',
-          time: '09:18',
-          status: 'sent'
-        }
-      ]
-    },
-    {
-      id: 3,
-      name: 'Ibu Fatimah Azzahra',
-      role: 'guru',
-      roleLabel: 'Guru',
-      detail: 'Bahasa Inggris',
-      preview: 'Terima kasih ya.',
-      unread: 0,
-      time: '17:14',
-      messages: [
-        {
-          id: 1,
-          from: 'other',
-          text: 'Andi, jangan lupa presentasi hari Jumat ya.',
-          time: '08:44'
-        },
-        {
-          id: 2,
-          from: 'me',
-          text: 'Siap Bu, terima kasih infonya.',
-          time: '08:50',
-          status: 'read'
-        }
-      ]
-    }
-  ]
-}
-
 const activeFilter = ref('all')
 const searchQuery = ref('')
 const newMessage = ref('')
-const activeConversationId = ref(conversationsByRole[currentRole.value]?.[0]?.id || null)
+const activeConversationId = ref(null)
+const conversations = ref([])
+const activeConversationMessages = ref([])
+
+const isLoadingContacts = ref(false)
+const isLoadingMessages = ref(false)
+
+// Mobile responsiveness detail panel status
+const isChatDetailOpen = ref(false)
+
+// Ref to the scrollable messages container
+const messagesContainer = ref(null)
+
+// Scroll to bottom of messages list
+function scrollToBottom() {
+  nextTick(() => {
+    if (messagesContainer.value) {
+      messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+    }
+  })
+}
 
 const filterOptions = computed(() => (isStudent.value ? [] : filters))
-
-const conversations = computed(() => conversationsByRole[currentRole.value] || [])
 
 const filteredConversations = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
@@ -220,7 +74,7 @@ const filteredConversations = computed(() => {
       !query ||
       convo.name.toLowerCase().includes(query) ||
       convo.preview.toLowerCase().includes(query) ||
-      convo.detail.toLowerCase().includes(query)
+      convo.roleLabel.toLowerCase().includes(query)
 
     return matchesRole && matchesQuery
   })
@@ -229,7 +83,6 @@ const filteredConversations = computed(() => {
 const activeConversation = computed(() => {
   return (
     conversations.value.find(convo => convo.id === activeConversationId.value) ||
-    filteredConversations.value[0] ||
     null
   )
 })
@@ -241,42 +94,222 @@ const panelDescription = computed(() =>
     : 'Kelola percakapan dengan guru dan siswa dari satu tempat.'
 )
 
-watch(
-  filteredConversations,
-  list => {
-    if (!list.length) return
+function formatTime(isoString) {
+  if (!isoString) return ''
+  try {
+    const date = new Date(isoString)
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+  } catch (e) {
+    return ''
+  }
+}
 
-    const stillVisible = list.some(convo => convo.id === activeConversationId.value)
-    if (!stillVisible) {
-      activeConversationId.value = list[0].id
+// Fetch contacts
+async function loadContacts(selectFirst = true) {
+  isLoadingContacts.value = true
+  try {
+    const list = await getContacts()
+    conversations.value = list.map(c => ({
+      ...c,
+      time: formatTime(c.last_message_at) || c.time
+    }))
+    
+    if (selectFirst && conversations.value.length && !activeConversationId.value) {
+      activeConversationId.value = conversations.value[0].id
     }
-  },
-  { immediate: true }
-)
+  } catch (error) {
+    console.error('Gagal mengambil kontak:', error)
+  } finally {
+    isLoadingContacts.value = false
+  }
+}
+
+// Fetch thread
+async function loadMessages(recipientId) {
+  if (!recipientId) return
+  isLoadingMessages.value = true
+  try {
+    const msgs = await getMessages(recipientId)
+    activeConversationMessages.value = msgs.map(m => ({
+      ...m,
+      time: formatTime(m.created_at) || m.time
+    }))
+    
+    // Clear unread count locally for this contact
+    const convo = conversations.value.find(c => c.id === recipientId)
+    if (convo) convo.unread = 0
+
+    // Sync navbar unread count badge from server (authoritative)
+    auth.fetchUnreadCount()
+
+    // Auto-scroll to latest message
+    scrollToBottom()
+  } catch (error) {
+    console.error('Gagal mengambil pesan:', error)
+  } finally {
+    isLoadingMessages.value = false
+  }
+}
 
 function selectConversation(convo) {
   activeConversationId.value = convo.id
+  isChatDetailOpen.value = true
 }
 
-function send() {
-  if (!newMessage.value.trim() || !activeConversation.value) return
+// Keep authStore in sync with which conversation is active
+watch(activeConversationId, (newId) => {
+  auth.activeChatRecipientId = newId
+  if (newId) {
+    loadMessages(newId)
+  } else {
+    activeConversationMessages.value = []
+  }
+}, { immediate: true })
 
-  activeConversation.value.messages.push({
-    id: Date.now(),
+/**
+ * Handle incoming WebSocket message relayed by authStore.
+ * authStore is the SINGLE WebSocket subscriber — ChatContainer registers
+ * this handler via auth.onIncomingMessage() and unsubscribes on unmount.
+ */
+function handleIncomingMessage(wrapper) {
+  const { type, data: event } = wrapper
+
+  if (type === 'read') {
+    // If the active conversation is with the reader, mark our sent messages to them as read (status = 'read')
+    if (activeConversationId.value === event.reader_id) {
+      activeConversationMessages.value.forEach(msg => {
+        if (msg.from === 'me') {
+          msg.status = 'read'
+        }
+      })
+    }
+    return
+  }
+
+  // Handle incoming 'message'
+  const localTime = formatTime(event.created_at) || event.time
+  const incomingMsg = {
+    id: event.id,
+    from: 'other',
+    text: event.message,
+    time: localTime,
+    status: 'read',
+    created_at: event.created_at
+  }
+
+  // If active conversation is currently showing this sender's thread
+  if (activeConversationId.value === event.sender_id) {
+    activeConversationMessages.value.push(incomingMsg)
+
+    // Update contact preview
+    const convo = conversations.value.find(c => c.id === event.sender_id)
+    if (convo) {
+      convo.preview = event.message
+      convo.time = localTime
+    }
+
+    // Mark as read in DB (endpoint also broadcasts MessageRead → updates sender's checkmarks)
+    markAsRead(event.id)
+
+    // Sync navbar badge (decrement since we just read it)
+    auth.fetchUnreadCount()
+
+    // Auto-scroll to show the new incoming message
+    scrollToBottom()
+  } else {
+    // Find sender in contacts list, increment unread and update preview
+    const convo = conversations.value.find(c => c.id === event.sender_id)
+    if (convo) {
+      convo.unread++
+      convo.preview = event.message
+      convo.time = localTime
+
+      // Re-sort contacts list since we received a new message (moves to top)
+      conversations.value.sort((a, b) => {
+        if (a.id === event.sender_id) return -1
+        if (b.id === event.sender_id) return 1
+        return 0
+      })
+    } else {
+      // If not in contacts, reload contacts list without resetting selection
+      loadContacts(false)
+    }
+  }
+}
+
+let unsubscribeMessage = null
+
+onMounted(() => {
+  loadContacts()
+  // Register callback to receive real-time messages from authStore's single global listener
+  unsubscribeMessage = auth.onIncomingMessage(handleIncomingMessage)
+})
+
+onUnmounted(() => {
+  // Unsubscribe callback (does NOT touch the WebSocket channel)
+  if (unsubscribeMessage) unsubscribeMessage()
+  // Clear active conversation so global listener resumes badge increment for this sender
+  auth.activeChatRecipientId = null
+})
+
+async function send() {
+  if (!newMessage.value.trim() || !activeConversationId.value) return
+
+  const text = newMessage.value.trim()
+  const recipientId = activeConversationId.value
+
+  // Optimistic UI update
+  const tempId = Date.now()
+  const tempMsg = {
+    id: tempId,
     from: 'me',
-    text: newMessage.value.trim(),
-    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    status: 'sent'
-  })
-  activeConversation.value.preview = newMessage.value.trim()
+    text: text,
+    time: formatTime(new Date().toISOString()),
+    status: 'sent',
+    created_at: new Date().toISOString()
+  }
+  activeConversationMessages.value.push(tempMsg)
+
+  // Auto-scroll to show the newly sent message immediately
+  scrollToBottom()
+
+  // Update contact preview and move to top
+  const convo = conversations.value.find(c => c.id === recipientId)
+  if (convo) {
+    convo.preview = text
+    convo.time = tempMsg.time
+  }
+
   newMessage.value = ''
+
+  try {
+    const savedMsg = await sendMessage(recipientId, text)
+    // Replace optimistic message with backend saved message
+    const idx = activeConversationMessages.value.findIndex(m => m.id === tempId)
+    if (idx !== -1) {
+      activeConversationMessages.value[idx] = {
+        ...savedMsg,
+        time: formatTime(savedMsg.created_at) || savedMsg.time
+      }
+    }
+  } catch (error) {
+    console.error('Gagal mengirim pesan:', error)
+    const idx = activeConversationMessages.value.findIndex(m => m.id === tempId)
+    if (idx !== -1) {
+      activeConversationMessages.value[idx].status = 'failed'
+    }
+  }
 }
 </script>
 
 <template>
   <div class="flex flex-col gap-4 lg:h-[calc(100vh-11rem)] lg:flex-row">
-    <aside class="w-full overflow-hidden rounded-xl border border-border bg-card shadow-sm lg:w-92">
-      <div class="border-b border-border p-4 sm:p-5">
+    <!-- ASIDE: CONVERSATIONS LIST -->
+    <aside 
+      class="w-full overflow-hidden rounded-xl border border-border bg-card shadow-sm lg:w-92 lg:h-full flex flex-col"
+      :class="[isChatDetailOpen ? 'hidden lg:flex' : 'flex flex-col']"
+    >
+      <div class="border-b border-border p-4 sm:p-5 shrink-0">
         <div>
           <h2 class="text-xl font-semibold tracking-tight text-foreground">{{ panelTitle }}</h2>
           <p class="text-sm text-muted-foreground">{{ panelDescription }}</p>
@@ -304,54 +337,85 @@ function send() {
         </div>
       </div>
 
-      <div class="max-h-96 overflow-auto p-2 sm:max-h-112 lg:h-[calc(100%-8.5rem)]">
-        <button
-          v-for="convo in filteredConversations"
-          :key="convo.id"
-          type="button"
-          class="flex w-full items-center gap-3 rounded-lg border border-transparent p-3 text-left transition-colors hover:border-border hover:bg-accent/60"
-          :class="activeConversationId === convo.id ? 'border-border bg-accent/50' : ''"
-          @click="selectConversation(convo)"
-        >
-          <Avatar class="h-11 w-11 shrink-0 ring-1 ring-border" />
+      <!-- LIST CONTAINER -->
+      <div class="overflow-y-auto p-2 max-h-96 sm:max-h-112 lg:max-h-none lg:flex-1">
+        <template v-if="isLoadingContacts">
+          <div class="flex h-20 items-center justify-center text-sm text-muted-foreground">
+            Memuat daftar kontak...
+          </div>
+        </template>
+        
+        <template v-else>
+          <button
+            v-for="convo in filteredConversations"
+            :key="convo.id"
+            type="button"
+            class="flex w-full items-center gap-3 rounded-lg border border-transparent p-3 text-left transition-colors hover:border-border hover:bg-accent/60"
+            :class="activeConversationId === convo.id ? 'border-border bg-accent/50' : ''"
+            @click="selectConversation(convo)"
+          >
+            <Avatar class="h-11 w-11 shrink-0 ring-1 ring-border">
+              <AvatarImage v-if="convo.photo" :src="getPhotoUrl(convo.photo)" :alt="convo.name" />
+              <AvatarFallback class="bg-primary/10 text-primary">
+                <User class="h-5 w-5 text-muted-foreground" />
+              </AvatarFallback>
+            </Avatar>
 
-          <div class="min-w-0 flex-1">
-            <div class="flex items-start justify-between gap-2">
-              <div class="truncate font-semibold text-foreground text-sm sm:text-base">{{ convo.name }}</div>
-              <div class="flex items-center gap-1">
-                <div class="text-[10px] text-muted-foreground font-medium font-mono">{{ convo.time }}</div>
-                <span
-                  v-if="convo.unread"
-                  class="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-bold text-white"
-                >
-                  {{ convo.unread }}
+            <div class="min-w-0 flex-1">
+              <div class="flex items-start justify-between gap-2">
+                <div class="truncate font-semibold text-foreground text-sm sm:text-base">{{ convo.name }}</div>
+                <div class="flex items-center gap-1">
+                  <div class="text-[10px] text-muted-foreground font-medium font-mono">{{ convo.time }}</div>
+                  <span
+                    v-if="convo.unread"
+                    class="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-bold text-white"
+                  >
+                    {{ convo.unread }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="mt-1.5 flex items-center gap-2 text-xs text-muted-foreground">
+                <span class="rounded-md border border-border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-muted/40 text-foreground/85">
+                  {{ convo.roleLabel }}
                 </span>
+                <span v-if="convo.preview" class="text-[11px] font-medium truncate flex-1 block max-w-[140px]">{{ convo.preview }}</span>
               </div>
             </div>
+          </button>
 
-            <div class="mt-1.5 flex items-center gap-2 text-xs text-muted-foreground">
-              <span class="rounded-md border border-border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-muted/40 text-foreground/85">
-                {{ convo.roleLabel }}
-              </span>
-              <span class="text-[11px] font-medium">{{ convo.detail }}</span>
-            </div>
+          <div
+            v-if="!filteredConversations.length"
+            class="flex h-40 items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground"
+          >
+            Tidak ada percakapan yang cocok.
           </div>
-        </button>
-
-        <div
-          v-if="!filteredConversations.length"
-          class="flex h-40 items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground"
-        >
-          Tidak ada percakapan yang cocok.
-        </div>
+        </template>
       </div>
     </aside>
 
+    <!-- SECTION: CHAT WINDOW -->
     <section
-      class="flex min-h-112 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+      class="flex min-h-112 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm lg:h-full"
+      :class="[!isChatDetailOpen ? 'hidden lg:flex' : 'flex']"
     >
       <header class="flex items-center gap-3 border-b border-border p-4 sm:p-5">
-        <Avatar class="h-11 w-11 ring-1 ring-border" />
+        <!-- Back button on mobile -->
+        <Button
+          variant="ghost"
+          size="icon"
+          class="lg:hidden rounded-full mr-1 -ml-1 shrink-0"
+          @click="isChatDetailOpen = false"
+        >
+          <ArrowLeft class="h-5 w-5" />
+        </Button>
+        
+        <Avatar class="h-11 w-11 ring-1 ring-border">
+          <AvatarImage v-if="activeConversation?.photo" :src="getPhotoUrl(activeConversation.photo)" :alt="activeConversation.name" />
+          <AvatarFallback class="bg-primary/10 text-primary">
+            <User class="h-5 w-5 text-muted-foreground" />
+          </AvatarFallback>
+        </Avatar>
         <div class="min-w-0 flex-1 text-left">
           <div class="truncate text-base font-semibold text-foreground">
             {{ activeConversation?.name || 'Pilih percakapan' }}
@@ -360,16 +424,23 @@ function send() {
             <span class="rounded-md border border-border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-muted/40 text-foreground/85">
               {{ activeConversation.roleLabel }}
             </span>
-            <span class="text-[11px] font-medium">{{ activeConversation.detail }}</span>
+            <span class="text-[11px] font-medium">{{ activeConversation.email }}</span>
           </div>
         </div>
       </header>
 
-      <div class="flex-1 overflow-auto p-4 sm:p-6">
-        <template v-if="activeConversation">
+      <!-- MESSAGE BUBBLES LIST -->
+      <div ref="messagesContainer" class="flex-1 overflow-auto p-4 sm:p-6">
+        <template v-if="isLoadingMessages">
+          <div class="flex h-full items-center justify-center text-sm text-muted-foreground">
+            Memuat obrolan...
+          </div>
+        </template>
+
+        <template v-else-if="activeConversationId">
           <div class="space-y-5">
             <div
-              v-for="message in activeConversation.messages"
+              v-for="message in activeConversationMessages"
               :key="message.id"
               class="flex flex-col gap-1 w-full"
               :class="message.from === 'me' ? 'items-end' : 'items-start'"
@@ -379,7 +450,12 @@ function send() {
                 <Avatar
                   v-if="message.from !== 'me'"
                   class="h-9 w-9 shrink-0 ring-1 ring-border self-start"
-                />
+                >
+                  <AvatarImage v-if="activeConversation?.photo" :src="getPhotoUrl(activeConversation.photo)" :alt="activeConversation.name" />
+                  <AvatarFallback class="bg-primary/10 text-primary">
+                    <User class="h-4 w-4 text-muted-foreground" />
+                  </AvatarFallback>
+                </Avatar>
 
                 <div class="flex flex-col gap-1 w-full">
                   <!-- Message Bubble Box -->
@@ -401,14 +477,20 @@ function send() {
                   >
                     <span>{{ message.time }}</span>
                     <template v-if="message.from === 'me'">
+                      <!-- Message Read indicator -->
                       <CheckCheck
                         v-if="message.status === 'read'"
                         class="h-3 w-3 text-emerald-500"
                       />
+                      <!-- Message Sent indicator -->
                       <Check
                         v-else-if="message.status === 'sent'"
                         class="h-3 w-3 text-muted-foreground/80"
                       />
+                      <!-- Message Failed indicator -->
+                      <span v-else-if="message.status === 'failed'" class="text-[9px] text-red-500 font-sans">
+                        Gagal mengirim
+                      </span>
                     </template>
                   </div>
                 </div>
@@ -425,10 +507,17 @@ function send() {
         </div>
       </div>
 
+      <!-- FOOTER: SEND INPUT -->
       <footer class="border-t border-border bg-background p-4 sm:p-5">
-        <div class="flex flex-col gap-3 sm:flex-row">
-          <Input v-model="newMessage" placeholder="Tulis pesan..." class="h-11 flex-1" />
-          <Button class="h-11 shrink-0 px-6" @click="send">Kirim</Button>
+        <div class="flex gap-3">
+          <Input 
+            v-model="newMessage" 
+            placeholder="Tulis pesan..." 
+            class="h-11 flex-1" 
+            :disabled="!activeConversationId"
+            @keyup.enter="send" 
+          />
+          <Button class="h-11 shrink-0 px-6" :disabled="!activeConversationId" @click="send">Kirim</Button>
         </div>
       </footer>
     </section>

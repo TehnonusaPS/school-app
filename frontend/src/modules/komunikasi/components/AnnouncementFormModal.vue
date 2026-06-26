@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, watch } from 'vue'
+import { computed, reactive, watch, ref, onMounted } from 'vue'
 import {
   Dialog,
   DialogContent,
@@ -20,15 +20,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { toast } from 'vue-sonner'
 import { useAuthStore } from '@/stores/authStore'
+import api from '@/services/api'
 
 const authStore = useAuthStore()
 const currentUser = authStore.user
-
-const userSchool = computed(() => {
-  return (currentUser?.role === 'kepala_sekolah' || currentUser?.role === 'admin_sekolah')
-    ? '8D Tehnonusa I'
-    : currentUser?.sekolah
-})
 
 const props = defineProps({
   open: {
@@ -52,12 +47,28 @@ const isOpen = computed({
   set: (val) => emit('update:open', val)
 })
 
+const schools = ref([])
+
+const loadSchools = async () => {
+  if (!authStore.token) return
+  try {
+    const response = await api.get('/management/schools')
+    schools.value = response.data.data.data || []
+  } catch (error) {
+    console.error('Gagal memuat sekolah sasaran:', error)
+  }
+}
+
+onMounted(() => {
+  loadSchools()
+})
+
 const form = reactive({
   id: null,
   judul: '',
   deskripsi: '',
   kategori: 'UMUM',
-  sekolah: 'SEMUA SEKOLAH',
+  sekolah: 'ALL',
   tanggal: ''
 })
 
@@ -70,14 +81,14 @@ watch(
         form.judul = ''
         form.deskripsi = ''
         form.kategori = 'UMUM'
-        form.sekolah = userSchool.value || 'SEMUA SEKOLAH'
+        form.sekolah = 'ALL'
         form.tanggal = new Date().toISOString().split('T')[0]
       } else if (props.announcement) {
         form.id = props.announcement.id
         form.judul = props.announcement.judul
         form.deskripsi = props.announcement.deskripsi
         form.kategori = props.announcement.kategori
-        form.sekolah = props.announcement.sekolah
+        form.sekolah = props.announcement.target_school_id ? props.announcement.target_school_id.toString() : 'ALL'
         form.tanggal = props.announcement.tanggal
       }
     }
@@ -96,7 +107,8 @@ function handleSubmit() {
     judul: form.judul.trim(),
     deskripsi: form.deskripsi.trim(),
     kategori: form.kategori,
-    sekolah: form.sekolah,
+    target_school_id: form.sekolah === 'ALL' ? null : parseInt(form.sekolah),
+    sekolah: form.sekolah === 'ALL' ? 'SEMUA SEKOLAH' : (schools.value.find(s => s.id === parseInt(form.sekolah))?.name || 'SEKOLAH'),
     tanggal: form.tanggal
   })
 }
@@ -148,12 +160,9 @@ function handleSubmit() {
                 <SelectValue placeholder="Pilih Sekolah" />
               </SelectTrigger>
               <SelectContent class="rounded-xl shadow-lg border-border bg-card">
-                <SelectItem value="SEMUA SEKOLAH">Semua Sekolah</SelectItem>
-                <SelectItem v-if="!userSchool || userSchool === '8D Tehnonusa I'" value="8D Tehnonusa I">
-                  8D Tehnonusa I
-                </SelectItem>
-                <SelectItem v-if="!userSchool || userSchool === '8D Tehnonusa II'" value="8D Tehnonusa II">
-                  8D Tehnonusa II
+                <SelectItem value="ALL">Semua Sekolah</SelectItem>
+                <SelectItem v-for="school in schools" :key="school.id" :value="school.id.toString()">
+                  {{ school.name }}
                 </SelectItem>
               </SelectContent>
             </Select>

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppSidebar from '@/components/AppSidebar.vue'
 import {
@@ -14,10 +14,11 @@ import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Bell, Search, UserPlus, CreditCard, MessageCircle, MessageSquare, Sun, Moon, Monitor } from 'lucide-vue-next'
+import { Bell, Search, UserPlus, CreditCard, MessageCircle, MessageSquare, Sun, Moon, Monitor, Megaphone } from 'lucide-vue-next'
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { sidebarSlide, topbarSlide } from '@/config/motion'
+import { getNotifications } from '@/services/notificationService'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,6 +65,29 @@ const cycleColorMode = () => {
   applyColorMode(nextMode)
 }
 
+const notifications = ref([])
+
+const loadNotifications = async () => {
+  if (!auth.token) return
+  try {
+    const data = await getNotifications()
+    notifications.value = data.notifications.slice(0, 5) // Ambil 5 terbaru untuk dropdown
+  } catch (error) {
+    console.error('Gagal mengambil notifikasi:', error)
+  }
+}
+
+const formatTime = (dateStr) => {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
 onMounted(() => {
   if (auth.isJustLoggedIn) {
     setTimeout(() => {
@@ -79,6 +103,25 @@ onMounted(() => {
   // Initialize global unread chat count & WebSocket listener
   auth.fetchUnreadCount()
   auth.setupGlobalChatListener()
+
+  // Initialize notifications
+  auth.fetchUnreadNotificationsCount()
+  auth.setupGlobalNotificationListener()
+  loadNotifications()
+
+  // Listen to incoming notifications in realtime to update the dropdown list
+  const unsubscribe = auth.onIncomingNotification(() => {
+    loadNotifications()
+  })
+
+  onMountedUnsubscribe.value = unsubscribe
+})
+
+const onMountedUnsubscribe = ref(null)
+onUnmounted(() => {
+  if (onMountedUnsubscribe.value) {
+    onMountedUnsubscribe.value()
+  }
 })
 
 // Fungsi untuk menelusuri hierarki breadcrumb secara rekursif
@@ -112,36 +155,6 @@ const breadcrumbs = computed(() => {
 
   return crumbs
 })
-
-// Data Dummy Notifikasi
-const notifications = [
-  {
-    id: 1,
-    title: 'Siswa Baru Mendaftar',
-    desc: 'Budi Santoso telah mendaftar di Kelas 1-A',
-    time: '2 menit yang lalu',
-    icon: UserPlus,
-    color: 'text-blue-500'
-  },
-
-  {
-    id: 2,
-    title: 'Pembayaran Berhasil',
-    desc: 'SPP bulan Mei untuk Siti Aminah sudah lunas',
-    time: '1 jam yang lalu',
-    icon: CreditCard,
-    color: 'text-green-500'
-  },
-
-  {
-    id: 3,
-    title: 'Pesan Baru',
-    desc: 'Ada pesan baru dari orang tua murid Ani',
-    time: '3 jam yang lalu',
-    icon: MessageCircle,
-    color: 'text-orange-500'
-  }
-]
 </script>
 
 <template>
@@ -217,7 +230,7 @@ const notifications = [
                   <Button variant="ghost" size="icon" class="rounded-full hover:bg-muted">
                     <Bell class="h-5 w-5" />
                   </Button>
-                  <span class="absolute top-2 right-2 flex h-2 w-2">
+                  <span v-if="auth.unreadNotificationsCount > 0" class="absolute top-2 right-2 flex h-2 w-2">
                     <span
                       class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"
                     ></span>
@@ -226,32 +239,66 @@ const notifications = [
                 </div>
               </DropdownMenuTrigger>
 
-              <DropdownMenuContent class="w-80" align="end">
-                <DropdownMenuLabel class="font-bold flex justify-between items-center">
+              <DropdownMenuContent class="w-80 rounded-2xl border-border bg-card p-2 shadow-xl" align="end">
+                <DropdownMenuLabel class="font-bold flex justify-between items-center px-3 py-2 text-sm">
                   Notifikasi Terbaru
-                  <span class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full"
-                    >3 Baru</span
+                  <span 
+                    v-if="auth.unreadNotificationsCount > 0" 
+                    class="text-[10px] bg-red-600/10 text-red-600 px-2 py-0.5 rounded-full font-extrabold"
                   >
+                    {{ auth.unreadNotificationsCount }} Baru
+                  </span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem v-for="n in notifications" :key="n.id" class="p-3 cursor-pointer">
-                    <div class="flex items-start gap-3">
-                      <div class="mt-1 p-2 bg-muted rounded-full" :class="n.color">
-                        <component :is="n.icon" class="h-4 w-4" />
+                <DropdownMenuGroup class="max-h-[300px] overflow-y-auto">
+                  <DropdownMenuItem 
+                    v-for="n in notifications" 
+                    :key="n.id" 
+                    class="flex items-start gap-3 p-3.5 cursor-pointer rounded-xl transition-all duration-200 border border-transparent hover:border-border/50 hover:bg-muted/40 relative overflow-hidden"
+                    :class="[
+                      !n.read_at 
+                        ? 'bg-primary/[0.03] hover:bg-primary/[0.06] border-l-3 border-l-primary' 
+                        : 'hover:bg-muted/40'
+                    ]"
+                    @click="router.push('/komunikasi/notifikasi')"
+                  >
+                    <!-- Icon container -->
+                    <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors"
+                         :class="!n.read_at ? 'bg-primary/10 text-primary font-bold shadow-xs' : 'bg-muted text-muted-foreground'">
+                      <Megaphone class="h-4.5 w-4.5" />
+                    </div>
+
+                    <!-- Text Information -->
+                    <div class="flex-1 min-w-0 space-y-1 text-left">
+                      <div class="flex items-center justify-between gap-2">
+                        <p class="text-xs font-extrabold leading-tight text-foreground truncate max-w-[150px]">
+                          {{ n.title }}
+                        </p>
+                        <!-- Unread pulsing indicator -->
+                        <span v-if="!n.read_at" class="h-1.5 w-1.5 shrink-0 rounded-full bg-primary animate-pulse"></span>
                       </div>
-                      <div class="flex flex-col gap-1">
-                        <p class="text-sm font-semibold leading-none">{{ n.title }}</p>
-                        <p class="text-xs text-muted-foreground line-clamp-2">{{ n.desc }}</p>
-                        <p class="text-[10px] text-muted-foreground/70">{{ n.time }}</p>
+                      <p class="text-[11px] leading-relaxed text-muted-foreground/90 line-clamp-2 pr-2">
+                        {{ n.content }}
+                      </p>
+                      <div class="flex items-center gap-1.5 pt-0.5">
+                        <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md bg-muted/80 text-muted-foreground tracking-wider uppercase">
+                          {{ n.data?.category || 'UMUM' }}
+                        </span>
+                        <span class="text-[9px] text-muted-foreground/60 font-medium">
+                          • {{ formatTime(n.created_at) }}
+                        </span>
                       </div>
                     </div>
                   </DropdownMenuItem>
+                  <div v-if="notifications.length === 0" class="p-6 text-center text-xs text-muted-foreground">
+                    Tidak ada notifikasi baru.
+                  </div>
                 </DropdownMenuGroup>
 
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  class="justify-center text-primary font-medium text-xs cursor-pointer"
+                  class="justify-center text-primary font-bold text-xs cursor-pointer py-2.5 rounded-xl hover:bg-primary/5"
+                  @click="router.push('/komunikasi/notifikasi')"
                 >
                   Lihat Semua Notifikasi
                 </DropdownMenuItem>

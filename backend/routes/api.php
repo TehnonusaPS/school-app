@@ -70,6 +70,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/chat/messages', [\App\Http\Controllers\Api\ChatController::class, 'sendMessage']);
     Route::post('/chat/messages/{message_id}/read', [\App\Http\Controllers\Api\ChatController::class, 'markAsRead']);
 
+    // Announcement routes
+    Route::apiResource('/announcements', \App\Http\Controllers\Api\AnnouncementController::class);
+
+    // Notification routes
+    Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
+
     // Super Admin Finance Routes
     Route::middleware('role:superadmin')->prefix('superadmin/finance')->group(function () {
         Route::get('/dashboard', [FinanceController::class, 'indexDashboard']);

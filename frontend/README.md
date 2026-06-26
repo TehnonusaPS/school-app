@@ -138,7 +138,8 @@ REVERB_APP_ID=school_chat_app
 REVERB_APP_KEY=schoolkey
 REVERB_APP_SECRET=schoolsecret
 REVERB_HOST="127.0.0.1"
-REVERB_PORT=8090              # Menggunakan port 8090 untuk menghindari konflik port bawaan Windows (8080)
+REVERB_PORT=8090
+REVERB_SERVER_PORT=8090              # Menggunakan port 8090 untuk menghindari konflik port bawaan Windows (8080)
 REVERB_SCHEME=http
 
 # Kredensial yang di-inject ke Frontend Vite

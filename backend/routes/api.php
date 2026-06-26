@@ -50,6 +50,40 @@ Route::get('/env-check', function () {
     ];
 });
 
+Route::get('/test-broadcast', function () {
+    try {
+        $broadcaster = config('broadcasting.default');
+        $pusherConfig = config('broadcasting.connections.pusher');
+        
+        // Find a message to use, or create a mock one
+        $message = \App\Models\Message::latest()->first();
+        if (!$message) {
+            $message = new \App\Models\Message();
+            $message->sender_id = 1;
+            $message->receiver_id = 2;
+            $message->message = "Test Message";
+        }
+        
+        $result = event(new \App\Events\MessageSent($message));
+        
+        return response()->json([
+            'status' => 'success',
+            'broadcaster' => $broadcaster,
+            'pusher_app_id' => !empty($pusherConfig['app_id']) ? 'configured' : 'NOT configured',
+            'pusher_key' => !empty($pusherConfig['key']) ? 'configured' : 'NOT configured',
+            'pusher_secret' => !empty($pusherConfig['secret']) ? 'configured' : 'NOT configured',
+            'pusher_cluster' => !empty($pusherConfig['options']['cluster']) ? $pusherConfig['options']['cluster'] : 'NOT configured',
+            'event_dispatch_result' => $result,
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ], 500);
+    }
+});
+
 // Broadcasting auth via Sanctum token (for Laravel Echo with Bearer token)
 Route::post('/broadcasting/auth', [\Illuminate\Broadcasting\BroadcastController::class, 'authenticate'])
     ->middleware('auth:sanctum')

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import * as authService from '@/services/authService'
 import { connectEcho, disconnectEcho, echo } from '@/services/echoService'
 import { getUnreadCount } from '@/services/chatService'
+import { getNotifications } from '@/services/notificationService'
 
 // Auto-connect on page refresh if token is present
 const initialToken = localStorage.getItem('token')
@@ -12,6 +13,7 @@ if (initialToken) {
 // Module-level callback registry (non-reactive, avoids Pinia overhead)
 // ChatContainer registers its handler here via onIncomingMessage()
 const _messageCallbacks = []
+const _notificationCallbacks = []
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -20,8 +22,10 @@ export const useAuthStore = defineStore('auth', {
     isJustLoggedIn: false,
     isLoggingOut: false,
     unreadCount: 0,
+    unreadNotificationsCount: 0,
     activeChatRecipientId: null,
-    echoChannel: null
+    echoChannel: null,
+    notificationChannel: null
   }),
 
   actions: {
@@ -82,6 +86,59 @@ export const useAuthStore = defineStore('auth', {
     },
 
     /**
+     * Fetch total unread notifications count from the server.
+     */
+    async fetchUnreadNotificationsCount() {
+      if (!this.token) return
+      try {
+        const data = await getNotifications()
+        this.unreadNotificationsCount = data.unread_count
+      } catch (error) {
+        console.error('Gagal mengambil unread notifications count:', error)
+      }
+    },
+
+    /**
+     * Register a callback to receive real-time incoming notifications.
+     */
+    onIncomingNotification(callback) {
+      _notificationCallbacks.push(callback)
+      return () => {
+        const idx = _notificationCallbacks.indexOf(callback)
+        if (idx > -1) _notificationCallbacks.splice(idx, 1)
+      }
+    },
+
+    /**
+     * Setup a single global WebSocket listener for notifications.
+     */
+    setupGlobalNotificationListener() {
+      const currentUserId = this.user?.id
+      if (!currentUserId || this.notificationChannel) return
+
+      if (!echo) {
+        console.warn('Echo belum terinisiasi untuk listener notifikasi.')
+        return
+      }
+
+      this.notificationChannel = echo.private(`notification.${currentUserId}`)
+        .listen('NotificationSent', (event) => {
+          this.unreadNotificationsCount++
+
+          // Show popup toast
+          import('vue-sonner').then(({ toast }) => {
+            toast.info(event.title, {
+              description: event.content,
+              duration: 5000,
+            })
+          })
+
+          // Relay to registered callbacks (like the Notifications list page)
+          _notificationCallbacks.forEach(cb => cb(event))
+        })
+    },
+
+    /**
      * Login melalui API backend Laravel Sanctum.
      * Mengirim email & password, menerima token + data user.
      */
@@ -100,9 +157,11 @@ export const useAuthStore = defineStore('auth', {
         // Connect WebSocket Echo
         connectEcho(data.access_token)
 
-        // Fetch unread count & setup global listener
+        // Fetch unread counts & setup global listeners
         await this.fetchUnreadCount()
+        await this.fetchUnreadNotificationsCount()
         this.setupGlobalChatListener()
+        this.setupGlobalNotificationListener()
 
         return data.user
       } catch (error) {
@@ -132,6 +191,12 @@ export const useAuthStore = defineStore('auth', {
             echo.leaveChannel(`chat.${currentUserId}`)
           }
         }
+        if (this.notificationChannel && echo) {
+          const currentUserId = this.user?.id
+          if (currentUserId) {
+            echo.leaveChannel(`notification.${currentUserId}`)
+          }
+        }
 
         // Disconnect WebSocket Echo
         disconnectEcho()
@@ -139,10 +204,13 @@ export const useAuthStore = defineStore('auth', {
         this.user = null
         this.token = null
         this.unreadCount = 0
+        this.unreadNotificationsCount = 0
         this.activeChatRecipientId = null
         this.echoChannel = null
+        this.notificationChannel = null
         // Clear all callbacks
         _messageCallbacks.length = 0
+        _notificationCallbacks.length = 0
         localStorage.removeItem('token')
         localStorage.removeItem('user')
       }

@@ -15,4 +15,9 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
 
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
+CMD if [ "$RUN_ROLE" = "websocket" ]; then \
+        php artisan reverb:start --host=0.0.0.0 --port=$PORT; \
+    else \
+        php artisan serve --host=0.0.0.0 --port=$PORT; \
+    fi
+

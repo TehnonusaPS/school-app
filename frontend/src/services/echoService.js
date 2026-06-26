@@ -40,10 +40,14 @@ export function connectEcho(token) {
 
   if (broadcaster === 'pusher') {
     // --- KONFIGURASI PUSHER ---
+    const pusherKey = import.meta.env.VITE_PUSHER_APP_KEY || 'ee5ef2c776d9a338df22'
+    const pusherCluster = import.meta.env.VITE_PUSHER_APP_CLUSTER || 'mt1'
+    console.log('Laravel Echo: Initializing Pusher', { key: pusherKey, cluster: pusherCluster, authEndpoint: `${apiBaseUrl}/broadcasting/auth` })
+    
     echo = new Echo({
       broadcaster: 'pusher',
-      key: import.meta.env.VITE_PUSHER_APP_KEY || 'ee5ef2c776d9a338df22',
-      cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER || 'mt1',
+      key: pusherKey,
+      cluster: pusherCluster,
       forceTLS: true,
       authEndpoint: `${apiBaseUrl}/broadcasting/auth`,
       auth: {
@@ -52,12 +56,23 @@ export function connectEcho(token) {
         }
       }
     })
+
+    if (echo.connector && echo.connector.pusher) {
+      echo.connector.pusher.connection.bind('state_change', (states) => {
+        console.log('Laravel Echo Pusher: Connection state changed from', states.previous, 'to', states.current)
+      })
+      echo.connector.pusher.connection.bind('error', (err) => {
+        console.error('Laravel Echo Pusher: Connection error:', err)
+      })
+    }
   } else {
     // --- KONFIGURASI REVERB (Lokal default) ---
     const reverbHost = import.meta.env.VITE_REVERB_HOST || '127.0.0.1'
     const reverbPort = import.meta.env.VITE_REVERB_PORT || 8090
     const reverbScheme = import.meta.env.VITE_REVERB_SCHEME || 'http'
     const forceTLS = reverbScheme === 'https'
+
+    console.log('Laravel Echo: Initializing Reverb', { key: import.meta.env.VITE_REVERB_APP_KEY || 'schoolkey', wsHost: reverbHost, wsPort: reverbPort, scheme: reverbScheme, authEndpoint: `${apiBaseUrl}/broadcasting/auth` })
 
     echo = new Echo({
       broadcaster: 'reverb',
@@ -74,6 +89,15 @@ export function connectEcho(token) {
         }
       }
     })
+
+    if (echo.connector && echo.connector.pusher) {
+      echo.connector.pusher.connection.bind('state_change', (states) => {
+        console.log('Laravel Echo Reverb: Connection state changed from', states.previous, 'to', states.current)
+      })
+      echo.connector.pusher.connection.bind('error', (err) => {
+        console.error('Laravel Echo Reverb: Connection error:', err)
+      })
+    }
   }
 }
 

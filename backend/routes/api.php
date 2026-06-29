@@ -112,6 +112,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
     Route::post('/notifications/read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
 
+    // Feedback routes
+    Route::apiResource('/feedbacks', \App\Http\Controllers\Api\FeedbackController::class);
+
     // Super Admin Finance Routes
     Route::middleware('role:superadmin')->prefix('superadmin/finance')->group(function () {
         Route::get('/dashboard', [FinanceController::class, 'indexDashboard']);

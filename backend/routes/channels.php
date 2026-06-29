@@ -13,3 +13,8 @@ Broadcast::channel('chat.{userId}', function ($user, $userId) {
 Broadcast::channel('notification.{userId}', function ($user, $userId) {
     return (int) $user->id === (int) $userId;
 });
+
+Broadcast::channel('feedback.{schoolId}', function ($user, $schoolId) {
+    return (int) $user->school_id === (int) $schoolId 
+        && $user->hasAnyRole(['kepala_sekolah', 'admin_sekolah']);
+});

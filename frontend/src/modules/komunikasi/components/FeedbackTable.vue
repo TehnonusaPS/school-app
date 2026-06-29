@@ -132,17 +132,9 @@ const customTableActions = computed(() => [
       </div>
       
       <!-- Anonymous Sender Tagging -->
-      <div class="flex items-center gap-2 mt-2.5 text-[10px] text-muted-foreground/90 font-medium text-left flex-wrap">
-        <span class="flex items-center gap-1 bg-muted px-2 py-0.5 rounded border border-border/40">
-          <Lock class="size-3 text-emerald-500" />
-          Pengirim: <span class="font-semibold text-foreground/80">Wali Murid (Anonim - #{{ item.id }})</span>
-        </span>
-        <span class="flex items-center gap-1 bg-muted px-2 py-0.5 rounded border border-border/40">
-          <EyeOff class="size-3 text-amber-500" />
-          Siswa: <span class="font-semibold text-foreground/80">Kelas {{ item.kelas }} (Dirahasiakan)</span>
-        </span>
-        <span class="flex items-center gap-1 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/10 font-bold uppercase tracking-wider text-[8px]">
-          RAHASIA / EVALUASI
+      <div class="flex items-center gap-2 mt-2 text-[10px] text-muted-foreground/90 font-medium text-left flex-wrap">
+        <span class="flex items-center gap-1 bg-muted px-2 py-0.5 rounded border border-border/40 font-semibold text-foreground/80">
+          Kelas {{ item.kelas }}
         </span>
       </div>
     </template>

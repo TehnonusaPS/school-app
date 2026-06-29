@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-//  baseURL: 'http://127.0.0.1:8000/api',
+  //  baseURL: 'http://127.0.0.1:8000/api',
   baseURL: 'https://school-app-ewoy.onrender.com/api',
   headers: {
     'Accept': 'application/json',
@@ -16,10 +16,16 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+
+  // Allow browser to auto-detect boundary for FormData requests by deleting the default Content-Type
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type']
+  }
+
   return config
 })
 
-// Response interceptor — tangani 401 Unauthorized secara global
+// Response interceptor — tangani 401 Unauthorized secaraß global
 api.interceptors.response.use(
   (response) => response,
   (error) => {

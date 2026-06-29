@@ -1,7 +1,7 @@
 <script setup>
-import PlaceholderPage from '@/components/PlaceholderPage.vue'
+import NotificationsList from '../../../components/NotificationsList.vue'
 </script>
 
 <template>
-  <PlaceholderPage />
+  <NotificationsList />
 </template>

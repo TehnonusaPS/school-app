@@ -1,7 +1,9 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { toast } from 'vue-sonner'
 import { useFeedbackStore } from '@/stores/feedbackStore'
+import { useAuthStore } from '@/stores/authStore'
+import { echo } from '@/services/echoService'
 import FeedbackTable from '../../../components/FeedbackTable.vue'
 import FeedbackDetailModal from '../../../components/FeedbackDetailModal.vue'
 import StatCard from '@/components/stat-card/StatCard.vue'
@@ -18,10 +20,34 @@ import {
 } from 'lucide-vue-next'
 
 const feedbackStore = useFeedbackStore()
+const auth = useAuthStore()
 
 const feedbacks = computed(() => feedbackStore.items)
 const isDetailOpen = ref(false)
 const selectedFeedback = ref(null)
+
+onMounted(() => {
+  feedbackStore.fetchFeedbacks()
+
+  const schoolId = auth.user?.school_id
+  if (schoolId && echo) {
+    echo.private(`feedback.${schoolId}`)
+      .listen('FeedbackCreated', (event) => {
+        feedbackStore.appendFeedback(event)
+        toast.info('Keluhan Baru Masuk!', {
+          description: `Aduan baru tentang ${event.kategori}: ${event.judul}`,
+          duration: 5000
+        })
+      })
+  }
+})
+
+onUnmounted(() => {
+  const schoolId = auth.user?.school_id
+  if (schoolId && echo) {
+    echo.leaveChannel(`feedback.${schoolId}`)
+  }
+})
 
 // --- Computed Stats ---
 const totalCount = computed(() => feedbacks.value.length)

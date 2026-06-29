@@ -61,6 +61,10 @@ const props = defineProps({
   rowDisabled: {
     type: Function,
     default: null
+  },
+  fixedHeight: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -91,6 +95,7 @@ const resolveHeaderClass = column => {
   const classes = ['font-semibold text-xs uppercase text-muted-foreground']
   const isCentered = column.key === 'actions' || column.badge || column.type === 'number'
   if (isCentered) classes.push('text-center')
+  if (column.class) classes.push(column.class)
   return classes
 }
 
@@ -133,12 +138,14 @@ const resolveCellClass = column => {
   // Truncate — max-w-xs sebagai batas standar yang wajar untuk kolom terpotong
   if (column.truncate) classes.push('truncate max-w-xs')
 
+  if (column.class) classes.push(column.class)
+
   return classes
 }
 
 // ── Filler Rows & Empty State ──────────────────────────────────────────────────
 const emptyRowsCount = computed(() => {
-  if (!props.perPage || props.items.length === 0) return 0
+  if (!props.fixedHeight || !props.perPage || props.items.length === 0) return 0
   return Math.max(0, props.perPage - props.items.length)
 })
 

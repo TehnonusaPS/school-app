@@ -1,21 +1,14 @@
 import axios from 'axios'
 
 const api = axios.create({
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-  baseURL: 'http://127.0.0.1:8000/api',
-  //  baseURL: 'https://school-app-ewoy.onrender.com/api',
-=======
-  // baseURL: 'http://127.0.0.1:8000/api',
-=======
   //  baseURL: 'http://127.0.0.1:8000/api',
->>>>>>> Stashed changes
   baseURL: 'https://school-app-ewoy.onrender.com/api',
->>>>>>> Stashed changes
   headers: {
-    'Accept': 'application/json'
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
   }
 })
+
 
 // Request interceptor — sisipkan Bearer token secara otomatis jika ada
 api.interceptors.request.use((config) => {

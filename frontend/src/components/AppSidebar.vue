@@ -220,6 +220,19 @@ const data = {
       ]
     },
     {
+      title: 'Administrasi',
+      url: '/administrasi',
+      icon: Mail,
+      allowedRoles: ['tata_usaha'],
+      items: [
+        { 
+          title: 'Loket', 
+          url: '/administrasi/loket', 
+          roles: ['tata_usaha']
+        }
+      ]
+    },
+    {
       title: 'Keuangan',
       url: '/keuangan',
       icon: Wallet,
@@ -318,11 +331,10 @@ const data = {
       icon: MessageSquare,
       excludeRoles: ['superadmin', 'guru', 'wali_kelas', 'siswa'],
       items: [
-        { title: 'Pengumuman', url: '/komunikasi/pengumuman', excludeRoles: ['tata_usaha', 'kepala_sekolah', 'admin_sekolah', 'orang_tua'] },
+        { title: 'Pengumuman', url: '/komunikasi/pengumuman', excludeRoles: ['tata_usaha', 'orang_tua'] },
         { title: 'Berita Kegiatan', url: '/komunikasi/berita-kegiatan', excludeRoles: ['tata_usaha', 'admin_yayasan', 'orang_tua'] },
         { title: 'Feedback', url: '/komunikasi/feedback', excludeRoles: ['tata_usaha', 'admin_yayasan'] },
         { title: 'Pesan Internal', url: '/komunikasi/pesan', excludeRoles: ['tata_usaha', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'orang_tua'] },
-        { title: 'Notifikasi', url: '/komunikasi/notifikasi', excludeRoles: ['tata_usaha', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'orang_tua'] },
         { title: 'Keterangan Aktif', url: '/komunikasi/persuratan/aktif', roles: ['tata_usaha'] },
         {
           title: 'Surat Dispensasi',

@@ -43,12 +43,14 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:open', 'save', 'save-draft'])
+const emit = defineEmits(['update:open', 'save', 'save-draft', 'cancel'])
 
 const isOpen = computed({
   get: () => props.open,
   set: (val) => emit('update:open', val)
 })
+
+const skipDraftSave = ref(false)
 
 const form = ref({
   classroom_id: '',
@@ -78,6 +80,7 @@ watch(
   () => props.open,
   async (newOpen) => {
     if (newOpen) {
+      skipDraftSave.value = false
       // Sync form values with parent
       if (props.mode === 'add' && props.draft) {
         form.value = JSON.parse(JSON.stringify(props.draft))
@@ -95,7 +98,7 @@ watch(
       }
     } else {
       // If closing sheet without submit, save draft
-      if (props.mode === 'add') {
+      if (props.mode === 'add' && !skipDraftSave.value) {
         emit('save-draft', { tab: props.activeTab, data: { ...form.value } })
       }
     }
@@ -307,6 +310,7 @@ const handleSave = () => {
     finalScores[student.id] = (sVal === '' || sVal === undefined) ? 0 : Number(sVal)
   })
 
+  skipDraftSave.value = true
   emit('save', {
     classroom_id: form.value.classroom_id,
     type: form.value.type,
@@ -314,6 +318,12 @@ const handleSave = () => {
     file: form.value.file,
     scores: finalScores
   })
+}
+
+const handleCancel = () => {
+  skipDraftSave.value = true
+  emit('cancel')
+  isOpen.value = false
 }
 </script>
 
@@ -383,7 +393,7 @@ const handleSave = () => {
         variant="outline"
         size="sm"
         class="h-9 px-4 rounded-xl"
-        @click="isOpen = false"
+        @click="handleCancel"
       >
         {{ mode === 'view' ? 'Tutup' : 'Batal' }}
       </Button>

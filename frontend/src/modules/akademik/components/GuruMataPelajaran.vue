@@ -436,6 +436,10 @@ const handleSave = async (savedForm) => {
 const handleSaveDraft = ({ tab, data }) => {
   saveDraft(tab, data)
 }
+
+const handleCancel = () => {
+  clearDraft(activeTab.value)
+}
 </script>
 
 <template>
@@ -612,6 +616,7 @@ const handleSaveDraft = ({ tab, data }) => {
       :draft="draftForm[activeTab]"
       @save="handleSave"
       @save-draft="handleSaveDraft"
+      @cancel="handleCancel"
     />
 
     <!-- Local Delete Confirmation Dialog -->

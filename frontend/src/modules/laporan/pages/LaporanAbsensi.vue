@@ -1,102 +1,83 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import {
-  Calendar as CalendarIcon,
-  Search,
-  Download,
   FileText,
   Users,
   UserCheck,
   UserX,
   Clock,
   TrendingUp,
-  Filter,
   Printer,
   RefreshCw,
+  Download,
 } from 'lucide-vue-next'
 import { getRecapData } from '@/services/api/absensi'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs'
-import { Separator } from '@/components/ui/separator'
-import { today, getLocalTimeZone, startOfMonth, endOfMonth } from '@internationalized/date'
+import { toast } from 'vue-sonner'
 
-const startDate = ref()
-const endDate = ref()
-const selectedStatus = ref('semua')
-const selectedKelas = ref('semua')
-const searchQuery = ref('')
-const currentPage = ref(1)
-const itemsPerPage = 10
-const isRefreshing = ref(false)
+// Common Components
+import PageHeader from '@/components/page-header/PageHeader.vue'
+import StatCard from '@/components/stat-card/StatCard.vue'
+import StatCardGrid from '@/components/stat-card/StatCardGrid.vue'
+import DataTableCard from '@/components/data-table/DataTableCard.vue'
+import { glassSlide, glassFade } from '@/config/motion'
 
-const recapData = ref([])
+// Helper to get local date strings for start and end of current month
+const getStartAndEndOfMonth = () => {
+  const d = new Date()
+  const start = new Date(d.getFullYear(), d.getMonth(), 1)
+  const end = new Date(d.getFullYear(), d.getMonth() + 1, 0)
+  
+  const formatDate = (date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+  
+  return {
+    start: formatDate(start),
+    end: formatDate(end)
+  }
+}
+
+const initialDates = getStartAndEndOfMonth()
+
 const isLoading = ref(true)
+const isRefreshing = ref(false)
+const recapData = ref([])
 
-function formatDateStr(dateObj) {
-  if (!dateObj) return ''
-  if (dateObj.year) {
-    return `${dateObj.year}-${String(dateObj.month).padStart(2, '0')}-${String(dateObj.day).padStart(2, '0')}`
-  }
-  if (dateObj instanceof Date) {
-    return dateObj.toISOString().split('T')[0]
-  }
-  return String(dateObj)
-}
+// Shared Filter State
+const filterValues = ref({
+  search: '',
+  startDate: initialDates.start,
+  endDate: initialDates.end,
+  kelas: 'all',
+  status: 'all'
+})
 
-function displayDate(dateObj) {
-  const str = formatDateStr(dateObj)
-  if (!str) return 'Pilih Tanggal'
-  const [y, m, d] = str.split('-')
-  const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
-  return `${d} ${months[parseInt(m)-1]} ${y}`
-}
+// Tab 1 isolated page states
+const pageDetail = ref(1)
+const perPageDetail = ref(10)
+
+// Tab 2 isolated page states
+const pageSummary = ref(1)
+const perPageSummary = ref(10)
 
 async function loadData() {
   isLoading.value = true
   try {
-    const startStr = formatDateStr(startDate.value)
-    const endStr = formatDateStr(endDate.value)
-    const data = await getRecapData(startStr, endStr)
+    const data = await getRecapData(filterValues.value.startDate, filterValues.value.endDate)
     recapData.value = data
   } catch (err) {
     console.error(err)
+    toast.error('Gagal mengambil data absensi')
   } finally {
     isLoading.value = false
   }
@@ -106,43 +87,100 @@ async function handleRefresh() {
   isRefreshing.value = true
   await loadData()
   isRefreshing.value = false
+  toast.success('Data absensi diperbarui')
 }
 
 onMounted(() => {
-  try {
-    const tz = getLocalTimeZone()
-    const now = today(tz)
-    startDate.value = startOfMonth(now)
-    endDate.value = endOfMonth(now)
-  } catch (e) {
-    startDate.value = new Date()
-    endDate.value = new Date()
-  }
   loadData()
 })
+
+// Reload data from API when date range changes
+watch(
+  () => [filterValues.value.startDate, filterValues.value.endDate],
+  () => {
+    pageDetail.value = 1
+    pageSummary.value = 1
+    loadData()
+  }
+)
+
+// Reset pages on search/kelas/status change
+watch(
+  () => [filterValues.value.search, filterValues.value.kelas, filterValues.value.status],
+  () => {
+    pageDetail.value = 1
+    pageSummary.value = 1
+  }
+)
 
 const kelasList = computed(() => {
   const set = new Set(recapData.value.map(d => d.kelas))
   return Array.from(set).sort()
 })
 
-const filteredData = computed(() => {
+const filteredDetailData = computed(() => {
   return recapData.value.filter(item => {
-    const matchStatus = selectedStatus.value === 'semua' || item.status === selectedStatus.value
-    const matchKelas = selectedKelas.value === 'semua' || item.kelas === selectedKelas.value
+    const matchStatus = filterValues.value.status === 'all' || item.status === filterValues.value.status
+    const matchKelas = filterValues.value.kelas === 'all' || item.kelas === filterValues.value.kelas
     const matchSearch =
-      !searchQuery.value ||
-      item.nama.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      item.kelas.toLowerCase().includes(searchQuery.value.toLowerCase())
+      !filterValues.value.search ||
+      item.nama.toLowerCase().includes(filterValues.value.search.toLowerCase()) ||
+      item.kelas.toLowerCase().includes(filterValues.value.search.toLowerCase())
     return matchStatus && matchKelas && matchSearch
   })
 })
 
-const totalPages = computed(() => Math.ceil(filteredData.value.length / itemsPerPage))
-const paginatedData = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  return filteredData.value.slice(start, start + itemsPerPage)
+const paginatedDetailData = computed(() => {
+  const start = (pageDetail.value - 1) * perPageDetail.value
+  return filteredDetailData.value.slice(start, start + perPageDetail.value)
 })
+
+const totalDetail = computed(() => filteredDetailData.value.length)
+const fromDetail = computed(() => totalDetail.value === 0 ? 0 : (pageDetail.value - 1) * perPageDetail.value + 1)
+const toDetail = computed(() => Math.min(pageDetail.value * perPageDetail.value, totalDetail.value))
+
+// Ringkasan per siswa
+const ringkasanSiswa = computed(() => {
+  const map = {}
+  recapData.value.forEach(item => {
+    if (!map[item.nama]) {
+      map[item.nama] = {
+        nama: item.nama,
+        kelas: item.kelas,
+        hadir: 0,
+        terlambat: 0,
+        izin: 0,
+        sakit: 0,
+        alpa: 0,
+        total: 0
+      }
+    }
+    map[item.nama].total++
+    if (item.status === 'hadir') map[item.nama].hadir++
+    else if (item.status === 'terlambat') map[item.nama].terlambat++
+    else if (item.status === 'izin') map[item.nama].izin++
+    else if (item.status === 'sakit') map[item.nama].sakit++
+    else if (item.status === 'alpa') map[item.nama].alpa++
+  })
+
+  // Filter client-side
+  return Object.values(map).filter(siswa => {
+    const matchKelas = filterValues.value.kelas === 'all' || siswa.kelas === filterValues.value.kelas
+    const matchSearch =
+      !filterValues.value.search ||
+      siswa.nama.toLowerCase().includes(filterValues.value.search.toLowerCase())
+    return matchKelas && matchSearch
+  })
+})
+
+const paginatedSummaryData = computed(() => {
+  const start = (pageSummary.value - 1) * perPageSummary.value
+  return ringkasanSiswa.value.slice(start, start + perPageSummary.value)
+})
+
+const totalSummary = computed(() => ringkasanSiswa.value.length)
+const fromSummary = computed(() => totalSummary.value === 0 ? 0 : (pageSummary.value - 1) * perPageSummary.value + 1)
+const toSummary = computed(() => Math.min(pageSummary.value * perPageSummary.value, totalSummary.value))
 
 // Stats
 const totalHadir = computed(() => recapData.value.filter(d => d.status === 'hadir').length)
@@ -161,242 +199,195 @@ function getStatusLabel(status) {
     terlambat: 'Terlambat',
     izin: 'Izin',
     sakit: 'Sakit',
-    alpa: 'Tanpa Keterangan',
+    alpa: 'Alpa',
   }
   return labels[status] || 'Belum Absen'
 }
 
 function getStatusClass(status) {
   return {
-    hadir: 'bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/40 dark:text-green-400',
-    terlambat: 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100 dark:bg-yellow-900/40 dark:text-yellow-400',
-    sakit: 'bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/40 dark:text-blue-400',
-    izin: 'bg-indigo-100 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/40 dark:text-indigo-400',
-    alpa: 'bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-900/40 dark:text-red-400',
-  }[status] || 'bg-muted text-muted-foreground'
+    hadir: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 border-none font-medium',
+    terlambat: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400 border-none font-medium',
+    sakit: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 border-none font-medium',
+    izin: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400 border-none font-medium',
+    alpa: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border-none font-medium',
+  }[status] || 'bg-muted text-muted-foreground border-none'
 }
 
 function handlePrint() {
   window.print()
 }
 
-// Ringkasan per siswa
-const ringkasanSiswa = computed(() => {
-  const map = {}
-  recapData.value.forEach(item => {
-    if (!map[item.nama]) {
-      map[item.nama] = { nama: item.nama, kelas: item.kelas, hadir: 0, terlambat: 0, izin: 0, sakit: 0, alpa: 0, total: 0 }
+// Configs for Header and DataTableCard
+const pageHeaderActions = computed(() => [
+  {
+    label: 'Perbarui',
+    icon: RefreshCw,
+    variant: 'outline',
+    click: handleRefresh,
+    disabled: isLoading.value || isRefreshing.value
+  },
+  {
+    label: 'Cetak',
+    icon: Printer,
+    variant: 'outline',
+    click: handlePrint
+  },
+  {
+    label: 'Ekspor Excel',
+    icon: Download,
+    variant: 'default',
+    click: () => {
+      toast.success('Laporan berhasil diekspor ke Excel!')
     }
-    map[item.nama].total++
-    if (item.status === 'hadir') map[item.nama].hadir++
-    else if (item.status === 'terlambat') map[item.nama].terlambat++
-    else if (item.status === 'izin') map[item.nama].izin++
-    else if (item.status === 'sakit') map[item.nama].sakit++
-    else if (item.status === 'alpa') map[item.nama].alpa++
-  })
-  return Object.values(map)
-})
+  }
+])
+
+const detailColumns = [
+  { key: 'tanggal', label: 'Tanggal' },
+  { key: 'nama', label: 'Nama Siswa' },
+  { key: 'kelas', label: 'Kelas' },
+  { key: 'jamMasuk', label: 'Jam Masuk' },
+  { key: 'jamKeluar', label: 'Jam Keluar' },
+  { key: 'status', label: 'Status' }
+]
+
+const summaryColumns = [
+  { key: 'nama', label: 'Nama Siswa' },
+  { key: 'kelas', label: 'Kelas' },
+  { key: 'hadir', label: 'Hadir', type: 'number' },
+  { key: 'terlambat', label: 'Terlambat', type: 'number' },
+  { key: 'izin', label: 'Izin', type: 'number' },
+  { key: 'sakit', label: 'Sakit', type: 'number' },
+  { key: 'alpa', label: 'Alpa', type: 'number' },
+  { key: 'persen', label: '% Kehadiran' }
+]
+
+const detailFiltersConfig = computed(() => [
+  {
+    key: 'search',
+    type: 'search',
+    placeholder: 'Cari nama siswa...'
+  },
+  {
+    key: 'startDate',
+    label: 'Dari',
+    type: 'date'
+  },
+  {
+    key: 'endDate',
+    label: 'Sampai',
+    type: 'date'
+  },
+  {
+    key: 'kelas',
+    label: 'Kelas',
+    type: 'select',
+    placeholder: 'Semua Kelas',
+    options: kelasList.value.map(k => ({ value: k, label: k }))
+  },
+  {
+    key: 'status',
+    label: 'Status',
+    type: 'select',
+    placeholder: 'Semua Status',
+    options: [
+      { value: 'hadir', label: 'Hadir' },
+      { value: 'terlambat', label: 'Terlambat' },
+      { value: 'izin', label: 'Izin' },
+      { value: 'sakit', label: 'Sakit' },
+      { value: 'alpa', label: 'Alpa' }
+    ]
+  }
+])
+
+const summaryFiltersConfig = computed(() => [
+  {
+    key: 'search',
+    type: 'search',
+    placeholder: 'Cari nama siswa...'
+  },
+  {
+    key: 'startDate',
+    label: 'Dari',
+    type: 'date'
+  },
+  {
+    key: 'endDate',
+    label: 'Sampai',
+    type: 'date'
+  },
+  {
+    key: 'kelas',
+    label: 'Kelas',
+    type: 'select',
+    placeholder: 'Semua Kelas',
+    options: kelasList.value.map(k => ({ value: k, label: k }))
+  }
+])
 </script>
 
 <template>
   <div class="space-y-6 animate-in fade-in duration-300">
     <!-- Page Header -->
-    <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between border-b pb-4">
-      <div>
-        <h1 class="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-          <FileText class="size-6 text-primary" />
-          Laporan Absensi
-        </h1>
-        <p class="text-muted-foreground mt-1 text-sm">
-          Rekap dan analisis kehadiran siswa berdasarkan rentang waktu yang dipilih.
-        </p>
-      </div>
-      <div class="flex items-center gap-2 shrink-0">
-        <Button id="btn-refresh-absensi" variant="outline" size="sm" class="gap-2" @click="handleRefresh" :disabled="isLoading">
-          <RefreshCw :class="['size-4', isRefreshing && 'animate-spin']" />
-          Perbarui
-        </Button>
-        <Button id="btn-print-absensi" variant="outline" size="sm" class="gap-2" @click="handlePrint">
-          <Printer class="size-4" />
-          Cetak
-        </Button>
-        <Button id="btn-export-absensi" size="sm" class="gap-2">
-          <Download class="size-4" />
-          Ekspor Excel
-        </Button>
-      </div>
-    </div>
+    <PageHeader
+      title="Laporan Absensi"
+      description="Rekap dan analisis kehadiran siswa berdasarkan rentang waktu yang dipilih."
+      :actions="pageHeaderActions"
+    />
 
     <!-- Stats Cards -->
-    <div class="grid gap-4 grid-cols-2 lg:grid-cols-5">
-      <Card class="p-4 hover:shadow-md transition-shadow col-span-1">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Kehadiran</span>
-          <div class="p-1.5 bg-primary/10 rounded-lg">
-            <TrendingUp class="size-4 text-primary" />
-          </div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-8 w-16 mb-1" />
-        <div v-else class="text-3xl font-bold tracking-tight text-primary">{{ persentaseKehadiran }}%</div>
-        <p class="text-xs text-muted-foreground mt-1">Rata-rata kehadiran</p>
-      </Card>
+    <StatCardGrid
+      v-motion
+      :initial="glassFade.initial"
+      :visible-once="glassFade.visible"
+      :cols="5"
+    >
+      <StatCard
+        title="Kehadiran"
+        :value="isLoading ? '' : `${persentaseKehadiran}%`"
+        description="Rata-rata kehadiran"
+        :icon="TrendingUp"
+        :loading="isLoading"
+      />
+      <StatCard
+        title="Hadir"
+        :value="isLoading ? '' : totalHadir"
+        description="Tepat waktu"
+        :icon="UserCheck"
+        iconClass="text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/40"
+        valueClass="text-green-600 dark:text-green-400"
+        :loading="isLoading"
+      />
+      <StatCard
+        title="Terlambat"
+        :value="isLoading ? '' : totalTerlambat"
+        description="Tidak tepat waktu"
+        :icon="Clock"
+        iconClass="text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/40"
+        valueClass="text-yellow-600 dark:text-yellow-400"
+        :loading="isLoading"
+      />
+      <StatCard
+        title="Izin / Sakit"
+        :value="isLoading ? '' : totalIzinSakit"
+        description="Ada keterangan"
+        :icon="Users"
+        iconClass="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40"
+        valueClass="text-blue-600 dark:text-blue-400"
+        :loading="isLoading"
+      />
+      <StatCard
+        title="Alpa"
+        :value="isLoading ? '' : totalAlpa"
+        description="Tanpa keterangan"
+        :icon="UserX"
+        iconClass="text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40"
+        valueClass="text-red-600 dark:text-red-400"
+        :loading="isLoading"
+      />
+    </StatCardGrid>
 
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Hadir</span>
-          <div class="p-1.5 bg-green-50 dark:bg-green-950/40 rounded-lg">
-            <UserCheck class="size-4 text-green-600" />
-          </div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-8 w-12" />
-        <div v-else class="text-3xl font-bold tracking-tight text-green-600 dark:text-green-400">{{ totalHadir }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Tepat waktu</p>
-      </Card>
-
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Terlambat</span>
-          <div class="p-1.5 bg-yellow-50 dark:bg-yellow-950/40 rounded-lg">
-            <Clock class="size-4 text-yellow-600" />
-          </div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-8 w-12" />
-        <div v-else class="text-3xl font-bold tracking-tight text-yellow-600 dark:text-yellow-400">{{ totalTerlambat }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Tidak tepat waktu</p>
-      </Card>
-
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Izin/Sakit</span>
-          <div class="p-1.5 bg-blue-50 dark:bg-blue-950/40 rounded-lg">
-            <Users class="size-4 text-blue-600" />
-          </div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-8 w-12" />
-        <div v-else class="text-3xl font-bold tracking-tight text-blue-600 dark:text-blue-400">{{ totalIzinSakit }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Ada keterangan</p>
-      </Card>
-
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Alpa</span>
-          <div class="p-1.5 bg-red-50 dark:bg-red-950/40 rounded-lg">
-            <UserX class="size-4 text-red-600" />
-          </div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-8 w-12" />
-        <div v-else class="text-3xl font-bold tracking-tight text-red-600 dark:text-red-400">{{ totalAlpa }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Tanpa keterangan</p>
-      </Card>
-    </div>
-
-    <!-- Filters -->
-    <Card class="overflow-hidden">
-      <CardHeader class="py-3 px-4 border-b bg-muted/30">
-        <div class="flex items-center gap-2">
-          <Filter class="size-4 text-muted-foreground" />
-          <CardTitle class="text-sm font-medium">Filter Data</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent class="py-3 px-4">
-        <div class="flex flex-wrap items-end gap-3">
-          <!-- Start Date -->
-          <div class="flex flex-col gap-1.5">
-            <Label class="text-xs text-muted-foreground">Dari Tanggal</Label>
-            <Popover>
-              <PopoverTrigger as-child>
-                <Button
-                  id="btn-start-date"
-                  variant="outline"
-                  :class="['w-[155px] justify-start text-left font-normal text-sm', !startDate && 'text-muted-foreground']"
-                >
-                  <CalendarIcon class="mr-2 h-3.5 w-3.5" />
-                  <span>{{ displayDate(startDate) }}</span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent class="w-auto p-0" align="start">
-                <Calendar v-model="startDate" />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          <!-- End Date -->
-          <div class="flex flex-col gap-1.5">
-            <Label class="text-xs text-muted-foreground">Sampai Tanggal</Label>
-            <Popover>
-              <PopoverTrigger as-child>
-                <Button
-                  id="btn-end-date"
-                  variant="outline"
-                  :class="['w-[155px] justify-start text-left font-normal text-sm', !endDate && 'text-muted-foreground']"
-                >
-                  <CalendarIcon class="mr-2 h-3.5 w-3.5" />
-                  <span>{{ displayDate(endDate) }}</span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent class="w-auto p-0" align="start">
-                <Calendar v-model="endDate" />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          <!-- Kelas Filter -->
-          <div class="flex flex-col gap-1.5">
-            <Label class="text-xs text-muted-foreground">Kelas</Label>
-            <Select v-model="selectedKelas">
-              <SelectTrigger id="select-kelas" class="w-[140px]">
-                <SelectValue placeholder="Semua Kelas" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="semua">Semua Kelas</SelectItem>
-                <SelectItem v-for="k in kelasList" :key="k" :value="k">{{ k }}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <!-- Status Filter -->
-          <div class="flex flex-col gap-1.5">
-            <Label class="text-xs text-muted-foreground">Status</Label>
-            <Select v-model="selectedStatus">
-              <SelectTrigger id="select-status" class="w-[150px]">
-                <SelectValue placeholder="Semua Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="semua">Semua Status</SelectItem>
-                <SelectItem value="hadir">Hadir</SelectItem>
-                <SelectItem value="terlambat">Terlambat</SelectItem>
-                <SelectItem value="izin">Izin</SelectItem>
-                <SelectItem value="sakit">Sakit</SelectItem>
-                <SelectItem value="alpa">Tanpa Keterangan</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <!-- Search -->
-          <div class="flex-1 min-w-[180px] relative">
-            <Label class="text-xs text-muted-foreground">Cari</Label>
-            <div class="relative mt-1.5">
-              <Search class="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
-              <Input
-                id="search-absensi"
-                v-model="searchQuery"
-                type="text"
-                placeholder="Nama siswa / kelas..."
-                class="pl-9 h-9"
-                @input="currentPage = 1"
-              />
-            </div>
-          </div>
-
-          <Button id="btn-filter-absensi" @click="loadData" class="gap-2 mt-auto">
-            <Search class="size-4" />
-            Tampilkan
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-
-    <!-- Tabs: Detail & Ringkasan -->
     <Tabs default-value="detail">
       <TabsList class="w-full justify-start">
         <TabsTrigger value="detail">Riwayat Detail</TabsTrigger>
@@ -404,170 +395,119 @@ const ringkasanSiswa = computed(() => {
       </TabsList>
 
       <!-- Detail Tab -->
-      <TabsContent value="detail" class="mt-4">
-        <Card class="overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow class="bg-muted/50">
-                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
-                <TableHead class="font-semibold w-[120px]">Tanggal</TableHead>
-                <TableHead class="font-semibold">Nama Siswa</TableHead>
-                <TableHead class="font-semibold">Kelas</TableHead>
-                <TableHead class="font-semibold text-center">Jam Masuk</TableHead>
-                <TableHead class="font-semibold text-center">Jam Keluar</TableHead>
-                <TableHead class="font-semibold">Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <template v-if="isLoading">
-                <TableRow v-for="(i, index) in 8" :key="`skel-${i}`">
-                  <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
-                  <TableCell><Skeleton class="h-5 w-24" /></TableCell>
-                  <TableCell><Skeleton class="h-5 w-36" /></TableCell>
-                  <TableCell><Skeleton class="h-5 w-20" /></TableCell>
-                  <TableCell><Skeleton class="h-5 w-16 mx-auto" /></TableCell>
-                  <TableCell><Skeleton class="h-5 w-16 mx-auto" /></TableCell>
-                  <TableCell><Skeleton class="h-6 w-22 rounded-full" /></TableCell>
-                </TableRow>
-              </template>
+      <TabsContent value="detail" class="mt-0">
+        <div
+          v-motion
+          :initial="glassSlide.initial"
+          :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 200 } }"
+        >
+          <DataTableCard
+            :columns="detailColumns"
+            :items="paginatedDetailData"
+            :filters="detailFiltersConfig"
+            v-model:filterValues="filterValues"
+            :from="fromDetail"
+            :to="toDetail"
+            :total="totalDetail"
+            :page="pageDetail"
+            :per-page="perPageDetail"
+            @update:page="pageDetail = $event"
+            @update:perPage="perPageDetail = $event"
+            illustration="textbook"
+          >
+            <!-- Overrides Cells -->
+            <template #cell-nama="{ item }">
+              <span class="font-medium text-sm text-foreground">{{ item.nama }}</span>
+            </template>
 
-              <template v-else>
-                <TableRow
-                  v-for="(log, index) in paginatedData"
-                  :key="log.id"
-                  class="hover:bg-muted/30 transition-colors"
-                >
-                  <TableCell class="text-center text-muted-foreground text-xs">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</TableCell>
-                  <TableCell class="text-sm text-muted-foreground">{{ log.tanggal }}</TableCell>
-                  <TableCell class="font-medium text-sm">{{ log.nama }}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" class="text-xs font-normal">{{ log.kelas }}</Badge>
-                  </TableCell>
-                  <TableCell class="text-center text-sm font-mono">{{ log.jamMasuk ?? '-' }}</TableCell>
-                  <TableCell class="text-center text-sm font-mono">{{ log.jamKeluar ?? '-' }}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary" :class="getStatusClass(log.status)">
-                      {{ getStatusLabel(log.status) }}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
+            <template #cell-kelas="{ item }">
+              <Badge variant="outline" class="text-xs font-normal border-white/10 dark:border-white/5 bg-background/50">
+                {{ item.kelas }}
+              </Badge>
+            </template>
 
-                <TableRow v-if="paginatedData.length === 0">
-                  <TableCell colspan="7" class="h-32 text-center text-muted-foreground">
-                    <div class="flex flex-col items-center justify-center gap-2">
-                      <CalendarIcon class="size-8 text-muted-foreground/40" />
-                      <p class="text-sm">Tidak ada data pada filter yang dipilih.</p>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              </template>
-            </TableBody>
-          </Table>
-        </Card>
+            <template #cell-jamMasuk="{ item }">
+              <span class="font-mono text-xs text-muted-foreground">{{ item.jamMasuk || '-' }}</span>
+            </template>
 
-        <!-- Pagination -->
-        <div class="flex items-center justify-between text-sm text-muted-foreground mt-3" v-if="filteredData.length > 0">
-          <span>Menampilkan {{ paginatedData.length }} dari {{ filteredData.length }} data</span>
-          <div class="flex items-center gap-1">
-            <Button
-              id="btn-prev-absensi"
-              variant="outline"
-              size="sm"
-              :disabled="currentPage === 1"
-              @click="currentPage--"
-            >Prev</Button>
-            <Button
-              v-for="p in totalPages"
-              :key="p"
-              :variant="p === currentPage ? 'default' : 'outline'"
-              size="sm"
-              @click="currentPage = p"
-            >{{ p }}</Button>
-            <Button
-              id="btn-next-absensi"
-              variant="outline"
-              size="sm"
-              :disabled="currentPage === totalPages"
-              @click="currentPage++"
-            >Next</Button>
-          </div>
+            <template #cell-jamKeluar="{ item }">
+              <span class="font-mono text-xs text-muted-foreground">{{ item.jamKeluar || '-' }}</span>
+            </template>
+
+            <template #cell-status="{ item }">
+              <Badge :class="getStatusClass(item.status)">
+                {{ getStatusLabel(item.status) }}
+              </Badge>
+            </template>
+          </DataTableCard>
         </div>
       </TabsContent>
 
       <!-- Ringkasan Tab -->
-      <TabsContent value="ringkasan" class="mt-4">
-        <Card class="overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow class="bg-muted/50">
-                <TableHead class="font-semibold w-[50px] text-center">No</TableHead>
-                <TableHead class="font-semibold">Nama Siswa</TableHead>
-                <TableHead class="font-semibold">Kelas</TableHead>
-                <TableHead class="font-semibold text-center">Hadir</TableHead>
-                <TableHead class="font-semibold text-center">Terlambat</TableHead>
-                <TableHead class="font-semibold text-center">Izin</TableHead>
-                <TableHead class="font-semibold text-center">Sakit</TableHead>
-                <TableHead class="font-semibold text-center">Alpa</TableHead>
-                <TableHead class="font-semibold text-center">% Hadir</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <template v-if="isLoading">
-                <TableRow v-for="(i, index) in 5" :key="`sum-skel-${i}`">
-                  <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
-                  <TableCell v-for="j in 9" :key="j"><Skeleton class="h-5 w-full" /></TableCell>
-                </TableRow>
-              </template>
-              <template v-else>
-                <TableRow
-                  v-for="(siswa, index) in ringkasanSiswa"
-                  :key="siswa.nama"
-                  class="hover:bg-muted/30 transition-colors"
-                >
-                  <TableCell class="text-center text-muted-foreground text-xs">{{ index + 1 }}</TableCell>
-                  <TableCell class="font-medium text-sm">{{ siswa.nama }}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" class="text-xs font-normal">{{ siswa.kelas }}</Badge>
-                  </TableCell>
-                  <TableCell class="text-center">
-                    <span class="text-green-600 dark:text-green-400 font-semibold">{{ siswa.hadir }}</span>
-                  </TableCell>
-                  <TableCell class="text-center">
-                    <span class="text-yellow-600 dark:text-yellow-400 font-semibold">{{ siswa.terlambat }}</span>
-                  </TableCell>
-                  <TableCell class="text-center">
-                    <span class="text-indigo-600 dark:text-indigo-400 font-semibold">{{ siswa.izin }}</span>
-                  </TableCell>
-                  <TableCell class="text-center">
-                    <span class="text-blue-600 dark:text-blue-400 font-semibold">{{ siswa.sakit }}</span>
-                  </TableCell>
-                  <TableCell class="text-center">
-                    <span class="text-red-600 dark:text-red-400 font-semibold">{{ siswa.alpa }}</span>
-                  </TableCell>
-                  <TableCell class="text-center">
-                    <Badge
-                      :class="[
-                        (((siswa.hadir + siswa.terlambat) / siswa.total) * 100) >= 80
-                          ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'
-                          : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
-                      ]"
-                    >
-                      {{ Math.round(((siswa.hadir + siswa.terlambat) / siswa.total) * 100) }}%
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-                <TableRow v-if="ringkasanSiswa.length === 0">
-                  <TableCell colspan="9" class="h-32 text-center text-muted-foreground">
-                    <div class="flex flex-col items-center justify-center gap-2">
-                      <Users class="size-8 text-muted-foreground/40" />
-                      <p class="text-sm">Tidak ada data ringkasan.</p>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              </template>
-            </TableBody>
-          </Table>
-        </Card>
+      <TabsContent value="ringkasan" class="mt-0">
+        <div
+          v-motion
+          :initial="glassSlide.initial"
+          :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 200 } }"
+        >
+          <DataTableCard
+            :columns="summaryColumns"
+            :items="paginatedSummaryData"
+            :filters="summaryFiltersConfig"
+            v-model:filterValues="filterValues"
+            :from="fromSummary"
+            :to="toSummary"
+            :total="totalSummary"
+            :page="pageSummary"
+            :per-page="perPageSummary"
+            @update:page="pageSummary = $event"
+            @update:perPage="perPageSummary = $event"
+            illustration="textbook"
+          >
+            <!-- Overrides Cells -->
+            <template #cell-nama="{ item }">
+              <span class="font-medium text-sm text-foreground">{{ item.nama }}</span>
+            </template>
+
+            <template #cell-kelas="{ item }">
+              <Badge variant="outline" class="text-xs font-normal border-white/10 dark:border-white/5 bg-background/50">
+                {{ item.kelas }}
+              </Badge>
+            </template>
+
+            <template #cell-hadir="{ item }">
+              <span class="text-green-600 dark:text-green-400 font-semibold">{{ item.hadir }}</span>
+            </template>
+
+            <template #cell-terlambat="{ item }">
+              <span class="text-yellow-600 dark:text-yellow-400 font-semibold">{{ item.terlambat }}</span>
+            </template>
+
+            <template #cell-izin="{ item }">
+              <span class="text-indigo-600 dark:text-indigo-400 font-semibold">{{ item.izin }}</span>
+            </template>
+
+            <template #cell-sakit="{ item }">
+              <span class="text-blue-600 dark:text-blue-400 font-semibold">{{ item.sakit }}</span>
+            </template>
+
+            <template #cell-alpa="{ item }">
+              <span class="text-red-600 dark:text-red-400 font-semibold">{{ item.alpa }}</span>
+            </template>
+
+            <template #cell-persen="{ item }">
+              <Badge
+                :class="[
+                  (((item.hadir + item.terlambat) / item.total) * 100) >= 80
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 font-bold border-none'
+                    : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 font-bold border-none'
+                ]"
+              >
+                {{ Math.round(((item.hadir + item.terlambat) / item.total) * 100) }}%
+              </Badge>
+            </template>
+          </DataTableCard>
+        </div>
       </TabsContent>
     </Tabs>
   </div>

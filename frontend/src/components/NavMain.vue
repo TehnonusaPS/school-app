@@ -1,7 +1,7 @@
 <script setup>
 import { ChevronRight } from 'lucide-vue-next'
 import { useRoute } from 'vue-router'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { navItemSlide } from '@/config/motion'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
@@ -52,6 +52,18 @@ const isParentActive = items => {
   if (!items) return false
   return items.some(sub => isPageActive(sub.url))
 }
+
+// ── Accordion Logic ─────────────────────────────────────────────────────────
+// Menyimpan index parent yang sedang terbuka. null = semua tertutup.
+// Inisialisasi: buka parent yang sedang aktif (jika ada).
+const openIndex = ref(
+  props.items.findIndex(item => item.items?.length && isParentActive(item.items))
+)
+
+const toggleItem = (index) => {
+  openIndex.value = openIndex.value === index ? null : index
+}
+// ────────────────────────────────────────────────────────────────────────────
 </script>
 
 <template>
@@ -99,7 +111,8 @@ const isParentActive = items => {
 
           <!-- COLLAPSIBLE UNTUK MODE EXPANDED -->
           <Collapsible
-            :default-open="isParentActive(item.items)"
+            :open="openIndex === itemIndex"
+            @update:open="toggleItem(itemIndex)"
             class="group/collapsible group-data-[collapsible=icon]:hidden w-full"
           >
             <CollapsibleTrigger as-child>

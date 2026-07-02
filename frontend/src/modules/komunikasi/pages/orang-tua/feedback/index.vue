@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { useAuthStore } from '@/stores/authStore'
@@ -55,8 +55,11 @@ const form = ref({
 
 // --- Parent Filtered Feedbacks ---
 const parentFeedbacks = computed(() => {
-  const email = auth.user?.email || 'orangtua@mail.com'
-  return feedbackStore.items.filter(item => item.pengirimEmail === email)
+  return feedbackStore.items
+})
+
+onMounted(() => {
+  feedbackStore.fetchFeedbacks()
 })
 
 // --- CRUD Operations ---
@@ -81,7 +84,7 @@ function openEditView(item) {
   currentView.value = 'edit'
 }
 
-function submitFeedback() {
+async function submitFeedback() {
   if (!form.value.kategori || !form.value.kelas || !form.value.judul || !form.value.pesan) {
     toast.error('Gagal mengirim aduan', {
       description: 'Mohon isi seluruh bidang formulir terlebih dahulu.'
@@ -89,33 +92,35 @@ function submitFeedback() {
     return
   }
 
-  if (currentView.value === 'create') {
-    feedbackStore.add({
-      kategori: form.value.kategori,
-      kelas: form.value.kelas,
-      judul: form.value.judul,
-      pesan: form.value.pesan,
-      pengirim: 'Wali Murid (Anonim)',
-      siswa: 'Siswa Dirahasiakan',
-      pengirimEmail: auth.user?.email || 'orangtua@mail.com'
-    })
-    toast.success('Keluhan/Saran Berhasil Dikirim secara Anonim!', {
-      description: 'Masukan Anda telah berhasil ditambahkan ke papan evaluasi Kepala Sekolah.'
-    })
-  } else if (currentView.value === 'edit') {
-    feedbackStore.update(editingId.value, {
-      kategori: form.value.kategori,
-      kelas: form.value.kelas,
-      judul: form.value.judul,
-      pesan: form.value.pesan
-    })
-    toast.success('Keluhan/Saran Berhasil Diperbarui!', {
-      description: 'Perubahan masukan Anda telah disimpan secara anonim.'
+  try {
+    if (currentView.value === 'create') {
+      await feedbackStore.add({
+        kategori: form.value.kategori,
+        kelas: form.value.kelas,
+        judul: form.value.judul,
+        pesan: form.value.pesan
+      })
+      toast.success('Keluhan/Saran Berhasil Dikirim secara Anonim!', {
+        description: 'Masukan Anda telah berhasil ditambahkan ke papan evaluasi Kepala Sekolah.'
+      })
+    } else if (currentView.value === 'edit') {
+      feedbackStore.update(editingId.value, {
+        kategori: form.value.kategori,
+        kelas: form.value.kelas,
+        judul: form.value.judul,
+        pesan: form.value.pesan
+      })
+      toast.success('Keluhan/Saran Berhasil Diperbarui!', {
+        description: 'Perubahan masukan Anda telah disimpan secara anonim.'
+      })
+    }
+    // Return to list view
+    currentView.value = 'list'
+  } catch (error) {
+    toast.error('Gagal mengirim aduan', {
+      description: 'Terjadi kesalahan sistem saat mengirim aduan.'
     })
   }
-
-  // Return to list view
-  currentView.value = 'list'
 }
 
 const isDetailOpen = ref(false)
@@ -133,7 +138,8 @@ function cancelForm() {
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '-'
-  const [year, month, day] = dateStr.split('-')
+  const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0]
+  const [year, month, day] = datePart.split('-')
   return `${day}/${month}/${year}`
 }
 
@@ -292,11 +298,7 @@ const categoryBadgeClass = (kategori) => {
           ]"
         />
         
-        <!-- Security Badge -->
-        <div class="flex items-center gap-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-3.5 py-1.5 rounded-full text-xs font-semibold self-start shadow-xs w-max">
-          <ShieldCheck class="size-4 shrink-0" />
-          <span>Proteksi Anonimitas 100% Aktif</span>
-        </div>
+
 
         <div class="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-6">
           <!-- Form Container -->
@@ -387,7 +389,6 @@ const categoryBadgeClass = (kategori) => {
               <div class="border-t border-border pt-6 flex gap-3 items-center">
                 <Button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 h-11 flex items-center gap-2 font-bold rounded-xl shadow-md transition-all cursor-pointer">
                   {{ currentView === 'create' ? 'Kirim Aduan Secara Anonim' : 'Simpan Perubahan' }}
-                  <Lock class="w-4 h-4" />
                 </Button>
                 <Button type="button" variant="ghost" @click="cancelForm" class="font-semibold rounded-xl h-11 px-4 cursor-pointer">
                   Batal
@@ -413,18 +414,7 @@ const categoryBadgeClass = (kategori) => {
               </ol>
             </Card>
 
-            <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-md border border-slate-800 relative overflow-hidden">
-              <div class="absolute inset-0 bg-gradient-to-br from-slate-800/50 to-transparent pointer-events-none"></div>
-              <div class="relative z-10">
-                <div class="flex items-center gap-2 mb-3 text-slate-300">
-                  <Lock class="w-5 h-5 text-emerald-400" />
-                  <h3 class="font-semibold text-sm">Privasi 100% Terjamin</h3>
-                </div>
-                <p class="text-xs text-slate-300 leading-relaxed font-medium">
-                  Komitmen kami adalah mendengar masukan demi kemajuan sekolah. Seluruh pesan yang Anda kirimkan disaring secara ketat agar bebas dari atribut identitas personal.
-                </p>
-              </div>
-            </div>
+
           </div>
         </div>
       </div>

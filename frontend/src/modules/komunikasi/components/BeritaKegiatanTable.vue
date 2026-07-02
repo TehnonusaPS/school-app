@@ -78,7 +78,8 @@ watch(filteredItems, () => {
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '-'
-  const [year, month, day] = dateStr.split('-')
+  const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0]
+  const [year, month, day] = datePart.split('-')
   return `${day}/${month}/${year}`
 }
 </script>

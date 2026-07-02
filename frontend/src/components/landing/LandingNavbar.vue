@@ -1,6 +1,9 @@
 <script setup>
 import { ref } from 'vue'
-import { School, Menu, X } from 'lucide-vue-next'
+import { School, Menu, X, Download } from 'lucide-vue-next'
+import { usePwa } from '@/composables/usePwa'
+
+const { triggerInstall } = usePwa()
 
 defineProps({
   brandName: {
@@ -64,6 +67,15 @@ const closeMobileMenu = () => {
 
         <!-- Actions -->
         <div class="flex items-center gap-2 shrink-0">
+          <!-- PWA Install Button -->
+          <button
+            @click="triggerInstall"
+            class="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-border/80 px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-foreground hover:bg-muted/60 transition duration-200 cursor-pointer"
+          >
+            <Download class="h-3.5 w-3.5" />
+            <span>Install Apps</span>
+          </button>
+
           <!-- "Masuk" Button - Always visible -->
           <router-link
             :to="loginPath"
@@ -99,6 +111,15 @@ const closeMobileMenu = () => {
         class="md:hidden border-t border-border/20 bg-background/95 backdrop-blur-lg px-4 py-3 shadow-lg"
       >
         <div class="space-y-1">
+          <!-- PWA Install Mobile Action -->
+          <button
+            @click="() => { closeMobileMenu(); triggerInstall(); }"
+            class="w-full flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-base font-medium text-muted-foreground hover:bg-primary/5 hover:text-primary transition text-left cursor-pointer"
+          >
+            <Download class="h-5 w-5 text-primary" />
+            <span>Install Apps</span>
+          </button>
+
           <a
             v-for="link in links"
             :key="link.label"

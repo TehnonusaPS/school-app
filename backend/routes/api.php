@@ -5,6 +5,12 @@ use App\Http\Controllers\Api\SuperAdmin\FinanceController;
 use App\Http\Controllers\Api\FoundationController;
 use App\Http\Controllers\Api\SchoolController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\StudentController;
+use App\Http\Controllers\Api\ClassroomController;
+use App\Http\Controllers\Api\TeacherController;
+use App\Http\Controllers\Api\ExtracurricularController;
+use App\Http\Controllers\Api\SubjectController;
+use App\Http\Controllers\Api\AcademicYearController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -74,6 +80,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('/foundations', FoundationController::class);
         Route::apiResource('/schools', SchoolController::class);
         Route::apiResource('/users', UserController::class);
+        Route::apiResource('/students', StudentController::class);
+        Route::apiResource('/classrooms', ClassroomController::class);
+        Route::apiResource('/teachers', TeacherController::class);
+        Route::apiResource('/extracurriculars', ExtracurricularController::class);
+        Route::apiResource('/subjects', SubjectController::class);
+        Route::apiResource('/academic-years', AcademicYearController::class);
     });
 });
 

@@ -1,28 +1,54 @@
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import PageHeader from '@/components/page-header/PageHeader.vue'
-import { statusOptions, agamaOptions, kelaminOptions, pekerjaanOptions, kelasOptions, hubunganOptions } from './data/siswa'
+import { statusOptions, agamaOptions, kelaminOptions, pekerjaanOptions, hubunganOptions } from './data/siswa'
 import { useAuthStore } from '@/stores/authStore'
-import { computed } from 'vue'
 import SiswaForm from './components/SiswaForm.vue'
 import { defaultForm } from './data/defaultForm'
 import { Save } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
+import { getClassrooms } from '@/services/managementService'
+import { getSiswaDetail, updateSiswa } from '@/services/siswaService'
 
 const auth = useAuthStore()
 const isWaliKelas = computed(() => auth.user?.role === 'wali_kelas')
 
-const classes = computed(() => {
-  if (isWaliKelas.value) {
-      return kelasOptions.filter(
-        item => item.value === auth.user?.kelasId
-    )
+const route = useRoute()
+const studentId = route.query.id
+
+const activeClassrooms = ref([])
+const form = ref({ ...defaultForm })
+
+onMounted(async () => {
+  try {
+    const resClass = await getClassrooms()
+    activeClassrooms.value = resClass.data
+  } catch (err) {
+    console.error('Gagal mengambil data kelas', err)
   }
-  return kelasOptions
+
+  if (studentId) {
+    try {
+      const res = await getSiswaDetail(studentId)
+      form.value = {
+        ...res.data,
+        tanggal_lahir: res.data.tanggal_lahir ? new Date(res.data.tanggal_lahir) : '',
+        tahun_masuk: res.data.tahun_masuk ? new Date(res.data.tahun_masuk) : ''
+      }
+    } catch (err) {
+      toast.error('Gagal memuat data detail siswa')
+    }
+  }
 })
 
-const form = ref({ ...defaultForm})
+const classes = computed(() => {
+  let list = activeClassrooms.value.map(c => ({ label: c.name, value: String(c.id) }))
+  if (isWaliKelas.value) {
+    return list.filter(item => item.value === String(auth.user?.kelasId))
+  }
+  return list
+})
 
 const router = useRouter()
 const isLoading = ref(false)
@@ -33,19 +59,27 @@ const handleImage = (file) => {
   imagePreview.value = URL.createObjectURL(file)
 }
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   isLoading.value = true
 
-  setTimeout(() => {
-    isLoading.value = false
+  const payload = {
+    ...form.value,
+    tanggal_lahir: form.value.tanggal_lahir ? new Date(form.value.tanggal_lahir).toISOString().split('T')[0] : null,
+    tahun_masuk: form.value.tahun_masuk ? new Date(form.value.tahun_masuk).toISOString().split('T')[0] : null
+  }
 
-    toast('Data siswa berhasil diperbarui', {
+  try {
+    await updateSiswa(studentId, payload)
+    toast.success('Data siswa berhasil diperbarui', {
       description: 'Perubahan data siswa telah berhasil disimpan.'
     })
-
     router.push('/manajemen-data/siswa')
-
-  }, 1000)
+  } catch (err) {
+    const errorMsg = err.response?.data?.message || 'Gagal memperbarui data siswa.'
+    toast.error('Gagal Menyimpan', { description: errorMsg })
+  } finally {
+    isLoading.value = false
+  }
 }
 
 const goToList = () => {

@@ -42,16 +42,16 @@ const features = [
 </script>
 
 <template>
-  <section id="fitur" class="relative px-6 py-24">
+  <section id="fitur" class="relative px-4 py-16 md:px-6 md:py-24">
     <div class="mx-auto max-w-6xl">
       <div class="mx-auto max-w-2xl text-center">
         <span class="text-sm font-semibold uppercase tracking-wider text-primary"
           >Fitur Lengkap</span
         >
-        <h2 class="mt-3 text-4xl font-bold tracking-tight md:text-5xl">
+        <h2 class="mt-3 text-3xl sm:text-4xl font-bold tracking-tight md:text-5xl">
           Semua yang dibutuhkan yayasan modern
         </h2>
-        <p class="mt-4 text-muted-foreground">
+        <p class="mt-4 text-sm sm:text-base text-muted-foreground leading-relaxed">
           Dari ruang kelas hingga ruang yayasan - Sekolahku menyatukan operasional pendidikan Anda.
         </p>
       </div>

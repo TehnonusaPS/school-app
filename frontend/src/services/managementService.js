@@ -106,3 +106,8 @@ export async function getRoles() {
   const response = await api.get('/management/roles')
   return response.data
 }
+
+export async function getClassrooms(params) {
+  const response = await api.get('/management/classrooms', { params })
+  return response.data
+}

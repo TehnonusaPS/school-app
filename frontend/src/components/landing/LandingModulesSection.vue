@@ -11,17 +11,17 @@ const activeSchools = [
 </script>
 
 <template>
-  <section id="modul" class="relative px-6 py-24">
+  <section id="modul" class="relative px-4 py-16 md:px-6 md:py-24">
     <div class="blob left-0 top-1/2 h-100 w-100 bg-lavender" />
     <div class="relative mx-auto grid max-w-6xl gap-10 lg:grid-cols-2 lg:items-center">
       <div>
         <span class="text-sm font-semibold uppercase tracking-wider text-primary"
           >Untuk Yayasan</span
         >
-        <h2 class="mt-3 text-4xl font-bold tracking-tight md:text-5xl">
+        <h2 class="mt-3 text-3xl sm:text-4xl font-bold tracking-tight md:text-5xl">
           Satu akun, semua sekolah Anda.
         </h2>
-        <p class="mt-4 text-muted-foreground">
+        <p class="mt-4 text-sm sm:text-base text-muted-foreground leading-relaxed">
           Yayasan dengan banyak unit sekolah (TK, SD, SMP, SMA, pesantren) bisa mengelola seluruh
           operasional dari satu tempat dengan kontrol akses berlapis.
         </p>

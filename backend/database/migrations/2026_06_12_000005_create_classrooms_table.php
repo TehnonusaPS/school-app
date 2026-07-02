@@ -17,6 +17,9 @@ return new class extends Migration
             $table->foreignId('academic_year_id')->constrained('academic_years')->cascadeOnDelete();
             $table->string('name');                            // e.g. "1-A", "2-D"
             $table->integer('grade');                           // tingkat: 1, 2, 3...
+            $table->string('major')->nullable();                // e.g. "MIPA", "IPS"
+            $table->string('room')->nullable();                 // e.g. "R. 101"
+            $table->string('status')->default('active');        // e.g. "active", "full", "no_teacher"
             $table->foreignId('homeroom_teacher_id')->nullable()->constrained('users')->nullOnDelete();
             $table->integer('capacity')->nullable();
             $table->timestamps();

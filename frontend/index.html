@@ -7,6 +7,16 @@
     <title>school-app</title>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
     <script>
+      // Capture PWA install prompt as early as possible
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        window.deferredPrompt = e;
+        if (window.onBeforeInstallPrompt) {
+          window.onBeforeInstallPrompt(e);
+        }
+      });
+    </script>
+    <script>
       // Inisialisasi dark mode sebelum Vue mount → cegah FOUC
       (function () {
         try {

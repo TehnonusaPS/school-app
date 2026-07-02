@@ -14,6 +14,18 @@ export function usePwa() {
       return
     }
 
+    // Capture early event if it already fired
+    if (window.deferredPrompt) {
+      deferredPrompt.value = window.deferredPrompt
+      isInstallable.value = true
+    }
+
+    // Hook callback for early listener in index.html
+    window.onBeforeInstallPrompt = (e) => {
+      deferredPrompt.value = e
+      isInstallable.value = true
+    }
+
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault()
       deferredPrompt.value = e

@@ -30,9 +30,11 @@ defineEmits(['update:modelValue'])
         type="date"
         :model-value="modelValue"
         @update:model-value="$emit('update:modelValue', $event)"
-        :class="{
-          'border-destructive': error
-        }"
+        @click="$event.target.showPicker()"
+        :class="[
+          'cursor-pointer',
+          { 'border-destructive': error }
+        ]"
       />
     </FieldContent>
 

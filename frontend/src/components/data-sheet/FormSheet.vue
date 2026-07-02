@@ -257,14 +257,14 @@ const handleSubmit = () => {
                       <Textarea
                         v-if="field.textarea || field.type === 'textarea'"
                         v-model="localForm[field.key]"
-                        :disabled="disabled"
+                        :disabled="disabled || field.disabled"
                         class="min-h-16 bg-background border-input focus-visible:ring-1 focus-visible:ring-ring text-sm"
                         :placeholder="field.placeholder || ('Masukkan ' + field.label)"
                       />
                       <Select
                         v-else-if="field.type === 'select' || field.select || field.options"
                         v-model="localForm[field.key]"
-                        :disabled="disabled"
+                        :disabled="disabled || field.disabled"
                       >
                         <SelectTrigger class="h-8 bg-background border-input focus-visible:ring-1 focus-visible:ring-ring text-sm w-full">
                           <SelectValue :placeholder="field.placeholder || ('Pilih ' + field.label)" />
@@ -282,15 +282,15 @@ const handleSubmit = () => {
                       <div
                         v-else-if="field.type === 'file' || field.file"
                         class="border-2 border-dashed border-border/80 rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-muted/30 transition-all"
-                        :class="disabled ? 'pointer-events-none opacity-85' : ''"
-                        @click="!disabled && $refs['fileInput_' + field.key]?.[0]?.click()"
+                        :class="disabled || field.disabled ? 'pointer-events-none opacity-85' : ''"
+                        @click="!(disabled || field.disabled) && $refs['fileInput_' + field.key]?.[0]?.click()"
                       >
                         <UploadCloud class="size-6 text-muted-foreground animate-bounce" />
                         <span class="text-xs font-semibold text-foreground text-center line-clamp-2 px-2">
                           {{ localForm[field.key + '_fileName'] || localForm[field.key]?.name || localForm[field.key] || field.placeholder || 'Pilih file (PDF, DOCX, PPTX atau Gambar)' }}
                         </span>
                         <input
-                          v-if="!disabled"
+                          v-if="!(disabled || field.disabled)"
                           :ref="'fileInput_' + field.key"
                           type="file"
                           :accept="field.accept || '*/*'"
@@ -307,7 +307,7 @@ const handleSubmit = () => {
                       <Input
                         v-else
                         v-model="localForm[field.key]"
-                        :disabled="disabled"
+                        :disabled="disabled || field.disabled"
                         class="h-8 bg-background border-input focus-visible:ring-1 focus-visible:ring-ring text-sm"
                         :placeholder="field.placeholder || ('Masukkan ' + field.label)"
                       />

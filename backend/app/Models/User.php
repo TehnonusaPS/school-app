@@ -136,4 +136,12 @@ class User extends Authenticatable
     {
         return $this->hasRole('superadmin');
     }
+
+    /**
+     * Get all subject-classroom teaching assignments for this user (guru/wali_kelas).
+     */
+    public function teacherSubjectAssignments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TeacherSubjectAssignment::class, 'teacher_id');
+    }
 }

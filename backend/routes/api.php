@@ -150,5 +150,25 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('/subjects', SubjectController::class);
         Route::apiResource('/academic-years', AcademicYearController::class);
     });
+
+    // Akademik Routes (Guru, Wali Kelas, Admin Sekolah, Kepala Sekolah)
+    Route::middleware('role:guru,wali_kelas,admin_sekolah,kepala_sekolah')
+        ->prefix('akademik')
+        ->group(function () {
+            // Data lookup
+            Route::get('/my-subjects', [\App\Http\Controllers\Api\AkademikDataController::class, 'getMySubjects']);
+            Route::get('/subjects/{subjectId}/my-classrooms', [\App\Http\Controllers\Api\AkademikDataController::class, 'getMyClassrooms']);
+            Route::get('/classrooms/{id}/students', [\App\Http\Controllers\Api\AkademikDataController::class, 'getStudentsByClassroom']);
+            Route::get('/active-academic-year', [\App\Http\Controllers\Api\AkademikDataController::class, 'getActiveAcademicYear']);
+
+            // Materi Pelajaran
+            Route::apiResource('/materials', \App\Http\Controllers\Api\SubjectMaterialController::class);
+            Route::get('/materials/{id}/download', [\App\Http\Controllers\Api\SubjectMaterialController::class, 'download']);
+            Route::patch('/materials/{id}/toggle-status', [\App\Http\Controllers\Api\SubjectMaterialController::class, 'toggleStatus']);
+
+            // Penilaian (Tugas & Ujian digabung)
+            Route::apiResource('/assessments', \App\Http\Controllers\Api\AssessmentController::class);
+            Route::patch('/assessments/{id}/toggle-status', [\App\Http\Controllers\Api\AssessmentController::class, 'toggleStatus']);
+        });
 });
 

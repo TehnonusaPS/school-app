@@ -1,6 +1,6 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
-import { Book, BookOpen, Users, FolderOpen, Plus } from 'lucide-vue-next'
+import { ref, computed, watch, onMounted } from 'vue'
+import { Book, BookOpen, Users, FolderOpen, Plus, Download, Eye, Pencil, Trash2 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 
 // UI Components
@@ -12,6 +12,16 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction
+} from '@/components/ui/alert-dialog'
 
 // Custom Components
 import GuruMataPelajaranSheet from './GuruMataPelajaranSheet.vue'
@@ -24,91 +34,104 @@ import DataTableCard from '@/components/data-table/DataTableCard.vue'
 // Helpers
 import { formatNumber } from '@/utils/formatNumber'
 
+// Composable
+import { useAkademik } from '../composables/useAkademik'
+import * as akademikService from '@/services/akademikService'
+
+// --- Initialize Composable ---
+const {
+  subjects,
+  classrooms,
+  students,
+  activeAcademicYear,
+  materiList,
+  tugasList,
+  ujianList,
+  isLoading,
+  isSubmitting,
+  draftForm,
+  fetchActiveAcademicYear,
+  fetchSubjects,
+  fetchClassrooms,
+  fetchStudents,
+  fetchMaterials,
+  fetchAssessments,
+  saveMaterial,
+  updateMaterial,
+  saveAssessment,
+  updateAssessment,
+  deleteItem,
+  toggleStatus,
+  handleDownload,
+  clearDraft,
+  saveDraft
+} = useAkademik()
+
 // --- State ---
-const selectedMapel = ref('matematika')
+const selectedMapel = ref('')
 const activeTab = ref('materi') // 'materi', 'tugas', 'ujian'
 
-// Table Filters (Using DataTableCard's filterValues format)
+// Table Filters
 const filterValues = ref({
   title: 'all',
-  kelas: 'all',
-  semester: 'all'
+  kelas: 'all'
 })
 
-// Reset filters when tab changes
+// Pagination states
+const page = ref(1)
+const perPage = ref(5)
+
+// --- Dialog state for delete ---
+const deleteDialogOpen = ref(false)
+const pendingDeleteItem = ref(null)
+
+// --- Fetch Data on Mount ---
+onMounted(async () => {
+  await fetchActiveAcademicYear()
+  await fetchSubjects()
+  
+  // Set default subject
+  if (subjects.value.length > 0) {
+    selectedMapel.value = String(subjects.value[0].id)
+  }
+})
+
+// Watch subject change to refresh classrooms and data
+watch(selectedMapel, async (newMapel) => {
+  if (newMapel) {
+    await fetchClassrooms(newMapel)
+    refreshData()
+  }
+})
+
+// Reset filters and refetch when tab changes
 watch(activeTab, () => {
   filterValues.value = {
     title: 'all',
-    kelas: 'all',
-    semester: 'all'
+    kelas: 'all'
   }
   page.value = 1
+  refreshData()
 })
 
-// --- Mock Students ---
-const studentsMap = {
-  'Kelas 1': [
-    { id: 's1', name: 'Budi Santoso' },
-    { id: 's2', name: 'Siti Aminah' },
-    { id: 's3', name: 'Ahmad Wibowo' },
-    { id: 's4', name: 'Dewi Lestari' },
-    { id: 's5', name: 'Rani Wijaya' }
-  ],
-  'Kelas 2': [
-    { id: 's6', name: 'Rian Hidayat' },
-    { id: 's7', name: 'Putri Utami' },
-    { id: 's8', name: 'Novianti' },
-    { id: 's9', name: 'Eka Putra' },
-    { id: 's10', name: 'Fajar Bahari' }
-  ],
-  'Kelas 3': [
-    { id: 's11', name: 'Hadi Wijaya' },
-    { id: 's12', name: 'Lina Marlina' },
-    { id: 's13', name: 'Andi Pratama' },
-    { id: 's14', name: 'Siska Amelia' },
-    { id: 's15', name: 'Tommy Hermawan' }
-  ]
+const refreshData = () => {
+  if (!selectedMapel.value) return
+  
+  if (activeTab.value === 'materi') {
+    fetchMaterials(selectedMapel.value)
+  } else {
+    fetchAssessments(selectedMapel.value, activeTab.value)
+  }
 }
-
-
-// --- Mock Lists ---
-const materiList = ref([
-  { id: 'm1', title: 'Bab 1 : Pengenalan Aljabar Dasar.pdf', kelas: 'Kelas 1', semester: 'Semester 1', status: 'Aktif', grades: {} },
-  { id: 'm2', title: 'Bab 2 : Relasi dan Fungsi Aljabar.pdf', kelas: 'Kelas 1', semester: 'Semester 1', status: 'Aktif', grades: {} },
-  { id: 'm3', title: 'Bab 3 : Geometri Bidang Datar.docx', kelas: 'Kelas 1', semester: 'Semester 1', status: 'Aktif', grades: {} },
-  { id: 'm4', title: 'Bab 4 : Teorema Phytagoras.pdf', kelas: 'Kelas 1', semester: 'Semester 1', status: 'Aktif', grades: {} },
-  { id: 'm5', title: 'Bab 5 : Persamaan Linear Dua Variabel.pdf', kelas: 'Kelas 2', semester: 'Semester 1', status: 'Aktif', grades: {} },
-  { id: 'm6', title: 'Bab 6 : Statistika Deskriptif.pptx', kelas: 'Kelas 2', semester: 'Semester 1', status: 'Aktif', grades: {} },
-  { id: 'm7', title: 'Bab 7 : Peluang Kejadian Sederhana.pdf', kelas: 'Kelas 2', semester: 'Semester 2', status: 'Aktif', grades: {} },
-  { id: 'm8', title: 'Bab 8 : Matriks dan Operasinya.pdf', kelas: 'Kelas 3', semester: 'Semester 1', status: 'Aktif', grades: {} },
-  { id: 'm9', title: 'Bab 9 : Persamaan Lingkaran.docx', kelas: 'Kelas 3', semester: 'Semester 1', status: 'Aktif', grades: {} },
-  { id: 'm10', title: 'Bab 10 : Turunan Fungsi Aljabar.pptx', kelas: 'Kelas 3', semester: 'Semester 2', status: 'Aktif', grades: {} }
-])
-
-const tugasList = ref([
-  { id: 't1', title: 'Tugas I : Latihan Aljabar Dasar', kelas: 'Kelas 1', semester: 'Semester 1', status: 'Aktif', grades: { s1: 90, s2: 95, s3: 92, s4: 85, s5: 98 } },
-  { id: 't2', title: 'Tugas II : Soal Relasi Fungsi', kelas: 'Kelas 1', semester: 'Semester 1', status: 'Aktif', grades: { s1: 80, s2: 85, s3: 82, s4: 78, s5: 88 } },
-  { id: 't3', title: 'Tugas III : Gambar Geometri Datar', kelas: 'Kelas 1', semester: 'Semester 1', status: 'Aktif', grades: { s1: 95, s2: 90, s3: 92, s4: 90, s5: 94 } },
-  { id: 't4', title: 'Tugas IV : Latihan Phytagoras', kelas: 'Kelas 2', semester: 'Semester 1', status: 'Aktif', grades: { s6: 85, s7: 90, s8: 88, s9: 82, s10: 89 } },
-  { id: 't5', title: 'Tugas V : Soal Rata-Rata Statistika', kelas: 'Kelas 3', semester: 'Semester 1', status: 'Aktif', grades: { s11: 88, s12: 92, s13: 85, s14: 90, s15: 91 } }
-])
-
-const ujianList = ref([
-  { id: 'u1', title: 'Ujian Harian I : Aljabar', kelas: 'Kelas 1', semester: 'Semester 1', status: 'Aktif', grades: { s1: 82, s2: 88, s3: 85, s4: 75, s5: 90 } },
-  { id: 'u2', title: 'UTS Matematika Semester Ganjil', kelas: 'Kelas 1', semester: 'Semester 1', status: 'Aktif', grades: { s1: 88, s2: 92, s3: 90, s4: 82, s5: 95 } },
-  { id: 'u3', title: 'Ujian Harian II : Geometri', kelas: 'Kelas 2', semester: 'Semester 1', status: 'Aktif', grades: { s6: 80, s7: 85, s8: 82, s9: 88, s10: 84 } },
-  { id: 'u4', title: 'Ujian Harian III : Statistika', kelas: 'Kelas 2', semester: 'Semester 2', status: 'Aktif', grades: { s6: 78, s7: 82, s8: 80, s9: 85, s10: 81 } },
-  { id: 'u5', title: 'UAS Matematika Semester Ganjil', kelas: 'Kelas 3', semester: 'Semester 1', status: 'Aktif', grades: { s11: 85, s12: 90, s13: 88, s14: 82, s15: 92 } }
-])
 
 // --- Computed Stats ---
 const avgTugas = computed(() => {
   let total = 0
   let count = 0
   tugasList.value.forEach(item => {
-    if (item.grades) {
-      Object.values(item.grades).forEach(grade => {
-        total += Number(grade)
+    if (item.scores) {
+      item.scores.forEach(s => {
+        total += Number(s.score)
         count++
       })
     }
@@ -120,9 +143,9 @@ const avgUjian = computed(() => {
   let total = 0
   let count = 0
   ujianList.value.forEach(item => {
-    if (item.grades) {
-      Object.values(item.grades).forEach(grade => {
-        total += Number(grade)
+    if (item.scores) {
+      item.scores.forEach(s => {
+        total += Number(s.score)
         count++
       })
     }
@@ -140,24 +163,53 @@ const activeTabLabel = computed(() => {
 })
 
 const tableColumns = computed(() => {
-  return [
+  const columns = [
     { key: 'title', label: activeTabLabel.value + ' Pelajaran' },
-    { key: 'kelas', label: 'Kelas' },
-    { key: 'semester', label: 'Semester' },
-    { key: 'status', label: 'Status', badge: true },
-    { key: 'actions', label: 'Aksi' }
+    { key: 'classroom_name', label: 'Kelas' },
+    { key: 'semester_name', label: 'Semester' }
   ]
+  
+  if (activeTab.value !== 'materi') {
+    columns.push({ key: 'type_label', label: 'Tipe' })
+  }
+  
+  columns.push({ key: 'uploaded_by_name', label: 'Diupload Oleh' })
+  columns.push({ key: 'status', label: 'Status', badge: true })
+  columns.push({ key: 'actions', label: 'Aksi' })
+  
+  return columns
 })
 
-// Current working list for active tab
 const currentTabList = computed(() => {
   if (activeTab.value === 'materi') return materiList.value
   if (activeTab.value === 'tugas') return tugasList.value
   return ujianList.value
 })
 
+const formatTypeLabel = (type) => {
+  const labels = {
+    tugas_sekolah: 'Tugas Sekolah',
+    tugas_rumah: 'Tugas Rumah',
+    ujian_harian: 'Ujian Harian',
+    uts: 'UTS',
+    uas: 'UAS'
+  }
+  return labels[type] || type
+}
+
+// Map raw items to include visual labels
+const mappedItems = computed(() => {
+  return currentTabList.value.map(item => ({
+    ...item,
+    classroom_name: item.classroom?.name || '',
+    semester_name: item.academic_year ? `${item.academic_year.name} (${item.academic_year.semester === 'odd' ? 'Ganjil' : 'Genap'})` : '',
+    type_label: item.type ? formatTypeLabel(item.type) : '',
+    status: item.is_active ? 'Aktif' : 'Nonaktif'
+  }))
+})
+
 const filterItemOptions = computed(() => {
-  const titles = currentTabList.value.map(item => item.title)
+  const titles = mappedItems.value.map(item => item.title)
   return [...new Set(titles)]
 })
 
@@ -175,25 +227,10 @@ const filtersConfig = computed(() => [
     label: 'Kelas',
     type: 'select',
     placeholder: 'Pilih Kelas',
-    options: [
-      { value: 'Kelas 1', label: 'Kelas 1' },
-      { value: 'Kelas 2', label: 'Kelas 2' },
-      { value: 'Kelas 3', label: 'Kelas 3' }
-    ]
-  },
-  {
-    key: 'semester',
-    label: 'Semester',
-    type: 'select',
-    placeholder: 'Pilih Semester',
-    options: [
-      { value: 'Semester 1', label: 'Semester 1' },
-      { value: 'Semester 2', label: 'Semester 2' }
-    ]
+    options: classrooms.value.map(c => ({ value: String(c.id), label: c.name }))
   }
 ])
 
-// Toolbar Action button config for DataTableCard
 const toolbarActions = computed(() => [
   {
     label: 'Tambah ' + activeTabLabel.value,
@@ -203,19 +240,13 @@ const toolbarActions = computed(() => [
   }
 ])
 
-// Filter items reactively based on DataTableCard's filterValues
 const filteredItems = computed(() => {
-  return currentTabList.value.filter(item => {
+  return mappedItems.value.filter(item => {
     const matchItem = filterValues.value.title === 'all' || item.title === filterValues.value.title
-    const matchKelas = filterValues.value.kelas === 'all' || item.kelas === filterValues.value.kelas
-    const matchSemester = filterValues.value.semester === 'all' || item.semester === filterValues.value.semester
-    return matchItem && matchKelas && matchSemester
+    const matchKelas = filterValues.value.kelas === 'all' || String(item.classroom_id) === String(filterValues.value.kelas)
+    return matchItem && matchKelas
   })
 })
-
-// Pagination states
-const page = ref(1)
-const perPage = ref(5)
 
 const total = computed(() => filteredItems.value.length)
 const from = computed(() => (page.value - 1) * perPage.value + 1)
@@ -227,102 +258,183 @@ const sheetMode = ref('add') // 'add', 'edit', 'view'
 const activeEditId = ref(null)
 
 const form = ref({
-  kelas: '',
+  classroom_id: '',
+  type: '',
   title: '',
-  fileName: '',
-  grades: {}
+  file: null,
+  scores: {}
 })
 
 // --- CRUD Actions ---
 const openAddSheet = () => {
   sheetMode.value = 'add'
   activeEditId.value = null
+  
+  // Load from draft if exists
+  const currentDraft = draftForm.value[activeTab.value]
   form.value = {
-    kelas: '',
-    title: '',
-    fileName: '',
-    grades: {}
+    classroom_id: currentDraft.classroom_id || '',
+    type: currentDraft.type || '',
+    title: currentDraft.title || '',
+    file: currentDraft.file || null,
+    scores: { ...currentDraft.scores }
   }
   showSheet.value = true
 }
 
-const editItem = (idOrItem, maybeItem) => {
+const editItem = async (idOrItem, maybeItem) => {
   const item = maybeItem || idOrItem
   sheetMode.value = 'edit'
   activeEditId.value = item.id
-  form.value = {
-    kelas: item.kelas,
-    title: item.title,
-    fileName: activeTab.value === 'materi' ? item.title : '',
-    grades: { ...item.grades }
+  
+  if (activeTab.value === 'materi') {
+    form.value = {
+      classroom_id: String(item.classroom_id),
+      type: '',
+      title: item.title,
+      file: null,
+      scores: {}
+    }
+  } else {
+    // Fetch assessment detail with scores
+    try {
+      const res = await akademikService.getAssessment(item.id)
+      const detail = res.data
+      
+      const scoresObj = {}
+      if (detail.scores_list) {
+        detail.scores_list.forEach(s => {
+          scoresObj[s.student_id] = s.score
+        })
+      }
+      
+      form.value = {
+        classroom_id: String(detail.classroom_id),
+        type: detail.type,
+        title: detail.title,
+        file: null,
+        scores: scoresObj
+      }
+    } catch (err) {
+      toast.error('Gagal memuat detail penilaian.')
+    }
   }
   showSheet.value = true
 }
 
-const viewItem = (idOrItem, maybeItem) => {
+const viewItem = async (idOrItem, maybeItem) => {
   const item = maybeItem || idOrItem
   sheetMode.value = 'view'
   activeEditId.value = item.id
-  form.value = {
-    kelas: item.kelas,
-    title: item.title,
-    fileName: activeTab.value === 'materi' ? item.title : '',
-    grades: { ...item.grades }
+  
+  if (activeTab.value === 'materi') {
+    form.value = {
+      classroom_id: String(item.classroom_id),
+      type: '',
+      title: item.title,
+      file: null,
+      scores: {}
+    }
+  } else {
+    try {
+      const res = await akademikService.getAssessment(item.id)
+      const detail = res.data
+      
+      const scoresObj = {}
+      if (detail.scores_list) {
+        detail.scores_list.forEach(s => {
+          scoresObj[s.student_id] = s.score
+        })
+      }
+      
+      form.value = {
+        classroom_id: String(detail.classroom_id),
+        type: detail.type,
+        title: detail.title,
+        file: null,
+        scores: scoresObj
+      }
+    } catch (err) {
+      toast.error('Gagal memuat detail penilaian.')
+    }
   }
   showSheet.value = true
 }
 
-const handleDelete = (id) => {
-  if (activeTab.value === 'materi') {
-    materiList.value = materiList.value.filter(x => x.id !== id)
-  } else if (activeTab.value === 'tugas') {
-    tugasList.value = tugasList.value.filter(x => x.id !== id)
-  } else {
-    ujianList.value = ujianList.value.filter(x => x.id !== id)
-  }
-
-  toast.success(`${activeTabLabel.value} berhasil dihapus!`)
-  page.value = 1
+const triggerDelete = (item) => {
+  pendingDeleteItem.value = item
+  deleteDialogOpen.value = true
 }
 
-const handleSave = (savedForm) => {
-  if (sheetMode.value === 'add') {
-    const newItem = {
-      id: Math.random().toString(36).substr(2, 9),
-      title: activeTab.value === 'materi' ? savedForm.fileName : savedForm.title,
-      kelas: savedForm.kelas,
-      semester: filterValues.value.semester !== 'all' ? filterValues.value.semester : 'Semester 1',
-      status: 'Aktif',
-      grades: savedForm.grades
+const confirmDelete = async () => {
+  if (pendingDeleteItem.value) {
+    const success = await deleteItem(activeTab.value, pendingDeleteItem.value.id)
+    if (success) {
+      refreshData()
+    }
+    deleteDialogOpen.value = false
+    pendingDeleteItem.value = null
+  }
+}
+
+const handleToggleStatus = async (item) => {
+  const success = await toggleStatus(activeTab.value, item.id)
+  if (success) {
+    refreshData()
+  }
+}
+
+const handleSave = async (savedForm) => {
+  let success = false
+  
+  if (activeTab.value === 'materi') {
+    const formData = new FormData()
+    formData.append('subject_id', selectedMapel.value)
+    formData.append('classroom_id', savedForm.classroom_id)
+    formData.append('academic_year_id', String(activeAcademicYear.value?.id))
+    formData.append('title', savedForm.title)
+    
+    if (savedForm.file) {
+      formData.append('file', savedForm.file)
     }
 
-    if (activeTab.value === 'materi') {
-      materiList.value.unshift(newItem)
-    } else if (activeTab.value === 'tugas') {
-      tugasList.value.unshift(newItem)
+    if (sheetMode.value === 'add') {
+      success = await saveMaterial(formData)
     } else {
-      ujianList.value.unshift(newItem)
+      success = await updateMaterial(activeEditId.value, formData)
+    }
+  } else {
+    // Format scores payload: [{ student_id, score }]
+    const scoresPayload = Object.keys(savedForm.scores).map(studentId => ({
+      student_id: studentId,
+      score: savedForm.scores[studentId] === '' ? 0 : Number(savedForm.scores[studentId])
+    }))
+
+    const payload = {
+      subject_id: selectedMapel.value,
+      classroom_id: savedForm.classroom_id,
+      academic_year_id: String(activeAcademicYear.value?.id),
+      category: activeTab.value,
+      type: savedForm.type,
+      title: savedForm.title,
+      scores: scoresPayload
     }
 
-    toast.success(`${activeTabLabel.value} baru berhasil ditambahkan!`)
-  } else if (sheetMode.value === 'edit') {
-    const listToUpdate = activeTab.value === 'materi'
-      ? materiList
-      : activeTab.value === 'tugas'
-        ? tugasList
-        : ujianList
-
-    const idx = listToUpdate.value.findIndex(x => x.id === activeEditId.value)
-    if (idx !== -1) {
-      listToUpdate.value[idx].title = activeTab.value === 'materi' ? savedForm.fileName : savedForm.title
-      listToUpdate.value[idx].kelas = savedForm.kelas
-      listToUpdate.value[idx].grades = savedForm.grades
+    if (sheetMode.value === 'add') {
+      success = await saveAssessment(payload)
+    } else {
+      success = await updateAssessment(activeEditId.value, payload)
     }
-
-    toast.success(`${activeTabLabel.value} berhasil diubah!`)
   }
 
-  showSheet.value = false
+  if (success) {
+    showSheet.value = false
+    refreshData()
+  }
+}
+
+const handleSaveDraft = ({ tab, data }) => {
+  saveDraft(tab, data)
 }
 </script>
 
@@ -373,7 +485,7 @@ const handleSave = (savedForm) => {
       <StatCard
         label="Jumlah Materi Diupload"
         :value="totalMateriUploaded"
-        sub="Total Ukuran File Upload : 120MB"
+        sub="Total Berkas Pelajaran"
         :icon="FolderOpen"
         illustration="closed_book"
         variant="blue"
@@ -389,14 +501,18 @@ const handleSave = (savedForm) => {
             <SelectValue placeholder="Pilih Mata Pelajaran" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="matematika">Matematika</SelectItem>
-            <SelectItem value="bahasa-indonesia">Bahasa Indonesia</SelectItem>
-            <SelectItem value="ipa">IPA</SelectItem>
+            <SelectItem 
+              v-for="sub in subjects" 
+              :key="sub.id" 
+              :value="String(sub.id)"
+            >
+              {{ sub.name }}
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <!-- Tab Buttons (Omitted Absensi) -->
+      <!-- Tab Buttons -->
       <div class="flex items-center gap-2 bg-muted/60 p-1.5 rounded-xl border border-white/5 shadow-inner">
         <button
           v-for="tab in ['materi', 'tugas', 'ujian']"
@@ -421,9 +537,6 @@ const handleSave = (savedForm) => {
         v-model:filterValues="filterValues"
         illustration="open_book"
         :actions="toolbarActions"
-        :on-view="viewItem"
-        :on-edit="editItem"
-        :on-delete="handleDelete"
         :from="from"
         :to="to"
         :total="total"
@@ -434,10 +547,56 @@ const handleSave = (savedForm) => {
         delete-label="title"
       >
         <!-- Custom cell status override -->
-        <template #cell-status="{ value }">
-          <Badge :variant="value === 'Aktif' ? 'green' : 'gray'" class="font-semibold">
-            ✓ {{ value }}
+        <template #cell-status="{ item }">
+          <Badge 
+            :variant="item.is_active ? 'green' : 'gray'" 
+            class="font-semibold cursor-pointer select-none transition-all hover:scale-105 active:scale-95"
+            @click="handleToggleStatus(item)"
+          >
+            ✓ {{ item.is_active ? 'Aktif' : 'Nonaktif' }}
           </Badge>
+        </template>
+
+        <!-- Custom Cell Actions Override -->
+        <template #cell-actions="{ item }">
+          <div class="flex items-center justify-center gap-3">
+            <button
+              v-if="activeTab === 'materi'"
+              class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-foreground transition-colors"
+              title="Unduh Berkas"
+              @click="handleDownload(item.id)"
+            >
+              <Download class="size-4 transition-transform group-hover/btn:scale-110" />
+              <span class="text-[9px] font-semibold leading-none">Unduh</span>
+            </button>
+            
+            <button
+              class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-foreground transition-colors"
+              title="Lihat Rincian"
+              @click="viewItem(item)"
+            >
+              <Eye class="size-4 transition-transform group-hover/btn:scale-110" />
+              <span class="text-[9px] font-semibold leading-none">Detail</span>
+            </button>
+
+            <button
+              class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-foreground transition-colors"
+              title="Sunting"
+              @click="editItem(item)"
+            >
+              <Pencil class="size-4 transition-transform group-hover/btn:scale-110" />
+              <span class="text-[9px] font-semibold leading-none">Edit</span>
+            </button>
+
+            <button
+              class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-destructive transition-colors"
+              title="Hapus"
+              @click="triggerDelete(item)"
+            >
+              <Trash2 class="size-4 transition-transform group-hover/btn:scale-110" />
+              <span class="text-[9px] font-semibold leading-none">Hapus</span>
+            </button>
+          </div>
         </template>
       </DataTableCard>
     </div>
@@ -449,8 +608,35 @@ const handleSave = (savedForm) => {
       :active-tab="activeTab"
       :active-tab-label="activeTabLabel"
       :initial-form="form"
-      :students-map="studentsMap"
+      :selected-subject-id="selectedMapel"
+      :draft="draftForm[activeTab]"
       @save="handleSave"
+      @save-draft="handleSaveDraft"
     />
+
+    <!-- Local Delete Confirmation Dialog -->
+    <AlertDialog :open="deleteDialogOpen">
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
+          <AlertDialogDescription>
+            Apakah Anda yakin ingin menghapus
+            <span v-if="pendingDeleteItem" class="font-semibold text-foreground">
+              "{{ pendingDeleteItem.title }}"
+            </span>
+            ? Tindakan ini bersifat permanen dan tidak dapat dibatalkan.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel @click="deleteDialogOpen = false; pendingDeleteItem = null">Batal</AlertDialogCancel>
+          <AlertDialogAction
+            class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            @click="confirmDelete"
+          >
+            Hapus
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
 </template>

@@ -29,4 +29,19 @@ class Subject extends Model
     {
         return $this->belongsTo(School::class);
     }
+
+    public function materials(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(SubjectMaterial::class);
+    }
+
+    public function assessments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Assessment::class);
+    }
+
+    public function teacherAssignments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TeacherSubjectAssignment::class);
+    }
 }

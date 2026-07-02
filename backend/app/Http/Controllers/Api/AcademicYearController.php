@@ -1,0 +1,290 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\AcademicYear;
+use App\Models\School;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+
+class AcademicYearController extends Controller
+{
+    /**
+     * Helper to get school scope for the current user.
+     */
+    private function getSchoolScope(Request $request, $user)
+    {
+        if ($user->isSuperAdmin()) {
+            return $request->input('school_id');
+        } elseif ($user->hasRole('admin_yayasan')) {
+            $schoolId = $request->input('school_id');
+            if ($schoolId) {
+                $belongs = School::where('id', $schoolId)
+                    ->where('foundation_id', $user->foundation_id)
+                    ->exists();
+                return $belongs ? $schoolId : -1;
+            }
+            return null;
+        }
+        return $user->school_id;
+    }
+
+    /**
+     * Display a listing of academic years.
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $query = AcademicYear::query();
+
+        if ($user->isSuperAdmin()) {
+            if ($request->has('school_id')) {
+                $query->where('school_id', $request->input('school_id'));
+            }
+        } elseif ($user->hasRole('admin_yayasan')) {
+            $query->whereHas('school', function ($q) use ($user) {
+                $q->where('foundation_id', $user->foundation_id);
+            });
+            if ($request->has('school_id')) {
+                $query->where('school_id', $request->input('school_id'));
+            }
+        } else {
+            $query->where('school_id', $user->school_id);
+        }
+
+        // Apply filters
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        if ($request->has('is_active')) {
+            $query->where('is_active', filter_var($request->input('is_active'), FILTER_VALIDATE_BOOLEAN));
+        }
+
+        $years = $query->latest()->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $years,
+        ]);
+    }
+
+    /**
+     * Store a newly created academic year.
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $schoolId = $this->getSchoolScope($request, $user);
+
+        if ($schoolId === -1) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'The selected school does not belong to your foundation.',
+            ], 403);
+        }
+
+        if (!$schoolId) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'School ID is required.',
+            ], 400);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name'       => 'required|string|max:100',
+            'semester'   => 'required|in:odd,even',
+            'start_date' => 'required|date',
+            'end_date'   => 'required|date|after_or_equal:start_date',
+            'is_active'  => 'nullable|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Validation error.',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        $isActive = $request->input('is_active', false);
+
+        DB::beginTransaction();
+        try {
+            if ($isActive) {
+                // Deactivate other academic years for the same school
+                AcademicYear::where('school_id', $schoolId)->update(['is_active' => false]);
+            }
+
+            $academicYear = AcademicYear::create([
+                'school_id'  => $schoolId,
+                'name'       => $request->input('name'),
+                'semester'   => $request->input('semester'),
+                'start_date' => $request->input('start_date'),
+                'end_date'   => $request->input('end_date'),
+                'is_active'  => $isActive,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Academic year created successfully.',
+                'data'    => $academicYear,
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Transaction failed: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Display the specified academic year.
+     */
+    public function show(Request $request, string $id): JsonResponse
+    {
+        $user = $request->user();
+        $academicYear = AcademicYear::find($id);
+
+        if (!$academicYear) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Academic year not found.',
+            ], 404);
+        }
+
+        // Scope check
+        if (!$user->isSuperAdmin()) {
+            if ($user->hasRole('admin_yayasan')) {
+                if ($academicYear->school->foundation_id != $user->foundation_id) {
+                    return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
+                }
+            } else {
+                if ($academicYear->school_id != $user->school_id) {
+                    return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
+                }
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $academicYear,
+        ]);
+    }
+
+    /**
+     * Update the specified academic year.
+     */
+    public function update(Request $request, string $id): JsonResponse
+    {
+        $user = $request->user();
+        $academicYear = AcademicYear::find($id);
+
+        if (!$academicYear) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Academic year not found.',
+            ], 404);
+        }
+
+        // Scope check
+        if (!$user->isSuperAdmin()) {
+            if ($user->hasRole('admin_yayasan')) {
+                if ($academicYear->school->foundation_id != $user->foundation_id) {
+                    return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
+                }
+            } else {
+                if ($academicYear->school_id != $user->school_id) {
+                    return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
+                }
+            }
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name'       => 'sometimes|required|string|max:100',
+            'semester'   => 'sometimes|required|in:odd,even',
+            'start_date' => 'sometimes|required|date',
+            'end_date'   => 'sometimes|required|date|after_or_equal:start_date',
+            'is_active'  => 'nullable|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Validation error.',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            if ($request->has('is_active') && $request->input('is_active') == true) {
+                // Deactivate other academic years for the same school
+                AcademicYear::where('school_id', $academicYear->school_id)
+                    ->where('id', '!=', $academicYear->id)
+                    ->update(['is_active' => false]);
+            }
+
+            $academicYear->update($request->only(['name', 'semester', 'start_date', 'end_date', 'is_active']));
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Academic year updated successfully.',
+                'data'    => $academicYear,
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Transaction failed: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified academic year.
+     */
+    public function destroy(Request $request, string $id): JsonResponse
+    {
+        $user = $request->user();
+        $academicYear = AcademicYear::find($id);
+
+        if (!$academicYear) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Academic year not found.',
+            ], 404);
+        }
+
+        // Scope check
+        if (!$user->isSuperAdmin()) {
+            if ($user->hasRole('admin_yayasan')) {
+                if ($academicYear->school->foundation_id != $user->foundation_id) {
+                    return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
+                }
+            } else {
+                if ($academicYear->school_id != $user->school_id) {
+                    return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
+                }
+            }
+        }
+
+        $academicYear->delete();
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Academic year deleted successfully.',
+        ]);
+    }
+}

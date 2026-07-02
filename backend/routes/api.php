@@ -143,6 +143,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('/foundations', FoundationController::class);
         Route::apiResource('/schools', SchoolController::class);
         Route::apiResource('/users', UserController::class);
+        Route::apiResource('/students', StudentController::class);
+        Route::apiResource('/classrooms', ClassroomController::class);
+        Route::apiResource('/teachers', TeacherController::class);
+        Route::apiResource('/extracurriculars', ExtracurricularController::class);
+        Route::apiResource('/subjects', SubjectController::class);
+        Route::apiResource('/academic-years', AcademicYearController::class);
     });
 });
 

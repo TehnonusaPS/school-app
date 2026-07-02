@@ -4,7 +4,7 @@ import LandingContactForm from './LandingContactForm.vue'
 </script>
 
 <template>
-  <section id="kontak" class="relative px-6 py-24 bg-gradient-to-b from-transparent to-slate-50/30 dark:to-slate-950/5">
+  <section id="kontak" class="relative px-4 py-16 md:px-6 md:py-24 bg-gradient-to-b from-transparent to-slate-50/30 dark:to-slate-950/5">
     <div class="mx-auto max-w-6xl">
       <!-- Section Header -->
       <div class="mx-auto max-w-2xl text-center space-y-3 mb-14">

@@ -13,6 +13,9 @@ class Classroom extends Model
         'academic_year_id',
         'name',
         'grade',
+        'major',
+        'room',
+        'status',
         'homeroom_teacher_id',
         'capacity',
     ];

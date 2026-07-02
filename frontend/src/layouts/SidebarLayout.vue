@@ -2,6 +2,8 @@
 import { computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppSidebar from '@/components/AppSidebar.vue'
+import AppMobileNavigation from '@/components/AppMobileNavigation.vue'
+import AppSubNavChips from '@/components/AppSubNavChips.vue'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -173,8 +175,8 @@ const breadcrumbs = computed(() => {
         >
           <!-- SISI KIRI: Sidebar Trigger & Breadcrumb -->
           <div class="flex items-center gap-2">
-            <SidebarTrigger class="-ml-1" />
-            <Separator orientation="vertical" class="mr-2 h-4 my-auto !self-center" />
+            <SidebarTrigger class="-ml-1 hidden md:inline-flex" />
+            <Separator orientation="vertical" class="mr-2 h-4 my-auto !self-center hidden md:block" />
             <Breadcrumb>
               <BreadcrumbList>
                 <template v-for="(crumb, index) in breadcrumbs" :key="index">
@@ -319,11 +321,12 @@ const breadcrumbs = computed(() => {
             </Button>
           </div>
         </header>
+        <AppSubNavChips />
       </div>
 
       <div
         :class="[
-          'flex flex-1 flex-col gap-4 p-6 text-left transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] min-w-0',
+          'flex flex-1 flex-col gap-4 p-6 pb-20 md:pb-6 text-left transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] min-w-0',
           auth.isLoggingOut ? 'content-exit-active' : ''
         ]"
       >
@@ -331,6 +334,7 @@ const breadcrumbs = computed(() => {
           <router-view />
         </div>
       </div>
+      <AppMobileNavigation />
     </SidebarInset>
   </SidebarProvider>
 </template>

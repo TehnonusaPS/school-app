@@ -1,35 +1,9 @@
 <script setup>
-import {
-  LayoutDashboard,
-  Database,
-  GraduationCap,
-  Wallet,
-  ClipboardList,
-  MessageSquare,
-  FileBarChart,
-  MoreHorizontal,
-  Users,
-  BookOpen,
-  CalendarDays,
-  DollarSign,
-  Receipt,
-  PiggyBank,
-  UserCheck,
-  Calendar,
-  Bell,
-  Mail,
-  FileText,
-  BarChart3,
-  School,
-  UserCog,
-  Settings,
-  Palette,
-  ChevronsUpDown
-} from 'lucide-vue-next'
+import { School } from 'lucide-vue-next'
 import NavMain from '@/components/NavMain.vue'
 import NavUser from '@/components/NavUser.vue'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { computed } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import {
@@ -43,6 +17,7 @@ import {
   SidebarMenuItem
 } from '@/components/ui/sidebar'
 import { sidebarSlide } from '@/config/motion'
+import { navMain } from '@/constants/navigation'
 
 const auth = useAuthStore()
 
@@ -54,16 +29,11 @@ const currentUser = computed(() => ({
 }))
 
 // Struktur RBAC Dinamis
-// Cara Penggunaan:
-// Tambahkan properti `roles: ['nama_role']` pada item parent atau children untuk membatasi akses.
-// Jika properti `roles` tidak ada, maka menu tersebut dapat diakses oleh SEMUA role.
-// Role yang tersedia di authStore: 'superadmin', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'tata_usaha', 'guru', 'wali_kelas', 'siswa', 'orang_tua'
-
 const filteredNavMain = computed(() => {
   const currentRole = auth.user?.role
 
   return (
-    data.navMain
+    navMain
       // 1. Filter parent menu
       .filter(item => {
         if (item.excludeRoles && item.excludeRoles.includes(currentRole)) return false

@@ -11,8 +11,15 @@ import LandingTestimonialsSection from '@/components/landing/LandingTestimonials
 import LandingCtaSection from '@/components/landing/LandingCtaSection.vue'
 import LandingFooter from '@/components/landing/LandingFooter.vue'
 import LandingChatWidget from '@/components/landing/LandingChatWidget.vue'
+import PwaInstallModal from '@/components/landing/PwaInstallModal.vue'
+import { usePwa } from '@/composables/usePwa'
+
+const { initPwa } = usePwa()
 
 onMounted(() => {
+  // PWA listeners registration
+  initPwa()
+
   // Paksa halaman landing selalu dalam light mode
   document.documentElement.classList.remove('dark')
 
@@ -65,6 +72,9 @@ onMounted(() => {
 
     <!-- Live Floating WhatsApp Chat Helper -->
     <LandingChatWidget />
+
+    <!-- Simulated PWA Installer Modal Dialog -->
+    <PwaInstallModal />
   </div>
 </template>
 

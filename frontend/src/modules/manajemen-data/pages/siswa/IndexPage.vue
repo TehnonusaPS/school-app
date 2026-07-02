@@ -2,25 +2,83 @@
 import DataTableCard from '@/components/data-table/DataTableCard.vue'
 import PageHeader from '@/components/page-header/PageHeader.vue'
 import { usePagination } from '@/composables/usePagination'
-import { stats, columns, filters, actions, allItems, kelasOptions } from './data/siswa.js'
+import { stats, columns, filters, actions, allItems } from './data/siswa.js'
 import StatCard from '@/components/stat-card/StatCard.vue'
 import { useAuthStore } from '@/stores/authStore'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { ref, watch } from 'vue'
 import { toast } from 'vue-sonner'
 import DataSheet from '@/components/data-sheet/DataSheet.vue'
 import { rawSiswaItem, siswaSheetSections} from './data/dataSheetDetail.js'
 import { useRouter } from 'vue-router'
+import { fetchAllSiswa, deleteSiswa } from '@/services/siswaService'
+import { getClassrooms } from '@/services/managementService'
 
 const auth = useAuthStore()
 const isWaliKelas = computed(() => auth.user?.role === 'wali_kelas')
 const isKepalaSekolah = computed(() => auth.user?.role === 'kepala_sekolah')
 const perPage = ref(5)
-const tableItems = ref([...allItems.value])
+const tableItems = ref([])
+const activeClassrooms = ref([])
+const isLoading = ref(false)
 
 const filterValues = ref({
   search: '',
-  status: 'all'
+  status: 'all',
+  kelasId: 'all'
+})
+
+const fetchSiswa = async () => {
+  isLoading.value = true
+  try {
+    const params = {}
+    if (filterValues.value.search) {
+      params.search = filterValues.value.search
+    }
+    if (filterValues.value.status !== 'all') {
+      params.status = filterValues.value.status
+    }
+    if (filterValues.value.kelasId !== 'all') {
+      params.kelasId = filterValues.value.kelasId
+    }
+    const res = await fetchAllSiswa(params)
+    tableItems.value = res.data
+  } catch (err) {
+    toast.error('Gagal memuat data siswa')
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(async () => {
+  try {
+    const resClass = await getClassrooms()
+    activeClassrooms.value = resClass.data
+    
+    // Add classroom filter dynamically
+    const classFilter = filters.find(f => f.key === 'kelasId')
+    if (!classFilter) {
+      filters.push({
+        type: 'select',
+        key: 'kelasId',
+        label: 'Kelas:',
+        placeholder: 'Semua Kelas',
+        options: [
+          { label: 'Semua Kelas', value: 'all' },
+          ...activeClassrooms.value.map(c => ({ label: c.name, value: String(c.id) }))
+        ]
+      })
+    } else {
+      classFilter.options = [
+        { label: 'Semua Kelas', value: 'all' },
+        ...activeClassrooms.value.map(c => ({ label: c.name, value: String(c.id) }))
+      ]
+    }
+  } catch (err) {
+    console.error('Gagal mengambil data kelas', err)
+  }
+
+  fetchSiswa()
 })
 
 const items = computed(() => {
@@ -32,7 +90,6 @@ const items = computed(() => {
   return tableItems.value
 })
 
-
 const actionButton = computed(() => {
     if (isKepalaSekolah.value) {
       return actions.filter(
@@ -43,29 +100,28 @@ const actionButton = computed(() => {
   return actions
 })
 
-const deleteItem = (id, item) => {
-  tableItems.value = tableItems.value.filter(
-    item => item.id !== id
-  )
-
-  toast.success('Berhasil dihapus', {
-    description: `${item.nama} telah dihapus dari sistem.`
-  })
+const deleteItem = async (id, item) => {
+  try {
+    await deleteSiswa(id)
+    toast.success('Berhasil dihapus', {
+      description: `${item.nama} telah dihapus dari sistem.`
+    })
+    fetchSiswa()
+  } catch (err) {
+    toast.error('Gagal menghapus siswa')
+  }
 }
 
 const filteredItems = computed(() => {
-  return items.value.filter(item => {
-    const searchVal = filterValues.value.search?.trim().toLowerCase() || ''
-    const searchMatch = !searchVal || item.nama.toLowerCase().includes(searchVal)
-
-    const statusVal = filterValues.value.status
-    const statusMatch = !statusVal || statusVal === 'all' || item.status === statusVal
-
-    return searchMatch && statusMatch
-  })
+  return items.value
 })
 
 const { currentPage, total, from, to, paginatedItems } = usePagination(filteredItems, perPage)
+
+watch(filterValues, () => {
+  currentPage.value = 1
+  fetchSiswa()
+}, { deep: true })
 
 watch(filteredItems, () => {
   currentPage.value = 1
@@ -83,8 +139,9 @@ const handleViewDetail = id => {
 }
 
 const router = useRouter()
-const handleEdit = () => {
-  router.push('/manajemen-data/siswa/edit')
+const handleEdit = (idOrItem) => {
+  const id = typeof idOrItem === 'object' ? idOrItem.id : idOrItem
+  router.push({ path: '/manajemen-data/siswa/edit', query: { id } })
 }
 
 </script>

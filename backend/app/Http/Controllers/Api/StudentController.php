@@ -1,0 +1,551 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Models\Role;
+use App\Models\StudentProfile;
+use App\Models\ParentProfile;
+use App\Models\Classroom;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+
+class StudentController extends Controller
+{
+    /**
+     * Map frontend gender to database.
+     */
+    private function mapGenderToDb(?string $gender): ?string
+    {
+        if (!$gender) return null;
+        return in_array(strtolower($gender), ['laki-laki', 'male']) ? 'male' : 'female';
+    }
+
+    /**
+     * Map database gender to frontend.
+     */
+    private function mapGenderToFe(?string $gender): string
+    {
+        if ($gender === 'male') return 'Laki-laki';
+        if ($gender === 'female') return 'Perempuan';
+        return '';
+    }
+
+    /**
+     * Map frontend status to database.
+     */
+    private function mapStatusToDb(?string $status): string
+    {
+        if (!$status) return 'active';
+        switch (strtolower($status)) {
+            case 'nonaktif':
+                return 'expelled';
+            case 'pindah':
+                return 'transferred';
+            case 'lulus':
+                return 'alumni';
+            case 'aktif':
+            default:
+                return 'active';
+        }
+    }
+
+    /**
+     * Map database status to frontend.
+     */
+    private function mapStatusToFe(?string $status): string
+    {
+        switch ($status) {
+            case 'expelled':
+                return 'Nonaktif';
+            case 'transferred':
+                return 'Pindah';
+            case 'alumni':
+                return 'Lulus';
+            case 'active':
+            default:
+                return 'Aktif';
+        }
+    }
+
+    /**
+     * Map frontend relationship to database.
+     */
+    private function mapRelationshipToDb(?string $relation): ?string
+    {
+        if (!$relation) return null;
+        switch (strtolower($relation)) {
+            case 'ayah':
+                return 'father';
+            case 'ibu':
+                return 'mother';
+            case 'wali':
+            default:
+                return 'guardian';
+        }
+    }
+
+    /**
+     * Map database relationship to frontend.
+     */
+    private function mapRelationshipToFe(?string $relation): string
+    {
+        switch ($relation) {
+            case 'father':
+                return 'Ayah';
+            case 'mother':
+                return 'Ibu';
+            case 'guardian':
+            default:
+                return 'Wali';
+        }
+    }
+
+    /**
+     * Display a listing of the students.
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        $query = User::whereHas('role', function ($q) {
+            $q->where('name', 'siswa');
+        })->with(['studentProfile.classroom', 'studentProfile.parents.user']);
+
+        // Role Scope
+        if ($user->isSuperAdmin()) {
+            if ($request->has('school_id')) {
+                $query->where('school_id', $request->input('school_id'));
+            }
+        } elseif ($user->hasRole('admin_yayasan')) {
+            $query->whereHas('school', function ($q) use ($user) {
+                $q->where('foundation_id', $user->foundation_id);
+            });
+            if ($request->has('school_id')) {
+                $query->where('school_id', $request->input('school_id'));
+            }
+        } else { // admin_sekolah, kepala_sekolah, tata_usaha, wali_kelas
+            $query->where('school_id', $user->school_id);
+        }
+
+        // Filtering by class
+        if ($request->has('kelasId') && $request->kelasId !== 'all') {
+            $query->whereHas('studentProfile', function ($q) use ($request) {
+                $q->where('classroom_id', $request->kelasId);
+            });
+        }
+
+        // Filtering by status
+        if ($request->has('status') && $request->status !== 'all') {
+            $dbStatus = $this->mapStatusToDb($request->status);
+            $query->whereHas('studentProfile', function ($q) use ($dbStatus) {
+                $q->where('status', $dbStatus);
+            });
+        }
+
+        // Search name or NISN
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhereHas('studentProfile', function ($sq) use ($search) {
+                      $sq->where('nisn', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $students = $query->latest()->get();
+
+        $formatted = $students->map(function ($student) {
+            $profile = $student->studentProfile;
+            $parent = $profile && $profile->parents->isNotEmpty() ? $profile->parents->first() : null;
+            
+            return [
+                'id'             => $student->id,
+                'nama'           => $student->name,
+                'email'          => $student->email,
+                'no_hp'          => $student->phone,
+                'foto'           => $student->photo,
+                'nisn'           => $profile ? $profile->nisn : '',
+                'kelasId'        => $profile ? $profile->classroom_id : null,
+                'kelas'          => $profile && $profile->classroom ? $profile->classroom->name : '-',
+                'tempat_lahir'   => $profile ? $profile->birth_place : '',
+                'tanggal_lahir'  => $profile && $profile->birth_date ? $profile->birth_date->format('Y-m-d') : '',
+                'jenisKelamin'   => $profile ? $this->mapGenderToFe($profile->gender) : '',
+                'alamat'         => $profile ? $profile->address : '',
+                'tahunMasuk'     => $profile && $profile->enrollment_date ? $profile->enrollment_date->format('Y') : '',
+                'status'         => $profile ? $this->mapStatusToFe($profile->status) : 'Aktif',
+                'namaWali'       => $parent && $parent->user ? $parent->user->name : '',
+                'hubungan_siswa' => $parent ? $this->mapRelationshipToFe($parent->relationship) : '',
+                'kelamin_wali'   => $parent ? $this->mapGenderToFe($parent->gender) : '',
+                'pekerjaan_wali' => $parent ? $parent->occupation : '',
+                'email_wali'     => $parent && $parent->user ? $parent->user->email : '',
+                'no_hp_wali'     => $parent && $parent->user ? $parent->user->phone : '',
+            ];
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $formatted,
+        ]);
+    }
+
+    /**
+     * Store a newly created student.
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $currentUser = $request->user();
+        $schoolId = $currentUser->isSuperAdmin() ? $request->input('sekolahId') : $currentUser->school_id;
+
+        if (!$schoolId) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'School ID is required.',
+            ], 400);
+        }
+
+        $inputs = $request->all();
+        foreach ($inputs as $key => $value) {
+            if ($value === '') {
+                $inputs[$key] = null;
+            }
+        }
+
+        $validator = Validator::make($inputs, [
+            'nama_depan'     => 'required|string|max:100',
+            'nama_belakang'  => 'nullable|string|max:100',
+            'nisn'           => 'required|string|max:50|unique:student_profiles,nisn',
+            'kelas'          => 'required', // classroom_id
+            'status'         => 'required|string',
+            'jenis_kelamin'  => 'required|string',
+            'tanggal_lahir'  => 'required|date',
+            'email'          => 'nullable|email|unique:users,email',
+            'no_hp'          => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            \Illuminate\Support\Facades\Log::error('Student Store Validation Failed: ' . json_encode($validator->errors()->all()));
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Validation error.',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        $studentRole = Role::where('name', 'siswa')->first();
+        $parentRole = Role::where('name', 'orang_tua')->first();
+
+        if (!$studentRole || !$parentRole) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Required user roles not configured in system.',
+            ], 500);
+        }
+
+        DB::beginTransaction();
+        try {
+            $fullName = trim($request->nama_depan . ' ' . ($request->nama_belakang ?: ''));
+            $studentEmail = $request->email ?: 'siswa-' . $request->nisn . '@school.com';
+            
+            // 1. Create Student User
+            $studentUser = User::create([
+                'name'      => $fullName,
+                'email'     => $studentEmail,
+                'password'  => Hash::make('123456'),
+                'role_id'   => $studentRole->id,
+                'school_id' => $schoolId,
+                'phone'     => $request->no_hp,
+                'is_active' => true,
+            ]);
+
+            // Parse entry year
+            $enrollYear = $request->tahun_masuk ? substr($request->tahun_masuk, 0, 4) : date('Y');
+            $enrollDate = $enrollYear . '-07-01';
+
+            // 2. Create Student Profile
+            $studentProfile = StudentProfile::create([
+                'user_id'         => $studentUser->id,
+                'classroom_id'    => $request->kelas,
+                'nisn'            => $request->nisn,
+                'birth_place'     => $request->tempat_lahir,
+                'birth_date'      => $request->tanggal_lahir,
+                'gender'          => $this->mapGenderToDb($request->jenis_kelamin),
+                'address'         => $request->alamat,
+                'enrollment_date' => $enrollDate,
+                'status'          => $this->mapStatusToDb($request->status),
+            ]);
+
+            // 3. Create Parent (if provided)
+            if ($request->has('nama_wali') && !empty($request->nama_wali)) {
+                $parentEmail = $request->emailLogin ?: $request->email_wali ?: 'ortu-' . $request->nisn . '@school.com';
+                $parentPhone = $request->noHpLogin ?: $request->no_hp_wali;
+
+                // Create or find parent user account
+                $parentUser = User::where('email', $parentEmail)->first();
+                if (!$parentUser) {
+                    $parentUser = User::create([
+                        'name'      => $request->nama_wali,
+                        'email'     => $parentEmail,
+                        'password'  => Hash::make('123456'),
+                        'role_id'   => $parentRole->id,
+                        'school_id' => $schoolId,
+                        'phone'     => $parentPhone,
+                        'is_active' => true,
+                    ]);
+                }
+
+                // Create parent profile
+                $parentProfile = ParentProfile::updateOrCreate(
+                    ['user_id' => $parentUser->id],
+                    [
+                        'gender'       => $this->mapGenderToDb($request->kelamin_wali),
+                        'relationship' => $this->mapRelationshipToDb($request->hubungan_siswa),
+                        'occupation'   => $request->pekerjaan_wali,
+                        'address'      => $request->alamat,
+                    ]
+                );
+
+                // Pivot association
+                $studentProfile->parents()->syncWithoutDetaching([$parentProfile->id]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Student created successfully.',
+                'data'    => [
+                    'id'       => $studentUser->id,
+                    'email'    => $studentEmail,
+                    'phone'    => $request->no_hp ?: '-',
+                    'password' => '123456'
+                ]
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Database transaction failed: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Display the specified student.
+     */
+    public function show(Request $request, string $id): JsonResponse
+    {
+        $student = User::with(['studentProfile.classroom', 'studentProfile.parents.user'])->find($id);
+
+        if (!$student) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Student not found.',
+            ], 404);
+        }
+
+        $profile = $student->studentProfile;
+        $parent = $profile && $profile->parents->isNotEmpty() ? $profile->parents->first() : null;
+
+        $feForm = [
+            'id'             => $student->id,
+            'nama_depan'     => explode(' ', $student->name)[0],
+            'nama_belakang'  => count(explode(' ', $student->name)) > 1 ? implode(' ', array_slice(explode(' ', $student->name), 1)) : '',
+            'nisn'           => $profile ? $profile->nisn : '',
+            'tempat_lahir'   => $profile ? $profile->birth_place : '',
+            'tanggal_lahir'  => $profile && $profile->birth_date ? $profile->birth_date->format('Y-m-d') : '',
+            'jenis_kelamin'  => $profile ? $this->mapGenderToFe($profile->gender) : '',
+            'agama'          => 'Islam', // default or custom mapping if exist
+            'alamat'         => $profile ? $profile->address : '',
+            'kelas'          => $profile ? (string)$profile->classroom_id : '',
+            'status'         => $profile ? $this->mapStatusToFe($profile->status) : 'Aktif',
+            'tahun_masuk'    => $profile && $profile->enrollment_date ? $profile->enrollment_date->format('Y-m-d') : '',
+            'email'          => $student->email,
+            'no_hp'          => $student->phone,
+            
+            // Parent
+            'nama_wali'      => $parent && $parent->user ? $parent->user->name : '',
+            'hubungan_siswa' => $parent ? $this->mapRelationshipToFe($parent->relationship) : '',
+            'kelamin_wali'   => $parent ? $this->mapGenderToFe($parent->gender) : '',
+            'pekerjaan_wali' => $parent ? $parent->occupation : '',
+            'email_wali'     => $parent && $parent->user ? $parent->user->email : '',
+            'no_hp_wali'     => $parent && $parent->user ? $parent->user->phone : '',
+            'emailLogin'     => $parent && $parent->user ? $parent->user->email : '',
+            'noHpLogin'      => $parent && $parent->user ? $parent->user->phone : '',
+        ];
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $feForm,
+        ]);
+    }
+
+    /**
+     * Update the specified student.
+     */
+    public function update(Request $request, string $id): JsonResponse
+    {
+        $studentUser = User::find($id);
+
+        if (!$studentUser) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Student not found.',
+            ], 404);
+        }
+
+        $profile = $studentUser->studentProfile;
+
+        $inputs = $request->all();
+        foreach ($inputs as $key => $value) {
+            if ($value === '') {
+                $inputs[$key] = null;
+            }
+        }
+
+        $validator = Validator::make($inputs, [
+            'nama_depan'     => 'required|string|max:100',
+            'nama_belakang'  => 'nullable|string|max:100',
+            'nisn'           => 'required|string|max:50|unique:student_profiles,nisn,' . ($profile ? $profile->id : 'NULL'),
+            'kelas'          => 'required',
+            'status'         => 'required|string',
+            'jenis_kelamin'  => 'required|string',
+            'tanggal_lahir'  => 'required|date',
+            'email'          => 'nullable|email|unique:users,email,' . $studentUser->id,
+            'no_hp'          => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            \Illuminate\Support\Facades\Log::error('Student Update Validation Failed: ' . json_encode($validator->errors()->all()));
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Validation error.',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $fullName = trim($request->nama_depan . ' ' . ($request->nama_belakang ?: ''));
+
+            // 1. Update Student User
+            $studentUser->update([
+                'name'  => $fullName,
+                'email' => $request->email ?: $studentUser->email,
+                'phone' => $request->no_hp,
+            ]);
+
+            // Parse entry year
+            $enrollYear = $request->tahun_masuk ? substr($request->tahun_masuk, 0, 4) : date('Y');
+            $enrollDate = $enrollYear . '-07-01';
+
+            // 2. Update Student Profile
+            if ($profile) {
+                $profile->update([
+                    'classroom_id'    => $request->kelas,
+                    'nisn'            => $request->nisn,
+                    'birth_place'     => $request->tempat_lahir,
+                    'birth_date'      => $request->tanggal_lahir,
+                    'gender'          => $this->mapGenderToDb($request->jenis_kelamin),
+                    'address'         => $request->alamat,
+                    'enrollment_date' => $enrollDate,
+                    'status'          => $this->mapStatusToDb($request->status),
+                ]);
+            }
+
+            // 3. Update parent (if provided)
+            if ($request->has('nama_wali') && !empty($request->nama_wali) && $profile) {
+                $parentEmail = $request->emailLogin ?: $request->email_wali ?: 'ortu-' . $request->nisn . '@school.com';
+                $parentPhone = $request->noHpLogin ?: $request->no_hp_wali;
+
+                $parent = $profile->parents->first();
+                if ($parent) {
+                    // Update parent user account
+                    if ($parent->user) {
+                        $parent->user->update([
+                            'name'  => $request->nama_wali,
+                            'email' => $parentEmail,
+                            'phone' => $parentPhone,
+                        ]);
+                    }
+
+                    // Update parent profile
+                    $parent->update([
+                        'gender'       => $this->mapGenderToDb($request->kelamin_wali),
+                        'relationship' => $this->mapRelationshipToDb($request->hubungan_siswa),
+                        'occupation'   => $request->pekerjaan_wali,
+                        'address'      => $request->alamat,
+                    ]);
+                } else {
+                    // Create new parent user and profile
+                    $parentRole = Role::where('name', 'orang_tua')->first();
+                    if ($parentRole) {
+                        $parentUser = User::create([
+                            'name'      => $request->nama_wali,
+                            'email'     => $parentEmail,
+                            'password'  => Hash::make('123456'),
+                            'role_id'   => $parentRole->id,
+                            'school_id' => $studentUser->school_id,
+                            'phone'     => $parentPhone,
+                            'is_active' => true,
+                        ]);
+
+                        $newParentProfile = ParentProfile::create([
+                            'user_id'      => $parentUser->id,
+                            'gender'       => $this->mapGenderToDb($request->kelamin_wali),
+                            'relationship' => $this->mapRelationshipToDb($request->hubungan_siswa),
+                            'occupation'   => $request->pekerjaan_wali,
+                            'address'      => $request->alamat,
+                        ]);
+
+                        $profile->parents()->syncWithoutDetaching([$newParentProfile->id]);
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Student updated successfully.',
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Database transaction failed: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified student.
+     */
+    public function destroy(Request $request, string $id): JsonResponse
+    {
+        $studentUser = User::find($id);
+
+        if (!$studentUser) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Student not found.',
+            ], 404);
+        }
+
+        // StudentProfile will be deleted via cascadeOnDelete foreign keys
+        // User account itself will be deleted
+        $studentUser->delete();
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Student deleted successfully.',
+        ]);
+    }
+}

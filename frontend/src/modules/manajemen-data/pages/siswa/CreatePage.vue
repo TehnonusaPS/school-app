@@ -1,28 +1,39 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import PageHeader from '@/components/page-header/PageHeader.vue'
-import { statusOptions, agamaOptions, kelaminOptions, pekerjaanOptions, kelasOptions, hubunganOptions } from './data/siswa'
+import { statusOptions, agamaOptions, kelaminOptions, pekerjaanOptions, hubunganOptions } from './data/siswa'
 import { useAuthStore } from '@/stores/authStore'
-import { computed } from 'vue'
 import SuccessAccountDialog from '@/components/dialogs/SuccessAccountDialog.vue'
 import SiswaForm from './components/SiswaForm.vue'
 import { defaultForm } from './data/defaultForm'
 import { Save } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
+import { getClassrooms } from '@/services/managementService'
+import { createSiswa } from '@/services/siswaService'
 
 const auth = useAuthStore()
 const isWaliKelas = computed(() => auth.user?.role === 'wali_kelas')
 
-const classes = computed(() => {
-  if (isWaliKelas.value) {
-      return kelasOptions.filter(
-        item => item.value === auth.user?.kelasId
-    )
+const activeClassrooms = ref([])
+onMounted(async () => {
+  try {
+    const resClass = await getClassrooms()
+    activeClassrooms.value = resClass.data
+  } catch (err) {
+    console.error('Gagal mengambil data kelas', err)
   }
-  return kelasOptions
 })
 
-const form = ref({ ...defaultForm})
+const classes = computed(() => {
+  let list = activeClassrooms.value.map(c => ({ label: c.name, value: String(c.id) }))
+  if (isWaliKelas.value) {
+    return list.filter(item => item.value === String(auth.user?.kelasId))
+  }
+  return list
+})
+
+const form = ref({ ...defaultForm })
 
 const router = useRouter()
 const isLoading = ref(false)
@@ -36,18 +47,34 @@ const handleImage = (file) => {
 const showSuccessModal = ref(false)
 
 const generatedAccount = ref({
-  email: 'admin@sdnusantara.sch.id',
-  phone: '081234567890',
-  password: 'Adm#2026!'
+  email: '',
+  phone: '',
+  password: ''
 })
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   isLoading.value = true
 
-  setTimeout(() => {
-    isLoading.value = false
+  const payload = {
+    ...form.value,
+    tanggal_lahir: form.value.tanggal_lahir ? new Date(form.value.tanggal_lahir).toISOString().split('T')[0] : null,
+    tahun_masuk: form.value.tahun_masuk ? new Date(form.value.tahun_masuk).toISOString().split('T')[0] : null
+  }
+
+  try {
+    const res = await createSiswa(payload)
+    generatedAccount.value = {
+      email: res.data.email,
+      phone: res.data.phone || '-',
+      password: res.data.password
+    }
     showSuccessModal.value = true
-  }, 1500)
+  } catch (err) {
+    const errorMsg = err.response?.data?.message || 'Gagal menambahkan siswa baru.'
+    toast.error('Gagal Menyimpan', { description: errorMsg })
+  } finally {
+    isLoading.value = false
+  }
 }
 
 const goToList = () => {

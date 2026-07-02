@@ -1,19 +1,26 @@
-/**
- * SERVICE: Murni logika Networking.
- * Tidak ada reaktivitas Vue di sini.
- * Fokus: Ambil data mentah dari API.
- */
-export async function fetchAllSiswa() {
-  const response = await fetch('https://jsonplaceholder.typicode.com/users')
-  if (!response.ok) throw new Error('Gagal mengambil data dari server')
-  return response.json()
+import api from './api'
+
+export async function fetchAllSiswa(params) {
+  const response = await api.get('/management/students', { params })
+  return response.data
 }
 
 export async function createSiswa(data) {
-  const response = await fetch('https://jsonplaceholder.typicode.com/users', {
-    method: 'POST',
-    body: JSON.stringify(data),
-    headers: { 'Content-Type': 'application/json' }
-  })
-  return response.json()
+  const response = await api.post('/management/students', data)
+  return response.data
+}
+
+export async function getSiswaDetail(id) {
+  const response = await api.get(`/management/students/${id}`)
+  return response.data
+}
+
+export async function updateSiswa(id, data) {
+  const response = await api.put(`/management/students/${id}`, data)
+  return response.data
+}
+
+export async function deleteSiswa(id) {
+  const response = await api.delete(`/management/students/${id}`)
+  return response.data
 }

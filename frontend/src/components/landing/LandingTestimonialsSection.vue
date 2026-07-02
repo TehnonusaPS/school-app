@@ -23,11 +23,11 @@ const testimonials = [
 </script>
 
 <template>
-  <section id="testimoni" class="relative px-6 py-24">
+  <section id="testimoni" class="relative px-4 py-16 md:px-6 md:py-24">
     <div class="mx-auto max-w-6xl">
       <div class="mx-auto max-w-2xl text-center">
         <span class="text-sm font-semibold uppercase tracking-wider text-primary">Testimoni</span>
-        <h2 class="mt-3 text-4xl font-bold tracking-tight md:text-5xl">
+        <h2 class="mt-3 text-3xl sm:text-4xl font-bold tracking-tight md:text-5xl">
           Dipercaya yayasan di seluruh Indonesia
         </h2>
       </div>

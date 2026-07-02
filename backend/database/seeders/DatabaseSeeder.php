@@ -12,6 +12,7 @@ use App\Models\StudentProfile;
 use App\Models\Subject;
 use App\Models\TeacherProfile;
 use App\Models\User;
+use App\Models\Extracurricular;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -375,6 +376,9 @@ class DatabaseSeeder extends Seeder
             'academic_year_id'    => $academicYear->id,
             'name'                => '2-D',
             'grade'               => 2,
+            'major'               => 'MIPA',
+            'room'                => 'R. 101',
+            'status'              => 'active',
             'homeroom_teacher_id' => $waliKelas->id,
             'capacity'            => 30,
         ]);
@@ -384,6 +388,9 @@ class DatabaseSeeder extends Seeder
             'academic_year_id'    => $academicYear->id,
             'name'                => '2-E',
             'grade'               => 2,
+            'major'               => 'IPS',
+            'room'                => 'R. 102',
+            'status'              => 'active',
             'homeroom_teacher_id' => $waliKelas2->id,
             'capacity'            => 30,
         ]);
@@ -536,5 +543,26 @@ class DatabaseSeeder extends Seeder
         //  10. Subscriptions & Payments
         // ─────────────────────────────────────────────
         $this->call(SubscriptionSeeder::class);
+
+        // ─────────────────────────────────────────────
+        //  11. Extracurriculars
+        // ─────────────────────────────────────────────
+        $extracurriculars = [
+            ['name' => 'Pramuka', 'description' => 'Kegiatan kepramukaan untuk mengembangkan karakter, kemandirian, dan jiwa kepemimpinan siswa.', 'is_active' => true],
+            ['name' => 'Paduan Suara', 'description' => 'Ekstrakulikuler paduan suara untuk mengembangkan bakat seni musik dan vokal siswa.', 'is_active' => true],
+            ['name' => 'Futsal', 'description' => 'Kegiatan olahraga futsal untuk melatih kerjasama tim dan kebugaran fisik siswa.', 'is_active' => true],
+            ['name' => 'Seni Tari', 'description' => 'Ekstrakulikuler tari tradisional dan modern untuk mengembangkan apresiasi seni budaya Indonesia.', 'is_active' => false],
+            ['name' => 'Robotika', 'description' => 'Kegiatan belajar pemrograman dan perakitan robot sederhana untuk melatih berpikir logis dan kreatif.', 'is_active' => true],
+            ['name' => 'Jurnalistik', 'description' => 'Ekstrakulikuler penulisan berita dan fotografi untuk mengembangkan kemampuan komunikasi dan literasi siswa.', 'is_active' => false],
+        ];
+
+        foreach ($extracurriculars as $ekskul) {
+            Extracurricular::create([
+                'school_id'   => $school->id,
+                'name'        => $ekskul['name'],
+                'description' => $ekskul['description'],
+                'is_active'   => $ekskul['is_active'],
+            ]);
+        }
     }
 }

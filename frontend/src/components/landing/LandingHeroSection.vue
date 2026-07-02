@@ -1,6 +1,9 @@
 <script setup>
-import { ArrowRight, Building2, MessageCircle, School, Sparkles } from 'lucide-vue-next'
+import { ArrowRight, Building2, MessageCircle, School, Sparkles, Download } from 'lucide-vue-next'
 import heroBg from '@/assets/images/landing-hero.png'
+import { usePwa } from '@/composables/usePwa'
+
+const { triggerInstall } = usePwa()
 
 const stats = [
   { label: 'Total Siswa', value: '4.218', color: 'bg-primary' },
@@ -48,7 +51,7 @@ const marqueeItems = [...yayasan, ...yayasan]
     <div class="blob right-0 top-40 h-95 w-95 bg-accent/30 dark:bg-accent/15" />
     <div class="blob bottom-0 left-1/3 h-80 w-80 bg-secondary/20" />
 
-    <div class="relative mx-auto max-w-6xl px-6 text-center">
+    <div class="relative mx-auto max-w-6xl px-4 sm:px-6 text-center">
       <div
         class="mx-auto inline-flex items-center gap-2 rounded-full bg-secondary/15 px-4 py-1.5 text-xs font-medium text-secondary-foreground ring-1 ring-secondary/20"
       >
@@ -56,36 +59,39 @@ const marqueeItems = [...yayasan, ...yayasan]
         Platform ERP #1 untuk Yayasan Pendidikan
       </div>
       <h1
-        class="mx-auto mt-6 max-w-4xl text-5xl font-bold leading-[1.05] tracking-tight text-foreground md:text-7xl"
+        class="mx-auto mt-6 max-w-4xl text-3xl font-bold leading-[1.2] sm:text-4xl tracking-tight text-foreground md:text-5xl md:leading-[1.1]"
       >
         Kelola seluruh sekolah yayasan Anda dari
         <span class="relative inline-block">
           <span class="relative z-10">satu dashboard</span>
           <span class="absolute inset-x-0 bottom-2 z-0 h-3 rounded-full bg-secondary/70" /></span>.
       </h1>
-      <p class="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
+      <p class="mx-auto mt-6 max-w-2xl text-base sm:text-lg text-muted-foreground md:text-xl leading-relaxed">
         Sekolahku menyatukan akademik, keuangan, kesiswaan, dan komunikasi orang tua untuk semua
         unit sekolah di bawah yayasan Anda - modern, aman, dan mudah dipakai guru.
       </p>
-
+ 
       <!-- Premium Responsive Action Buttons -->
-      <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+      <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5">
         <a
           href="#kontak"
-          class="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 shadow-lg shadow-primary/25 cursor-pointer w-full sm:w-auto justify-center"
+          class="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 shadow-lg shadow-primary/25 cursor-pointer w-full max-w-xs sm:max-w-none sm:w-auto justify-center"
         >
           Coba Demo Gratis
           <ArrowRight class="h-4 w-4" />
         </a>
-        <router-link
-          to="/login"
-          class="inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3.5 text-sm font-semibold text-foreground transition hover:bg-muted/50 cursor-pointer w-full sm:w-auto"
+ 
+        <button
+          @click="triggerInstall"
+          class="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-background px-6 py-3.5 text-sm font-semibold text-foreground transition hover:bg-muted/50 cursor-pointer w-full max-w-xs sm:max-w-none sm:w-auto"
         >
-          Masuk ke Portal
-        </router-link>
+          <Download class="h-4 w-4 text-primary animate-bounce" />
+          Install Apps
+        </button>
       </div>
-
-      <div class="mt-20 space-y-4">
+    </div>
+ 
+    <div class="mx-auto max-w-6xl px-4 sm:px-6 mt-12 md:mt-20 space-y-4">
         <p class="text-center text-xs uppercase tracking-[0.25em] text-muted-foreground">
           Dipercaya oleh yayasan di Indonesia
         </p>
@@ -120,7 +126,6 @@ const marqueeItems = [...yayasan, ...yayasan]
               <span class="text-sm font-semibold tracking-tight">{{ name }}</span>
             </div>
           </div>
-        </div>
       </div>
     </div>
   </section>

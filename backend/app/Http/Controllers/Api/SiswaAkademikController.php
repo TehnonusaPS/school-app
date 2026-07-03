@@ -33,9 +33,11 @@ class SiswaAkademikController extends Controller
             ]);
         }
 
+        $schoolId = $request->user()->school_id;
+
         // Find all classrooms in the same school with the same name/grade across all academic years
         $classrooms = Classroom::with('academicYear')
-            ->where('school_id', $student->school_id)
+            ->where('school_id', $schoolId)
             ->where('name', $currentClassroom->name)
             ->get();
 

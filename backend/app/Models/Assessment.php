@@ -14,6 +14,7 @@ class Assessment extends Model
         'classroom_id',
         'academic_year_id',
         'created_by',
+        'material_id',
         'category',
         'type',
         'title',
@@ -51,6 +52,11 @@ class Assessment extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function material(): BelongsTo
+    {
+        return $this->belongsTo(SubjectMaterial::class, 'material_id');
     }
 
     public function scores(): HasMany

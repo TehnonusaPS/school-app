@@ -19,7 +19,7 @@ class AssessmentController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
-        $query = Assessment::with(['classroom:id,name', 'subject:id,name,code', 'academicYear:id,name,semester'])
+        $query = Assessment::with(['classroom:id,name', 'subject:id,name,code', 'academicYear:id,name,semester', 'material:id,title'])
             ->where('school_id', $user->school_id);
 
         if ($request->has('category')) {
@@ -77,6 +77,7 @@ class AssessmentController extends Controller
                 'classroom_id'     => $request->classroom_id,
                 'academic_year_id' => $request->academic_year_id,
                 'created_by'       => $user->id,
+                'material_id'      => $request->material_id,
                 'category'         => $request->category,
                 'type'             => $request->type,
                 'title'            => $request->title,
@@ -174,8 +175,17 @@ class AssessmentController extends Controller
             ], 403);
         }
 
+        $type = strtolower($request->input('type', ''));
+        if (in_array($type, ['uts', 'uas'])) {
+            $request->merge([
+                'title' => strtoupper($type),
+                'material_id' => null,
+            ]);
+        }
+
         $request->validate([
-            'title'        => 'required|string|max:255',
+            'material_id'  => 'required_unless:type,uts,uas|nullable|exists:subject_materials,id',
+            'title'        => 'required_unless:type,uts,uas|nullable|string|max:255',
             'type'         => 'required|in:tugas_sekolah,tugas_rumah,ujian_harian,uts,uas',
             'is_active'    => 'nullable|boolean',
             'scores'       => 'required|array|min:1',
@@ -192,6 +202,7 @@ class AssessmentController extends Controller
             $updateData = [
                 'title' => $request->title,
                 'type'  => $request->type,
+                'material_id' => $request->material_id,
             ];
             if ($request->has('is_active')) {
                 $updateData['is_active'] = filter_var($request->is_active, FILTER_VALIDATE_BOOLEAN);

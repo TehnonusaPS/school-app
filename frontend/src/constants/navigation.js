@@ -104,23 +104,8 @@ export const navMain = [
         roles: ['siswa']
       },
       {
-        title: 'Materi',
-        url: '/akademik/materi',
-        roles: ['siswa']
-      },
-      {
         title: 'Mata Pelajaran',
         url: '/akademik/mapel',
-        roles: ['siswa']
-      },
-      {
-        title: 'Tugas',
-        url: '/akademik/tugas',
-        roles: ['siswa']
-      },
-      {
-        title: 'Ujian',
-        url: '/akademik/ujian',
         roles: ['siswa']
       },
       {

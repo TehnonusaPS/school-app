@@ -170,5 +170,15 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::apiResource('/assessments', \App\Http\Controllers\Api\AssessmentController::class);
             Route::patch('/assessments/{id}/toggle-status', [\App\Http\Controllers\Api\AssessmentController::class, 'toggleStatus']);
         });
+
+    Route::middleware('role:siswa')
+        ->prefix('siswa/akademik')
+        ->group(function () {
+            Route::get('/my-classrooms', [\App\Http\Controllers\Api\SiswaAkademikController::class, 'getMyClassrooms']);
+            Route::get('/subjects', [\App\Http\Controllers\Api\SiswaAkademikController::class, 'getSubjects']);
+            Route::get('/overview', [\App\Http\Controllers\Api\SiswaAkademikController::class, 'getSubjectOverview']);
+            Route::get('/stats', [\App\Http\Controllers\Api\SiswaAkademikController::class, 'getGlobalStats']);
+            Route::get('/materials/{id}/download', [\App\Http\Controllers\Api\SubjectMaterialController::class, 'download']);
+        });
 });
 

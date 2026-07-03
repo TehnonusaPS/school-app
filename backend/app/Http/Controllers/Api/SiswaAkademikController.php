@@ -1,0 +1,223 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\Classroom;
+use App\Models\SubjectMaterial;
+use App\Models\Assessment;
+use App\Models\TeacherSubjectAssignment;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+class SiswaAkademikController extends Controller
+{
+    /**
+     * Get classroom history/options for the authenticated student.
+     */
+    public function getMyClassrooms(Request $request): JsonResponse
+    {
+        $student = $request->user()->studentProfile;
+        if (!$student) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Profil siswa tidak ditemukan.'
+            ], 404);
+        }
+
+        $currentClassroom = Classroom::find($student->classroom_id);
+        if (!$currentClassroom) {
+            return response()->json([
+                'status' => 'success',
+                'data' => []
+            ]);
+        }
+
+        // Find all classrooms in the same school with the same name/grade across all academic years
+        $classrooms = Classroom::with('academicYear')
+            ->where('school_id', $student->school_id)
+            ->where('name', $currentClassroom->name)
+            ->get();
+
+        $data = $classrooms->map(function ($c) use ($student) {
+            return [
+                'classroom_id'       => $c->id,
+                'classroom_name'     => $c->name,
+                'grade'              => $c->grade,
+                'academic_year_id'   => $c->academic_year_id,
+                'academic_year_name' => $c->academicYear->name,
+                'semester'           => $c->academicYear->semester,
+                'semester_label'     => $c->academicYear->semester === 'odd' ? 'Ganjil' : 'Genap',
+                'is_current'         => $c->id === $student->classroom_id
+            ];
+        })->sortByDesc('academic_year_id')->values();
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $data
+        ]);
+    }
+
+    /**
+     * Get subjects taught in a classroom.
+     */
+    public function getSubjects(Request $request): JsonResponse
+    {
+        $classroomId = $request->query('classroom_id');
+        if (!$classroomId) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Classroom ID wajib diisi.'
+            ], 400);
+        }
+
+        $assignments = TeacherSubjectAssignment::with('subject')
+            ->where('classroom_id', $classroomId)
+            ->where('is_active', true)
+            ->get();
+
+        $subjects = $assignments->map(function ($assignment) {
+            return $assignment->subject;
+        })->filter()->unique('id')->values();
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $subjects
+        ]);
+    }
+
+    /**
+     * Get subject material & assessment overview.
+     */
+    public function getSubjectOverview(Request $request): JsonResponse
+    {
+        $student = $request->user()->studentProfile;
+        $subjectId = $request->query('subject_id');
+        $classroomId = $request->query('classroom_id');
+
+        if (!$student || !$subjectId || !$classroomId) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Parameter tidak lengkap.'
+            ], 400);
+        }
+
+        // 1. Fetch materials
+        $materials = SubjectMaterial::where('subject_id', $subjectId)
+            ->where('classroom_id', $classroomId)
+            ->where('is_active', true)
+            ->get();
+
+        // 2. Fetch assessments with student score
+        $assessments = Assessment::with(['material:id,title', 'scores' => function ($q) use ($student) {
+                $q->where('student_id', $student->id);
+            }])
+            ->where('subject_id', $subjectId)
+            ->where('classroom_id', $classroomId)
+            ->where('is_active', true)
+            ->get();
+
+        $mappedAssessments = $assessments->map(function ($a) {
+            $studentScore = $a->scores->first();
+            return [
+                'id'             => $a->id,
+                'type'           => $a->type,
+                'category'       => $a->category,
+                'title'          => $a->title,
+                'material_id'    => $a->material_id,
+                'material_title' => $a->material ? $a->material->title : null,
+                'score'          => $studentScore ? floatval($studentScore->score) : null
+            ];
+        });
+
+        // 3. Compute stats
+        $tugasAssessments = $mappedAssessments->filter(fn($a) => $a['category'] === 'tugas' && $a['score'] !== null);
+        $ujianAssessments = $mappedAssessments->filter(fn($a) => $a['category'] === 'ujian' && $a['score'] !== null);
+
+        $avgTugas = $tugasAssessments->count() > 0 ? round($tugasAssessments->avg('score'), 2) : 0;
+        $avgUjian = $ujianAssessments->count() > 0 ? round($ujianAssessments->avg('score'), 2) : 0;
+
+        $avgKeseluruhan = round(($avgTugas * 0.4) + ($avgUjian * 0.6), 2);
+
+        $uts = $mappedAssessments->first(fn($a) => $a['type'] === 'uts');
+        $uas = $mappedAssessments->first(fn($a) => $a['type'] === 'uas');
+
+        $tugasDetails = $tugasAssessments->map(fn($a) => ['label' => $a['title'], 'value' => $a['score']])->values();
+        $ujianDetails = $ujianAssessments->map(fn($a) => ['label' => $a['title'], 'value' => $a['score']])->values();
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => [
+                'materials'   => $materials,
+                'assessments' => $mappedAssessments,
+                'uts'         => $uts ? $uts['score'] : null,
+                'uas'         => $uas ? $uas['score'] : null,
+                'stats'       => [
+                    'avg_tugas'       => $avgTugas,
+                    'avg_ujian'       => $avgUjian,
+                    'avg_keseluruhan' => $avgKeseluruhan,
+                    'tugas_count'     => $tugasAssessments->count(),
+                    'ujian_count'     => $ujianAssessments->count(),
+                    'tugas_details'   => $tugasDetails,
+                    'ujian_details'   => $ujianDetails
+                ]
+            ]
+        ]);
+    }
+
+    /**
+     * Get global stats across all subjects.
+     */
+    public function getGlobalStats(Request $request): JsonResponse
+    {
+        $student = $request->user()->studentProfile;
+        $classroomId = $request->query('classroom_id');
+
+        if (!$student || !$classroomId) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Parameter tidak lengkap.'
+            ], 400);
+        }
+
+        $assessments = Assessment::with(['scores' => function ($q) use ($student) {
+                $q->where('student_id', $student->id);
+            }])
+            ->where('classroom_id', $classroomId)
+            ->where('is_active', true)
+            ->get();
+
+        $tugasScores = [];
+        $ujianScores = [];
+        $tugasCompletedCount = 0;
+
+        foreach ($assessments as $assessment) {
+            $studentScore = $assessment->scores->first();
+            if ($studentScore !== null) {
+                $scoreVal = floatval($studentScore->score);
+                if ($assessment->category === 'tugas') {
+                    $tugasScores[] = $scoreVal;
+                    $tugasCompletedCount++;
+                } elseif ($assessment->category === 'ujian') {
+                    $ujianScores[] = $scoreVal;
+                }
+            }
+        }
+
+        $avgTugas = count($tugasScores) > 0 ? (array_sum($tugasScores) / count($tugasScores)) : 0;
+        $avgUjian = count($ujianScores) > 0 ? (array_sum($ujianScores) / count($ujianScores)) : 0;
+        $avgAll = (count($tugasScores) + count($ujianScores)) > 0
+            ? (($avgTugas * 0.40) + ($avgUjian * 0.60))
+            : 0;
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => [
+                'avg_all_subjects'      => round($avgAll, 2),
+                'total_tugas_completed' => $tugasCompletedCount,
+                'avg_ujian_all'         => round($avgUjian, 2),
+                'avg_tugas_all'         => round($avgTugas, 2)
+            ]
+        ]);
+    }
+}

@@ -59,4 +59,19 @@ class Classroom extends Model
     {
         return $this->hasMany(StudentProfile::class);
     }
+
+    public function materials(): HasMany
+    {
+        return $this->hasMany(SubjectMaterial::class);
+    }
+
+    public function assessments(): HasMany
+    {
+        return $this->hasMany(Assessment::class);
+    }
+
+    public function teacherAssignments(): HasMany
+    {
+        return $this->hasMany(TeacherSubjectAssignment::class);
+    }
 }

@@ -13,6 +13,10 @@ use App\Models\Subject;
 use App\Models\TeacherProfile;
 use App\Models\User;
 use App\Models\Extracurricular;
+use App\Models\TeacherSubjectAssignment;
+use App\Models\SubjectMaterial;
+use App\Models\Assessment;
+use App\Models\AssessmentScore;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -563,6 +567,141 @@ class DatabaseSeeder extends Seeder
                 'description' => $ekskul['description'],
                 'is_active'   => $ekskul['is_active'],
             ]);
+        }
+
+        // Query the seeded entities for akademik assignments & samples
+        $subjectMtk = Subject::where('code', 'MTK')->first();
+        $subjectBin = Subject::where('code', 'BIN')->first();
+        $subjectIpa = Subject::where('code', 'IPA')->first();
+
+        $guruUser = User::where('email', 'guru@mail.com')->first();
+        $guru2User = User::where('email', 'guru2@mail.com')->first();
+
+        $classroomObj = Classroom::where('name', '2-D')->first();
+        $classroom2Obj = Classroom::where('name', '2-E')->first();
+
+        // 1. Teacher subject assignments
+        if ($guruUser && $subjectMtk && $classroomObj) {
+            TeacherSubjectAssignment::create([
+                'school_id' => $school->id,
+                'teacher_id' => $guruUser->id,
+                'subject_id' => $subjectMtk->id,
+                'classroom_id' => $classroomObj->id,
+                'academic_year_id' => $academicYear->id,
+                'is_active' => true,
+            ]);
+        }
+
+        if ($guruUser && $subjectBin && $classroomObj) {
+            TeacherSubjectAssignment::create([
+                'school_id' => $school->id,
+                'teacher_id' => $guruUser->id,
+                'subject_id' => $subjectBin->id,
+                'classroom_id' => $classroomObj->id,
+                'academic_year_id' => $academicYear->id,
+                'is_active' => true,
+            ]);
+        }
+
+        if ($guruUser && $subjectMtk && $classroom2Obj) {
+            TeacherSubjectAssignment::create([
+                'school_id' => $school->id,
+                'teacher_id' => $guruUser->id,
+                'subject_id' => $subjectMtk->id,
+                'classroom_id' => $classroom2Obj->id,
+                'academic_year_id' => $academicYear->id,
+                'is_active' => true,
+            ]);
+        }
+
+        if ($guru2User && $subjectIpa && $classroom2Obj) {
+            TeacherSubjectAssignment::create([
+                'school_id' => $school->id,
+                'teacher_id' => $guru2User->id,
+                'subject_id' => $subjectIpa->id,
+                'classroom_id' => $classroom2Obj->id,
+                'academic_year_id' => $academicYear->id,
+                'is_active' => true,
+            ]);
+        }
+
+        // 2. Subject Materials (Sample Metadata)
+        if ($guruUser && $subjectMtk && $classroomObj) {
+            SubjectMaterial::create([
+                'school_id' => $school->id,
+                'subject_id' => $subjectMtk->id,
+                'classroom_id' => $classroomObj->id,
+                'academic_year_id' => $academicYear->id,
+                'uploaded_by' => $guruUser->id,
+                'title' => 'Bab 1 : Pengenalan Aljabar Dasar',
+                'file_path' => 'materials/' . $school->id . '/' . $subjectMtk->id . '/aljabar_dasar.pdf',
+                'file_name' => 'Aljabar Dasar.pdf',
+                'file_type' => 'pdf',
+                'file_size' => 1024 * 1024 * 2, // 2MB
+                'uploaded_by_name' => $guruUser->name,
+                'is_active' => true,
+            ]);
+
+            SubjectMaterial::create([
+                'school_id' => $school->id,
+                'subject_id' => $subjectMtk->id,
+                'classroom_id' => $classroomObj->id,
+                'academic_year_id' => $academicYear->id,
+                'uploaded_by' => $guruUser->id,
+                'title' => 'Bab 2 : Himpunan & Diagram Venn',
+                'file_path' => 'materials/' . $school->id . '/' . $subjectMtk->id . '/himpunan.pptx',
+                'file_name' => 'Himpunan.pptx',
+                'file_type' => 'pptx',
+                'file_size' => 1024 * 1024 * 5, // 5MB
+                'uploaded_by_name' => $guruUser->name,
+                'is_active' => true,
+            ]);
+        }
+
+        // 3. Assessments (Sample Tugas & Ujian)
+        if ($guruUser && $subjectMtk && $classroomObj) {
+            $tugas = Assessment::create([
+                'school_id' => $school->id,
+                'subject_id' => $subjectMtk->id,
+                'classroom_id' => $classroomObj->id,
+                'academic_year_id' => $academicYear->id,
+                'created_by' => $guruUser->id,
+                'category' => 'tugas',
+                'type' => 'tugas_sekolah',
+                'title' => 'Tugas I : Latihan Aljabar Dasar',
+                'uploaded_by_name' => $guruUser->name,
+                'is_active' => true,
+            ]);
+
+            $studentsInClass = StudentProfile::where('classroom_id', $classroomObj->id)->get();
+            foreach ($studentsInClass as $st) {
+                AssessmentScore::create([
+                    'assessment_id' => $tugas->id,
+                    'student_id' => $st->id,
+                    'score' => $st->nisn === '0012345678' ? 85.00 : 90.00,
+                ]);
+            }
+
+            $ujian = Assessment::create([
+                'school_id' => $school->id,
+                'subject_id' => $subjectMtk->id,
+                'classroom_id' => $classroomObj->id,
+                'academic_year_id' => $academicYear->id,
+                'created_by' => $guruUser->id,
+                'category' => 'ujian',
+                'type' => 'ujian_harian',
+                'title' => 'Ujian Harian I : Aljabar',
+                'uploaded_by_name' => $guruUser->name,
+                'is_active' => true,
+            ]);
+
+            foreach ($studentsInClass as $st) {
+                AssessmentScore::create([
+                    'assessment_id' => $ujian->id,
+                    'student_id' => $st->id,
+                    'score' => $st->nisn === '0012345678' ? 78.50 : 88.00,
+                ]);
+            }
         }
     }
 }

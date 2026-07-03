@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { toast } from 'vue-sonner'
 
 // UI Components
@@ -8,6 +8,9 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import FormSheet from '@/components/data-sheet/FormSheet.vue'
+
+// API Services
+import * as akademikService from '@/services/akademikService'
 
 const props = defineProps({
   open: {
@@ -30,46 +33,131 @@ const props = defineProps({
     type: Object,
     required: true
   },
-  studentsMap: {
-    type: Object,
+  selectedSubjectId: {
+    type: [String, Number],
     required: true
+  },
+  draft: {
+    type: Object,
+    default: null
   }
 })
 
-const emit = defineEmits(['update:open', 'save'])
+const emit = defineEmits(['update:open', 'save', 'save-draft', 'cancel'])
 
 const isOpen = computed({
   get: () => props.open,
   set: (val) => emit('update:open', val)
 })
 
+const skipDraftSave = ref(false)
+
 const form = ref({
-  kelas: '',
+  classroom_id: '',
+  type: '',
   title: '',
-  fileName: '',
-  grades: {}
+  file: null,
+  scores: {}
 })
 
-// Sync with initialForm when opened or when initialForm changes
+// Lookup lists
+const classrooms = ref([])
+const students = ref([])
+const activeAcademicYear = ref(null)
+
+// Load active academic year on mount
+onMounted(async () => {
+  try {
+    const res = await akademikService.getActiveAcademicYear()
+    activeAcademicYear.value = res.data
+  } catch (err) {
+    console.error('Gagal mengambil tahun ajaran aktif:', err)
+  }
+})
+
+// Load classrooms taught by the teacher for this subject when opened
 watch(
   () => props.open,
-  (newOpen) => {
+  async (newOpen) => {
     if (newOpen) {
-      form.value = JSON.parse(JSON.stringify(props.initialForm))
+      skipDraftSave.value = false
+      // Sync form values with parent
+      if (props.mode === 'add' && props.draft) {
+        form.value = JSON.parse(JSON.stringify(props.draft))
+      } else {
+        form.value = JSON.parse(JSON.stringify(props.initialForm))
+      }
+
+      if (props.selectedSubjectId) {
+        try {
+          const res = await akademikService.getMyClassrooms(props.selectedSubjectId)
+          classrooms.value = res.data
+        } catch (err) {
+          toast.error('Gagal memuat daftar kelas.')
+        }
+      }
+    } else {
+      // If closing sheet without submit, save draft
+      if (props.mode === 'add' && !skipDraftSave.value) {
+        emit('save-draft', { tab: props.activeTab, data: { ...form.value } })
+      }
     }
   },
   { immediate: true }
 )
 
-// Watch class selection to initialize default student grades if in add mode
-watch(() => form.value.kelas, (newKelas) => {
-  if (props.mode === 'add' && newKelas) {
-    const students = props.studentsMap[newKelas] || []
-    const newGrades = {}
-    students.forEach(st => {
-      newGrades[st.id] = ''
-    })
-    form.value.grades = newGrades
+// Load students list when classroom selection changes
+watch(
+  () => form.value.classroom_id,
+  async (newClassroomId) => {
+    if (newClassroomId) {
+      try {
+        const res = await akademikService.getStudentsByClassroom(newClassroomId)
+        students.value = res.data
+
+        // Initialize grades array for input if adding new assessment
+        if (props.mode === 'add') {
+          const newScores = {}
+          students.value.forEach(st => {
+            // Keep old draft score if exists, else empty
+            newScores[st.id] = form.value.scores?.[st.id] !== undefined ? form.value.scores[st.id] : ''
+          })
+          form.value.scores = newScores
+        }
+      } catch (err) {
+        toast.error('Gagal memuat siswa kelas.')
+      }
+    } else {
+      students.value = []
+    }
+  }
+)
+
+const semesterLabel = computed(() => {
+  if (!activeAcademicYear.value) return 'Memuat...'
+  const term = activeAcademicYear.value.semester === 'odd' ? 'Ganjil' : 'Genap'
+  return `${activeAcademicYear.value.name} (${term})`
+})
+
+const classroomOptions = computed(() => {
+  return classrooms.value.map(c => ({
+    value: String(c.id),
+    label: c.name
+  }))
+})
+
+const typeOptions = computed(() => {
+  if (props.activeTab === 'tugas') {
+    return [
+      { value: 'tugas_sekolah', label: 'Tugas Sekolah' },
+      { value: 'tugas_rumah', label: 'Tugas Rumah' }
+    ]
+  } else {
+    return [
+      { value: 'ujian_harian', label: 'Ujian Harian' },
+      { value: 'uts', label: 'UTS' },
+      { value: 'uas', label: 'UAS' }
+    ]
   }
 })
 
@@ -83,56 +171,68 @@ const schemaSections = computed(() => {
       fields: [
         {
           label: 'Pilih Kelas',
-          key: 'kelas',
+          key: 'classroom_id',
           select: true,
-          options: [
-            { value: 'Kelas 1', label: 'Kelas 1' },
-            { value: 'Kelas 2', label: 'Kelas 2' },
-            { value: 'Kelas 3', label: 'Kelas 3' }
-          ]
+          options: classroomOptions.value
         },
         {
-          label: 'File Materi Pelajaran',
-          key: 'fileName',
+          label: 'Semester',
+          key: 'semester_text',
+          type: 'text',
+          disabled: true,
+          placeholder: semesterLabel.value
+        },
+        {
+          label: 'Nama Materi',
+          key: 'title',
+          placeholder: 'Masukkan Nama Materi'
+        },
+        {
+          label: 'Unggah Berkas',
+          key: 'file',
           file: true,
-          accept: '.pdf,.doc,.docx,.ppt,.pptx,image/*'
+          accept: '.pdf,.ppt,.pptx'
         }
       ]
     })
   } else {
     sections.push({
-      id: 'tugas-ujian-info',
+      id: 'assessment-info',
       title: props.activeTabLabel,
       fields: [
         {
           label: 'Pilih Kelas',
-          key: 'kelas',
+          key: 'classroom_id',
           select: true,
-          options: [
-            { value: 'Kelas 1', label: 'Kelas 1' },
-            { value: 'Kelas 2', label: 'Kelas 2' },
-            { value: 'Kelas 3', label: 'Kelas 3' }
-          ]
+          options: classroomOptions.value
         },
         {
-          label: 'Judul ' + props.activeTabLabel,
+          label: 'Semester',
+          key: 'semester_text',
+          type: 'text',
+          disabled: true,
+          placeholder: semesterLabel.value
+        },
+        {
+          label: 'Tipe Penilaian',
+          key: 'type',
+          select: true,
+          options: typeOptions.value
+        },
+        {
+          label: 'Judul Penilaian',
           key: 'title',
           placeholder: 'Masukkan Judul ' + props.activeTabLabel
         },
         {
           label: 'Daftar Siswa & Nilai',
-          key: 'grades'
+          key: 'scores'
         }
       ]
     })
   }
   
   return sections
-})
-
-const currentFormStudents = computed(() => {
-  if (!form.value.kelas) return []
-  return props.studentsMap[form.value.kelas] || []
 })
 
 const getInitials = (name) => {
@@ -142,35 +242,88 @@ const getInitials = (name) => {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
+// File Upload Pre-validation
+const validateFile = (file) => {
+  const allowedExtensions = ['pdf', 'ppt', 'pptx']
+  const fileExt = file.name.split('.').pop().toLowerCase()
+  const maxSize = 15 * 1024 * 1024 // 15MB
+
+  if (!allowedExtensions.includes(fileExt)) {
+    toast.error('Format berkas ditolak.', {
+      description: 'Hanya dokumen berformat PDF, PPT, atau PPTX yang diperbolehkan.'
+    })
+    return false
+  }
+
+  if (file.size > maxSize) {
+    toast.error('Berkas terlalu besar.', {
+      description: `Ukuran berkas ${(file.size / (1024 * 1024)).toFixed(1)}MB melebihi batas maksimal 15MB.`
+    })
+    return false
+  }
+
+  return true
+}
+
+// Watch custom change from FormSheet file input component
+const handleFormChange = (newVal) => {
+  if (newVal.file && newVal.file !== form.value.file) {
+    if (!validateFile(newVal.file)) {
+      newVal.file = null
+      newVal.file_fileName = ''
+    }
+  }
+  form.value = { ...form.value, ...newVal }
+}
+
 // --- Save Action ---
 const handleSave = () => {
-  if (!form.value.kelas) {
+  if (!form.value.classroom_id) {
     toast.error('Silakan pilih kelas terlebih dahulu')
     return
   }
 
-  if (props.activeTab === 'materi' && !form.value.fileName) {
-    toast.error('Silakan unggah file materi terlebih dahulu')
-    return
+  if (props.activeTab === 'materi') {
+    if (!form.value.title || !form.value.title.trim()) {
+      toast.error('Nama materi wajib diisi.')
+      return
+    }
+    if (props.mode === 'add' && !form.value.file) {
+      toast.error('Silakan pilih berkas materi terlebih dahulu.')
+      return
+    }
+  } else {
+    if (!form.value.type) {
+      toast.error('Silakan tentukan tipe penilaian.')
+      return
+    }
+    if (!form.value.title || !form.value.title.trim()) {
+      toast.error('Judul penilaian tidak boleh kosong.')
+      return
+    }
   }
 
-  if (props.activeTab !== 'materi' && !form.value.title.trim()) {
-    toast.error(`Nama ${props.activeTabLabel} tidak boleh kosong`)
-    return
-  }
-
-  // Convert grade values to numbers
-  const finalGrades = {}
-  Object.keys(form.value.grades).forEach(key => {
-    finalGrades[key] = form.value.grades[key] === '' ? 0 : Number(form.value.grades[key])
+  // Convert empty values to 0 for grade numbers
+  const finalScores = {}
+  students.value.forEach(student => {
+    const sVal = form.value.scores[student.id]
+    finalScores[student.id] = (sVal === '' || sVal === undefined) ? 0 : Number(sVal)
   })
 
+  skipDraftSave.value = true
   emit('save', {
-    kelas: form.value.kelas,
-    title: props.activeTab === 'materi' ? form.value.fileName : form.value.title,
-    fileName: form.value.fileName,
-    grades: finalGrades
+    classroom_id: form.value.classroom_id,
+    type: form.value.type,
+    title: form.value.title,
+    file: form.value.file,
+    scores: finalScores
   })
+}
+
+const handleCancel = () => {
+  skipDraftSave.value = true
+  emit('cancel')
+  isOpen.value = false
 }
 </script>
 
@@ -183,24 +336,22 @@ const handleSave = () => {
     :description="mode === 'view' ? 'Melihat rincian informasi dan berkas' : 'Isi form berikut untuk mengelola data pelajaran dan berkas'"
     :sections="schemaSections"
     :disabled="mode === 'view'"
-    @change="(val) => {
-      form = { ...form, ...val }
-    }"
+    @change="handleFormChange"
   >
-    <!-- Override custom field for grades -->
-    <template #field-grades="{ form: localForm }">
+    <!-- Override custom field for scores -->
+    <template #field-scores="{ form: localForm }">
       <!-- List Siswa dan Input Nilai -->
-      <div v-if="localForm.kelas" class="space-y-4 pt-2 border-t border-border/60">
+      <div v-if="localForm.classroom_id" class="space-y-4 pt-2 border-t border-border/60">
         <div class="flex items-center justify-between">
           <label class="text-xs font-bold text-muted-foreground uppercase tracking-wider">Daftar Siswa & Nilai</label>
           <Badge variant="secondary" class="text-[10px] font-semibold">
-            {{ currentFormStudents.length }} Siswa
+            {{ students.length }} Siswa
           </Badge>
         </div>
         
         <div class="space-y-2.5 max-h-[350px] overflow-y-auto pr-1">
           <div
-            v-for="student in currentFormStudents"
+            v-for="student in students"
             :key="student.id"
             class="flex items-center justify-between p-3 rounded-xl border border-border/40 bg-background/40 backdrop-blur-sm"
           >
@@ -221,9 +372,10 @@ const handleSave = () => {
                 type="number"
                 min="0"
                 max="100"
-                v-model.number="localForm.grades[student.id]"
+                step="0.01"
+                v-model.number="localForm.scores[student.id]"
                 :disabled="mode === 'view'"
-                class="w-16 h-8 text-center text-sm font-bold bg-background/60"
+                class="w-20 h-8 text-center text-sm font-bold bg-background/60"
                 placeholder="0"
               />
             </div>
@@ -241,7 +393,7 @@ const handleSave = () => {
         variant="outline"
         size="sm"
         class="h-9 px-4 rounded-xl"
-        @click="isOpen = false"
+        @click="handleCancel"
       >
         {{ mode === 'view' ? 'Tutup' : 'Batal' }}
       </Button>

@@ -15,6 +15,20 @@ class StoreAssessmentRequest extends FormRequest
     }
 
     /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation()
+    {
+        $type = strtolower($this->input('type', ''));
+        if (in_array($type, ['uts', 'uas'])) {
+            $this->merge([
+                'title' => strtoupper($type),
+                'material_id' => null,
+            ]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      */
     public function rules(): array
@@ -23,9 +37,10 @@ class StoreAssessmentRequest extends FormRequest
             'subject_id'       => 'required|exists:subjects,id',
             'classroom_id'     => 'required|exists:classrooms,id',
             'academic_year_id' => 'required|exists:academic_years,id',
+            'material_id'      => 'required_unless:type,uts,uas|nullable|exists:subject_materials,id',
             'category'         => 'required|in:tugas,ujian',
             'type'             => 'required|in:tugas_sekolah,tugas_rumah,ujian_harian,uts,uas',
-            'title'            => 'required|string|max:255',
+            'title'            => 'required_unless:type,uts,uas|nullable|string|max:255',
             'scores'           => 'required|array|min:1',
             'scores.*.student_id' => 'required|exists:student_profiles,id',
             'scores.*.score'      => 'required|numeric|min:0|max:100',

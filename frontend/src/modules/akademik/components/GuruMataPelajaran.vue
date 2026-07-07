@@ -171,6 +171,7 @@ const tableColumns = computed(() => {
   
   if (activeTab.value !== 'materi') {
     columns.push({ key: 'type_label', label: 'Tipe' })
+    columns.push({ key: 'material_title', label: 'Materi' })
   }
   
   columns.push({ key: 'uploaded_by_name', label: 'Diupload Oleh' })
@@ -204,6 +205,7 @@ const mappedItems = computed(() => {
     classroom_name: item.classroom?.name || '',
     semester_name: item.academic_year ? `${item.academic_year.name} (${item.academic_year.semester === 'odd' ? 'Ganjil' : 'Genap'})` : '',
     type_label: item.type ? formatTypeLabel(item.type) : '',
+    material_title: item.material ? item.material.title : '-',
     status: item.is_active ? 'Aktif' : 'Nonaktif'
   }))
 })
@@ -261,6 +263,7 @@ const form = ref({
   classroom_id: '',
   type: '',
   title: '',
+  material_id: '',
   file: null,
   scores: {}
 })
@@ -276,6 +279,7 @@ const openAddSheet = () => {
     classroom_id: currentDraft.classroom_id || '',
     type: currentDraft.type || '',
     title: currentDraft.title || '',
+    material_id: currentDraft.material_id || '',
     file: currentDraft.file || null,
     scores: { ...currentDraft.scores }
   }
@@ -292,6 +296,7 @@ const editItem = async (idOrItem, maybeItem) => {
       classroom_id: String(item.classroom_id),
       type: '',
       title: item.title,
+      material_id: '',
       file: null,
       scores: {}
     }
@@ -312,6 +317,7 @@ const editItem = async (idOrItem, maybeItem) => {
         classroom_id: String(detail.classroom_id),
         type: detail.type,
         title: detail.title,
+        material_id: detail.material_id ? String(detail.material_id) : '',
         file: null,
         scores: scoresObj
       }
@@ -332,6 +338,7 @@ const viewItem = async (idOrItem, maybeItem) => {
       classroom_id: String(item.classroom_id),
       type: '',
       title: item.title,
+      material_id: '',
       file: null,
       scores: {}
     }
@@ -351,6 +358,7 @@ const viewItem = async (idOrItem, maybeItem) => {
         classroom_id: String(detail.classroom_id),
         type: detail.type,
         title: detail.title,
+        material_id: detail.material_id ? String(detail.material_id) : '',
         file: null,
         scores: scoresObj
       }
@@ -417,6 +425,7 @@ const handleSave = async (savedForm) => {
       category: activeTab.value,
       type: savedForm.type,
       title: savedForm.title,
+      material_id: savedForm.material_id || null,
       scores: scoresPayload
     }
 

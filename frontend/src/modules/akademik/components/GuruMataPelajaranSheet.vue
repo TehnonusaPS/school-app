@@ -56,6 +56,7 @@ const form = ref({
   classroom_id: '',
   type: '',
   title: '',
+  material_id: '',
   file: null,
   scores: {}
 })
@@ -63,7 +64,15 @@ const form = ref({
 // Lookup lists
 const classrooms = ref([])
 const students = ref([])
+const materials = ref([])
 const activeAcademicYear = ref(null)
+
+const materialOptions = computed(() => {
+  return materials.value.map(m => ({
+    value: String(m.id),
+    label: m.title
+  }))
+})
 
 // Load active academic year on mount
 onMounted(async () => {
@@ -106,7 +115,7 @@ watch(
   { immediate: true }
 )
 
-// Load students list when classroom selection changes
+// Load students and materials list when classroom selection changes
 watch(
   () => form.value.classroom_id,
   async (newClassroomId) => {
@@ -127,8 +136,27 @@ watch(
       } catch (err) {
         toast.error('Gagal memuat siswa kelas.')
       }
+
+      try {
+        const res = await akademikService.getMaterialsBySubjectClassroom(props.selectedSubjectId, newClassroomId)
+        materials.value = res.data
+      } catch (err) {
+        console.error('Gagal memuat materi kelas:', err)
+      }
     } else {
       students.value = []
+      materials.value = []
+    }
+  }
+)
+
+// Auto-handle type UTS/UAS title & material_id reset
+watch(
+  () => form.value.type,
+  (newType) => {
+    if (newType === 'uts' || newType === 'uas') {
+      form.value.material_id = ''
+      form.value.title = newType.toUpperCase()
     }
   }
 )
@@ -196,39 +224,55 @@ const schemaSections = computed(() => {
       ]
     })
   } else {
+    const fields = [
+      {
+        label: 'Pilih Kelas',
+        key: 'classroom_id',
+        select: true,
+        options: classroomOptions.value
+      },
+      {
+        label: 'Semester',
+        key: 'semester_text',
+        type: 'text',
+        disabled: true,
+        placeholder: semesterLabel.value
+      },
+      {
+        label: 'Tipe Penilaian',
+        key: 'type',
+        select: true,
+        options: typeOptions.value
+      }
+    ]
+
+    const type = form.value.type
+    const isUtsUas = type === 'uts' || type === 'uas'
+
+    if (!isUtsUas) {
+      fields.push({
+        label: 'Materi Pelajaran',
+        key: 'material_id',
+        select: true,
+        options: materialOptions.value
+      })
+
+      fields.push({
+        label: 'Judul Penilaian',
+        key: 'title',
+        placeholder: 'Masukkan Judul ' + props.activeTabLabel
+      })
+    }
+
+    fields.push({
+      label: 'Daftar Siswa & Nilai',
+      key: 'scores'
+    })
+
     sections.push({
       id: 'assessment-info',
       title: props.activeTabLabel,
-      fields: [
-        {
-          label: 'Pilih Kelas',
-          key: 'classroom_id',
-          select: true,
-          options: classroomOptions.value
-        },
-        {
-          label: 'Semester',
-          key: 'semester_text',
-          type: 'text',
-          disabled: true,
-          placeholder: semesterLabel.value
-        },
-        {
-          label: 'Tipe Penilaian',
-          key: 'type',
-          select: true,
-          options: typeOptions.value
-        },
-        {
-          label: 'Judul Penilaian',
-          key: 'title',
-          placeholder: 'Masukkan Judul ' + props.activeTabLabel
-        },
-        {
-          label: 'Daftar Siswa & Nilai',
-          key: 'scores'
-        }
-      ]
+      fields
     })
   }
   
@@ -297,9 +341,16 @@ const handleSave = () => {
       toast.error('Silakan tentukan tipe penilaian.')
       return
     }
-    if (!form.value.title || !form.value.title.trim()) {
-      toast.error('Judul penilaian tidak boleh kosong.')
-      return
+    const isUtsUas = form.value.type === 'uts' || form.value.type === 'uas'
+    if (!isUtsUas) {
+      if (!form.value.material_id) {
+        toast.error('Silakan pilih materi pelajaran.')
+        return
+      }
+      if (!form.value.title || !form.value.title.trim()) {
+        toast.error('Judul penilaian tidak boleh kosong.')
+        return
+      }
     }
   }
 
@@ -315,6 +366,7 @@ const handleSave = () => {
     classroom_id: form.value.classroom_id,
     type: form.value.type,
     title: form.value.title,
+    material_id: form.value.material_id || null,
     file: form.value.file,
     scores: finalScores
   })

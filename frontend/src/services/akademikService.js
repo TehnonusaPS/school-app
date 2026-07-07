@@ -85,3 +85,10 @@ export async function toggleAssessmentStatus(id) {
   const res = await api.patch(`/akademik/assessments/${id}/toggle-status`)
   return res.data
 }
+
+export async function getMaterialsBySubjectClassroom(subjectId, classroomId) {
+  const res = await api.get('/akademik/materials', {
+    params: { subject_id: subjectId, classroom_id: classroomId }
+  })
+  return res.data
+}

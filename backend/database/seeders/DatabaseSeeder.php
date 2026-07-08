@@ -423,68 +423,52 @@ class DatabaseSeeder extends Seeder
         // ─────────────────────────────────────────────
         //  8. Siswa
         // ─────────────────────────────────────────────
-        $siswa = User::create([
-            'name'      => 'Ahmad Wibowo',
-            'email'     => 'siswa@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['siswa']->id,
-            'school_id' => $school->id,
-            'is_active' => true,
-        ]);
+        $studentNames = [
+            'Ahmad Wibowo', 'Budi Santoso', 'Citra Lestari', 
+            'Dian Pratama', 'Eka Wijaya', 'Fitri Handayani', 
+            'Giri Nugroho', 'Hendra Kusuma', 'Indah Permata', 'Joko Susilo'
+        ];
 
-        $studentProfile = StudentProfile::create([
-            'user_id'         => $siswa->id,
-            'classroom_id'    => $classroom->id,
-            'nisn'            => '0012345678',
-            'birth_place'     => 'Jakarta',
-            'birth_date'      => '2016-08-15',
-            'gender'          => 'male',
-            'address'         => 'Jl. Mawar No. 10, Bekasi',
-            'enrollment_date' => '2022-07-01',
-            'status'          => 'active',
-        ]);
+        $studentGenders = ['male', 'male', 'female', 'male', 'male', 'female', 'male', 'male', 'female', 'male'];
+        $studentBirthPlaces = ['Jakarta', 'Bandung', 'Surabaya', 'Semarang', 'Yogyakarta', 'Solo', 'Malang', 'Medan', 'Palembang', 'Makassar'];
+        $studentBirthDates = ['2016-08-15', '2016-09-12', '2016-05-23', '2016-04-10', '2016-07-22', '2016-11-05', '2016-02-18', '2016-12-30', '2016-03-14', '2016-10-09'];
+        $studentAddresses = [
+            'Jl. Mawar No. 10, Bekasi', 'Jl. Anggrek No. 5, Bekasi', 'Jl. Melati No. 12, Bekasi',
+            'Jl. Kamboja No. 4, Bekasi', 'Jl. Tulip No. 8, Bekasi', 'Jl. Lavender No. 15, Bekasi',
+            'Jl. Kenanga No. 22, Bekasi', 'Jl. Flamboyan No. 7, Bekasi', 'Jl. Dahlia No. 11, Bekasi', 'Jl. Jasmine No. 3, Bekasi'
+        ];
 
-        $siswa2 = User::create([
-            'name'      => 'Budi Santoso',
-            'email'     => 'siswa2@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['siswa']->id,
-            'school_id' => $school->id,
-            'is_active' => true,
-        ]);
+        $studentProfiles = [];
 
-        $studentProfile2 = StudentProfile::create([
-            'user_id'         => $siswa2->id,
-            'classroom_id'    => $classroom->id,
-            'nisn'            => '0012345679',
-            'birth_place'     => 'Bandung',
-            'birth_date'      => '2016-09-12',
-            'gender'          => 'male',
-            'address'         => 'Jl. Anggrek No. 5, Bekasi',
-            'enrollment_date' => '2022-07-01',
-            'status'          => 'active',
-        ]);
+        foreach ($studentNames as $idx => $name) {
+            $num = $idx === 0 ? '' : ($idx + 1);
+            $email = "siswa{$num}@mail.com";
+            
+            $sUser = User::create([
+                'name'      => $name,
+                'email'     => $email,
+                'password'  => $defaultPassword,
+                'role_id'   => $roles['siswa']->id,
+                'school_id' => $school->id,
+                'is_active' => true,
+            ]);
 
-        $siswa3 = User::create([
-            'name'      => 'Citra Lestari',
-            'email'     => 'siswa3@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['siswa']->id,
-            'school_id' => $school->id,
-            'is_active' => true,
-        ]);
+            $classObj = ($idx % 2 === 0) ? $classroom : $classroom2;
 
-        $studentProfile3 = StudentProfile::create([
-            'user_id'         => $siswa3->id,
-            'classroom_id'    => $classroom2->id,
-            'nisn'            => '0012345680',
-            'birth_place'     => 'Surabaya',
-            'birth_date'      => '2016-05-23',
-            'gender'          => 'female',
-            'address'         => 'Jl. Melati No. 12, Bekasi',
-            'enrollment_date' => '2022-07-01',
-            'status'          => 'active',
-        ]);
+            $sProfile = StudentProfile::create([
+                'user_id'         => $sUser->id,
+                'classroom_id'    => $classObj->id,
+                'nisn'            => '00123456' . str_pad($idx + 78, 2, '0', STR_PAD_LEFT),
+                'birth_place'     => $studentBirthPlaces[$idx],
+                'birth_date'      => $studentBirthDates[$idx],
+                'gender'          => $studentGenders[$idx],
+                'address'         => $studentAddresses[$idx],
+                'enrollment_date' => '2022-07-01',
+                'status'          => 'active',
+            ]);
+
+            $studentProfiles[] = $sProfile;
+        }
 
         // ─────────────────────────────────────────────
         //  9. Orang Tua / Wali
@@ -512,7 +496,7 @@ class DatabaseSeeder extends Seeder
             'address'        => 'Jl. Mawar No. 10, Bekasi',
         ]);
 
-        $parentProfile->children()->attach($studentProfile->id);
+        $parentProfile->children()->attach($studentProfiles[0]->id);
 
         $orangTua2 = User::create([
             'name'      => 'Orang Tua / Wali 2',
@@ -537,7 +521,7 @@ class DatabaseSeeder extends Seeder
             'address'        => 'Jl. Anggrek No. 5, Bekasi',
         ]);
 
-        $parentProfile2->children()->attach($studentProfile2->id);
+        $parentProfile2->children()->attach($studentProfiles[1]->id);
 
         $orangTua3 = User::create([
             'name'      => 'Orang Tua / Wali 3',
@@ -562,7 +546,7 @@ class DatabaseSeeder extends Seeder
             'address'        => 'Jl. Melati No. 12, Bekasi',
         ]);
 
-        $parentProfile3->children()->attach($studentProfile3->id);
+        $parentProfile3->children()->attach($studentProfiles[2]->id);
 
         // ─────────────────────────────────────────────
         //  10. Subscriptions & Payments
@@ -908,5 +892,12 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
         }
+        // ─────────────────────────────────────────────
+        //  12. Active Student Certificates (Persuratan)
+        // ─────────────────────────────────────────────
+        $this->call(ActiveStudentCertificateSeeder::class);
+        $this->call(StudentDispensationCertificateSeeder::class);
+        $this->call(StudentWarningCertificateSeeder::class);
+        $this->call(ActivityNewsSeeder::class);
     }
 }

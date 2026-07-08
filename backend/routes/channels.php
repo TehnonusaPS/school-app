@@ -18,3 +18,8 @@ Broadcast::channel('feedback.{schoolId}', function ($user, $schoolId) {
     return (int) $user->school_id === (int) $schoolId 
         && $user->hasAnyRole(['kepala_sekolah', 'admin_sekolah']);
 });
+
+Broadcast::channel('persuratan.{schoolId}', function ($user, $schoolId) {
+    return (int) $user->school_id === (int) $schoolId 
+        && $user->hasAnyRole(['tata_usaha', 'kepala_sekolah', 'admin_sekolah']);
+});

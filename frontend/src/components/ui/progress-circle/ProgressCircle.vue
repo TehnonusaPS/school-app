@@ -32,7 +32,7 @@ const props = defineProps({
   variant: {
     type: String,
     default: 'blue',
-    validator: (v) => ['blue', 'green', 'purple', 'amber'].includes(v)
+    validator: v => ['blue', 'green', 'purple', 'amber'].includes(v)
   }
 })
 
@@ -56,12 +56,31 @@ const colors = computed(() => gradientColors[props.variant] || gradientColors.bl
 </script>
 
 <template>
-  <div class="relative inline-flex" :style="{ width: `${size}px`, height: `${size}px` }">
-    <svg :width="size" :height="size" class="transform -rotate-90">
+  <div
+    class="relative inline-flex"
+    :style="{ width: `${size}px`, height: `${size}px` }"
+  >
+    <svg
+      :width="size"
+      :height="size"
+      class="transform -rotate-90"
+    >
       <defs>
-        <linearGradient :id="gradientId" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" :stop-color="colors.start" />
-          <stop offset="100%" :stop-color="colors.end" />
+        <linearGradient
+          :id="gradientId"
+          x1="0%"
+          y1="0%"
+          x2="100%"
+          y2="100%"
+        >
+          <stop
+            offset="0%"
+            :stop-color="colors.start"
+          />
+          <stop
+            offset="100%"
+            :stop-color="colors.end"
+          />
         </linearGradient>
       </defs>
 

@@ -7,8 +7,10 @@ import { BookOpen, Download, ClipboardList, CheckCircle, ArrowRight } from 'luci
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
     <!-- Date Mode Demos -->
     <div class="space-y-3">
-      <h4 class="text-sm font-bold text-muted-foreground mb-2">Date Mode (Leading berupa tanggal)</h4>
-      
+      <h4 class="text-sm font-bold text-muted-foreground mb-2">
+        Date Mode (Leading berupa tanggal)
+      </h4>
+
       <ActivityCard
         :date="18"
         month="Jun"
@@ -38,7 +40,9 @@ import { BookOpen, Download, ClipboardList, CheckCircle, ArrowRight } from 'luci
 
     <!-- Icon Mode Demos -->
     <div class="space-y-3">
-      <h4 class="text-sm font-bold text-muted-foreground mb-2">Icon Mode (Leading berupa kotak icon)</h4>
+      <h4 class="text-sm font-bold text-muted-foreground mb-2">
+        Icon Mode (Leading berupa kotak icon)
+      </h4>
 
       <ActivityCard
         :leading-icon="BookOpen"

@@ -8,4 +8,3 @@ export const sppSummary = {
   belum: 'Rp 80 Jt',
   total: 'Rp 400 Jt'
 }
-

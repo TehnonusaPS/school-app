@@ -18,11 +18,18 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + 100)
     <Card
       v-motion
       :initial="{ opacity: 0, y: 30, scale: 0.95 }"
-      :visible-once="{ opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 200, damping: 20, mass: 0.8, delay: computedDelay } }"
+      :visible-once="{
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: { type: 'spring', stiffness: 200, damping: 20, mass: 0.8, delay: computedDelay }
+      }"
       class="relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-white/40 group glass-ui flex flex-col justify-between col-span-2 lg:col-span-1"
     >
       <!-- Watermark Icon Background -->
-      <Sun class="absolute -right-4 -bottom-4 size-24 opacity-[0.04] rotate-12 transition-transform duration-300 group-hover:scale-110 text-violet-500" />
+      <Sun
+        class="absolute -right-4 -bottom-4 size-24 opacity-[0.04] rotate-12 transition-transform duration-300 group-hover:scale-110 text-violet-500"
+      />
 
       <CardHeader class="pb-2 relative z-10">
         <CardDescription class="text-sm font-medium">Selamat Pagi 👋</CardDescription>
@@ -30,10 +37,14 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + 100)
       </CardHeader>
       <CardContent class="space-y-3 relative z-10">
         <p class="text-xs text-muted-foreground leading-relaxed">
-          Hari ini Anda memiliki <strong class="text-foreground">4 sesi</strong> mengajar
-          dan <strong class="text-foreground">12 tugas</strong> siswa yang perlu dinilai.
+          Hari ini Anda memiliki <strong class="text-foreground">4 sesi</strong> mengajar dan
+          <strong class="text-foreground">12 tugas</strong> siswa yang perlu dinilai.
         </p>
-        <Button variant="outline" size="sm" class="h-8 text-xs gap-1.5 border-white/10 hover:bg-white/5">
+        <Button
+          variant="outline"
+          size="sm"
+          class="h-8 text-xs gap-1.5 border-white/10 hover:bg-white/5"
+        >
           <BookOpen class="size-3.5" />
           Lihat Jadwal Penuh
         </Button>

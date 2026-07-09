@@ -47,7 +47,9 @@ const chartConfig = {
     footerSubtext="Menampilkan total sekolah baru selama 12 bulan terakhir"
   >
     <template #extra>
-      <div class="absolute -inset-x-20 -bottom-20 h-64 bg-primary/5 blur-[80px] rounded-full pointer-events-none transition-opacity group-hover:opacity-100 opacity-0"></div>
+      <div
+        class="absolute -inset-x-20 -bottom-20 h-64 bg-primary/5 blur-[80px] rounded-full pointer-events-none transition-opacity group-hover:opacity-100 opacity-0"
+      ></div>
     </template>
   </BarChartCard>
 </template>

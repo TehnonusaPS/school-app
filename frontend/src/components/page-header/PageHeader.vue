@@ -58,14 +58,20 @@ const handleBack = () => {
         <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-foreground leading-tight">
           {{ title }}
         </h1>
-        <p v-if="description" class="text-muted-foreground text-xs sm:text-sm leading-relaxed">
+        <p
+          v-if="description"
+          class="text-muted-foreground text-xs sm:text-sm leading-relaxed"
+        >
           {{ description }}
         </p>
       </div>
     </div>
 
     <!-- Actions buttons on the right side -->
-    <div v-if="actions && actions.length" class="grid grid-cols-[repeat(3,max-content)] sm:grid-cols-[repeat(4,max-content)] lg:flex lg:flex-row-reverse gap-3 items-center justify-start w-full lg:w-auto shrink-0 [direction:rtl] lg:[direction:ltr]">
+    <div
+      v-if="actions && actions.length"
+      class="grid grid-cols-[repeat(3,max-content)] sm:grid-cols-[repeat(4,max-content)] lg:flex lg:flex-row-reverse gap-3 items-center justify-start w-full lg:w-auto shrink-0 [direction:rtl] lg:[direction:ltr]"
+    >
       <Button
         v-for="(action, index) in actions"
         v-motion
@@ -73,7 +79,13 @@ const handleBack = () => {
         :visible-once="{
           opacity: 1,
           x: 0,
-          transition: { type: 'spring', stiffness: 120, damping: 18, mass: 0.8, delay: 100 + index * 100 }
+          transition: {
+            type: 'spring',
+            stiffness: 120,
+            damping: 18,
+            mass: 0.8,
+            delay: 100 + index * 100
+          }
         }"
         :key="index"
         :variant="action.variant || 'default'"
@@ -82,8 +94,15 @@ const handleBack = () => {
         class="[direction:ltr] w-auto justify-center shrink-0"
         @click="action.click"
       >
-        <span v-if="action.loading" class="mr-2 h-4 w-4 animate-spin border-2 border-current border-t-transparent rounded-full" />
-        <component v-else-if="action.icon" :is="action.icon" class="mr-2 h-4 w-4" />
+        <span
+          v-if="action.loading"
+          class="mr-2 h-4 w-4 animate-spin border-2 border-current border-t-transparent rounded-full"
+        />
+        <component
+          v-else-if="action.icon"
+          :is="action.icon"
+          class="mr-2 h-4 w-4"
+        />
         {{ action.label }}
       </Button>
     </div>

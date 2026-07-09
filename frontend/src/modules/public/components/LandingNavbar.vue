@@ -41,7 +41,11 @@ const navLinks = [
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
       <!-- Logo -->
-      <a href="#" @click.prevent="scrollTo('home')" class="flex items-center gap-2">
+      <a
+        href="#"
+        @click.prevent="scrollTo('home')"
+        class="flex items-center gap-2"
+      >
         <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg">
           <GraduationCap class="w-6 h-6 text-white" />
         </div>
@@ -112,8 +116,14 @@ const navLinks = [
         class="md:hidden"
         :class="isScrolled ? 'text-gray-700' : 'text-white'"
       >
-        <Menu v-if="!isMenuOpen" class="w-6 h-6" />
-        <X v-else class="w-6 h-6" />
+        <Menu
+          v-if="!isMenuOpen"
+          class="w-6 h-6"
+        />
+        <X
+          v-else
+          class="w-6 h-6"
+        />
       </button>
     </div>
 

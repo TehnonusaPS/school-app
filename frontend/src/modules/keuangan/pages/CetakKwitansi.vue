@@ -9,7 +9,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select'
 import {
   Filter,
@@ -188,11 +188,12 @@ const handlePrint = () => {
     
     <!-- Left Section: Data & Filter -->
     <div class="flex-1 space-y-6">
-      
       <!-- Header -->
       <div>
         <h1 class="text-3xl font-bold tracking-tight">Cetak Kuitansi Pembayaran</h1>
-        <p class="text-muted-foreground mt-2 text-sm">Kelola, cari, dan cetak bukti pembayaran siswa dengan mudah.</p>
+        <p class="text-muted-foreground mt-2 text-sm">
+          Kelola, cari, dan cetak bukti pembayaran siswa dengan mudah.
+        </p>
       </div>
 
       <!-- Filter Card -->
@@ -244,7 +245,9 @@ const handlePrint = () => {
         
         <div class="overflow-x-auto">
           <table class="w-full text-sm text-left">
-            <thead class="bg-muted/50 text-muted-foreground text-xs uppercase font-semibold border-b border-border">
+            <thead
+              class="bg-muted/50 text-muted-foreground text-xs uppercase font-semibold border-b border-border"
+            >
               <tr>
                 <th class="px-6 py-4 tracking-wider">NO. KUITANSI</th>
                 <th class="px-6 py-4 tracking-wider">SISWA</th>
@@ -271,7 +274,7 @@ const handlePrint = () => {
                 <td class="px-6 py-4 text-muted-foreground">{{ formatDate(tx.payment_date) }}</td>
                 <td class="px-6 py-4 font-bold text-foreground">{{ formatRupiah(tx.amount) }}</td>
                 <td class="px-6 py-4">
-                  <span 
+                  <span
                     class="px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase"
                     :class="tx.status === 'success' ? 'bg-emerald-500/10 text-emerald-600' : tx.status === 'failed' ? 'bg-destructive/10 text-destructive' : 'bg-amber-500/10 text-amber-600'"
                   >
@@ -292,7 +295,6 @@ const handlePrint = () => {
 
     <!-- Right Section: Preview -->
     <div class="w-full xl:w-[400px] flex-shrink-0 space-y-5">
-      
       <div class="flex items-center justify-between pt-1">
         <h2 class="text-lg font-bold tracking-tight">Pratinjau Kuitansi</h2>
         <Button 
@@ -445,6 +447,5 @@ const handlePrint = () => {
       </div>
 
     </div>
-
   </div>
 </template>

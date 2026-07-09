@@ -281,7 +281,10 @@ onMounted(() => {
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem @click="router.push('/akun-setting')" class="cursor-pointer">
+            <DropdownMenuItem
+              @click="router.push('/akun-setting')"
+              class="cursor-pointer"
+            >
               <BadgeCheck />
               Account
             </DropdownMenuItem>

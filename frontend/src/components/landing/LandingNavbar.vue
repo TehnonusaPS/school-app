@@ -38,19 +38,26 @@ const closeMobileMenu = () => {
 </script>
 
 <template>
-  <header 
+  <header
     class="fixed top-0 left-0 right-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md transition-all duration-300 overflow-hidden"
   >
     <div class="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
       <div class="flex h-14 sm:h-16 items-center justify-between gap-2">
         <!-- Logo -->
-        <router-link to="/" class="flex items-center gap-2 min-w-0 shrink" @click="closeMobileMenu">
+        <router-link
+          to="/"
+          class="flex items-center gap-2 min-w-0 shrink"
+          @click="closeMobileMenu"
+        >
           <div
             class="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm shrink-0"
           >
             <School class="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
-          <span class="font-display text-base sm:text-lg font-bold tracking-tight text-foreground truncate">{{ brandName }}</span>
+          <span
+            class="font-display text-base sm:text-lg font-bold tracking-tight text-foreground truncate"
+            >{{ brandName }}</span
+          >
         </router-link>
 
         <!-- Desktop Navigation Links -->
@@ -91,7 +98,10 @@ const closeMobileMenu = () => {
             aria-label="Toggle Menu"
             @click="toggleMobileMenu"
           >
-            <component :is="isMobileMenuOpen ? X : Menu" class="h-5 w-5 text-foreground" />
+            <component
+              :is="isMobileMenuOpen ? X : Menu"
+              class="h-5 w-5 text-foreground"
+            />
           </button>
         </div>
       </div>

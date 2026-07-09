@@ -42,7 +42,11 @@ defineProps({
     <CardHeader class="pb-3">
       <CardTitle>
         <div class="flex items-center gap-2">
-          <component v-if="icon" :is="icon" class="size-4 text-muted-foreground" />
+          <component
+            v-if="icon"
+            :is="icon"
+            class="size-4 text-muted-foreground"
+          />
           <span class="text-foreground">{{ title }}</span>
         </div>
       </CardTitle>
@@ -65,7 +69,10 @@ defineProps({
         </div>
 
         <!-- Progress Bar -->
-        <Progress :model-value="cat.score" class="h-2" />
+        <Progress
+          :model-value="cat.score"
+          class="h-2"
+        />
 
         <!-- Detail Items -->
         <div class="space-y-1 pl-1">

@@ -21,7 +21,7 @@ const openEdit = () => {
   isOpen.value = true
 }
 
-const handleSubmit = (formData) => {
+const handleSubmit = formData => {
   isSaving.value = true
   setTimeout(() => {
     isSaving.value = false
@@ -55,7 +55,11 @@ const handleSubmit = (formData) => {
       v-model:open="isOpen"
       :item="selectedItem"
       :title="selectedItem ? 'Edit Profil Guru' : 'Tambah Guru Baru'"
-      :description="selectedItem ? 'Ubah informasi data akademik dan kontak guru' : 'Lengkapi data formulir di bawah ini untuk menambahkan guru baru'"
+      :description="
+        selectedItem
+          ? 'Ubah informasi data akademik dan kontak guru'
+          : 'Lengkapi data formulir di bawah ini untuk menambahkan guru baru'
+      "
       :sections="guruSheetSections"
       :loading="isSaving"
       @submit="handleSubmit"

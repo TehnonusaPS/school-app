@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { Sparkles, CalendarDays, ArrowRight } from 'lucide-vue-next';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
-import ScheduleEventCard from './ScheduleEventCard.vue';
+import { computed } from 'vue'
+import { Sparkles, CalendarDays, ArrowRight } from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import ScheduleEventCard from './ScheduleEventCard.vue'
 
 const props = defineProps<{
-  selectedDate: Date;
+  selectedDate: Date
   selectedDateDetails: {
     dateStr: string;
     dateObj: Date;
@@ -21,8 +21,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'view-all'): void;
-}>();
+  (e: 'view-all'): void
+}>()
 
 const formattedSelectedDate = computed(() => {
   return props.selectedDate.toLocaleDateString('id-ID', {
@@ -30,15 +30,16 @@ const formattedSelectedDate = computed(() => {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
-  });
-});
+  })
+})
 
 const limitedUpcomingEvents = computed(() => {
-  return props.upcomingEvents.slice(0, 3);
-});
+  return props.upcomingEvents.slice(0, 3)
+})
 
 const hasNoEvents = computed(() => {
-  return !props.selectedDateDetails.holiday &&
+  return (
+    !props.selectedDateDetails.holiday &&
     props.selectedDateDetails.exams.length === 0 &&
     props.selectedDateDetails.assignments.length === 0 &&
     props.selectedDateDetails.lessons.length === 0 &&
@@ -62,7 +63,6 @@ const hasNoEvents = computed(() => {
     <!-- Scrollable Content — hanya bagian ini yang bisa scroll -->
     <ScrollArea class="flex-1 min-h-0">
       <div class="px-5 py-4 space-y-5">
-
         <!-- Section 1: Agenda Terpilih -->
         <div class="space-y-3">
           <h3 class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
@@ -127,7 +127,10 @@ const hasNoEvents = computed(() => {
             </Button>
           </div>
 
-          <div v-if="upcomingEvents.length === 0" class="text-center py-6 text-xs text-muted-foreground">
+          <div
+            v-if="upcomingEvents.length === 0"
+            class="text-center py-6 text-xs text-muted-foreground"
+          >
             Tidak ada agenda mendatang.
           </div>
 
@@ -142,7 +145,6 @@ const hasNoEvents = computed(() => {
             </div>
           </div>
         </div>
-
       </div>
     </ScrollArea>
   </Card>

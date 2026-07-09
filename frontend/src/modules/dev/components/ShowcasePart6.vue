@@ -7,7 +7,7 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -72,7 +72,10 @@ const stepperValue = ref(2)
 <template>
   <div class="space-y-12">
     <!-- 51. SPINNER -->
-    <section v-show="match('spinner')" class="space-y-4">
+    <section
+      v-show="match('spinner')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">51. Spinner</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -87,7 +90,10 @@ const stepperValue = ref(2)
     </section>
 
     <!-- 52. STEPPER -->
-    <section v-show="match('stepper')" class="space-y-4">
+    <section
+      v-show="match('stepper')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">52. Stepper</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -96,7 +102,10 @@ const stepperValue = ref(2)
         </p>
       </div>
       <div class="p-6 border rounded-xl bg-card">
-        <Stepper v-model="stepperValue" class="flex w-full items-start gap-2">
+        <Stepper
+          v-model="stepperValue"
+          class="flex w-full items-start gap-2"
+        >
           <StepperItem
             v-for="step in stepperSteps"
             :key="step.step"
@@ -155,7 +164,10 @@ const stepperValue = ref(2)
     </section>
 
     <!-- 53. SWITCH -->
-    <section v-show="match('switch')" class="space-y-4">
+    <section
+      v-show="match('switch')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">53. Switch</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -164,14 +176,20 @@ const stepperValue = ref(2)
       </div>
       <div class="p-6 border rounded-xl bg-card flex justify-center">
         <div class="flex items-center space-x-2">
-          <Switch id="airplane-mode" v-model="switchValue" />
+          <Switch
+            id="airplane-mode"
+            v-model="switchValue"
+          />
           <Label for="airplane-mode">Airplane Mode</Label>
         </div>
       </div>
     </section>
 
     <!-- 54. TABLE -->
-    <section v-show="match('table')" class="space-y-4">
+    <section
+      v-show="match('table')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">54. Table</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -208,7 +226,10 @@ const stepperValue = ref(2)
     </section>
 
     <!-- 55. TABS -->
-    <section v-show="match('tabs')" class="space-y-4">
+    <section
+      v-show="match('tabs')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">55. Tabs</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -219,30 +240,31 @@ const stepperValue = ref(2)
         <div class="flex w-full max-w-sm flex-col gap-6">
           <Tabs default-value="account">
             <TabsList class="grid w-full grid-cols-2">
-              <TabsTrigger value="account">
-                Account
-              </TabsTrigger>
-              <TabsTrigger value="password">
-                Password
-              </TabsTrigger>
+              <TabsTrigger value="account"> Account </TabsTrigger>
+              <TabsTrigger value="password"> Password </TabsTrigger>
             </TabsList>
             <TabsContent value="account">
               <Card>
                 <CardHeader>
                   <CardTitle>Account</CardTitle>
                   <CardDescription>
-                    Make changes to your account here. Click save when you're
-                    done.
+                    Make changes to your account here. Click save when you're done.
                   </CardDescription>
                 </CardHeader>
                 <CardContent class="grid gap-6">
                   <div class="grid gap-3">
                     <Label for="tabs-demo-name">Name</Label>
-                    <Input id="tabs-demo-name" default-value="Pedro Duarte" />
+                    <Input
+                      id="tabs-demo-name"
+                      default-value="Pedro Duarte"
+                    />
                   </div>
                   <div class="grid gap-3">
                     <Label for="tabs-demo-username">Username</Label>
-                    <Input id="tabs-demo-username" default-value="@peduarte" />
+                    <Input
+                      id="tabs-demo-username"
+                      default-value="@peduarte"
+                    />
                   </div>
                 </CardContent>
                 <CardFooter>
@@ -255,18 +277,23 @@ const stepperValue = ref(2)
                 <CardHeader>
                   <CardTitle>Password</CardTitle>
                   <CardDescription>
-                    Change your password here. After saving, you'll be logged
-                    out.
+                    Change your password here. After saving, you'll be logged out.
                   </CardDescription>
                 </CardHeader>
                 <CardContent class="grid gap-6">
                   <div class="grid gap-3">
                     <Label for="tabs-demo-current">Current password</Label>
-                    <Input id="tabs-demo-current" type="password" />
+                    <Input
+                      id="tabs-demo-current"
+                      type="password"
+                    />
                   </div>
                   <div class="grid gap-3">
                     <Label for="tabs-demo-new">New password</Label>
-                    <Input id="tabs-demo-new" type="password" />
+                    <Input
+                      id="tabs-demo-new"
+                      type="password"
+                    />
                   </div>
                 </CardContent>
                 <CardFooter>
@@ -280,7 +307,10 @@ const stepperValue = ref(2)
     </section>
 
     <!-- 56. TAGS INPUT -->
-    <section v-show="match('tags input')" class="space-y-4">
+    <section
+      v-show="match('tags input')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">56. Tags Input</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -288,8 +318,15 @@ const stepperValue = ref(2)
         </p>
       </div>
       <div class="p-6 border rounded-xl bg-card flex justify-center">
-        <TagsInput v-model="tagsInputValue" class="w-80">
-          <TagsInputItem v-for="item in tagsInputValue" :key="item" :value="item">
+        <TagsInput
+          v-model="tagsInputValue"
+          class="w-80"
+        >
+          <TagsInputItem
+            v-for="item in tagsInputValue"
+            :key="item"
+            :value="item"
+          >
             <TagsInputItemText />
             <TagsInputItemDelete />
           </TagsInputItem>
@@ -299,7 +336,10 @@ const stepperValue = ref(2)
     </section>
 
     <!-- 57. TEXTAREA -->
-    <section v-show="match('textarea')" class="space-y-4">
+    <section
+      v-show="match('textarea')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">57. Textarea</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -316,7 +356,10 @@ const stepperValue = ref(2)
     </section>
 
     <!-- 58. TOGGLE -->
-    <section v-show="match('toggle')" class="space-y-4">
+    <section
+      v-show="match('toggle')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">58. Toggle</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -324,14 +367,20 @@ const stepperValue = ref(2)
         </p>
       </div>
       <div class="p-6 border rounded-xl bg-card flex justify-center">
-        <Toggle v-model="toggleValue" aria-label="Toggle italic">
+        <Toggle
+          v-model="toggleValue"
+          aria-label="Toggle italic"
+        >
           <span class="italic font-serif">I</span>
         </Toggle>
       </div>
     </section>
 
     <!-- 59. TOGGLE GROUP -->
-    <section v-show="match('toggle group')" class="space-y-4">
+    <section
+      v-show="match('toggle group')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">59. Toggle Group</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -340,16 +389,37 @@ const stepperValue = ref(2)
         </p>
       </div>
       <div class="p-6 border rounded-xl bg-card flex justify-center">
-        <ToggleGroup v-model="toggleGroupValue" type="single">
-          <ToggleGroupItem value="left" aria-label="Toggle Left"> Kiri </ToggleGroupItem>
-          <ToggleGroupItem value="center" aria-label="Toggle Center"> Tengah </ToggleGroupItem>
-          <ToggleGroupItem value="right" aria-label="Toggle Right"> Kanan </ToggleGroupItem>
+        <ToggleGroup
+          v-model="toggleGroupValue"
+          type="single"
+        >
+          <ToggleGroupItem
+            value="left"
+            aria-label="Toggle Left"
+          >
+            Kiri
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="center"
+            aria-label="Toggle Center"
+          >
+            Tengah
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="right"
+            aria-label="Toggle Right"
+          >
+            Kanan
+          </ToggleGroupItem>
         </ToggleGroup>
       </div>
     </section>
 
     <!-- 60. TOOLTIP -->
-    <section v-show="match('tooltip')" class="space-y-4">
+    <section
+      v-show="match('tooltip')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">60. Tooltip</h2>
         <p class="text-sm text-muted-foreground mt-1">

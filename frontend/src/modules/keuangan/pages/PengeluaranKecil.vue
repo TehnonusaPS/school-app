@@ -9,7 +9,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select'
 import {
   PlusCircle,
@@ -18,7 +18,7 @@ import {
   UploadCloud,
   CheckCircle2,
   Wallet,
-  Lightbulb,
+  Lightbulb
 } from 'lucide-vue-next'
 
 const paymentMethod = ref('cash')
@@ -63,12 +63,13 @@ const recentActivities = ref([
         <span class="font-semibold text-foreground">Input Pengeluaran</span>
       </div>
       <h1 class="text-3xl font-bold tracking-tight">Input Pengeluaran Kas Kecil</h1>
-      <p class="text-muted-foreground mt-2 text-sm">Catat pengeluaran operasional harian sekolah secara detail untuk audit.</p>
+      <p class="text-muted-foreground mt-2 text-sm">
+        Catat pengeluaran operasional harian sekolah secara detail untuk audit.
+      </p>
     </div>
 
     <!-- Main Content -->
     <div class="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-6">
-      
       <!-- Left Column: Form -->
       <Card class="overflow-hidden shadow-sm">
         <div class="px-6 py-4 border-b border-border flex justify-between items-center bg-muted/30">
@@ -76,16 +77,18 @@ const recentActivities = ref([
             <PlusCircle class="w-5 h-5" />
             FORMULIR PENGELUARAN
           </div>
-          <div class="text-xs text-muted-foreground font-medium">
-            ID Transaksi: AUTO-PC-2405
-          </div>
+          <div class="text-xs text-muted-foreground font-medium">ID Transaksi: AUTO-PC-2405</div>
         </div>
-        
+
         <div class="p-6 space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-2">
               <label class="text-sm font-semibold">Tanggal Transaksi</label>
-              <Input type="date" value="2026-05-28" class="text-muted-foreground" />
+              <Input
+                type="date"
+                value="2026-05-28"
+                class="text-muted-foreground"
+              />
             </div>
             <div class="space-y-2">
               <label class="text-sm font-semibold">Kategori Pengeluaran</label>
@@ -105,23 +108,32 @@ const recentActivities = ref([
           <div class="space-y-2">
             <label class="text-sm font-semibold">Jumlah Nominal (Rp)</label>
             <div class="relative">
-              <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">Rp</span>
-              <Input type="text" value="0" class="pl-12 text-2xl font-bold h-14" />
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-muted-foreground"
+                >Rp</span
+              >
+              <Input
+                type="text"
+                value="0"
+                class="pl-12 text-2xl font-bold h-14"
+              />
             </div>
           </div>
 
           <div class="space-y-2">
             <label class="text-sm font-semibold">Deskripsi / Catatan</label>
-            <Textarea placeholder="Contoh: Pembelian kertas A4 5 rim untuk ruang guru" class="min-h-[120px] resize-none" />
+            <Textarea
+              placeholder="Contoh: Pembelian kertas A4 5 rim untuk ruang guru"
+              class="min-h-[120px] resize-none"
+            />
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-2">
               <label class="text-sm font-semibold">Metode Pembayaran</label>
               <div class="flex gap-3">
-                <Button 
-                  type="button" 
-                  :variant="paymentMethod === 'cash' ? 'default' : 'outline'" 
+                <Button
+                  type="button"
+                  :variant="paymentMethod === 'cash' ? 'default' : 'outline'"
                   class="flex-1 flex items-center gap-2 h-11"
                   @click="paymentMethod = 'cash'"
                   :class="paymentMethod === 'cash' ? 'bg-primary text-primary-foreground' : ''"
@@ -129,9 +141,9 @@ const recentActivities = ref([
                   <Banknote class="w-4 h-4" />
                   Cash
                 </Button>
-                <Button 
-                  type="button" 
-                  :variant="paymentMethod === 'reimburse' ? 'default' : 'outline'" 
+                <Button
+                  type="button"
+                  :variant="paymentMethod === 'reimburse' ? 'default' : 'outline'"
                   class="flex-1 flex items-center gap-2 h-11"
                   @click="paymentMethod = 'reimburse'"
                   :class="paymentMethod === 'reimburse' ? 'bg-primary text-primary-foreground' : ''"
@@ -143,7 +155,9 @@ const recentActivities = ref([
             </div>
             <div class="space-y-2">
               <label class="text-sm font-semibold">Unggah Kuitansi / Nota</label>
-              <div class="border-2 border-dashed border-border rounded-lg h-11 flex items-center justify-center text-sm text-muted-foreground hover:bg-muted/50 cursor-pointer transition-colors gap-2">
+              <div
+                class="border-2 border-dashed border-border rounded-lg h-11 flex items-center justify-center text-sm text-muted-foreground hover:bg-muted/50 cursor-pointer transition-colors gap-2"
+              >
                 <UploadCloud class="w-4 h-4" />
                 <span>Klik untuk unggah (Max 2MB)</span>
               </div>
@@ -151,29 +165,47 @@ const recentActivities = ref([
           </div>
 
           <div class="border-t border-border pt-6 mt-2 flex gap-4 items-center">
-            <Button class="bg-primary text-primary-foreground hover:bg-primary/90 px-6 h-11 flex items-center gap-2 font-semibold">
+            <Button
+              class="bg-primary text-primary-foreground hover:bg-primary/90 px-6 h-11 flex items-center gap-2 font-semibold"
+            >
               Simpan Pengeluaran
               <CheckCircle2 class="w-4 h-4" />
             </Button>
-            <Button variant="ghost" class="font-semibold">Batal</Button>
+            <Button
+              variant="ghost"
+              class="font-semibold"
+              >Batal</Button
+            >
           </div>
         </div>
       </Card>
 
       <!-- Right Column: Info & Stats -->
       <div class="space-y-6">
-        
         <!-- Recent Activities -->
         <Card class="shadow-sm">
-          <div class="px-5 py-4 flex justify-between items-center border-b border-border bg-muted/20">
+          <div
+            class="px-5 py-4 flex justify-between items-center border-b border-border bg-muted/20"
+          >
             <h3 class="font-bold text-sm tracking-widest uppercase">AKTIVITAS TERAKHIR</h3>
-            <a href="#" class="text-xs font-semibold hover:underline">Lihat Semua</a>
+            <a
+              href="#"
+              class="text-xs font-semibold hover:underline"
+              >Lihat Semua</a
+            >
           </div>
           <div class="divide-y divide-border">
-            <div v-for="act in recentActivities" :key="act.id" class="p-5">
+            <div
+              v-for="act in recentActivities"
+              :key="act.id"
+              class="p-5"
+            >
               <div class="flex justify-between items-start mb-1">
                 <p class="font-bold text-base">{{ act.amount }}</p>
-                <span class="text-[9px] font-bold tracking-wider px-2 py-0.5 rounded-full uppercase" :class="act.badgeClass">
+                <span
+                  class="text-[9px] font-bold tracking-wider px-2 py-0.5 rounded-full uppercase"
+                  :class="act.badgeClass"
+                >
                   {{ act.category }}
                 </span>
               </div>
@@ -184,8 +216,12 @@ const recentActivities = ref([
         </Card>
 
         <!-- Sisa Anggaran Box -->
-        <div class="bg-slate-900 text-white p-6 rounded-xl shadow-md border border-slate-800 relative overflow-hidden">
-          <div class="absolute inset-0 bg-gradient-to-br from-slate-800/50 to-transparent pointer-events-none"></div>
+        <div
+          class="bg-slate-900 text-white p-6 rounded-xl shadow-md border border-slate-800 relative overflow-hidden"
+        >
+          <div
+            class="absolute inset-0 bg-gradient-to-br from-slate-800/50 to-transparent pointer-events-none"
+          ></div>
           <div class="relative z-10">
             <div class="flex items-center gap-2 mb-4 text-slate-300">
               <Wallet class="w-5 h-5" />
@@ -197,9 +233,13 @@ const recentActivities = ref([
             </div>
             <!-- Progress Bar -->
             <div class="h-2.5 w-full bg-slate-800 rounded-full mb-3 overflow-hidden flex">
-              <div class="h-full bg-emerald-400 w-[49%] rounded-full shadow-[0_0_10px_rgba(52,211,153,0.5)]"></div>
+              <div
+                class="h-full bg-emerald-400 w-[49%] rounded-full shadow-[0_0_10px_rgba(52,211,153,0.5)]"
+              ></div>
             </div>
-            <p class="text-[11px] text-slate-400 italic font-medium">*Anggaran periode Oktober 2023</p>
+            <p class="text-[11px] text-slate-400 italic font-medium">
+              *Anggaran periode Oktober 2023
+            </p>
           </div>
         </div>
 
@@ -212,14 +252,13 @@ const recentActivities = ref([
             <div>
               <h4 class="font-bold text-sm mb-1.5">Tips Keamanan</h4>
               <p class="text-xs text-muted-foreground leading-relaxed font-medium">
-                Selalu pastikan foto kuitansi terlihat jelas dan nomor nota terbaca untuk mempermudah proses audit bulanan.
+                Selalu pastikan foto kuitansi terlihat jelas dan nomor nota terbaca untuk
+                mempermudah proses audit bulanan.
               </p>
             </div>
           </div>
         </div>
-
       </div>
-
     </div>
   </div>
 </template>

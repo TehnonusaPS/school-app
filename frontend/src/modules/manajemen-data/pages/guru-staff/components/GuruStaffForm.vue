@@ -1,11 +1,5 @@
 <script setup>
-import { 
-  Phone, 
-  Image,
-  SquareUserRound,
-  BriefcaseBusiness,
-  UserCog,
-} from 'lucide-vue-next'
+import { Phone, Image, SquareUserRound, BriefcaseBusiness, UserCog } from 'lucide-vue-next'
 import { Separator } from '@/components/ui/separator'
 import ImageUpload from '@/components/forms/ImageUpload.vue'
 import FormInput from '@/components/forms/FormInput.vue'
@@ -28,7 +22,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['image-change'])
 
-const handleImageChange = (file) => {
+const handleImageChange = file => {
   emit('image-change', file)
 }
 </script>
@@ -99,4 +93,144 @@ const handleImageChange = (file) => {
         </FormSection>
       </div>
     </div>
+    <!-- Kolom Kanan: Informasi Pribadi (Lebar 2 Kolom) -->
+    <div class="md:col-span-2 space-y-6">
+      <FormSection
+        title="Informasi Pribadi"
+        description="Informasi dasar mengenai guru/staff"
+        :icon="SquareUserRound"
+      >
+        <div class="grid gap-4 md:grid-cols-2">
+          <FormInput
+            v-model="form.nama_depan"
+            label="Nama Depan"
+            placeholder="Contoh: John"
+          />
+          <FormInput
+            v-model="form.nama_belakang"
+            label="Nama Belakang"
+            placeholder="Contoh: Doe"
+          />
+        </div>
+        <div class="grid gap-4 md:grid-cols-2">
+          <FormInput
+            v-model="form.nik"
+            label="NIK"
+            placeholder="Contoh: 1234567890"
+          />
+          <FormInput
+            v-model="form.nip_nuptk"
+            label="NIP/NUPTK"
+            placeholder="Contoh: 1234567890"
+          />
+        </div>
+        <div class="grid gap-4 md:grid-cols-2">
+          <FormInput
+            v-model="form.tempat_lahir"
+            label="Tempat Lahir"
+            placeholder="Contoh: Jakarta"
+          />
+          <FormDate
+            v-model="form.tanggal_lahir"
+            label="Tanggal Lahir"
+          />
+        </div>
+        <div class="grid gap-4 md:grid-cols-2">
+          <FormSelect
+            v-model="form.jenis_kelamin"
+            label="Jenis Kelamin"
+            placeholder="Pilih jenis kelamin"
+            :options="kelaminOptions"
+          />
+          <FormSelect
+            v-model="form.agama"
+            label="Agama"
+            placeholder="Pilih agama"
+            :options="agamaOptions"
+          />
+        </div>
+        <div class="grid gap-4 md:grid-cols-2">
+          <FormSelect
+            v-model="form.status_pernikahan"
+            label="Status Pernikahan"
+            placeholder="Pilih status pernikahan"
+            :options="statusPernikahanOptions"
+          />
+          <FormSelect
+            v-model="form.pendidikan_terakhir"
+            label="Pendidikan Terakhir"
+            placeholder="Pilih pendidikan terakhir"
+            :options="pendidikanOptions"
+          />
+        </div>
+        <div class="grid gap-4 md:grid-cols-2">
+          <FormInput
+            v-model="form.gelar_depan"
+            label="Gelar Depan"
+            placeholder="Contoh: Drs."
+          />
+          <FormInput
+            v-model="form.gelar_belakang"
+            label="Gelar Belakang"
+            placeholder="Contoh: S.Pd., M.Pd."
+          />
+        </div>
+      </FormSection>
+
+      <FormSection
+        title="Informasi Kepegawaian"
+        description="Informasi kepegawaian mengenai guru/staff"
+        :icon="BriefcaseBusiness"
+      >
+        <div class="grid gap-4 md:grid-cols-2">
+          <FormSelect
+            v-model="form.jabatan"
+            label="Jabatan"
+            placeholder="Pilih jabatan"
+            :options="jabatanOptions"
+          />
+          <FormSelect
+            v-model="form.status_kepegawaian"
+            label="Status Kepegawaian"
+            placeholder="Pilih status kepegawaian"
+            :options="statusKepegawaianOptions"
+          />
+        </div>
+        <div class="grid gap-4 md:grid-cols-2">
+          <FormSelect
+            v-model="form.unit_kerja"
+            label="Unit Kerja"
+            placeholder="Pilih unit kerja"
+            :options="unitKerjaOptions"
+          />
+          <FormSelect
+            v-model="form.status_aktif"
+            label="Status Aktif"
+            placeholder="Pilih status"
+            :options="statusOptions"
+          />
+        </div>
+      </FormSection>
+
+      <!-- Informasi Login -->
+      <FormSection
+        title="Akun Pengguna"
+        description="Informasi akun yang digunakan guru atau staff untuk mengakses sistem."
+        :icon="UserCog"
+      >
+        <div class="grid gap-4 md:grid-cols-2">
+          <FormInput
+            v-model="form.emailLogin"
+            label="E-mail Login"
+            placeholder="Contoh: admin@sekolah.sch.id"
+          />
+          <FormInput
+            v-model="form.noHpLogin"
+            label="No. HP Login"
+            placeholder="Contoh: 081234567890"
+          />
+        </div>
+      </FormSection>
+    </div>
+  </div>
 </template>

@@ -9,9 +9,14 @@ const props = defineProps({
   delay: { type: Number, default: 0 }
 })
 
-const today = new Date().toLocaleDateString('id-ID', {
-  weekday: 'long', day: '2-digit', month: 'short', year: 'numeric'
-}).toUpperCase()
+const today = new Date()
+  .toLocaleDateString('id-ID', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  })
+  .toUpperCase()
 </script>
 
 <template>
@@ -25,7 +30,10 @@ const today = new Date().toLocaleDateString('id-ID', {
     illustration="school_bell"
   >
     <template #header-action>
-      <Badge variant="outline" class="text-xs font-semibold text-primary">
+      <Badge
+        variant="outline"
+        class="text-xs font-semibold text-primary"
+      >
         {{ today }}
       </Badge>
     </template>
@@ -40,7 +48,9 @@ const today = new Date().toLocaleDateString('id-ID', {
     >
       <!-- Waktu -->
       <div class="min-w-[70px] text-right">
-        <p :class="['text-sm font-bold tabular-nums', j.aktif ? 'text-primary' : 'text-foreground']">
+        <p
+          :class="['text-sm font-bold tabular-nums', j.aktif ? 'text-primary' : 'text-foreground']"
+        >
           {{ j.mulai }} WIB
         </p>
         <p class="text-[10px] text-muted-foreground tabular-nums">{{ j.selesai }} WIB</p>
@@ -59,7 +69,12 @@ const today = new Date().toLocaleDateString('id-ID', {
 
       <!-- Actions -->
       <div class="flex items-center gap-2 shrink-0">
-        <Button variant="outline" size="sm" class="h-8 text-xs">Materi</Button>
+        <Button
+          variant="outline"
+          size="sm"
+          class="h-8 text-xs"
+          >Materi</Button
+        >
         <Button
           :variant="j.aktif ? 'default' : 'secondary'"
           size="sm"

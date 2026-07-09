@@ -52,7 +52,7 @@ const props = defineProps({
   variant: {
     type: String,
     default: 'blue',
-    validator: (v) => ['blue', 'green', 'purple', 'amber'].includes(v)
+    validator: v => ['blue', 'green', 'purple', 'amber'].includes(v)
   }
 })
 
@@ -81,7 +81,9 @@ const labelColor = computed(() => variantLabelColors[props.variant] || variantLa
 
 <template>
   <Card>
-    <CardContent class="flex flex-col items-center text-center py-6 px-5 min-h-[280px] justify-center">
+    <CardContent
+      class="flex flex-col items-center text-center py-6 px-5 min-h-[280px] justify-center"
+    >
       <!-- Title -->
       <h3 class="text-sm font-bold mb-4 leading-snug text-foreground">{{ title }}</h3>
 
@@ -98,12 +100,18 @@ const labelColor = computed(() => variantLabelColors[props.variant] || variantLa
       </div>
 
       <!-- Label -->
-      <div v-if="label" :class="['text-sm font-bold mt-1', labelColor]">
+      <div
+        v-if="label"
+        :class="['text-sm font-bold mt-1', labelColor]"
+      >
         {{ label }}
       </div>
 
       <!-- Description -->
-      <p v-if="description" class="text-xs text-muted-foreground mt-1 leading-relaxed max-w-[200px]">
+      <p
+        v-if="description"
+        class="text-xs text-muted-foreground mt-1 leading-relaxed max-w-[200px]"
+      >
         {{ description }}
       </p>
     </CardContent>

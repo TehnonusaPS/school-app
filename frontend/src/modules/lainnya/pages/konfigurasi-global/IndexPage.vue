@@ -56,7 +56,8 @@ import {
   GripVertical,
   Eye,
   MoveUp,
-  MoveDown
+  MoveDown,
+  ExternalLink
 } from 'lucide-vue-next'
 import VueDraggable from 'vuedraggable'
 import { toast } from 'vue-sonner'
@@ -182,81 +183,34 @@ const createFoundationSections = () => [
   { id: 6, type: 'faq', title: 'FAQ Yayasan', is_visible: true, sort_order: 6, items: [] }
 ]
 
-// Mock Data Yayasan
+// Helper data factory
+const createDefaultEntity = (id, name, slug, avatarLetter, colorClass, type, status = 'Aktif') => ({
+  id, name, slug, avatarLetter, avatarColor: colorClass, status,
+  template: type === 'Yayasan' ? 'Modern Institutional' : 'Classic Academic', 
+  landing_page_enabled: true, is_published: true, lastUpdated: 'Kemarin', 
+  indicatorColor: status === 'Aktif' ? 'bg-emerald-500' : 'bg-red-500', theme: type === 'Yayasan' ? 'modern' : 'classic',
+  meta_title: '', meta_description: '', 
+  primary_color: type === 'Yayasan' ? '#1e40af' : '#7c3aed', secondary_color: '#f59e0b', accent_color: '#06b6d4',
+  hero_title: '', hero_subtitle: '', hero_description: '', about_title: '', about_description: '', about_vision: '', about_mission: [],
+  contact_email: '', contact_phone: '', contact_address: '', contact_maps_embed: '', social_instagram: '', social_facebook: '', social_youtube: '', social_tiktok: '',
+  sections: type === 'Yayasan' ? createFoundationSections() : createSchoolSections()
+})
+
 const defaultFoundationMappings = [
-  {
-    id: 'FDN-2023-001',
-    name: 'Yayasan Pendidikan Nusantara',
-    template: 'Modern Institutional',
-    status: 'Aktif',
-    landing_page_enabled: true,
-    is_published: false,
-    lastUpdated: '-',
-    avatarLetter: 'YN',
-    avatarColor: 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20',
-    indicatorColor: 'bg-emerald-500',
-    theme: 'modern',
-    slug: 'yayasan-nusantara',
-    meta_title: '',
-    meta_description: '',
-    primary_color: '#1e40af',
-    secondary_color: '#f59e0b',
-    accent_color: '#0ea5e9',
-    hero_title: '',
-    hero_subtitle: '',
-    hero_description: '',
-    about_title: '',
-    about_description: '',
-    about_vision: '',
-    about_mission: [],
-    contact_email: '',
-    contact_phone: '',
-    contact_address: '',
-    contact_maps_embed: '',
-    social_instagram: '',
-    social_facebook: '',
-    social_youtube: '',
-    social_tiktok: '',
-    sections: createFoundationSections()
-  }
+  createDefaultEntity('FDN-2023-001', 'Yayasan Pendidikan Nusantara', 'yayasan-nusantara', 'YN', 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20', 'Yayasan'),
+  createDefaultEntity('FDN-2023-002', 'Yayasan Bina Cendekia', 'yayasan-cendekia', 'YC', 'bg-blue-500/10 text-blue-500 border border-blue-500/20', 'Yayasan'),
+  createDefaultEntity('FDN-2023-003', 'Yayasan Pelita Bangsa', 'yayasan-pelita', 'YP', 'bg-teal-500/10 text-teal-500 border border-teal-500/20', 'Yayasan'),
+  createDefaultEntity('FDN-2023-004', 'Yayasan Generasi Emas', 'yayasan-emas', 'YE', 'bg-amber-500/10 text-amber-500 border border-amber-500/20', 'Yayasan'),
+  createDefaultEntity('FDN-2023-005', 'Yayasan Citra Mandiri', 'yayasan-citra', 'YM', 'bg-rose-500/10 text-rose-500 border border-rose-500/20', 'Yayasan', 'Nonaktif')
 ]
 
 const defaultSchoolMappings = [
-  {
-    id: 'SCH-2023-001',
-    name: 'SMA Nusantara',
-    template: 'Modern Institutional',
-    status: 'Aktif',
-    landing_page_enabled: true,
-    is_published: false,
-    lastUpdated: '-',
-    avatarLetter: 'SN',
-    avatarColor: 'bg-violet-500/10 text-violet-500 border border-violet-500/20',
-    indicatorColor: 'bg-emerald-500',
-    theme: 'modern',
-    slug: 'sma-nusantara',
-    meta_title: '',
-    meta_description: '',
-    primary_color: '#7c3aed',
-    secondary_color: '#f59e0b',
-    accent_color: '#06b6d4',
-    hero_title: '',
-    hero_subtitle: '',
-    hero_description: '',
-    about_title: '',
-    about_description: '',
-    about_vision: '',
-    about_mission: [],
-    contact_email: '',
-    contact_phone: '',
-    contact_address: '',
-    contact_maps_embed: '',
-    social_instagram: '',
-    social_facebook: '',
-    social_youtube: '',
-    social_tiktok: '',
-    sections: createSchoolSections()
-  }
+  createDefaultEntity('SCH-2023-001', 'SMA Nusantara', 'sma-nusantara', 'SN', 'bg-violet-500/10 text-violet-500 border border-violet-500/20', 'Sekolah'),
+  createDefaultEntity('SCH-2023-002', 'SMP Bina Cendekia', 'smp-cendekia', 'SC', 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20', 'Sekolah'),
+  createDefaultEntity('SCH-2023-003', 'SD Pelita Bangsa', 'sd-pelita', 'SP', 'bg-sky-500/10 text-sky-500 border border-sky-500/20', 'Sekolah'),
+  createDefaultEntity('SCH-2023-004', 'TK Generasi Emas', 'tk-emas', 'TE', 'bg-pink-500/10 text-pink-500 border border-pink-500/20', 'Sekolah'),
+  createDefaultEntity('SCH-2023-005', 'SMK Citra Mandiri', 'smk-citra', 'SM', 'bg-orange-500/10 text-orange-500 border border-orange-500/20', 'Sekolah'),
+  createDefaultEntity('SCH-2023-006', 'SDIT Al-Falah', 'sdit-alfalah', 'SA', 'bg-green-500/10 text-green-500 border border-green-500/20', 'Sekolah')
 ]
 
 const storedFoundations = localStorage.getItem('superadmin_foundations')
@@ -270,12 +224,12 @@ const page = ref(1)
 const perPage = ref(5)
 
 const columns = [
-  { key: 'name', label: 'NAMA INSTANSI' },
-  { key: 'template', label: 'TEMPLATE SAAT INI' },
-  { key: 'access', label: 'AKSES BUILDER' },
-  { key: 'status', label: 'STATUS' },
-  { key: 'lastUpdated', label: 'TERAKHIR DIPERBARUI' },
-  { key: 'actions', label: 'AKSI' }
+  { key: 'name', label: 'Nama Instansi', sortable: true },
+  { key: 'template', label: 'Template UI' },
+  { key: 'access', label: 'Akses Builder' },
+  { key: 'publish', label: 'Status Web' },
+  { key: 'status', label: 'Status Data' },
+  { key: 'actions', label: '' }
 ]
 
 const filters = [{ key: 'search', type: 'search', placeholder: 'Cari nama...' }]
@@ -555,6 +509,7 @@ const closeSectionItemEditor = () => {
             @click="confirmToggleAccess(item)"
             class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
             :class="item.landing_page_enabled ? 'bg-primary' : 'bg-white/10 border-white/20'"
+            title="Izinkan Yayasan/Sekolah mengedit Landing Page"
           >
             <span
               class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200 ease-in-out"
@@ -563,24 +518,44 @@ const closeSectionItemEditor = () => {
           </button>
         </template>
 
+        <template #cell-publish="{ item }">
+          <button
+            @click="confirmTogglePublish(item)"
+            class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+            :class="item.is_published ? 'bg-emerald-500' : 'bg-white/10 border-white/20'"
+            title="Publikasikan Website"
+          >
+            <span
+              class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200 ease-in-out"
+              :class="item.is_published ? 'translate-x-4' : 'translate-x-0'"
+            />
+          </button>
+        </template>
+
         <template #cell-status="{ item }">
           <Badge
             variant="secondary"
-            class="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-medium px-2 py-0 text-[10px] rounded-lg"
+            class="font-medium px-2 py-0 text-[10px] rounded-lg"
+            :class="item.status === 'Aktif' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'"
           >
             {{ item.status }}
           </Badge>
         </template>
 
         <template #cell-actions="{ item }">
-          <Button
-            size="sm"
-            variant="default"
-            class="h-7 text-[10px] font-bold px-3 rounded-lg"
-            @click="openModalEditor(item)"
-          >
-            Kelola Halaman
-          </Button>
+          <div class="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="default"
+              class="h-7 text-[10px] font-bold px-3 rounded-lg"
+              @click="openModalEditor(item)"
+            >
+              Kelola Data
+            </Button>
+            <a :href="`http://localhost:5173/${item.slug}`" target="_blank" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-primary transition-colors" title="Lihat Web Landing Page">
+              <ExternalLink class="w-4 h-4" />
+            </a>
+          </div>
         </template>
       </DataTableCard>
     </div>
@@ -597,46 +572,28 @@ const closeSectionItemEditor = () => {
         <div class="p-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
           <div>
             <h3 class="font-extrabold text-lg text-foreground flex items-center gap-2">
-              <span>🛠️</span> Asisten Setup Landing Page
+              <span>🛠️</span> Editor Data Utama Landing Page
             </h3>
-            <div class="flex items-center gap-2 mt-1">
-              <span class="text-xs text-muted-foreground">
-                Konfigurasi lengkap untuk: <strong>{{ selectedItemForEdit?.name }}</strong>
-              </span>
-              <span class="text-border">|</span>
-              <span
-                class="flex h-2 w-2 rounded-full"
-                :class="selectedItemForEdit?.is_published ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'"
-              ></span>
-              <span class="text-[10px] font-bold uppercase tracking-wider" :class="selectedItemForEdit?.is_published ? 'text-emerald-500' : 'text-amber-500'">
-                {{ selectedItemForEdit?.is_published ? 'Aktif Publik' : 'Draft Offline' }}
-              </span>
-            </div>
+            <p class="text-xs text-muted-foreground mt-1">
+              Anda sedang mengelola instansi <span class="text-primary font-bold">{{ selectedItemForEdit?.name }}</span>
+            </p>
           </div>
-          <div class="flex items-center gap-2">
-            <button
-              type="button"
-              @click="confirmTogglePublish"
-              class="px-4 py-2 rounded-xl text-xs font-bold text-white transition-all bg-primary hover:bg-primary/90"
-            >
-              {{ selectedItemForEdit?.is_published ? 'Nonaktifkan' : 'Aktifkan Publik' }}
-            </button>
-            <a
-              v-if="form.slug"
-              :href="`/s/${form.slug}`"
-              target="_blank"
-              class="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl border border-border/50 bg-muted/10 hover:bg-muted/50 font-bold text-xs transition-colors text-foreground"
-            >
-              <Eye class="w-3.5 h-3.5" /> Lihat Landing Page
-            </a>
+
+          <div class="flex flex-wrap items-center gap-3">
             <Button
-              variant="ghost"
-              size="icon"
-              @click="isModalOpen = false"
-              class="text-muted-foreground hover:text-foreground rounded-xl hover:bg-muted/50"
+              variant="default"
+              class="rounded-xl text-xs font-bold shadow-md shadow-primary/20"
+              @click="saveEditorConfiguration"
             >
-              <X class="w-5 h-5" />
+              <Save class="w-4 h-4 mr-2" />
+              Simpan Data
             </Button>
+            <button
+              @click="isModalOpen = false"
+              class="p-2 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 rounded-xl text-gray-500 dark:text-gray-300 transition-colors"
+            >
+              <X class="w-4 h-4" />
+            </button>
           </div>
         </div>
 

@@ -119,9 +119,16 @@ async function handleSave() {
         <h3 class="text-lg font-bold text-foreground">Tautan Media Sosial</h3>
         <div class="grid md:grid-cols-2 gap-4">
           <div>
-            <Label class="block text-xs font-bold text-gray-400 uppercase mb-2"
-              >Instagram URL</Label
-            >
+            <Label class="block text-xs font-bold text-gray-400 uppercase mb-2">TikTok URL</Label>
+            <Input
+              type="text"
+              v-model="form.social_tiktok"
+              class="w-full h-11 px-4 border border-gray-200 dark:border-white/10 bg-white/50 dark:bg-background/30 rounded-xl text-foreground focus-visible:ring-1 focus-visible:border-primary/50"
+              placeholder="https://tiktok.com/@sekolah"
+            />
+          </div>
+          <div>
+            <Label class="block text-xs font-bold text-gray-400 uppercase mb-2">Instagram URL</Label>
             <Input
               type="text"
               v-model="form.social_instagram"
@@ -139,23 +146,12 @@ async function handleSave() {
             />
           </div>
           <div>
-            <Label class="block text-xs font-bold text-gray-400 uppercase mb-2"
-              >Youtube Channel URL</Label
-            >
+            <Label class="block text-xs font-bold text-gray-400 uppercase mb-2">YouTube URL</Label>
             <Input
               type="text"
               v-model="form.social_youtube"
               class="w-full h-11 px-4 border border-gray-200 dark:border-white/10 bg-white/50 dark:bg-background/30 rounded-xl text-foreground focus-visible:ring-1 focus-visible:border-primary/50"
               placeholder="https://youtube.com/c/sekolah"
-            />
-          </div>
-          <div>
-            <Label class="block text-xs font-bold text-gray-400 uppercase mb-2">TikTok URL</Label>
-            <Input
-              type="text"
-              v-model="form.social_tiktok"
-              class="w-full h-11 px-4 border border-gray-200 dark:border-white/10 bg-white/50 dark:bg-background/30 rounded-xl text-foreground focus-visible:ring-1 focus-visible:border-primary/50"
-              placeholder="https://tiktok.com/@sekolah"
             />
           </div>
         </div>

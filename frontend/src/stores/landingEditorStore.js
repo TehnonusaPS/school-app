@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import * as service from '@/services/landingPageService'
+import { useAuthStore } from '@/stores/authStore'
 
 // Data Dummy Premium untuk Sekolah/Yayasan
 const dummyData = {
@@ -204,9 +205,49 @@ const dummyData = {
   ]
 }
 
+const dummyDataYayasan = {
+  id: 2,
+  theme: 'modern',
+  slug: 'yayasan-nusantara',
+  is_published: true,
+  meta_title: 'Yayasan Pendidikan Nusantara',
+  meta_description: 'Mewujudkan pendidikan berstandar tinggi di Indonesia.',
+  hero_title: 'Membangun Pendidikan Berkualitas',
+  hero_subtitle: 'Yayasan Pendidikan Nusantara',
+  hero_description: 'Kami berkomitmen menaungi sekolah-sekolah unggulan masa depan.',
+  hero_image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=1200',
+  hero_images: [
+    { url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=1200', caption: 'Gedung Yayasan' }
+  ],
+  hero_cta_text: 'Jelajahi Program',
+  hero_cta_link: '#',
+  about_title: 'Tentang Yayasan',
+  about_description: 'Berdiri sejak tahun 2005 dengan fokus utama pada pembiayaan dan manajemen kurikulum.',
+  about_image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800',
+  about_vision: 'Mewujudkan sistem pendidikan berdaya saing global.',
+  about_mission: ['Meningkatkan kualitas SDM pendidik.', 'Menyediakan fasilitas belajar modern.'],
+  primary_color: '#1e40af',
+  secondary_color: '#f59e0b',
+  accent_color: '#0ea5e9',
+  logo: '',
+  contact_email: 'info@nusantara.org',
+  contact_phone: '+62 21-555-1234',
+  contact_address: 'Gedung Nusantara Lt. 5, Jakarta',
+  contact_maps_embed: '',
+  social_instagram: '',
+  social_facebook: '',
+  social_youtube: '',
+  social_tiktok: '',
+  sections: [
+    { id: 1, type: 'stats', title: 'Jejaring Yayasan', is_visible: true, sort_order: 1, items: [{ id: 11, title: 'Sekolah Binaan', value: '12' }, { id: 12, title: 'Total Siswa', value: '4500+' }, { id: 13, title: 'Tahun Berdiri', value: '1995' }] },
+    { id: 2, type: 'features', title: 'Fokus Yayasan Kami', is_visible: true, sort_order: 2, items: [{ id: 21, title: 'Pendidikan Merata', description: 'Menyediakan akses yang adil.', icon: 'globe' }, { id: 22, title: 'Sertifikasi Guru', description: 'Pelatihan rutin.', icon: 'award' }] },
+    { id: 3, type: 'programs', title: 'Lembaga Pendidikan', is_visible: true, sort_order: 3, items: [{ id: 31, title: 'TK & SD Islam Terpadu', description: 'Membangun karakter.', image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=600' }] }
+  ]
+}
+
 export const useLandingEditorStore = defineStore('landingEditor', {
   state: () => ({
-    landingPage: dummyData, // gunakan dummyData secara instan
+    landingPage: null, // akan diisi oleh fetchLandingPage
     loading: false,
     saving: false,
     error: null,
@@ -224,7 +265,14 @@ export const useLandingEditorStore = defineStore('landingEditor', {
         }
       } catch (err) {
         console.warn('API error, using dummy data instead:', err)
-        this.landingPage = dummyData
+        const authStore = useAuthStore()
+        const isYayasan = authStore.user && String(authStore.user.role).toLowerCase().includes('yayasan')
+        
+        if (isYayasan) {
+          this.landingPage = JSON.parse(JSON.stringify(dummyDataYayasan))
+        } else {
+          this.landingPage = JSON.parse(JSON.stringify(dummyData))
+        }
       } finally {
         this.loading = false
       }

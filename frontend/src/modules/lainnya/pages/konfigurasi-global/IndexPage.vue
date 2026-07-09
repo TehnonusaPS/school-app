@@ -54,7 +54,9 @@ import {
   Layers,
   PhoneCall,
   GripVertical,
-  Eye
+  Eye,
+  MoveUp,
+  MoveDown
 } from 'lucide-vue-next'
 import VueDraggable from 'vuedraggable'
 import { toast } from 'vue-sonner'
@@ -124,10 +126,12 @@ const selectedSectionIndex = ref(null)
 const editingSectionItem = ref(null)
 const isAddingSectionItem = ref(false)
 const sectionItemForm = ref({
+  id: null,
   title: '',
   description: '',
   icon: 'star',
   image: '',
+  link: '',
   value: ''
 })
 
@@ -160,176 +164,64 @@ function onSectionItemImageUpload(e) {
 }
 
 // Helper dummy item data generator
-const createDefaultSections = () => [
-  {
-    id: 1,
-    type: 'stats',
-    title: 'Sekolah Kami Dalam Angka',
-    is_visible: true,
-    sort_order: 1,
-    items: [
-      { id: 11, title: 'Siswa Aktif', value: '850+' },
-      { id: 12, title: 'Guru Profesional', value: '45' },
-      { id: 13, title: 'Kelas / Rombel', value: '24' },
-      { id: 14, title: 'Akreditasi', value: 'A+' }
-    ]
-  },
-  {
-    id: 2,
-    type: 'features',
-    title: 'Mengapa Memilih Kami?',
-    is_visible: true,
-    sort_order: 2,
-    items: [
-      {
-        id: 21,
-        title: 'Guru Tersertifikasi',
-        description: 'Tenaga pendidik profesional lulusan universitas ternama yang ramah dan kompeten.',
-        icon: 'award'
-      },
-      {
-        id: 22,
-        title: 'Kurikulum Modern',
-        description: 'Kurikulum nasional yang diperkaya dengan program bilingual dan penguatan karakter.',
-        icon: 'book-open'
-      },
-      {
-        id: 23,
-        title: 'Fasilitas Premium',
-        description: 'Ruang kelas ber-AC, laboratorium sains, ruang IT komputer, dan lapangan olahraga indoor.',
-        icon: 'shield'
-      }
-    ]
-  },
-  {
-    id: 3,
-    type: 'programs',
-    title: 'Program Unggulan',
-    is_visible: true,
-    sort_order: 3,
-    items: [
-      {
-        id: 31,
-        title: 'Bilingual Class (English & Indonesia)',
-        description: 'Pengenalan bahasa Inggris aktif sejak dini untuk melatih rasa percaya diri anak.',
-        image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=600'
-      },
-      {
-        id: 32,
-        title: 'Coding & Robotics Kid Club',
-        description: 'Mengasah logika berpikir komputasional siswa melalui kelas merakit robot seru.',
-        image: 'https://images.unsplash.com/photo-1561557944-6e7860d1a7eb?q=80&w=600'
-      }
-    ]
-  },
-  {
-    id: 4,
-    type: 'gallery',
-    title: 'Galeri Kegiatan Belajar',
-    is_visible: true,
-    sort_order: 4,
-    items: [
-      {
-        id: 41,
-        title: 'Keseruan Belajar Outbound',
-        image: 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?q=80&w=600'
-      },
-      {
-        id: 42,
-        title: 'Pentas Seni Tahunan',
-        image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=600'
-      },
-      {
-        id: 43,
-        title: 'Kelas Eksperimen Sains',
-        image: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=600'
-      }
-    ]
-  },
-  {
-    id: 5,
-    type: 'testimonials',
-    title: 'Apa Kata Orang Tua Murid?',
-    is_visible: true,
-    sort_order: 5,
-    items: [
-      {
-        id: 51,
-        title: 'Bunda Larasati',
-        description: 'Sangat senang menyekolahkan anak di sini. Gurunya peduli perkembangan anak.',
-        value: 'Wali Murid Kelas 3'
-      },
-      {
-        id: 52,
-        title: 'Bapak Hendra',
-        description: 'Fasilitas sangat memadai, lingkungan aman, dan ekstrakurikulernya banyak!',
-        value: 'Wali Murid Kelas 5'
-      }
-    ]
-  },
-  {
-    id: 6,
-    type: 'faq',
-    title: 'Pertanyaan yang Sering Diajukan',
-    is_visible: true,
-    sort_order: 6,
-    items: [
-      {
-        id: 61,
-        title: 'Kapan jadwal pendaftaran siswa baru dibuka?',
-        description: 'Pendaftaran gelombang 1 dibuka bulan Januari - Maret setiap tahunnya.'
-      },
-      {
-        id: 62,
-        title: 'Apakah tersedia layanan antar jemput?',
-        description: 'Tentu, kami bekerja sama dengan layanan transportasi terpercaya.'
-      }
-    ]
-  }
+const createSchoolSections = () => [
+  { id: 1, type: 'stats', title: 'Sekolah Kami Dalam Angka', is_visible: true, sort_order: 1, items: [] },
+  { id: 2, type: 'features', title: 'Mengapa Memilih Kami?', is_visible: true, sort_order: 2, items: [] },
+  { id: 3, type: 'programs', title: 'Program Unggulan', is_visible: true, sort_order: 3, items: [] },
+  { id: 4, type: 'gallery', title: 'Galeri Kegiatan Belajar', is_visible: true, sort_order: 4, items: [] },
+  { id: 5, type: 'testimonials', title: 'Apa Kata Orang Tua Murid?', is_visible: true, sort_order: 5, items: [] },
+  { id: 6, type: 'faq', title: 'Pertanyaan yang Sering Diajukan', is_visible: true, sort_order: 6, items: [] }
+]
+
+const createFoundationSections = () => [
+  { id: 1, type: 'stats', title: 'Jejaring Yayasan', is_visible: true, sort_order: 1, items: [] },
+  { id: 2, type: 'features', title: 'Fokus Yayasan Kami', is_visible: true, sort_order: 2, items: [] },
+  { id: 3, type: 'programs', title: 'Lembaga Pendidikan', is_visible: true, sort_order: 3, items: [] },
+  { id: 4, type: 'gallery', title: 'Kegiatan Sosial & Diklat', is_visible: true, sort_order: 4, items: [] },
+  { id: 5, type: 'testimonials', title: 'Kata Mitra Kami', is_visible: true, sort_order: 5, items: [] },
+  { id: 6, type: 'faq', title: 'FAQ Yayasan', is_visible: true, sort_order: 6, items: [] }
 ]
 
 // Mock Data Yayasan
-const foundationMappings = ref([
+const defaultFoundationMappings = [
   {
     id: 'FDN-2023-001',
     name: 'Yayasan Pendidikan Nusantara',
     template: 'Modern Institutional',
     status: 'Aktif',
     landing_page_enabled: true,
-    is_published: true,
-    lastUpdated: '12 Okt 2023, 14:30',
+    is_published: false,
+    lastUpdated: '-',
     avatarLetter: 'YN',
     avatarColor: 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20',
     indicatorColor: 'bg-emerald-500',
     theme: 'modern',
     slug: 'yayasan-nusantara',
-    meta_title: 'Yayasan Pendidikan Nusantara',
-    meta_description: 'Mewujudkan pendidikan berstandar tinggi di Indonesia.',
+    meta_title: '',
+    meta_description: '',
     primary_color: '#1e40af',
     secondary_color: '#f59e0b',
     accent_color: '#0ea5e9',
-    hero_title: 'Membangun Pendidikan Berkualitas',
-    hero_subtitle: 'Yayasan Pendidikan Nusantara',
-    hero_description: 'Kami berkomitmen menaungi sekolah-sekolah unggulan masa depan.',
-    about_title: 'Tentang Yayasan',
-    about_description:
-      'Berdiri sejak tahun 2005 dengan fokus utama pada pembiayaan dan manajemen kurikulum.',
-    about_vision: 'Mewujudkan sistem pendidikan berdaya saing global.',
-    about_mission: ['Meningkatkan kualitas SDM pendidik.', 'Menyediakan fasilitas belajar modern.'],
-    contact_email: 'info@nusantara.org',
-    contact_phone: '+62 21-555-1234',
-    contact_address: 'Gedung Nusantara Lt. 5, Jakarta',
+    hero_title: '',
+    hero_subtitle: '',
+    hero_description: '',
+    about_title: '',
+    about_description: '',
+    about_vision: '',
+    about_mission: [],
+    contact_email: '',
+    contact_phone: '',
+    contact_address: '',
     contact_maps_embed: '',
     social_instagram: '',
     social_facebook: '',
     social_youtube: '',
     social_tiktok: '',
-    sections: createDefaultSections()
+    sections: createFoundationSections()
   }
-])
+]
 
-// Mock Data Sekolah
-const schoolMappings = ref([
+const defaultSchoolMappings = [
   {
     id: 'SCH-2023-001',
     name: 'SMA Nusantara',
@@ -337,36 +229,41 @@ const schoolMappings = ref([
     status: 'Aktif',
     landing_page_enabled: true,
     is_published: false,
-    lastUpdated: '12 Okt 2023, 14:30',
+    lastUpdated: '-',
     avatarLetter: 'SN',
     avatarColor: 'bg-violet-500/10 text-violet-500 border border-violet-500/20',
     indicatorColor: 'bg-emerald-500',
     theme: 'modern',
     slug: 'sma-nusantara',
-    meta_title: 'SMA Nusantara Unggul',
-    meta_description: 'Sekolah menengah atas terbaik se-DKI Jakarta.',
+    meta_title: '',
+    meta_description: '',
     primary_color: '#7c3aed',
     secondary_color: '#f59e0b',
     accent_color: '#06b6d4',
-    hero_title: 'Sekolah Masa Depan Anda',
-    hero_subtitle: 'SMA Nusantara Terakreditasi A',
-    hero_description: 'Mari bergabung dengan ekosistem belajar yang modern dan inovatif.',
-    about_title: 'Profil Singkat',
-    about_description:
-      'SMA Nusantara fokus melatih siswa berpikir analitis, berdaya saing global, dan berkarakter Pancasila.',
-    about_vision: 'Melahirkan pemimpin masa depan berkarakter.',
-    about_mission: ['Menerapkan model active learning.', 'Mengembangkan minat olahraga dan seni.'],
-    contact_email: 'info@smanusantara.sch.id',
-    contact_phone: '+62 812-3456-7890',
-    contact_address: 'Jl. Pendidikan No. 12, Jakarta',
+    hero_title: '',
+    hero_subtitle: '',
+    hero_description: '',
+    about_title: '',
+    about_description: '',
+    about_vision: '',
+    about_mission: [],
+    contact_email: '',
+    contact_phone: '',
+    contact_address: '',
     contact_maps_embed: '',
-    social_instagram: 'https://instagram.com/smanusantara',
+    social_instagram: '',
     social_facebook: '',
     social_youtube: '',
-    social_tiktok: 'https://tiktok.com/@smanusantara',
-    sections: createDefaultSections()
+    social_tiktok: '',
+    sections: createSchoolSections()
   }
-])
+]
+
+const storedFoundations = localStorage.getItem('superadmin_foundations')
+const foundationMappings = ref(storedFoundations ? JSON.parse(storedFoundations) : defaultFoundationMappings)
+
+const storedSchools = localStorage.getItem('superadmin_schools')
+const schoolMappings = ref(storedSchools ? JSON.parse(storedSchools) : defaultSchoolMappings)
 
 const filterValues = ref({})
 const page = ref(1)
@@ -408,9 +305,15 @@ const confirmToggleAccess = item => {
   showAccessDialog.value = true
 }
 
+const saveToLocalStorage = () => {
+  localStorage.setItem('superadmin_foundations', JSON.stringify(foundationMappings.value))
+  localStorage.setItem('superadmin_schools', JSON.stringify(schoolMappings.value))
+}
+
 const executeToggleAccess = () => {
   if (itemToToggleAccess.value) {
     itemToToggleAccess.value.landing_page_enabled = !itemToToggleAccess.value.landing_page_enabled
+    saveToLocalStorage()
     toast.success(`Akses untuk ${itemToToggleAccess.value.name} berhasil diubah!`)
     showAccessDialog.value = false
     itemToToggleAccess.value = null
@@ -426,6 +329,7 @@ const confirmTogglePublish = () => {
 const executeTogglePublish = () => {
   if (selectedItemForEdit.value) {
     selectedItemForEdit.value.is_published = !selectedItemForEdit.value.is_published
+    saveToLocalStorage()
     toast.success(`Status publikasi untuk ${selectedItemForEdit.value.name} berhasil diubah!`)
     showPublishDialog.value = false
   }
@@ -458,7 +362,11 @@ const openModalEditor = item => {
     social_facebook: item.social_facebook || '',
     social_youtube: item.social_youtube || '',
     social_tiktok: item.social_tiktok || '',
-    sections: JSON.parse(JSON.stringify(item.sections || createDefaultSections()))
+    sections: JSON.parse(
+      JSON.stringify(
+        item.sections || (activeTab.value === 'sekolah' ? createSchoolSections() : createFoundationSections())
+      )
+    )
   }
   isModalOpen.value = true
 }
@@ -476,8 +384,9 @@ const saveModalData = () => {
           : 'Modern Playful'
     item.lastUpdated = 'Baru saja'
 
+    saveToLocalStorage()
     isModalOpen.value = false
-    toast.success(`Konfigurasi landing page lengkap untuk ${item.name} disimpan!`)
+    toast.success(`Konfigurasi landing page lengkap untuk ${item.name} disimpan secara lokal!`)
   }
 }
 
@@ -488,8 +397,25 @@ const addMission = () => {
     newMissionItem.value = ''
   }
 }
-const removeMission = idx => {
-  form.value.about_mission.splice(idx, 1)
+const removeMission = index => {
+  form.value.about_mission.splice(index, 1)
+}
+
+const moveSection = (idx, direction) => {
+  const targetIdx = idx + direction
+  if (targetIdx < 0 || targetIdx >= form.value.sections.length) return
+  const temp = form.value.sections[idx]
+  form.value.sections[idx] = form.value.sections[targetIdx]
+  form.value.sections[targetIdx] = temp
+}
+
+const moveSectionItem = (secIdx, itemIdx, direction) => {
+  const items = form.value.sections[secIdx].items
+  const targetIdx = itemIdx + direction
+  if (targetIdx < 0 || targetIdx >= items.length) return
+  const temp = items[itemIdx]
+  items[itemIdx] = items[targetIdx]
+  items[targetIdx] = temp
 }
 
 // Handler CRUD Item Section di dalam Modal
@@ -864,6 +790,7 @@ const closeSectionItemEditor = () => {
                     type="text"
                     v-model="form.meta_title"
                     class="rounded-xl text-xs"
+                    placeholder="Contoh: SMA Nusantara Unggul"
                   />
                 </div>
                 <div>
@@ -873,6 +800,7 @@ const closeSectionItemEditor = () => {
                     v-model="form.meta_description"
                     rows="2"
                     class="rounded-xl text-xs"
+                    placeholder="Contoh: Sekolah menengah atas terbaik se-DKI Jakarta yang berfokus pada karakter."
                   ></Textarea>
                 </div>
               </div>
@@ -931,6 +859,7 @@ const closeSectionItemEditor = () => {
                   type="text"
                   v-model="form.hero_title"
                   class="rounded-xl text-xs"
+                  placeholder="Contoh: Sekolah Masa Depan Anda"
                 />
               </div>
               <div>
@@ -939,6 +868,7 @@ const closeSectionItemEditor = () => {
                   type="text"
                   v-model="form.hero_subtitle"
                   class="rounded-xl text-xs"
+                  placeholder="Contoh: Terakreditasi A dan Berkarakter"
                 />
               </div>
               <div>
@@ -947,6 +877,7 @@ const closeSectionItemEditor = () => {
                   v-model="form.hero_description"
                   rows="3"
                   class="rounded-xl text-xs"
+                  placeholder="Contoh: Mari bergabung dengan ekosistem belajar yang modern, inovatif, dan berpusat pada minat bakat siswa..."
                 ></Textarea>
               </div>
               <div class="grid md:grid-cols-2 gap-4">
@@ -990,15 +921,14 @@ const closeSectionItemEditor = () => {
                     <input type="file" @change="onAboutImageUpload" class="sr-only" accept="image/*" />
                   </label>
                 </div>
-                <!-- Kolom Kanan: Title & Description -->
                 <div class="md:col-span-2 flex flex-col space-y-3">
                   <div>
                     <Label class="text-xs text-muted-foreground mb-1.5 block uppercase font-bold">Judul Profil Tentang Kami</Label>
-                    <Input type="text" v-model="form.about_title" class="rounded-xl text-xs" />
+                    <Input type="text" v-model="form.about_title" class="rounded-xl text-xs" placeholder="Contoh: Profil Singkat SMA Nusantara" />
                   </div>
                   <div class="flex-1 flex flex-col">
                     <Label class="text-xs text-muted-foreground mb-1.5 block uppercase font-bold">Deskripsi Tentang Sekolah</Label>
-                    <Textarea v-model="form.about_description" class="rounded-xl text-xs flex-1 min-h-[110px] resize-none"></Textarea>
+                    <Textarea v-model="form.about_description" class="rounded-xl text-xs flex-1 min-h-[110px] resize-none" placeholder="Tuliskan latar belakang, sejarah, atau filosofi instansi di sini..."></Textarea>
                   </div>
                 </div>
               </div>
@@ -1009,6 +939,7 @@ const closeSectionItemEditor = () => {
                   v-model="form.about_vision"
                   rows="2"
                   class="rounded-xl text-xs"
+                  placeholder="Contoh: Mewujudkan generasi muda yang beriman, bertakwa, berakhlak mulia..."
                 ></Textarea>
               </div>
               <div class="space-y-2">
@@ -1150,7 +1081,7 @@ const closeSectionItemEditor = () => {
 
               <!-- List Section items -->
               <div v-else class="space-y-6">
-                <VueDraggable v-model="form.sections" item-key="id" class="space-y-6" handle=".section-drag-handle" animation="200">
+                <VueDraggable v-model="form.sections" item-key="id" class="space-y-6 relative" handle=".section-drag-handle" animation="200" tag="transition-group" :component-data="{ name: 'list' }">
                   <template #item="{ element: sec, index: secIdx }">
                     <div class="glass-mini p-5 border border-gray-100 dark:border-white/10 rounded-2xl space-y-3 section-drag-handle cursor-grab active:cursor-grabbing hover:bg-white/50 dark:hover:bg-white/5 transition-colors">
                       <div class="flex items-center justify-between">
@@ -1158,13 +1089,33 @@ const closeSectionItemEditor = () => {
                           <span class="text-xs font-bold uppercase tracking-wider text-primary bg-primary/15 px-2 py-0.5 rounded">{{ sec.type || 'SECTION' }}</span>
                           <span class="font-extrabold text-sm text-foreground">{{ sec.title || 'Section Tanpa Judul' }}</span>
                         </div>
-                        <button type="button" @click="openSectionItemEditor(secIdx)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/15 hover:bg-primary/25 text-primary font-bold text-xs transition-colors">
-                          <Plus class="w-3.5 h-3.5" /> Tambah Item
-                        </button>
+                        <div class="flex items-center gap-2">
+                          <div class="flex items-center mr-2 border-r border-gray-200 dark:border-white/10 pr-2">
+                            <button
+                              type="button"
+                              @click.stop="moveSection(secIdx, -1)"
+                              :disabled="secIdx === 0"
+                              class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 transition-colors disabled:opacity-30"
+                            >
+                              <MoveUp class="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              @click.stop="moveSection(secIdx, 1)"
+                              :disabled="secIdx === form.sections.length - 1"
+                              class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 transition-colors disabled:opacity-30"
+                            >
+                              <MoveDown class="w-4 h-4" />
+                            </button>
+                          </div>
+                          <button type="button" @click="openSectionItemEditor(secIdx)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/15 hover:bg-primary/25 text-primary font-bold text-xs transition-colors">
+                            <Plus class="w-3.5 h-3.5" /> Tambah Item
+                          </button>
+                        </div>
                       </div>
                       
-                      <VueDraggable v-if="sec.items" v-model="sec.items" item-key="id" class="space-y-2" handle=".item-drag-handle" animation="200">
-                        <template #item="{ element: item }">
+                      <VueDraggable v-if="sec.items" v-model="sec.items" item-key="id" class="space-y-2 relative" handle=".item-drag-handle" animation="200" tag="transition-group" :component-data="{ name: 'list' }">
+                        <template #item="{ element: item, index: itemIdx }">
                           <div class="flex items-center justify-between p-3 rounded-xl border border-gray-200 dark:border-white/10 bg-white/50 dark:bg-white/5 text-xs item-drag-handle cursor-grab active:cursor-grabbing hover:bg-gray-50 dark:hover:bg-white/10 transition-colors">
                             <div class="flex gap-4">
                               <div v-if="item.image" class="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-gray-200 dark:border-white/10">
@@ -1180,6 +1131,10 @@ const closeSectionItemEditor = () => {
                               </div>
                             </div>
                             <div class="flex gap-1 shrink-0">
+                              <div class="flex items-center mr-1 border-r border-gray-200 dark:border-white/10 pr-1">
+                                <button type="button" @click.stop="moveSectionItem(secIdx, itemIdx, -1)" :disabled="itemIdx === 0" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 transition-colors disabled:opacity-30"><MoveUp class="w-3.5 h-3.5" /></button>
+                                <button type="button" @click.stop="moveSectionItem(secIdx, itemIdx, 1)" :disabled="itemIdx === sec.items.length - 1" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 transition-colors disabled:opacity-30"><MoveDown class="w-3.5 h-3.5" /></button>
+                              </div>
                               <button type="button" @click="openSectionItemEditor(secIdx, item)" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 transition-colors"><Edit class="w-3.5 h-3.5" /></button>
                               <button type="button" @click="deleteSectionItem(secIdx, item.id)" class="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive transition-colors"><Trash2 class="w-3.5 h-3.5" /></button>
                             </div>
@@ -1206,6 +1161,7 @@ const closeSectionItemEditor = () => {
                     type="email"
                     v-model="form.contact_email"
                     class="rounded-xl text-xs"
+                    placeholder="Contoh: info@sekolah.sch.id"
                   />
                 </div>
                 <div>
@@ -1214,6 +1170,7 @@ const closeSectionItemEditor = () => {
                     type="text"
                     v-model="form.contact_phone"
                     class="rounded-xl text-xs"
+                    placeholder="Contoh: +62 812-3456-7890"
                   />
                 </div>
                 <div class="md:col-span-2">
@@ -1222,6 +1179,7 @@ const closeSectionItemEditor = () => {
                     v-model="form.contact_address"
                     rows="2"
                     class="rounded-xl text-xs"
+                    placeholder="Contoh: Jl. Pendidikan No. 12, Jakarta..."
                   ></Textarea>
                 </div>
                 <div class="md:col-span-2">
@@ -1231,6 +1189,7 @@ const closeSectionItemEditor = () => {
                     v-model="form.contact_maps_embed"
                     rows="2"
                     class="rounded-xl text-xs"
+                    placeholder="Salin tag <iframe src='...'> dari Google Maps"
                   ></Textarea>
                 </div>
               </div>
@@ -1250,6 +1209,7 @@ const closeSectionItemEditor = () => {
                     type="text"
                     v-model="form.social_instagram"
                     class="rounded-xl text-xs"
+                    placeholder="https://instagram.com/sekolah"
                   />
                 </div>
                 <div>
@@ -1258,6 +1218,7 @@ const closeSectionItemEditor = () => {
                     type="text"
                     v-model="form.social_facebook"
                     class="rounded-xl text-xs"
+                    placeholder="https://facebook.com/sekolah"
                   />
                 </div>
                 <div>
@@ -1266,6 +1227,7 @@ const closeSectionItemEditor = () => {
                     type="text"
                     v-model="form.social_youtube"
                     class="rounded-xl text-xs"
+                    placeholder="https://youtube.com/c/sekolah"
                   />
                 </div>
               </div>
@@ -1358,3 +1320,22 @@ const closeSectionItemEditor = () => {
     </AlertDialogContent>
   </AlertDialog>
 </template>
+
+<style scoped>
+.list-move,
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.4s cubic-bezier(0.55, 0, 0.1, 1);
+}
+
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.list-leave-active {
+  position: absolute;
+  width: 100%;
+}
+</style>

@@ -221,7 +221,7 @@ export const navMain = [
     items: [
       { title: 'Pengumuman', url: '/komunikasi/pengumuman', excludeRoles: ['tata_usaha', 'orang_tua', 'guru', 'wali_kelas', 'siswa'] },
       { title: 'Berita Kegiatan', url: '/komunikasi/berita-kegiatan', excludeRoles: ['tata_usaha', 'admin_yayasan'] },
-      { title: 'Feedback', url: '/komunikasi/feedback', excludeRoles: ['tata_usaha', 'admin_yayasan', 'guru', 'wali_kelas', 'siswa', 'orang_tua'] },
+      { title: 'Feedback', url: '/komunikasi/feedback', excludeRoles: ['tata_usaha', 'admin_yayasan', 'guru', 'wali_kelas', 'siswa'] },
       { title: 'Pesan Internal', url: '/komunikasi/pesan', excludeRoles: ['tata_usaha', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'orang_tua', 'guru', 'wali_kelas', 'siswa'] },
       { title: 'Notifikasi', url: '/komunikasi/notifikasi', excludeRoles: ['tata_usaha', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'orang_tua', 'guru', 'wali_kelas', 'siswa'] },
       { title: 'Keterangan Aktif', url: '/komunikasi/persuratan/aktif', roles: ['tata_usaha'] },

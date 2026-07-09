@@ -66,10 +66,29 @@ const filterValues = ref({
   status: 'all'
 })
 
-// --- Computed Stats ---
-const totalCount = ref(0)
-const aktifCount = ref(0)
-const nonaktifCount = ref(0)
+const statsData = ref({
+  total: 0,
+  aktif: 0,
+  nonaktif: 0
+})
+
+const fetchStats = async () => {
+  try {
+    const res = await getUsers({ per_page: 1000 })
+    const list = res.data.data || []
+    statsData.value = {
+      total: list.length,
+      aktif: list.filter(item => item.is_active).length,
+      nonaktif: list.filter(item => !item.is_active).length
+    }
+  } catch (err) {
+    console.error('Gagal mengambil data statistik pengguna', err)
+  }
+}
+
+const totalCount = computed(() => statsData.value.total)
+const aktifCount = computed(() => statsData.value.aktif)
+const nonaktifCount = computed(() => statsData.value.nonaktif)
 
 function getRoleLabel(role) {
   return ROLE_LABELS[role] || role
@@ -121,6 +140,7 @@ const fetchUsers = async () => {
     }
     const res = await getUsers(params)
     penggunaList.value = res.data.data.map(user => ({
+      ...user,
       id: user.id,
       nama: user.name,
       email: user.email,
@@ -132,17 +152,11 @@ const fetchUsers = async () => {
       school_id: user.school_id,
       role_id: user.role_id,
       phone: user.phone,
-      photo: user.photo,
-      ...user
+      photo: user.photo
     }))
     total.value = res.data.total
     from.value = res.data.from || 1
     to.value = res.data.to || 1
-
-    // Quick stats count
-    totalCount.value = res.data.total
-    aktifCount.value = penggunaList.value.filter(p => p.status === 'aktif').length
-    nonaktifCount.value = penggunaList.value.filter(p => p.status === 'nonaktif').length
   } catch (err) {
     toast.error('Gagal mengambil data pengguna')
   } finally {
@@ -174,6 +188,7 @@ onMounted(async () => {
   }
 
   fetchUsers()
+  fetchStats()
 })
 
 watch([currentPage, perPage, filterValues], () => {
@@ -202,6 +217,16 @@ const formItem = ref({
   sekolah: '-',
   status: 'aktif',
   password: ''
+})
+
+// Clear fields when role changes to match requested rules
+watch(() => formItem.value.role, (newRole) => {
+  if (newRole === 'superadmin') {
+    formItem.value.yayasan = '-'
+    formItem.value.sekolah = '-'
+  } else if (newRole === 'admin_yayasan') {
+    formItem.value.sekolah = '-'
+  }
 })
 
 function handleCreate() {
@@ -249,6 +274,22 @@ function validateForm() {
   }
   if (!formItem.value.role) errors.role = 'Peran wajib dipilih.'
   if (!formItem.value.status) errors.status = 'Status wajib dipilih.'
+
+  // Yayasan & Sekolah validation based on role
+  const role = formItem.value.role
+  if (role === 'admin_yayasan') {
+    if (!formItem.value.yayasan || formItem.value.yayasan === '-') {
+      errors.yayasan = 'Yayasan wajib dipilih.'
+    }
+  } else if (role && role !== 'superadmin') {
+    if (!formItem.value.yayasan || formItem.value.yayasan === '-') {
+      errors.yayasan = 'Yayasan wajib dipilih.'
+    }
+    if (!formItem.value.sekolah || formItem.value.sekolah === '-') {
+      errors.sekolah = 'Sekolah wajib dipilih.'
+    }
+  }
+
   formErrors.value = errors
   return Object.keys(errors).length === 0
 }
@@ -289,6 +330,7 @@ async function handleSave() {
     }
     isFormSheetOpen.value = false
     fetchUsers()
+    fetchStats()
   } catch (err) {
     if (err.response?.status === 422 && err.response?.data?.errors) {
       const serverErrors = err.response.data.errors
@@ -363,6 +405,7 @@ async function handleToggleStatus(item) {
       { description: `Pengguna "${item.nama}" kini berstatus ${nextActive ? 'Aktif' : 'Nonaktif'}.` }
     )
     fetchUsers()
+    fetchStats()
   } catch (err) {
     toast.error('Gagal memperbarui status akun')
   }
@@ -385,6 +428,7 @@ async function confirmDelete() {
     toast.success('Berhasil Dihapus', { description: `Pengguna "${selectedItemToDelete.value.nama}" telah dihapus.` })
     selectedItemToDelete.value = null
     fetchUsers()
+    fetchStats()
   } catch (err) {
     toast.error('Gagal menghapus pengguna')
   }
@@ -615,10 +659,10 @@ async function confirmDelete() {
           </div>
 
           <!-- Yayasan -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-muted-foreground">Yayasan</label>
+          <div v-if="formItem.role && formItem.role !== 'superadmin'" class="space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
+            <label class="text-xs font-semibold text-muted-foreground">Yayasan <span class="text-rose-500">*</span></label>
             <Select v-model="formItem.yayasan" @update:modelValue="formItem.sekolah = '-'">
-              <SelectTrigger class="h-10 rounded-xl">
+              <SelectTrigger class="h-10 rounded-xl" :class="formErrors.yayasan ? 'border-rose-500' : ''">
                 <SelectValue placeholder="Pilih Yayasan..." />
               </SelectTrigger>
               <SelectContent>
@@ -631,13 +675,14 @@ async function confirmDelete() {
                 </SelectItem>
               </SelectContent>
             </Select>
+            <p v-if="formErrors.yayasan" class="text-[10px] text-rose-500">{{ formErrors.yayasan }}</p>
           </div>
 
           <!-- Sekolah -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-muted-foreground">Sekolah</label>
+          <div v-if="formItem.role && formItem.role !== 'superadmin' && formItem.role !== 'admin_yayasan' && formItem.yayasan && formItem.yayasan !== '-'" class="space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
+            <label class="text-xs font-semibold text-muted-foreground">Sekolah <span class="text-rose-500">*</span></label>
             <Select v-model="formItem.sekolah">
-              <SelectTrigger class="h-10 rounded-xl">
+              <SelectTrigger class="h-10 rounded-xl" :class="formErrors.sekolah ? 'border-rose-500' : ''">
                 <SelectValue placeholder="Pilih Sekolah..." />
               </SelectTrigger>
               <SelectContent>
@@ -650,6 +695,7 @@ async function confirmDelete() {
                 </SelectItem>
               </SelectContent>
             </Select>
+            <p v-if="formErrors.sekolah" class="text-[10px] text-rose-500">{{ formErrors.sekolah }}</p>
           </div>
         </div>
 

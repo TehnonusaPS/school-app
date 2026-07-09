@@ -18,7 +18,7 @@ class SchoolController extends Controller
         $user = $request->user();
 
         if ($user->isSuperAdmin()) {
-            $query = School::with('foundation:id,name,code');
+            $query = School::with('foundation:id,name,code')->withCount('students');
 
             if ($request->has('search')) {
                 $search = $request->input('search');
@@ -42,12 +42,13 @@ class SchoolController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'data'   => $query->latest()->paginate(15),
+                'data'   => $query->latest()->paginate($request->input('per_page', 15)),
             ]);
         }
 
         if ($user->hasRole('admin_yayasan')) {
             $query = School::with('foundation:id,name,code')
+                ->withCount('students')
                 ->where('foundation_id', $user->foundation_id);
 
             if ($request->has('search')) {
@@ -68,12 +69,12 @@ class SchoolController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'data'   => $query->latest()->paginate(15),
+                'data'   => $query->latest()->paginate($request->input('per_page', 15)),
             ]);
         }
 
-        if ($user->hasRole('admin_sekolah')) {
-            $school = School::with('foundation:id,name,code')->find($user->school_id);
+        if ($user->school_id) { // admin_sekolah, kepala_sekolah, tata_usaha, wali_kelas
+            $school = School::with('foundation:id,name,code')->withCount('students')->find($user->school_id);
             if (!$school) {
                 return response()->json([
                     'status'  => 'error',

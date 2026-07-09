@@ -18,7 +18,7 @@ class FoundationController extends Controller
         $user = $request->user();
 
         if ($user->isSuperAdmin()) {
-            $query = Foundation::query();
+            $query = Foundation::withCount('schools');
 
             // Search by name or code
             if ($request->has('search')) {
@@ -34,7 +34,15 @@ class FoundationController extends Controller
                 $query->where('status', $request->input('status'));
             }
 
-            $foundations = $query->latest()->paginate(15);
+            $foundations = $query->latest()->paginate($request->input('per_page', 15));
+
+            $foundations->getCollection()->transform(function ($f) {
+                $schoolIds = $f->schools()->pluck('id');
+                $f->users_count = \App\Models\User::where('foundation_id', $f->id)
+                    ->orWhereIn('school_id', $schoolIds)
+                    ->count();
+                return $f;
+            });
 
             return response()->json([
                 'status' => 'success',
@@ -43,13 +51,20 @@ class FoundationController extends Controller
         }
 
         if ($user->hasRole('admin_yayasan')) {
-            $foundation = Foundation::find($user->foundation_id);
+            $foundation = Foundation::withCount('schools')->find($user->foundation_id);
             if (!$foundation) {
                 return response()->json([
                     'status'  => 'error',
                     'message' => 'Foundation not found for your account.',
                 ], 404);
             }
+
+            $schoolIds = $foundation->schools()->pluck('id');
+            $usersCount = \App\Models\User::where('foundation_id', $foundation->id)
+                ->orWhereIn('school_id', $schoolIds)
+                ->count();
+
+            $foundation->users_count = $usersCount;
 
             return response()->json([
                 'status' => 'success',

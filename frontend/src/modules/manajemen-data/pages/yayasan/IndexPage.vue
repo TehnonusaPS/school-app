@@ -1,13 +1,14 @@
 <script setup>
 import DataTableCard from '@/components/data-table/DataTableCard.vue'
 import PageHeader from '@/components/page-header/PageHeader.vue'
-import { stats, columns, filters, actions } from './data/yayasan.js'
+import { columns, filters, actions } from './data/yayasan.js'
 import StatCard from '@/components/stat-card/StatCard.vue'
 import { ref, computed, watch, onMounted } from 'vue'
 import { toast } from 'vue-sonner'
 import DataSheet from '@/components/data-sheet/DataSheet.vue'
 import { yayasanSheetSections } from './data/dataSheetDetail.js'
 import { getFoundations, deleteFoundation } from '@/services/managementService'
+import { Building2, ShieldCheck, ShieldAlert, ShieldX } from 'lucide-vue-next'
 
 const perPage = ref(5)
 const currentPage = ref(1)
@@ -16,6 +17,68 @@ const from = ref(1)
 const to = ref(1)
 const tableItems = ref([])
 const isLoading = ref(false)
+
+const statsData = ref({
+  total: 0,
+  aktif: 0,
+  trial: 0,
+  inactive: 0
+})
+
+const fetchStats = async () => {
+  try {
+    const res = await getFoundations({ per_page: 1000 })
+    // getFoundations might return pagination data structure or simple array depending on role
+    const list = Array.isArray(res.data) ? res.data : (res.data.data || [])
+    statsData.value = {
+      total: list.length,
+      aktif: list.filter(item => item.status === 'active').length,
+      trial: list.filter(item => item.status === 'trial').length,
+      inactive: list.filter(item => item.status === 'inactive').length
+    }
+  } catch (err) {
+    console.error('Gagal mengambil data statistik yayasan', err)
+  }
+}
+
+const stats = computed(() => [
+  {
+    label: 'TOTAL YAYASAN',
+    value: String(statsData.value.total),
+    trend: '+8.4% bln ini',
+    trendDirection: 'up',
+    icon: Building2,
+    illustration: 'globe',
+    variant: 'primary'
+  },
+  {
+    label: 'YAYASAN AKTIF',
+    value: String(statsData.value.aktif),
+    trend: '+12 Baru',
+    trendDirection: 'up',
+    icon: ShieldCheck,
+    illustration: 'school_bell',
+    variant: 'emerald'
+  },
+  {
+    label: 'YAYASAN SEDANG TRIAL',
+    value: String(statsData.value.trial),
+    trend: '-2 Yayasan',
+    trendDirection: 'down',
+    icon: ShieldAlert,
+    illustration: 'pencil',
+    variant: 'amber'
+  },
+  {
+    label: 'YAYASAN TIDAK AKTIF',
+    value: String(statsData.value.inactive),
+    trend: '-1 Yayasan',
+    trendDirection: 'up',
+    icon: ShieldX,
+    illustration: 'ruler',
+    variant: 'violet'
+  }
+])
 
 const filterValues = ref({
   search: '',
@@ -31,10 +94,19 @@ const fetchFoundations = async () => {
       search: filterValues.value.search,
     }
     if (filterValues.value.status !== 'all') {
-      params.status = filterValues.value.status.toLowerCase()
+      const statusMap = {
+        aktif: 'active',
+        nonaktif: 'inactive',
+        trial: 'trial',
+        Aktif: 'active',
+        Nonaktif: 'inactive',
+        Trial: 'trial'
+      }
+      params.status = statusMap[filterValues.value.status] || filterValues.value.status
     }
     const res = await getFoundations(params)
     tableItems.value = res.data.data.map(item => ({
+      ...item,
       id: item.id,
       nama: item.name,
       kode: item.code,
@@ -48,11 +120,10 @@ const fetchFoundations = async () => {
       no_sk: item.decree_number,
       tanggal_sk: item.decree_date ? item.decree_date.split('T')[0] : '-',
       logo: item.logo || 'https://picsum.photos/200',
-      status: item.status.charAt(0).toUpperCase() + item.status.slice(1),
+      status: item.status === 'active' ? 'Aktif' : (item.status === 'inactive' ? 'Nonaktif' : 'Trial'),
       // Mapped fields
       jmlSekolah: item.schools_count || 0,
-      jmlPengguna: item.users_count || 0,
-      ...item
+      jmlPengguna: item.users_count || 0
     }))
     total.value = res.data.total
     from.value = res.data.from || 1
@@ -66,6 +137,7 @@ const fetchFoundations = async () => {
 
 onMounted(() => {
   fetchFoundations()
+  fetchStats()
 })
 
 watch([currentPage, perPage, filterValues], () => {
@@ -79,6 +151,7 @@ const deleteItem = async (id, item) => {
       description: `${item.nama} telah dihapus dari sistem.`
     })
     fetchFoundations()
+    fetchStats()
   } catch (err) {
     toast.error('Gagal menghapus yayasan')
   }

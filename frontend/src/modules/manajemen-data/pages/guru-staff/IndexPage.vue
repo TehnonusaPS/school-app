@@ -1,19 +1,69 @@
 <script setup>
 import DataTableCard from '@/components/data-table/DataTableCard.vue'
 import PageHeader from '@/components/page-header/PageHeader.vue'
-import { usePagination } from '@/composables/usePagination'
-import { columns, filters, actions, stats, allItems } from './data/guruStaff.js'
+import { columns, filters, actions } from './data/guruStaff.js'
 import StatCard from '@/components/stat-card/StatCard.vue'
 import { useAuthStore } from '@/stores/authStore'
-import { computed, ref, watch } from 'vue'
+import { usePagination } from '@/composables/usePagination'
+import { computed, ref, watch, onMounted } from 'vue'
 import { toast } from 'vue-sonner'
 import DataSheet from '@/components/data-sheet/DataSheet.vue'
-import { guruStaffSheetSections, rawGuruStaffItem } from './data/dataSheetDetail.js'
+import { guruStaffSheetSections } from './data/dataSheetDetail.js'
+import { getTeachers, deleteTeacher } from '@/services/managementService'
+import { School, BookCheck, GraduationCap, BookX } from 'lucide-vue-next'
 
 const auth = useAuthStore()
 const isAdminYayasan = computed(() => auth.user?.role === 'admin_yayasan')
 const perPage = ref(5)
-const tableItems = ref([...allItems.value])
+const tableItems = ref([])
+const isLoading = ref(false)
+
+const stats = computed(() => {
+  const list = items.value || []
+  const totalVal = list.length
+  const aktifVal = list.filter(item => item.status_aktif === 'Aktif').length
+  const guruVal = list.filter(item => ['guru', 'wali_kelas', 'kepala_sekolah'].includes(item.role)).length
+  const staffVal = list.filter(item => ['tata_usaha', 'admin_sekolah', 'admin_yayasan'].includes(item.role)).length
+
+  return [
+    {
+      label: 'TOTAL PEGAWAI',
+      value: String(totalVal),
+      trend: '+8.4% bln ini',
+      trendDirection: 'up',
+      icon: School,
+      illustration: 'globe',
+      variant: 'primary'
+    },
+    {
+      label: 'PEGAWAI AKTIF',
+      value: String(aktifVal),
+      trend: '+12 Baru',
+      trendDirection: 'up',
+      icon: BookCheck,
+      illustration: 'school_bell',
+      variant: 'emerald'
+    },
+    {
+      label: 'TOTAL GURU',
+      value: String(guruVal),
+      sub: 'Kehadiran',
+      progress: 98,
+      icon: GraduationCap,
+      illustration: 'open_book',
+      variant: 'amber'
+    },
+    {
+      label: 'TOTAL STAFF',
+      value: String(staffVal),
+      sub: 'Kehadiran',
+      progress: 90,
+      icon: BookX,
+      illustration: 'abc_board',
+      variant: 'violet'
+    }
+  ]
+})
 
 const filterValues = ref({
   search: '',
@@ -26,18 +76,42 @@ const items = computed(() => {
   }
 
   return tableItems.value.filter(
-    item => item.unitId === auth.user?.unitId
+    item => item.unitId === auth.user?.unitId || item.unit_id === auth.user?.unitId
   )
 })
 
-const deleteItem = (id, item) => {
-  tableItems.value = tableItems.value.filter(
-    item => item.id !== id
-  )
+const fetchTeachers = async () => {
+  isLoading.value = true
+  try {
+    const res = await getTeachers()
+    tableItems.value = res.data.map(item => ({
+      ...item,
+      nip: item.nip_nuptk || '-',
+      unitKerja: item.unit_kerja || '-',
+      unitId: item.unit_id,
+      status: item.status_kepegawaian || '-'
+    }))
+  } catch (error) {
+    toast.error('Gagal mengambil data guru dan staff')
+  } finally {
+    isLoading.value = false
+  }
+}
 
-  toast.success('Berhasil dihapus', {
-    description: `${item.nama} telah dihapus dari sistem.`
-  })
+onMounted(() => {
+  fetchTeachers()
+})
+
+const deleteItem = async (id, item) => {
+  try {
+    await deleteTeacher(id)
+    toast.success('Berhasil dihapus', {
+      description: `${item.nama} telah dihapus dari sistem.`
+    })
+    fetchTeachers()
+  } catch (err) {
+    toast.error('Gagal menghapus guru/staff')
+  }
 }
 
 const filteredItems = computed(() => {
@@ -46,7 +120,6 @@ const filteredItems = computed(() => {
     const searchMatch =
       !searchVal ||
       item.nama.toLowerCase().includes(searchVal)
-
 
     const statusVal = filterValues.value.status
     const statusMatch = !statusVal || statusVal === 'all' || item.status === statusVal
@@ -110,18 +183,18 @@ const handleViewDetail = id => {
       :page="currentPage"
       @update:page="currentPage = $event"
       @view="handleViewDetail"
-      @edit="$router.push('/manajemen-data/guru-staff/edit')"
+      @edit="$router.push(`/manajemen-data/guru-staff/edit?id=${$event}`)"
       @delete="deleteItem"
     />
 
     <DataSheet
       v-model:open="isDetailSheetOpen"
-      :item="rawGuruStaffItem"
+      :item="selectedItemForDetail"
       title-key="nama"
       description-key="nip_nuptk"
       description-prefix="NIP/NUPTK: "
       avatar-key="foto"
-      badge-key="status_kepegawaian"
+      badge-key="status"
       :sections="guruStaffSheetSections"
     />
   </div>

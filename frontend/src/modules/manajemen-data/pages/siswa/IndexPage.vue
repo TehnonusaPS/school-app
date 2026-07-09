@@ -2,7 +2,7 @@
 import DataTableCard from '@/components/data-table/DataTableCard.vue'
 import PageHeader from '@/components/page-header/PageHeader.vue'
 import { usePagination } from '@/composables/usePagination'
-import { stats, columns, filters, actions, allItems } from './data/siswa.js'
+import { columns, filters, actions, allItems } from './data/siswa.js'
 import StatCard from '@/components/stat-card/StatCard.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { computed, onMounted } from 'vue'
@@ -13,6 +13,7 @@ import { rawSiswaItem, siswaSheetSections} from './data/dataSheetDetail.js'
 import { useRouter } from 'vue-router'
 import { fetchAllSiswa, deleteSiswa } from '@/services/siswaService'
 import { getClassrooms } from '@/services/managementService'
+import { Users, UserCheck, UserRound, UserRoundCheck } from 'lucide-vue-next'
 
 const auth = useAuthStore()
 const isWaliKelas = computed(() => auth.user?.role === 'wali_kelas')
@@ -21,6 +22,58 @@ const perPage = ref(5)
 const tableItems = ref([])
 const activeClassrooms = ref([])
 const isLoading = ref(false)
+
+const stats = computed(() => {
+  const list = items.value || []
+  const totalVal = list.length
+  const aktifVal = list.filter(item => item.status === 'Aktif').length
+  const lakiVal = list.filter(item => item.jenisKelamin === 'Laki-laki').length
+  const perempuanVal = list.filter(item => item.jenisKelamin === 'Perempuan').length
+  
+  const lakiProgress = totalVal > 0 ? Math.round((lakiVal / totalVal) * 100) : 0
+  const perempuanProgress = totalVal > 0 ? Math.round((perempuanVal / totalVal) * 100) : 0
+
+  return [
+    {
+      label: 'TOTAL SISWA',
+      value: String(totalVal),
+      sub: 'Jumlah Siswa Terdaftar',
+      trend: '+0 bln ini',
+      trendDirection: 'up',
+      icon: Users,
+      variant: 'up',
+      color: 'primary'
+    },
+    {
+      label: 'SISWA AKTIF',
+      value: String(aktifVal),
+      sub: 'Siswa Berstatus Aktif',
+      trend: '+0 bln ini',
+      trendDirection: 'up',
+      icon: UserCheck,
+      variant: 'up',
+      color: 'emerald'
+    },
+    {
+      label: 'SISWA LAKI-LAKI',
+      value: String(lakiVal),
+      sub: 'Komposisi Gender',
+      progress: lakiProgress,
+      icon: UserRound,
+      variant: 'progress',
+      color: 'blue'
+    },
+    {
+      label: 'SISWA PEREMPUAN',
+      value: String(perempuanVal),
+      sub: 'Komposisi Gender',
+      progress: perempuanProgress,
+      icon: UserRoundCheck,
+      variant: 'progress',
+      color: 'violet'
+    }
+  ]
+})
 
 const filterValues = ref({
   search: '',

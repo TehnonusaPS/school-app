@@ -104,7 +104,7 @@ class UserController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data'   => $query->latest()->paginate(15),
+            'data'   => $query->latest()->paginate($request->input('per_page', 15)),
         ]);
     }
 

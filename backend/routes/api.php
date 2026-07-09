@@ -5,6 +5,12 @@ use App\Http\Controllers\Api\SuperAdmin\FinanceController;
 use App\Http\Controllers\Api\FoundationController;
 use App\Http\Controllers\Api\SchoolController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\StudentController;
+use App\Http\Controllers\Api\ClassroomController;
+use App\Http\Controllers\Api\TeacherController;
+use App\Http\Controllers\Api\ExtracurricularController;
+use App\Http\Controllers\Api\SubjectController;
+use App\Http\Controllers\Api\AcademicYearController;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
@@ -115,6 +121,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Feedback routes
     Route::apiResource('/feedbacks', \App\Http\Controllers\Api\FeedbackController::class);
 
+    // Active Student Certificate routes (Persuratan Aktif)
+    Route::apiResource('/komunikasi/surat-aktif', \App\Http\Controllers\Api\ActiveStudentCertificateController::class);
+    Route::apiResource('/komunikasi/surat-dispensasi', \App\Http\Controllers\Api\StudentDispensationCertificateController::class);
+    Route::apiResource('/komunikasi/surat-peringatan', \App\Http\Controllers\Api\StudentWarningCertificateController::class);
+    Route::apiResource('/komunikasi/berita-kegiatan', \App\Http\Controllers\Api\ActivityNewsController::class);
+
     // Super Admin Finance Routes
     Route::middleware('role:superadmin')->prefix('superadmin/finance')->group(function () {
         Route::get('/dashboard', [FinanceController::class, 'indexDashboard']);
@@ -138,7 +150,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Management Data Routes (Yayasan, Sekolah & Pengguna)
-    Route::middleware('role:superadmin,admin_yayasan,admin_sekolah')->prefix('management')->group(function () {
+    Route::middleware('role:superadmin,admin_yayasan,admin_sekolah,tata_usaha,kepala_sekolah')->prefix('management')->group(function () {
         Route::get('/roles', [UserController::class, 'getRoles']);
         Route::apiResource('/foundations', FoundationController::class);
         Route::apiResource('/schools', SchoolController::class);

@@ -20,7 +20,7 @@ import { Bell, Search, UserPlus, CreditCard, MessageCircle, MessageSquare, Sun, 
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { sidebarSlide, topbarSlide } from '@/config/motion'
-import { getNotifications } from '@/services/notificationService'
+import { getNotifications, markAsRead as apiMarkAsRead } from '@/services/notificationService'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -76,6 +76,32 @@ const loadNotifications = async () => {
     notifications.value = data.notifications.slice(0, 5) // Ambil 5 terbaru untuk dropdown
   } catch (error) {
     console.error('Gagal mengambil notifikasi:', error)
+  }
+}
+
+const handleNotificationClick = async (n) => {
+  if (!n.read_at) {
+    try {
+      await apiMarkAsRead(n.id)
+      n.read_at = new Date().toISOString()
+      auth.fetchUnreadNotificationsCount()
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  if (n.type === 'ACTIVITY_NEWS' && n.data?.activity_news_id) {
+    router.push({
+      path: '/komunikasi/berita-kegiatan',
+      query: { id: n.data.activity_news_id }
+    })
+  } else if (n.type === 'ANNOUNCEMENT' && n.data?.announcement_id) {
+    router.push({
+      path: '/komunikasi/pengumuman',
+      query: { id: n.data.announcement_id }
+    })
+  } else {
+    router.push('/komunikasi/notifikasi')
   }
 }
 
@@ -262,7 +288,7 @@ const breadcrumbs = computed(() => {
                         ? 'bg-primary/[0.03] hover:bg-primary/[0.06] border-l-3 border-l-primary' 
                         : 'hover:bg-muted/40'
                     ]"
-                    @click="router.push('/komunikasi/notifikasi')"
+                    @click="handleNotificationClick(n)"
                   >
                     <!-- Icon container -->
                     <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors"

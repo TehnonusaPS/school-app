@@ -102,9 +102,32 @@ class UserController extends Controller
             $query->where('is_active', filter_var($request->input('is_active'), FILTER_VALIDATE_BOOLEAN));
         }
 
+        $statsQuery = User::query();
+        if ($user->isSuperAdmin()) {
+            // No restriction
+        } elseif ($user->hasRole('admin_yayasan')) {
+            $statsQuery->where(function ($q) use ($user) {
+                $q->where('foundation_id', $user->foundation_id)
+                  ->orWhereHas('school', function ($sq) use ($user) {
+                      $sq->where('foundation_id', $user->foundation_id);
+                  });
+            });
+        } elseif ($user->hasRole('admin_sekolah')) {
+            $statsQuery->where('school_id', $user->school_id);
+        }
+
+        $total = (clone $statsQuery)->count();
+        $active = (clone $statsQuery)->where('is_active', true)->count();
+        $inactive = (clone $statsQuery)->where('is_active', false)->count();
+
         return response()->json([
             'status' => 'success',
             'data'   => $query->latest()->paginate(15),
+            'stats'  => [
+                'total' => $total,
+                'active' => $active,
+                'inactive' => $inactive,
+            ]
         ]);
     }
 

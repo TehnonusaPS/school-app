@@ -1,23 +1,95 @@
 <script setup>
-import DataTableCard from '@/components/data-table/DataTableCard.vue'
-import PageHeader from '@/components/page-header/PageHeader.vue'
-import { usePagination } from '@/composables/usePagination'
-import { columns, filters, actions, stats, allItems } from './data/guruStaff.js'
+import { columns, filters, actions } from './data/guruStaff.js'
 import StatCard from '@/components/stat-card/StatCard.vue'
 import { useAuthStore } from '@/stores/authStore'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
+import { usePagination } from '@/composables/usePagination'
 import { toast } from 'vue-sonner'
 import DataSheet from '@/components/data-sheet/DataSheet.vue'
 import { guruStaffSheetSections, rawGuruStaffItem } from './data/dataSheetDetail.js'
+import { getTeachers, deleteTeacher } from '@/services/managementService'
+import { School, BookCheck, GraduationCap, BookX } from 'lucide-vue-next'
+
+const stats = ref([
+  {
+    label: 'TOTAL PEGAWAI',
+    value: '0',
+    trend: 'Pegawai',
+    trendDirection: 'up',
+    icon: School,
+    illustration: 'globe',
+    variant: 'primary'
+  },
+  {
+    label: 'PEGAWAI AKTIF',
+    value: '0',
+    trend: 'Aktif',
+    trendDirection: 'up',
+    icon: BookCheck,
+    illustration: 'school_bell',
+    variant: 'emerald'
+  },
+  {
+    label: 'TOTAL GURU',
+    value: '0',
+    sub: 'Guru Pendidik',
+    icon: GraduationCap,
+    illustration: 'open_book',
+    variant: 'amber'
+  },
+  {
+    label: 'TOTAL STAFF',
+    value: '0',
+    sub: 'Tenaga Kependidikan',
+    icon: BookX,
+    illustration: 'abc_board',
+    variant: 'violet'
+  }
+])
 
 const auth = useAuthStore()
 const isAdminYayasan = computed(() => auth.user?.role === 'admin_yayasan')
 const perPage = ref(5)
-const tableItems = ref([...allItems.value])
+const tableItems = ref([])
+const isLoading = ref(false)
 
 const filterValues = ref({
   search: '',
   status: 'all'
+})
+
+const fetchTeachers = async () => {
+  isLoading.value = true
+  try {
+    const params = {}
+    const res = await getTeachers(params)
+    tableItems.value = res.data.map(item => ({
+      id: item.id,
+      nama: item.nama,
+      nip: item.nip_nuptk,
+      unitKerja: item.unit_kerja,
+      unitId: item.unit_id,
+      jabatan: item.jabatan,
+      masaKerja: item.masaKerja,
+      status: item.status_kepegawaian,
+      ...item
+    }))
+
+    if (res.stats) {
+      stats.value[0].value = String(res.stats.total)
+      stats.value[1].value = String(res.stats.active)
+      stats.value[2].value = String(res.stats.guru)
+      stats.value[3].value = String(res.stats.staff)
+    }
+  } catch (err) {
+    toast.error('Gagal mengambil data guru dan staff')
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchTeachers()
 })
 
 const items = computed(() => {
@@ -30,14 +102,16 @@ const items = computed(() => {
   )
 })
 
-const deleteItem = (id, item) => {
-  tableItems.value = tableItems.value.filter(
-    item => item.id !== id
-  )
-
-  toast.success('Berhasil dihapus', {
-    description: `${item.nama} telah dihapus dari sistem.`
-  })
+const deleteItem = async (id, item) => {
+  try {
+    await deleteTeacher(id)
+    toast.success('Berhasil dihapus', {
+      description: `${item.nama} telah dihapus dari sistem.`
+    })
+    fetchTeachers()
+  } catch (err) {
+    toast.error('Gagal menghapus pegawai')
+  }
 }
 
 const filteredItems = computed(() => {
@@ -46,7 +120,6 @@ const filteredItems = computed(() => {
     const searchMatch =
       !searchVal ||
       item.nama.toLowerCase().includes(searchVal)
-
 
     const statusVal = filterValues.value.status
     const statusMatch = !statusVal || statusVal === 'all' || item.status === statusVal

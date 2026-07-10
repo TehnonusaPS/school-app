@@ -242,9 +242,39 @@ class TeacherController extends Controller
             ];
         })->filter()->values();
 
+        $statsQuery = TeacherProfile::query();
+        if ($user->isSuperAdmin()) {
+            // no restriction
+        } elseif ($user->hasRole('admin_yayasan')) {
+            $statsQuery->where(function ($q) use ($user) {
+                $q->whereHas('user.school', function ($sq) use ($user) {
+                    $sq->where('foundation_id', $user->foundation_id);
+                })->orWhereHas('user', function ($sq) use ($user) {
+                    $sq->where('foundation_id', $user->foundation_id)->whereNull('school_id');
+                });
+            });
+        } else { // admin_sekolah etc.
+            $statsQuery->whereHas('user', function ($q) use ($user) {
+                $q->where('school_id', $user->school_id);
+            });
+        }
+
+        $total = (clone $statsQuery)->count();
+        $active = (clone $statsQuery)->whereHas('user', function ($q) {
+            $q->where('is_active', true);
+        })->count();
+        $guru = (clone $statsQuery)->where('position', 'J004')->count();
+        $staff = (clone $statsQuery)->where('position', '!=', 'J004')->count();
+
         return response()->json([
             'status' => 'success',
             'data'   => $formatted,
+            'stats'  => [
+                'total' => $total,
+                'active' => $active,
+                'guru' => $guru,
+                'staff' => $staff,
+            ]
         ]);
     }
 

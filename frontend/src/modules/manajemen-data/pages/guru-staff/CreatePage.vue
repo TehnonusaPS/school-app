@@ -2,30 +2,53 @@
 import { 
   Save
 } from 'lucide-vue-next'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import PageHeader from '@/components/page-header/PageHeader.vue'
 import { defaultForm } from './data/defaultForm'
 import { useAuthStore } from '@/stores/authStore'
 import GuruStaffForm from './components/GuruStaffForm.vue'
-import { agamaOptions, jabatanOptions, kelaminOptions, pendidikanOptions, statusKepegawaianOptions, statusOptions, statusPernikahanOptions, unitKerjaOptions } from './data/guruStaff'
+import { agamaOptions, jabatanOptions, kelaminOptions, pendidikanOptions, statusKepegawaianOptions, statusOptions, statusPernikahanOptions } from './data/guruStaff'
 import SuccessAccountDialog from '@/components/dialogs/SuccessAccountDialog.vue'
+import { createTeacher, getSchools, getFoundation } from '@/services/managementService'
+import { toast } from 'vue-sonner'
 
 const auth = useAuthStore()
-const isAdminYayasan = computed(() => auth.user?.role === 'admin_yayasan')
-
-const unitOptions = computed(() => {
-  if (isAdminYayasan.value) {
-    return unitKerjaOptions
-  }
-
-  return unitKerjaOptions.filter(
-    item => item.value === auth.user?.unitId
-  )
-})
-
 const router = useRouter()
 const isLoading = ref(false)
+const unitOptions = ref([])
+
+const loadUnitOptions = async () => {
+  try {
+    const resSchools = await getSchools()
+    const options = resSchools.data.data.map(s => ({
+      label: s.name,
+      value: 'S' + String(s.id).padStart(4, '0')
+    }))
+
+    if (auth.user?.foundation_id) {
+      try {
+        const resFd = await getFoundation(auth.user.foundation_id)
+        options.unshift({
+          label: resFd.data.name,
+          value: 'Y' + String(auth.user.foundation_id).padStart(4, '0')
+        })
+      } catch (err) {
+        options.unshift({
+          label: 'Yayasan',
+          value: 'Y' + String(auth.user.foundation_id).padStart(4, '0')
+        })
+      }
+    }
+    unitOptions.value = options
+  } catch (err) {
+    console.error('Failed to load schools', err)
+  }
+}
+
+onMounted(() => {
+  loadUnitOptions()
+})
 
 const form = ref({ ...defaultForm})
 
@@ -37,20 +60,33 @@ const handleImage = (file) => {
 
 const showSuccessModal = ref(false)
 
-
 const generatedAccount = ref({
-  email: 'nama@sdnusantara.sch.id',
-  phone: '081234567890',
-  password: 'Adm#2026!'
+  email: '',
+  phone: '',
+  password: ''
 })
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   isLoading.value = true
-
-  setTimeout(() => {
+  try {
+    const submitData = { ...form.value }
+    const res = await createTeacher(submitData)
+    if (res.status === 'success') {
+      generatedAccount.value = {
+        email: res.data.email,
+        phone: res.data.phone || '-',
+        password: res.data.password
+      }
+      showSuccessModal.value = true
+    } else {
+      toast.error(res.message || 'Gagal menyimpan data')
+    }
+  } catch (err) {
+    const errorMsg = err.response?.data?.message || 'Terjadi kesalahan sistem'
+    toast.error(errorMsg)
+  } finally {
     isLoading.value = false
-    showSuccessModal.value = true
-  }, 1500)
+  }
 }
 const goToList = () => {
   router.push('/manajemen-data/guru-staff')

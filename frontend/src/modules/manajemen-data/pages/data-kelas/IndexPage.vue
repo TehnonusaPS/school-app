@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { toast } from 'vue-sonner'
 
 import PageHeader from '@/components/page-header/PageHeader.vue'
@@ -10,8 +10,8 @@ import { Button } from '@/components/ui/button'
 import KelasStatCards from './components/KelasStatCards.vue'
 import KelasTable from './components/KelasTable.vue'
 import KelasForm from './components/KelasForm.vue'
-import { mockKelas } from './data/mock-kelas'
 import router from '@/router/index.js'
+import { getClassrooms, createClassroom, updateClassroom, deleteClassroom } from '@/services/managementService'
 
 import {
   Eye,
@@ -20,7 +20,24 @@ import {
   Users
 } from 'lucide-vue-next'
 
-const kelasList = ref(mockKelas)
+const kelasList = ref([])
+const isLoading = ref(false)
+
+const fetchClassrooms = async () => {
+  isLoading.value = true
+  try {
+    const res = await getClassrooms()
+    kelasList.value = res.data
+  } catch (err) {
+    toast.error('Gagal memuat data kelas')
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchClassrooms()
+})
 
 // --- Form Sheet State & Methods ---
 const isFormSheetOpen = ref(false)
@@ -73,7 +90,7 @@ const validateForm = () => {
   return Object.keys(errors).length === 0
 }
 
-const handleSave = () => {
+const handleSave = async () => {
   if (!validateForm()) {
     toast.error('Gagal Menyimpan', { description: 'Harap lengkapi semua field yang wajib diisi.' })
     return
@@ -81,17 +98,19 @@ const handleSave = () => {
 
   const data = { ...formItem.value }
 
-  if (isEditMode.value) {
-    kelasList.value = kelasList.value.map(k => k.id === data.id ? data : k)
-    toast.success('Berhasil Diperbarui', { description: `Data kelas "${data.name}" telah diperbarui.` })
-  } else {
-    data.id = Date.now()
-    data.students_count = 0 // default for new class
-    kelasList.value = [data, ...kelasList.value]
-    toast.success('Berhasil Ditambahkan', { description: `Kelas "${data.name}" telah ditambahkan.` })
+  try {
+    if (isEditMode.value) {
+      await updateClassroom(data.id, data)
+      toast.success('Berhasil Diperbarui', { description: `Data kelas "${data.name}" telah diperbarui.` })
+    } else {
+      await createClassroom(data)
+      toast.success('Berhasil Ditambahkan', { description: `Kelas "${data.name}" telah ditambahkan.` })
+    }
+    fetchClassrooms()
+    isFormSheetOpen.value = false
+  } catch (err) {
+    toast.error('Gagal menyimpan kelas')
   }
-
-  isFormSheetOpen.value = false
 }
 
 // --- Detail Sheet State & Methods ---
@@ -143,9 +162,14 @@ const detailSections = computed(() => {
 })
 
 // --- Delete ---
-function handleDelete(id) {
-  kelasList.value = kelasList.value.filter(k => k.id !== id)
-  toast.success('Data kelas berhasil dihapus!')
+async function handleDelete(id) {
+  try {
+    await deleteClassroom(id)
+    toast.success('Data kelas berhasil dihapus!')
+    fetchClassrooms()
+  } catch (err) {
+    toast.error('Gagal menghapus kelas')
+  }
 }
 
 const rowActions = [
@@ -170,7 +194,6 @@ const rowActions = [
     click: item => handleDelete(item.id)
   }
 ]
-
 </script>
 
 <template>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Foundation;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -18,7 +19,16 @@ class FoundationController extends Controller
         $user = $request->user();
 
         if ($user->isSuperAdmin()) {
-            $query = Foundation::query();
+            $query = Foundation::query()
+                ->withCount('schools')
+                ->addSelect(['users_count' => User::selectRaw('count(*)')
+                    ->where(function ($q) {
+                        $q->whereColumn('users.foundation_id', 'foundations.id')
+                          ->orWhereIn('users.school_id', function ($sq) {
+                              $sq->select('id')->from('schools')->whereColumn('schools.foundation_id', 'foundations.id');
+                          });
+                    })
+                ]);
 
             // Search by name or code
             if ($request->has('search')) {
@@ -36,9 +46,21 @@ class FoundationController extends Controller
 
             $foundations = $query->latest()->paginate(15);
 
+            $statsQuery = Foundation::query();
+            $total = (clone $statsQuery)->count();
+            $active = (clone $statsQuery)->where('status', 'active')->count();
+            $trial = (clone $statsQuery)->where('status', 'trial')->count();
+            $inactive = (clone $statsQuery)->where('status', 'inactive')->count();
+
             return response()->json([
                 'status' => 'success',
                 'data'   => $foundations,
+                'stats'  => [
+                    'total' => $total,
+                    'active' => $active,
+                    'trial' => $trial,
+                    'inactive' => $inactive,
+                ]
             ]);
         }
 
@@ -51,6 +73,13 @@ class FoundationController extends Controller
                 ], 404);
             }
 
+            $stats = [
+                'total' => 1,
+                'active' => $foundation->status === 'active' ? 1 : 0,
+                'trial' => $foundation->status === 'trial' ? 1 : 0,
+                'inactive' => $foundation->status === 'inactive' ? 1 : 0,
+            ];
+
             return response()->json([
                 'status' => 'success',
                 'data'   => [
@@ -58,6 +87,7 @@ class FoundationController extends Controller
                     'data' => [$foundation],
                     'total' => 1,
                 ],
+                'stats' => $stats,
             ]);
         }
 

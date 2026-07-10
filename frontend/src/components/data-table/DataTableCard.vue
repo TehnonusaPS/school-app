@@ -123,7 +123,7 @@ const defaultRowActions = computed(() => {
   const actions = []
   if (props.onView)
     actions.push({ label: 'Detail', icon: Eye, click: item => props.onView(item.id, item) })
-  if (props.onEdit) actions.push({ label: 'Edit', icon: Pencil, click: props.onEdit })
+  if (props.onEdit) actions.push({ label: 'Edit', icon: Pencil, click: item => props.onEdit(item.id, item) })
   if (props.onDelete) actions.push({ label: 'Hapus', icon: Trash2, click: requestDelete })
   return actions
 })

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\School;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -18,13 +19,20 @@ class SchoolController extends Controller
         $user = $request->user();
 
         if ($user->isSuperAdmin()) {
-            $query = School::with('foundation:id,name,code');
+            $query = School::select('schools.*')
+                ->with('foundation:id,name,code')
+                ->addSelect(['students_count' => User::selectRaw('count(*)')
+                    ->whereColumn('users.school_id', 'schools.id')
+                    ->whereIn('users.role_id', function ($sq) {
+                        $sq->select('id')->from('roles')->where('name', 'siswa');
+                    })
+                ]);
 
             if ($request->has('search')) {
                 $search = $request->input('search');
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('npsn', 'like', "%{$search}%");
+                       ->orWhere('npsn', 'like', "%{$search}%");
                 });
             }
 
@@ -40,21 +48,40 @@ class SchoolController extends Controller
                 $query->where('status', $request->input('status'));
             }
 
+            $statsQuery = School::query();
+            $total = (clone $statsQuery)->count();
+            $active = (clone $statsQuery)->where('status', 'active')->count();
+            $trial = (clone $statsQuery)->where('status', 'trial')->count();
+            $inactive = (clone $statsQuery)->where('status', 'inactive')->count();
+
             return response()->json([
                 'status' => 'success',
-                'data'   => $query->latest()->paginate(15),
+                'data'   => $query->latest('schools.created_at')->paginate(15),
+                'stats'  => [
+                    'total' => $total,
+                    'active' => $active,
+                    'trial' => $trial,
+                    'inactive' => $inactive,
+                ]
             ]);
         }
 
         if ($user->hasRole('admin_yayasan')) {
-            $query = School::with('foundation:id,name,code')
-                ->where('foundation_id', $user->foundation_id);
+            $query = School::select('schools.*')
+                ->with('foundation:id,name,code')
+                ->where('foundation_id', $user->foundation_id)
+                ->addSelect(['students_count' => User::selectRaw('count(*)')
+                    ->whereColumn('users.school_id', 'schools.id')
+                    ->whereIn('users.role_id', function ($sq) {
+                        $sq->select('id')->from('roles')->where('name', 'siswa');
+                    })
+                ]);
 
             if ($request->has('search')) {
                 $search = $request->input('search');
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('npsn', 'like', "%{$search}%");
+                       ->orWhere('npsn', 'like', "%{$search}%");
                 });
             }
 
@@ -66,20 +93,48 @@ class SchoolController extends Controller
                 $query->where('status', $request->input('status'));
             }
 
+            $statsQuery = School::where('foundation_id', $user->foundation_id);
+            $total = (clone $statsQuery)->count();
+            $active = (clone $statsQuery)->where('status', 'active')->count();
+            $trial = (clone $statsQuery)->where('status', 'trial')->count();
+            $inactive = (clone $statsQuery)->where('status', 'inactive')->count();
+
             return response()->json([
                 'status' => 'success',
-                'data'   => $query->latest()->paginate(15),
+                'data'   => $query->latest('schools.created_at')->paginate(15),
+                'stats'  => [
+                    'total' => $total,
+                    'active' => $active,
+                    'trial' => $trial,
+                    'inactive' => $inactive,
+                ]
             ]);
         }
 
         if ($user->hasRole('admin_sekolah')) {
-            $school = School::with('foundation:id,name,code')->find($user->school_id);
+            $school = School::select('schools.*')
+                ->with('foundation:id,name,code')
+                ->addSelect(['students_count' => User::selectRaw('count(*)')
+                    ->whereColumn('users.school_id', 'schools.id')
+                    ->whereIn('users.role_id', function ($sq) {
+                        $sq->select('id')->from('roles')->where('name', 'siswa');
+                    })
+                ])
+                ->find($user->school_id);
+
             if (!$school) {
                 return response()->json([
                     'status'  => 'error',
                     'message' => 'School not found for your account.',
                 ], 404);
             }
+
+            $stats = [
+                'total' => 1,
+                'active' => $school->status === 'active' ? 1 : 0,
+                'trial' => $school->status === 'trial' ? 1 : 0,
+                'inactive' => $school->status === 'inactive' ? 1 : 0,
+            ];
 
             return response()->json([
                 'status' => 'success',
@@ -88,6 +143,7 @@ class SchoolController extends Controller
                     'data' => [$school],
                     'total' => 1,
                 ],
+                'stats' => $stats,
             ]);
         }
 

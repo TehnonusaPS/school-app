@@ -72,7 +72,8 @@ const aktifCount = ref(0)
 const nonaktifCount = ref(0)
 
 function getRoleLabel(role) {
-  return ROLE_LABELS[role] || role
+  const roleName = typeof role === 'object' && role !== null ? role.name : role;
+  return ROLE_LABELS[roleName] || roleName || ''
 }
 
 function getStatusLabel(status) {
@@ -121,6 +122,7 @@ const fetchUsers = async () => {
     }
     const res = await getUsers(params)
     penggunaList.value = res.data.data.map(user => ({
+      ...user,
       id: user.id,
       nama: user.name,
       email: user.email,
@@ -132,17 +134,16 @@ const fetchUsers = async () => {
       school_id: user.school_id,
       role_id: user.role_id,
       phone: user.phone,
-      photo: user.photo,
-      ...user
+      photo: user.photo
     }))
     total.value = res.data.total
     from.value = res.data.from || 1
     to.value = res.data.to || 1
 
-    // Quick stats count
-    totalCount.value = res.data.total
-    aktifCount.value = penggunaList.value.filter(p => p.status === 'aktif').length
-    nonaktifCount.value = penggunaList.value.filter(p => p.status === 'nonaktif').length
+    // Quick stats count from database
+    totalCount.value = res.stats ? res.stats.total : res.data.total
+    aktifCount.value = res.stats ? res.stats.active : 0
+    nonaktifCount.value = res.stats ? res.stats.inactive : 0
   } catch (err) {
     toast.error('Gagal mengambil data pengguna')
   } finally {

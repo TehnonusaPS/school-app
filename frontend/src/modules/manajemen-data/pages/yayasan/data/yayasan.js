@@ -77,15 +77,15 @@ export const filters = [
     options: [
       {
         label: 'Aktif',
-        value: 'Aktif'
+        value: 'active'
       },
       {
         label: 'Nonaktif',
-        value: 'Nonaktif'
+        value: 'inactive'
       },
       {
         label: 'Trial',
-        value: 'Trial'
+        value: 'trial'
       }
     ]
   }

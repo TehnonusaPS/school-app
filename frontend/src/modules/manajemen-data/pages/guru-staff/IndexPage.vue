@@ -1,4 +1,6 @@
 <script setup>
+import DataTableCard from '@/components/data-table/DataTableCard.vue'
+import PageHeader from '@/components/page-header/PageHeader.vue'
 import { columns, filters, actions } from './data/guruStaff.js'
 import StatCard from '@/components/stat-card/StatCard.vue'
 import { useAuthStore } from '@/stores/authStore'
@@ -64,6 +66,7 @@ const fetchTeachers = async () => {
     const params = {}
     const res = await getTeachers(params)
     tableItems.value = res.data.map(item => ({
+      ...item,
       id: item.id,
       nama: item.nama,
       nip: item.nip_nuptk,
@@ -71,8 +74,8 @@ const fetchTeachers = async () => {
       unitId: item.unit_id,
       jabatan: item.jabatan,
       masaKerja: item.masaKerja,
-      status: item.status_kepegawaian,
-      ...item
+      statusKepegawaian: item.status_kepegawaian,
+      status: item.status_aktif
     }))
 
     if (res.stats) {
@@ -93,13 +96,7 @@ onMounted(() => {
 })
 
 const items = computed(() => {
-  if (isAdminYayasan.value) {
-    return tableItems.value
-  }
-
-  return tableItems.value.filter(
-    item => item.unitId === auth.user?.unitId
-  )
+  return tableItems.value
 })
 
 const deleteItem = async (id, item) => {
@@ -183,13 +180,13 @@ const handleViewDetail = id => {
       :page="currentPage"
       @update:page="currentPage = $event"
       @view="handleViewDetail"
-      @edit="$router.push('/manajemen-data/guru-staff/edit')"
+      @edit="$router.push(`/manajemen-data/guru-staff/edit?id=${$event}`)"
       @delete="deleteItem"
     />
 
     <DataSheet
       v-model:open="isDetailSheetOpen"
-      :item="rawGuruStaffItem"
+      :item="selectedItemForDetail"
       title-key="nama"
       description-key="nip_nuptk"
       description-prefix="NIP/NUPTK: "

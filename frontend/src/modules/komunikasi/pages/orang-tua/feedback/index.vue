@@ -308,19 +308,19 @@ const categoryBadgeClass = (kategori) => {
             :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 100 } }"
             class="rounded-2xl border-border bg-card shadow-sm overflow-hidden"
           >
-            <div class="px-6 py-4 border-b border-border flex justify-between items-center bg-muted/30">
-              <div class="flex items-center gap-2 font-bold text-sm tracking-widest uppercase">
-                <Lock class="w-5 h-5 text-emerald-500" />
-                {{ currentView === 'create' ? 'FORMULIR MASUKAN / SARAN SECURE' : 'FORMULIR EDIT ADUAN SECURE' }}
+            <div class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-border flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 bg-muted/30">
+              <div class="flex items-center gap-2 font-bold text-xs sm:text-sm tracking-wider sm:tracking-widest uppercase text-left">
+                <Lock class="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500 shrink-0" />
+                <span>{{ currentView === 'create' ? 'FORMULIR MASUKAN / SARAN SECURE' : 'FORMULIR EDIT ADUAN SECURE' }}</span>
               </div>
-              <div class="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
-                <ShieldCheck class="w-4 h-4 text-emerald-500" />
+              <div class="text-[10px] sm:text-xs text-muted-foreground font-medium flex items-center gap-1.5 self-start sm:self-auto">
+                <ShieldCheck class="w-4 h-4 text-emerald-500 shrink-0" />
                 Anonim Terenkripsi
               </div>
             </div>
 
-            <form @submit.prevent="submitFeedback" class="p-6 space-y-6">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form @submit.prevent="submitFeedback" class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <!-- Category Selector -->
                 <div class="space-y-2 text-left">
                   <label class="text-sm font-semibold text-foreground">Kategori Masukan / Keluhan</label>
@@ -328,11 +328,11 @@ const categoryBadgeClass = (kategori) => {
                     <SelectTrigger class="h-11 rounded-xl">
                       <SelectValue placeholder="Pilih Kategori" />
                     </SelectTrigger>
-                    <SelectContent class="rounded-xl shadow-md border-border bg-card">
-                      <SelectItem value="AKADEMIK">Akademik (Guru, Kurikulum, Pembelajaran)</SelectItem>
-                      <SelectItem value="FASILITAS">Fasilitas (Gedung, AC, Kelas, Kantin)</SelectItem>
-                      <SelectItem value="PELAYANAN">Pelayanan (Administrasi TU, Kebersihan)</SelectItem>
-                      <SelectItem value="KEUANGAN">Keuangan (SPP, Tagihan, Pembayaran)</SelectItem>
+                    <SelectContent class="rounded-xl shadow-md border-border bg-card w-[var(--reka-select-trigger-width)]">
+                      <SelectItem value="AKADEMIK" class="whitespace-normal leading-snug">Akademik (Guru, Kurikulum, Pembelajaran)</SelectItem>
+                      <SelectItem value="FASILITAS" class="whitespace-normal leading-snug">Fasilitas (Gedung, AC, Kelas, Kantin)</SelectItem>
+                      <SelectItem value="PELAYANAN" class="whitespace-normal leading-snug">Pelayanan (Administrasi TU, Kebersihan)</SelectItem>
+                      <SelectItem value="KEUANGAN" class="whitespace-normal leading-snug">Keuangan (SPP, Tagihan, Pembayaran)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -344,7 +344,7 @@ const categoryBadgeClass = (kategori) => {
                     <SelectTrigger class="h-11 rounded-xl">
                       <SelectValue placeholder="Pilih Kelas" />
                     </SelectTrigger>
-                    <SelectContent class="rounded-xl shadow-md border-border bg-card">
+                    <SelectContent class="rounded-xl shadow-md border-border bg-card w-[var(--reka-select-trigger-width)]">
                       <SelectItem v-for="c in ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B']" :key="c" :value="c">
                         Kelas {{ c }}
                       </SelectItem>
@@ -386,11 +386,11 @@ const categoryBadgeClass = (kategori) => {
                 </div>
               </div>
 
-              <div class="border-t border-border pt-6 flex gap-3 items-center">
-                <Button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 h-11 flex items-center gap-2 font-bold rounded-xl shadow-md transition-all cursor-pointer">
-                  {{ currentView === 'create' ? 'Kirim Aduan Secara Anonim' : 'Simpan Perubahan' }}
+              <div class="border-t border-border pt-4 sm:pt-6 flex flex-col sm:flex-row gap-3 items-center">
+                <Button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white w-full sm:w-auto px-6 h-11 flex items-center justify-center gap-2 font-bold rounded-xl shadow-md transition-all cursor-pointer">
+                  {{ currentView === 'create' ? 'Kirim Aduan' : 'Simpan Perubahan' }}
                 </Button>
-                <Button type="button" variant="ghost" @click="cancelForm" class="font-semibold rounded-xl h-11 px-4 cursor-pointer">
+                <Button type="button" variant="ghost" @click="cancelForm" class="w-full sm:w-auto font-semibold rounded-xl h-11 px-4 cursor-pointer">
                   Batal
                 </Button>
               </div>

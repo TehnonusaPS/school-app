@@ -107,7 +107,7 @@ export const columns = [
   { key: 'unitKerja', label: 'Unit Kerja' },
   { key: 'jabatan', label: 'Jabatan' },
   { key: 'masaKerja', label: 'Masa Kerja' },
-  { key: 'status', label: 'Status Kepegawaian', badge: true,
+  { key: 'statusKepegawaian', label: 'Status Kepegawaian', badge: true,
     badgeVariant: {
       Tetap: 'green',
       Honorer: 'gray',

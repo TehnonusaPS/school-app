@@ -1,13 +1,53 @@
 <script setup>
 import DataTableCard from '@/components/data-table/DataTableCard.vue'
 import PageHeader from '@/components/page-header/PageHeader.vue'
-import { stats, columns, filters, actions } from './data/yayasan.js'
+import { columns, filters, actions } from './data/yayasan.js'
 import StatCard from '@/components/stat-card/StatCard.vue'
 import { ref, computed, watch, onMounted } from 'vue'
 import { toast } from 'vue-sonner'
 import DataSheet from '@/components/data-sheet/DataSheet.vue'
 import { yayasanSheetSections } from './data/dataSheetDetail.js'
 import { getFoundations, deleteFoundation } from '@/services/managementService'
+import { Building2, ShieldCheck, ShieldAlert, ShieldX } from 'lucide-vue-next'
+
+const stats = ref([
+  {
+    label: 'TOTAL YAYASAN',
+    value: '0',
+    trend: 'Terdaftar',
+    trendDirection: 'up',
+    icon: Building2,
+    illustration: 'globe',
+    variant: 'primary'
+  },
+  {
+    label: 'YAYASAN AKTIF',
+    value: '0',
+    trend: 'Status aktif',
+    trendDirection: 'up',
+    icon: ShieldCheck,
+    illustration: 'school_bell',
+    variant: 'emerald'
+  },
+  {
+    label: 'YAYASAN SEDANG TRIAL',
+    value: '0',
+    trend: 'Status trial',
+    trendDirection: 'down',
+    icon: ShieldAlert,
+    illustration: 'pencil',
+    variant: 'amber'
+  },
+  {
+    label: 'YAYASAN TIDAK AKTIF',
+    value: '0',
+    trend: 'Status nonaktif',
+    trendDirection: 'up',
+    icon: ShieldX,
+    illustration: 'ruler',
+    variant: 'violet'
+  }
+])
 
 const perPage = ref(5)
 const currentPage = ref(1)
@@ -57,6 +97,13 @@ const fetchFoundations = async () => {
     total.value = res.data.total
     from.value = res.data.from || 1
     to.value = res.data.to || 1
+
+    if (res.stats) {
+      stats.value[0].value = String(res.stats.total)
+      stats.value[1].value = String(res.stats.active)
+      stats.value[2].value = String(res.stats.trial)
+      stats.value[3].value = String(res.stats.inactive)
+    }
   } catch (error) {
     toast.error('Gagal mengambil data yayasan')
   } finally {

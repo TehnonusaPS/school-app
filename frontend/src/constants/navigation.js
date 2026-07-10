@@ -104,23 +104,8 @@ export const navMain = [
         roles: ['siswa']
       },
       {
-        title: 'Materi',
-        url: '/akademik/materi',
-        roles: ['siswa']
-      },
-      {
         title: 'Mata Pelajaran',
         url: '/akademik/mapel',
-        roles: ['siswa']
-      },
-      {
-        title: 'Tugas',
-        url: '/akademik/tugas',
-        roles: ['siswa']
-      },
-      {
-        title: 'Ujian',
-        url: '/akademik/ujian',
         roles: ['siswa']
       },
       {
@@ -232,13 +217,13 @@ export const navMain = [
     title: 'Komunikasi',
     url: '/komunikasi',
     icon: MessageSquare,
-    excludeRoles: ['superadmin', 'guru', 'wali_kelas', 'siswa'],
+    excludeRoles: ['superadmin'],
     items: [
-      { title: 'Pengumuman', url: '/komunikasi/pengumuman', excludeRoles: ['tata_usaha', 'kepala_sekolah', 'admin_sekolah', 'orang_tua'] },
-      { title: 'Berita Kegiatan', url: '/komunikasi/berita-kegiatan', excludeRoles: ['tata_usaha', 'admin_yayasan', 'orang_tua'] },
-      { title: 'Feedback', url: '/komunikasi/feedback', excludeRoles: ['tata_usaha', 'admin_yayasan'] },
-      { title: 'Pesan Internal', url: '/komunikasi/pesan', excludeRoles: ['tata_usaha', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'orang_tua'] },
-      { title: 'Notifikasi', url: '/komunikasi/notifikasi', excludeRoles: ['tata_usaha', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'orang_tua'] },
+      { title: 'Pengumuman', url: '/komunikasi/pengumuman', excludeRoles: ['tata_usaha', 'orang_tua', 'guru', 'wali_kelas', 'siswa'] },
+      { title: 'Berita Kegiatan', url: '/komunikasi/berita-kegiatan', excludeRoles: ['tata_usaha', 'admin_yayasan'] },
+      { title: 'Feedback', url: '/komunikasi/feedback', excludeRoles: ['tata_usaha', 'admin_yayasan', 'guru', 'wali_kelas', 'siswa'] },
+      { title: 'Pesan Internal', url: '/komunikasi/pesan', excludeRoles: ['tata_usaha', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'orang_tua', 'guru', 'wali_kelas', 'siswa'] },
+      { title: 'Notifikasi', url: '/komunikasi/notifikasi', excludeRoles: ['tata_usaha', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'orang_tua', 'guru', 'wali_kelas', 'siswa'] },
       { title: 'Keterangan Aktif', url: '/komunikasi/persuratan/aktif', roles: ['tata_usaha'] },
       {
         title: 'Surat Dispensasi',

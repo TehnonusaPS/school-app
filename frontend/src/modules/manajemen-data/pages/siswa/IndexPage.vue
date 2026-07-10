@@ -2,7 +2,7 @@
 import DataTableCard from '@/components/data-table/DataTableCard.vue'
 import PageHeader from '@/components/page-header/PageHeader.vue'
 import { usePagination } from '@/composables/usePagination'
-import { stats, columns, filters, actions, allItems } from './data/siswa.js'
+import { columns, filters, actions, allItems } from './data/siswa.js'
 import StatCard from '@/components/stat-card/StatCard.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { computed, onMounted } from 'vue'
@@ -13,6 +13,48 @@ import { rawSiswaItem, siswaSheetSections} from './data/dataSheetDetail.js'
 import { useRouter } from 'vue-router'
 import { fetchAllSiswa, deleteSiswa } from '@/services/siswaService'
 import { getClassrooms } from '@/services/managementService'
+import { Users, UserCheck, UserRound, UserRoundCheck } from 'lucide-vue-next'
+
+const stats = ref([
+  {
+    label: 'TOTAL SISWA',
+    value: '0',
+    sub: 'Dalam sistem',
+    trend: 'Siswa',
+    trendDirection: 'up',
+    icon: Users,
+    variant: 'up',
+    color: 'primary'
+  },
+  {
+    label: 'SISWA AKTIF',
+    value: '0',
+    sub: 'Status aktif',
+    trend: 'Siswa',
+    trendDirection: 'up',
+    icon: UserCheck,
+    variant: 'up',
+    color: 'emerald'
+  },
+  {
+    label: 'SISWA LAKI-LAKI',
+    value: '0',
+    sub: 'Komposisi Gender',
+    progress: 0,
+    icon: UserRound,
+    variant: 'progress',
+    color: 'blue'
+  },
+  {
+    label: 'SISWA PEREMPUAN',
+    value: '0',
+    sub: 'Komposisi Gender',
+    progress: 0,
+    icon: UserRoundCheck,
+    variant: 'progress',
+    color: 'violet'
+  }
+])
 
 const auth = useAuthStore()
 const isWaliKelas = computed(() => auth.user?.role === 'wali_kelas')
@@ -43,6 +85,22 @@ const fetchSiswa = async () => {
     }
     const res = await fetchAllSiswa(params)
     tableItems.value = res.data
+
+    if (res.stats) {
+      stats.value[0].value = String(res.stats.total)
+      stats.value[1].value = String(res.stats.active)
+      stats.value[2].value = String(res.stats.male)
+      stats.value[3].value = String(res.stats.female)
+
+      const sum = res.stats.male + res.stats.female
+      if (sum > 0) {
+        stats.value[2].progress = Math.round((res.stats.male / sum) * 100)
+        stats.value[3].progress = Math.round((res.stats.female / sum) * 100)
+      } else {
+        stats.value[2].progress = 0
+        stats.value[3].progress = 0
+      }
+    }
   } catch (err) {
     toast.error('Gagal memuat data siswa')
   } finally {

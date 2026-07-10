@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AnnouncementTable from '../../../components/AnnouncementTable.vue'
 import AnnouncementDetailModal from '../../../components/AnnouncementDetailModal.vue'
@@ -19,6 +20,7 @@ import {
 
 const authStore = useAuthStore()
 const currentUser = authStore.user
+const route = useRoute()
 
 // Determine school scope based on user role to avoid modifying the auth store itself
 const isSchoolRole = currentUser?.role === 'kepala_sekolah' || currentUser?.role === 'admin_sekolah'
@@ -46,6 +48,15 @@ async function loadAnnouncements() {
       tanggal: item.publish_date,
       target_school_id: item.target_school_id
     }))
+
+    // Auto-open detail modal if id query param exists
+    const queryId = route.query.id
+    if (queryId) {
+      const found = announcements.value.find(a => String(a.id) === String(queryId))
+      if (found) {
+        openDetailDialog(found)
+      }
+    }
   } catch (error) {
     console.error('Gagal memuat pengumuman:', error)
     toast.error('Gagal mengambil data pengumuman.')

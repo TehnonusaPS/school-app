@@ -1,7 +1,7 @@
 <script setup>
 import DataTableCard from '@/components/data-table/DataTableCard.vue'
 import PageHeader from '@/components/page-header/PageHeader.vue'
-import { stats, columns, filters, actions } from './data/sekolah.js'
+import { columns, filters, actions } from './data/sekolah.js'
 import StatCard from '@/components/stat-card/StatCard.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { computed } from 'vue'
@@ -10,6 +10,46 @@ import { toast } from 'vue-sonner'
 import DataSheet from '@/components/data-sheet/DataSheet.vue'
 import { sekolahSheetSections } from './data/dataSheetDetail.js'
 import { getSchools, deleteSchool } from '@/services/managementService'
+import { School, BookCheck, BookAlert, BookX } from 'lucide-vue-next'
+
+const stats = ref([
+  {
+    label: 'TOTAL SEKOLAH',
+    value: '0',
+    trend: 'Terdaftar',
+    trendDirection: 'up',
+    icon: School,
+    illustration: 'globe',
+    variant: 'primary'
+  },
+  {
+    label: 'SEKOLAH AKTIF',
+    value: '0',
+    trend: 'Status aktif',
+    trendDirection: 'up',
+    icon: BookCheck,
+    illustration: 'school_bell',
+    variant: 'emerald'
+  },
+  {
+    label: 'SEKOLAH SEDANG TRIAL',
+    value: '0',
+    trend: 'Status trial',
+    trendDirection: 'down',
+    icon: BookAlert,
+    illustration: 'pencil',
+    variant: 'amber'
+  },
+  {
+    label: 'SEKOLAH TIDAK AKTIF',
+    value: '0',
+    trend: 'Status nonaktif',
+    trendDirection: 'up',
+    icon: BookX,
+    illustration: 'ruler',
+    variant: 'violet'
+  }
+])
 
 const auth = useAuthStore()
 const isSuperAdmin = computed(() => auth.user?.role === 'superadmin')
@@ -69,6 +109,13 @@ const fetchSchools = async () => {
     total.value = res.data.total
     from.value = res.data.from || 1
     to.value = res.data.to || 1
+
+    if (res.stats) {
+      stats.value[0].value = String(res.stats.total)
+      stats.value[1].value = String(res.stats.active)
+      stats.value[2].value = String(res.stats.trial)
+      stats.value[3].value = String(res.stats.inactive)
+    }
   } catch (error) {
     toast.error('Gagal mengambil data sekolah')
   } finally {

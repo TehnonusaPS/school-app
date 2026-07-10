@@ -1,15 +1,53 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { getNotifications, markAsRead as apiMarkAsRead, markAllAsRead as apiMarkAllAsRead } from '@/services/notificationService'
 import PageHeader from '@/components/page-header/PageHeader.vue'
 import { toast } from 'vue-sonner'
-import { Bell, BellOff, Megaphone, CheckCircle } from 'lucide-vue-next'
+import { Bell, BellOff, Megaphone, CheckCircle, Eye } from 'lucide-vue-next'
 import { glassSlide, glassFade } from '@/config/motion'
 
 const auth = useAuthStore()
+const router = useRouter()
 const notifications = ref([])
 const loading = ref(false)
+
+const isSchoolRole = computed(() => {
+  return auth.user?.role === 'kepala_sekolah' || auth.user?.role === 'admin_sekolah'
+})
+
+const viewAnnouncement = (announcementId) => {
+  router.push({
+    path: '/komunikasi/pengumuman',
+    query: { id: announcementId }
+  })
+}
+
+const viewNews = (newsId) => {
+  router.push({
+    path: '/komunikasi/berita-kegiatan',
+    query: { id: newsId }
+  })
+}
+
+const handleNotificationCardClick = async (n) => {
+  if (!n.read_at) {
+    try {
+      await apiMarkAsRead(n.id)
+      n.read_at = new Date().toISOString()
+      auth.fetchUnreadNotificationsCount()
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  if (n.type === 'ACTIVITY_NEWS' && n.data?.activity_news_id) {
+    viewNews(n.data.activity_news_id)
+  } else if (n.type === 'ANNOUNCEMENT' && n.data?.announcement_id) {
+    viewAnnouncement(n.data.announcement_id)
+  }
+}
 
 const loadNotifications = async () => {
   loading.value = true
@@ -123,12 +161,13 @@ onUnmounted(() => {
         <div
           v-for="n in notifications"
           :key="n.id"
-          class="p-5 bg-card border rounded-2xl transition-all duration-300 flex items-start gap-4"
+          class="p-5 bg-card border rounded-2xl transition-all duration-300 flex items-start gap-4 cursor-pointer hover:bg-muted/[0.15]"
           :class="[
             !n.read_at 
               ? 'border-primary/40 shadow-md shadow-primary/5 hover:border-primary/60 bg-primary/[0.01]' 
               : 'border-border/60 hover:border-border hover:shadow-xs'
           ]"
+          @click="handleNotificationCardClick(n)"
         >
           <!-- Icon -->
           <div 
@@ -162,18 +201,36 @@ onUnmounted(() => {
               <span class="text-[10px] bg-primary/10 text-primary px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
                 {{ n.data?.category || 'UMUM' }}
               </span>
-              <button
-                v-if="!n.read_at"
-                @click="handleMarkAsRead(n)"
-                class="text-[11px] text-primary hover:text-primary/80 font-bold flex items-center gap-1 transition-colors"
-              >
-                <CheckCircle class="size-3.5" />
-                Tandai dibaca
-              </button>
-              <span v-else class="text-[10px] text-muted-foreground flex items-center gap-1 font-semibold">
-                <CheckCircle class="size-3 text-emerald-500" />
-                Sudah dibaca
-              </span>
+              <div class="flex items-center gap-3">
+                <button
+                  v-if="isSchoolRole && n.type === 'ANNOUNCEMENT' && n.data?.announcement_id"
+                  @click.stop="viewAnnouncement(n.data.announcement_id)"
+                  class="text-[11px] text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 transition-colors"
+                >
+                  <Eye class="size-3.5" />
+                  Lihat
+                </button>
+                <button
+                  v-if="n.type === 'ACTIVITY_NEWS' && n.data?.activity_news_id"
+                  @click.stop="viewNews(n.data.activity_news_id)"
+                  class="text-[11px] text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 transition-colors"
+                >
+                  <Eye class="size-3.5" />
+                  Lihat
+                </button>
+                <button
+                  v-if="!n.read_at"
+                  @click.stop="handleMarkAsRead(n)"
+                  class="text-[11px] text-primary hover:text-primary/80 font-bold flex items-center gap-1 transition-colors"
+                >
+                  <CheckCircle class="size-3.5" />
+                  Tandai dibaca
+                </button>
+                <span v-else class="text-[10px] text-muted-foreground flex items-center gap-1 font-semibold" @click.stop>
+                  <CheckCircle class="size-3 text-emerald-500" />
+                  Sudah dibaca
+                </span>
+              </div>
             </div>
           </div>
         </div>

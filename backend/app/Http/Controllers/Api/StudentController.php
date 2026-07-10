@@ -188,9 +188,46 @@ class StudentController extends Controller
             ];
         });
 
+        $statsQuery = User::whereHas('role', function ($q) {
+            $q->where('name', 'siswa');
+        });
+
+        // Role Scope
+        if ($user->isSuperAdmin()) {
+            if ($request->has('school_id')) {
+                $statsQuery->where('school_id', $request->input('school_id'));
+            }
+        } elseif ($user->hasRole('admin_yayasan')) {
+            $statsQuery->whereHas('school', function ($q) use ($user) {
+                $q->where('foundation_id', $user->foundation_id);
+            });
+            if ($request->has('school_id')) {
+                $statsQuery->where('school_id', $request->input('school_id'));
+            }
+        } else { // admin_sekolah, kepala_sekolah, tata_usaha, wali_kelas
+            $statsQuery->where('school_id', $user->school_id);
+        }
+
+        $total = (clone $statsQuery)->count();
+        $active = (clone $statsQuery)->whereHas('studentProfile', function ($q) {
+            $q->where('status', 'active');
+        })->count();
+        $male = (clone $statsQuery)->whereHas('studentProfile', function ($q) {
+            $q->where('gender', 'male');
+        })->count();
+        $female = (clone $statsQuery)->whereHas('studentProfile', function ($q) {
+            $q->where('gender', 'female');
+        })->count();
+
         return response()->json([
             'status' => 'success',
             'data'   => $formatted,
+            'stats'  => [
+                'total' => $total,
+                'active' => $active,
+                'male' => $male,
+                'female' => $female,
+            ]
         ]);
     }
 

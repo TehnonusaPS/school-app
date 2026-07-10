@@ -7,6 +7,10 @@ const props = defineProps({
   items: {
     type: Array,
     required: true
+  },
+  canManage: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -98,8 +102,10 @@ const formatDate = (dateStr) => {
     :page="currentPage"
     @update:page="currentPage = $event"
     @view="(id, item) => $emit('view', item)"
-    @edit="(item) => $emit('edit', item)"
-    @delete="(id, item) => $emit('delete', item)"
+    v-bind="canManage ? {
+      onEdit: (item) => $emit('edit', item),
+      onDelete: (id, item) => $emit('delete', item)
+    } : {}"
     delete-label="judul"
   >
     <template #cell-judul="{ item }">

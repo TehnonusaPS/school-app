@@ -157,10 +157,12 @@ class TeacherController extends Controller
                 });
             }
         } elseif ($user->hasRole('admin_yayasan')) {
-            $query->whereHas('user.school', function ($q) use ($user) {
-                $q->where('foundation_id', $user->foundation_id);
-            })->orWhereHas('user', function ($q) use ($user) {
-                $q->where('foundation_id', $user->foundation_id)->whereNull('school_id');
+            $query->where(function ($q) use ($user) {
+                $q->whereHas('user.school', function ($sq) use ($user) {
+                    $sq->where('foundation_id', $user->foundation_id);
+                })->orWhereHas('user', function ($sq) use ($user) {
+                    $sq->where('foundation_id', $user->foundation_id)->whereNull('school_id');
+                });
             });
 
             if ($request->has('school_id')) {
@@ -242,9 +244,39 @@ class TeacherController extends Controller
             ];
         })->filter()->values();
 
+        $statsQuery = TeacherProfile::query();
+        if ($user->isSuperAdmin()) {
+            // no restriction
+        } elseif ($user->hasRole('admin_yayasan')) {
+            $statsQuery->where(function ($q) use ($user) {
+                $q->whereHas('user.school', function ($sq) use ($user) {
+                    $sq->where('foundation_id', $user->foundation_id);
+                })->orWhereHas('user', function ($sq) use ($user) {
+                    $sq->where('foundation_id', $user->foundation_id)->whereNull('school_id');
+                });
+            });
+        } else { // admin_sekolah etc.
+            $statsQuery->whereHas('user', function ($q) use ($user) {
+                $q->where('school_id', $user->school_id);
+            });
+        }
+
+        $total = (clone $statsQuery)->count();
+        $active = (clone $statsQuery)->whereHas('user', function ($q) {
+            $q->where('is_active', true);
+        })->count();
+        $guru = (clone $statsQuery)->where('position', 'J004')->count();
+        $staff = (clone $statsQuery)->where('position', '!=', 'J004')->count();
+
         return response()->json([
             'status' => 'success',
             'data'   => $formatted,
+            'stats'  => [
+                'total' => $total,
+                'active' => $active,
+                'guru' => $guru,
+                'staff' => $staff,
+            ]
         ]);
     }
 
@@ -528,6 +560,18 @@ class TeacherController extends Controller
                 if ($role) {
                     $u->role_id = $role->id;
                 }
+            }
+
+            if ($request->has('unit_kerja')) {
+                $tenant = $this->resolveTenantId($request, $currentUser);
+                if (isset($tenant['error'])) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => $tenant['error'],
+                    ], 403);
+                }
+                $u->school_id = $tenant['school_id'];
+                $u->foundation_id = $tenant['foundation_id'];
             }
 
             $u->save();

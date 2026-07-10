@@ -13,6 +13,10 @@ use App\Models\Subject;
 use App\Models\TeacherProfile;
 use App\Models\User;
 use App\Models\Extracurricular;
+use App\Models\TeacherSubjectAssignment;
+use App\Models\SubjectMaterial;
+use App\Models\Assessment;
+use App\Models\AssessmentScore;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -81,6 +85,15 @@ class DatabaseSeeder extends Seeder
             'start_date' => '2025-01-06',
             'end_date'   => '2025-06-30',
             'is_active'  => true,
+        ]);
+
+        $academicYearOdd = AcademicYear::create([
+            'school_id'  => $school->id,
+            'name'       => '2024/2025',
+            'semester'   => 'odd',
+            'start_date' => '2024-07-15',
+            'end_date'   => '2024-12-20',
+            'is_active'  => false,
         ]);
 
         // ─────────────────────────────────────────────
@@ -395,71 +408,67 @@ class DatabaseSeeder extends Seeder
             'capacity'            => 30,
         ]);
 
+        $classroomOdd = Classroom::create([
+            'school_id'           => $school->id,
+            'academic_year_id'    => $academicYearOdd->id,
+            'name'                => '2-D',
+            'grade'               => 2,
+            'major'               => 'MIPA',
+            'room'                => 'R. 101',
+            'status'              => 'active',
+            'homeroom_teacher_id' => $waliKelas->id,
+            'capacity'            => 30,
+        ]);
+
         // ─────────────────────────────────────────────
         //  8. Siswa
         // ─────────────────────────────────────────────
-        $siswa = User::create([
-            'name'      => 'Ahmad Wibowo',
-            'email'     => 'siswa@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['siswa']->id,
-            'school_id' => $school->id,
-            'is_active' => true,
-        ]);
+        $studentNames = [
+            'Ahmad Wibowo', 'Budi Santoso', 'Citra Lestari', 
+            'Dian Pratama', 'Eka Wijaya', 'Fitri Handayani', 
+            'Giri Nugroho', 'Hendra Kusuma', 'Indah Permata', 'Joko Susilo'
+        ];
 
-        $studentProfile = StudentProfile::create([
-            'user_id'         => $siswa->id,
-            'classroom_id'    => $classroom->id,
-            'nisn'            => '0012345678',
-            'birth_place'     => 'Jakarta',
-            'birth_date'      => '2016-08-15',
-            'gender'          => 'male',
-            'address'         => 'Jl. Mawar No. 10, Bekasi',
-            'enrollment_date' => '2022-07-01',
-            'status'          => 'active',
-        ]);
+        $studentGenders = ['male', 'male', 'female', 'male', 'male', 'female', 'male', 'male', 'female', 'male'];
+        $studentBirthPlaces = ['Jakarta', 'Bandung', 'Surabaya', 'Semarang', 'Yogyakarta', 'Solo', 'Malang', 'Medan', 'Palembang', 'Makassar'];
+        $studentBirthDates = ['2016-08-15', '2016-09-12', '2016-05-23', '2016-04-10', '2016-07-22', '2016-11-05', '2016-02-18', '2016-12-30', '2016-03-14', '2016-10-09'];
+        $studentAddresses = [
+            'Jl. Mawar No. 10, Bekasi', 'Jl. Anggrek No. 5, Bekasi', 'Jl. Melati No. 12, Bekasi',
+            'Jl. Kamboja No. 4, Bekasi', 'Jl. Tulip No. 8, Bekasi', 'Jl. Lavender No. 15, Bekasi',
+            'Jl. Kenanga No. 22, Bekasi', 'Jl. Flamboyan No. 7, Bekasi', 'Jl. Dahlia No. 11, Bekasi', 'Jl. Jasmine No. 3, Bekasi'
+        ];
 
-        $siswa2 = User::create([
-            'name'      => 'Budi Santoso',
-            'email'     => 'siswa2@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['siswa']->id,
-            'school_id' => $school->id,
-            'is_active' => true,
-        ]);
+        $studentProfiles = [];
 
-        $studentProfile2 = StudentProfile::create([
-            'user_id'         => $siswa2->id,
-            'classroom_id'    => $classroom->id,
-            'nisn'            => '0012345679',
-            'birth_place'     => 'Bandung',
-            'birth_date'      => '2016-09-12',
-            'gender'          => 'male',
-            'address'         => 'Jl. Anggrek No. 5, Bekasi',
-            'enrollment_date' => '2022-07-01',
-            'status'          => 'active',
-        ]);
+        foreach ($studentNames as $idx => $name) {
+            $num = $idx === 0 ? '' : ($idx + 1);
+            $email = "siswa{$num}@mail.com";
+            
+            $sUser = User::create([
+                'name'      => $name,
+                'email'     => $email,
+                'password'  => $defaultPassword,
+                'role_id'   => $roles['siswa']->id,
+                'school_id' => $school->id,
+                'is_active' => true,
+            ]);
 
-        $siswa3 = User::create([
-            'name'      => 'Citra Lestari',
-            'email'     => 'siswa3@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['siswa']->id,
-            'school_id' => $school->id,
-            'is_active' => true,
-        ]);
+            $classObj = ($idx % 2 === 0) ? $classroom : $classroom2;
 
-        $studentProfile3 = StudentProfile::create([
-            'user_id'         => $siswa3->id,
-            'classroom_id'    => $classroom2->id,
-            'nisn'            => '0012345680',
-            'birth_place'     => 'Surabaya',
-            'birth_date'      => '2016-05-23',
-            'gender'          => 'female',
-            'address'         => 'Jl. Melati No. 12, Bekasi',
-            'enrollment_date' => '2022-07-01',
-            'status'          => 'active',
-        ]);
+            $sProfile = StudentProfile::create([
+                'user_id'         => $sUser->id,
+                'classroom_id'    => $classObj->id,
+                'nisn'            => '00123456' . str_pad($idx + 78, 2, '0', STR_PAD_LEFT),
+                'birth_place'     => $studentBirthPlaces[$idx],
+                'birth_date'      => $studentBirthDates[$idx],
+                'gender'          => $studentGenders[$idx],
+                'address'         => $studentAddresses[$idx],
+                'enrollment_date' => '2022-07-01',
+                'status'          => 'active',
+            ]);
+
+            $studentProfiles[] = $sProfile;
+        }
 
         // ─────────────────────────────────────────────
         //  9. Orang Tua / Wali
@@ -487,7 +496,7 @@ class DatabaseSeeder extends Seeder
             'address'        => 'Jl. Mawar No. 10, Bekasi',
         ]);
 
-        $parentProfile->children()->attach($studentProfile->id);
+        $parentProfile->children()->attach($studentProfiles[0]->id);
 
         $orangTua2 = User::create([
             'name'      => 'Orang Tua / Wali 2',
@@ -512,7 +521,7 @@ class DatabaseSeeder extends Seeder
             'address'        => 'Jl. Anggrek No. 5, Bekasi',
         ]);
 
-        $parentProfile2->children()->attach($studentProfile2->id);
+        $parentProfile2->children()->attach($studentProfiles[1]->id);
 
         $orangTua3 = User::create([
             'name'      => 'Orang Tua / Wali 3',
@@ -537,7 +546,7 @@ class DatabaseSeeder extends Seeder
             'address'        => 'Jl. Melati No. 12, Bekasi',
         ]);
 
-        $parentProfile3->children()->attach($studentProfile3->id);
+        $parentProfile3->children()->attach($studentProfiles[2]->id);
 
         // ─────────────────────────────────────────────
         //  10. Subscriptions & Payments
@@ -564,5 +573,331 @@ class DatabaseSeeder extends Seeder
                 'is_active'   => $ekskul['is_active'],
             ]);
         }
+
+        // Query the seeded entities for akademik assignments & samples
+        $subjectMtk = Subject::where('code', 'MTK')->first();
+        $subjectBin = Subject::where('code', 'BIN')->first();
+        $subjectIpa = Subject::where('code', 'IPA')->first();
+
+        $guruUser = User::where('email', 'guru@mail.com')->first();
+        $guru2User = User::where('email', 'guru2@mail.com')->first();
+
+        $classroomObj = Classroom::where('name', '2-D')->first();
+        $classroom2Obj = Classroom::where('name', '2-E')->first();
+
+        // 1. Teacher subject assignments
+        // Even Semester (classroom)
+        if ($guruUser && $subjectMtk && $classroom) {
+            TeacherSubjectAssignment::create([
+                'school_id' => $school->id,
+                'teacher_id' => $guruUser->id,
+                'subject_id' => $subjectMtk->id,
+                'classroom_id' => $classroom->id,
+                'academic_year_id' => $academicYear->id,
+                'is_active' => true,
+            ]);
+        }
+
+        if ($guruUser && $subjectBin && $classroom) {
+            TeacherSubjectAssignment::create([
+                'school_id' => $school->id,
+                'teacher_id' => $guruUser->id,
+                'subject_id' => $subjectBin->id,
+                'classroom_id' => $classroom->id,
+                'academic_year_id' => $academicYear->id,
+                'is_active' => true,
+            ]);
+        }
+
+        if ($guruUser && $subjectMtk && $classroom2) {
+            TeacherSubjectAssignment::create([
+                'school_id' => $school->id,
+                'teacher_id' => $guruUser->id,
+                'subject_id' => $subjectMtk->id,
+                'classroom_id' => $classroom2->id,
+                'academic_year_id' => $academicYear->id,
+                'is_active' => true,
+            ]);
+        }
+
+        if ($guru2User && $subjectIpa && $classroom2) {
+            TeacherSubjectAssignment::create([
+                'school_id' => $school->id,
+                'teacher_id' => $guru2User->id,
+                'subject_id' => $subjectIpa->id,
+                'classroom_id' => $classroom2->id,
+                'academic_year_id' => $academicYear->id,
+                'is_active' => true,
+            ]);
+        }
+
+        // Odd Semester (classroomOdd)
+        if ($guruUser && $subjectMtk && $classroomOdd) {
+            TeacherSubjectAssignment::create([
+                'school_id' => $school->id,
+                'teacher_id' => $guruUser->id,
+                'subject_id' => $subjectMtk->id,
+                'classroom_id' => $classroomOdd->id,
+                'academic_year_id' => $academicYearOdd->id,
+                'is_active' => true,
+            ]);
+        }
+
+        if ($guruUser && $subjectBin && $classroomOdd) {
+            TeacherSubjectAssignment::create([
+                'school_id' => $school->id,
+                'teacher_id' => $guruUser->id,
+                'subject_id' => $subjectBin->id,
+                'classroom_id' => $classroomOdd->id,
+                'academic_year_id' => $academicYearOdd->id,
+                'is_active' => true,
+            ]);
+        }
+
+        // 2. Subject Materials (Sample Metadata)
+        // Even Semester (classroom)
+        $mtkMat1Even = null;
+        $mtkMat2Even = null;
+        if ($guruUser && $subjectMtk && $classroom) {
+            $mtkMat1Even = SubjectMaterial::create([
+                'school_id' => $school->id,
+                'subject_id' => $subjectMtk->id,
+                'classroom_id' => $classroom->id,
+                'academic_year_id' => $academicYear->id,
+                'uploaded_by' => $guruUser->id,
+                'title' => 'Bab 1 : Pengenalan Aljabar Dasar',
+                'file_path' => 'materials/' . $school->id . '/' . $subjectMtk->id . '/aljabar_dasar.pdf',
+                'file_name' => 'Aljabar Dasar.pdf',
+                'file_type' => 'pdf',
+                'file_size' => 1024 * 1024 * 2, // 2MB
+                'uploaded_by_name' => $guruUser->name,
+                'is_active' => true,
+            ]);
+
+            $mtkMat2Even = SubjectMaterial::create([
+                'school_id' => $school->id,
+                'subject_id' => $subjectMtk->id,
+                'classroom_id' => $classroom->id,
+                'academic_year_id' => $academicYear->id,
+                'uploaded_by' => $guruUser->id,
+                'title' => 'Bab 2 : Himpunan & Diagram Venn',
+                'file_path' => 'materials/' . $school->id . '/' . $subjectMtk->id . '/himpunan.pptx',
+                'file_name' => 'Himpunan.pptx',
+                'file_type' => 'pptx',
+                'file_size' => 1024 * 1024 * 5, // 5MB
+                'uploaded_by_name' => $guruUser->name,
+                'is_active' => true,
+            ]);
+        }
+
+        // Odd Semester (classroomOdd)
+        $mtkMat1Odd = null;
+        $mtkMat2Odd = null;
+        if ($guruUser && $subjectMtk && $classroomOdd) {
+            $mtkMat1Odd = SubjectMaterial::create([
+                'school_id' => $school->id,
+                'subject_id' => $subjectMtk->id,
+                'classroom_id' => $classroomOdd->id,
+                'academic_year_id' => $academicYearOdd->id,
+                'uploaded_by' => $guruUser->id,
+                'title' => 'Bab 1 : Review Matematika Dasar',
+                'file_path' => 'materials/' . $school->id . '/' . $subjectMtk->id . '/review_dasar.pdf',
+                'file_name' => 'Review Dasar.pdf',
+                'file_type' => 'pdf',
+                'file_size' => 1024 * 1024 * 1, // 1MB
+                'uploaded_by_name' => $guruUser->name,
+                'is_active' => true,
+            ]);
+
+            $mtkMat2Odd = SubjectMaterial::create([
+                'school_id' => $school->id,
+                'subject_id' => $subjectMtk->id,
+                'classroom_id' => $classroomOdd->id,
+                'academic_year_id' => $academicYearOdd->id,
+                'uploaded_by' => $guruUser->id,
+                'title' => 'Bab 2 : Geometri Sederhana',
+                'file_path' => 'materials/' . $school->id . '/' . $subjectMtk->id . '/geometri.pptx',
+                'file_name' => 'Geometri.pptx',
+                'file_type' => 'pptx',
+                'file_size' => 1024 * 1024 * 3, // 3MB
+                'uploaded_by_name' => $guruUser->name,
+                'is_active' => true,
+            ]);
+        }
+
+        // 3. Assessments (Sample Tugas & Ujian)
+        // Even Semester (classroom)
+        $studentsInClass = StudentProfile::where('classroom_id', $classroom->id)->get();
+
+        if ($guruUser && $subjectMtk && $classroom) {
+            $tugas = Assessment::create([
+                'school_id' => $school->id,
+                'subject_id' => $subjectMtk->id,
+                'classroom_id' => $classroom->id,
+                'academic_year_id' => $academicYear->id,
+                'created_by' => $guruUser->id,
+                'material_id' => $mtkMat1Even ? $mtkMat1Even->id : null,
+                'category' => 'tugas',
+                'type' => 'tugas_sekolah',
+                'title' => 'Tugas I : Latihan Aljabar Dasar',
+                'uploaded_by_name' => $guruUser->name,
+                'is_active' => true,
+            ]);
+
+            foreach ($studentsInClass as $st) {
+                AssessmentScore::create([
+                    'assessment_id' => $tugas->id,
+                    'student_id' => $st->id,
+                    'score' => $st->nisn === '0012345678' ? 85.00 : 90.00,
+                ]);
+            }
+
+            $ujian = Assessment::create([
+                'school_id' => $school->id,
+                'subject_id' => $subjectMtk->id,
+                'classroom_id' => $classroom->id,
+                'academic_year_id' => $academicYear->id,
+                'created_by' => $guruUser->id,
+                'material_id' => $mtkMat1Even ? $mtkMat1Even->id : null,
+                'category' => 'ujian',
+                'type' => 'ujian_harian',
+                'title' => 'Ujian Harian I : Aljabar',
+                'uploaded_by_name' => $guruUser->name,
+                'is_active' => true,
+            ]);
+
+            foreach ($studentsInClass as $st) {
+                AssessmentScore::create([
+                    'assessment_id' => $ujian->id,
+                    'student_id' => $st->id,
+                    'score' => $st->nisn === '0012345678' ? 78.50 : 88.00,
+                ]);
+            }
+        }
+
+        // Odd Semester (classroomOdd)
+        if ($guruUser && $subjectMtk && $classroomOdd) {
+            // Assessment 1: Tugas Sekolah tied to Bab 1
+            $tugasOdd1 = Assessment::create([
+                'school_id' => $school->id,
+                'subject_id' => $subjectMtk->id,
+                'classroom_id' => $classroomOdd->id,
+                'academic_year_id' => $academicYearOdd->id,
+                'created_by' => $guruUser->id,
+                'material_id' => $mtkMat1Odd ? $mtkMat1Odd->id : null,
+                'category' => 'tugas',
+                'type' => 'tugas_sekolah',
+                'title' => 'Tugas I : Latihan Penjumlahan Dasar',
+                'uploaded_by_name' => $guruUser->name,
+                'is_active' => true,
+            ]);
+
+            foreach ($studentsInClass as $st) {
+                AssessmentScore::create([
+                    'assessment_id' => $tugasOdd1->id,
+                    'student_id' => $st->id,
+                    'score' => $st->nisn === '0012345678' ? 80.00 : 85.00,
+                ]);
+            }
+
+            // Assessment 2: Tugas Sekolah tied to Bab 2
+            $tugasOdd2 = Assessment::create([
+                'school_id' => $school->id,
+                'subject_id' => $subjectMtk->id,
+                'classroom_id' => $classroomOdd->id,
+                'academic_year_id' => $academicYearOdd->id,
+                'created_by' => $guruUser->id,
+                'material_id' => $mtkMat2Odd ? $mtkMat2Odd->id : null,
+                'category' => 'tugas',
+                'type' => 'tugas_sekolah',
+                'title' => 'Tugas II : Geometri Segitiga',
+                'uploaded_by_name' => $guruUser->name,
+                'is_active' => true,
+            ]);
+
+            foreach ($studentsInClass as $st) {
+                AssessmentScore::create([
+                    'assessment_id' => $tugasOdd2->id,
+                    'student_id' => $st->id,
+                    'score' => $st->nisn === '0012345678' ? 85.00 : 92.00,
+                ]);
+            }
+
+            // Assessment 3: Ujian Harian tied to Bab 1
+            $ujianOdd1 = Assessment::create([
+                'school_id' => $school->id,
+                'subject_id' => $subjectMtk->id,
+                'classroom_id' => $classroomOdd->id,
+                'academic_year_id' => $academicYearOdd->id,
+                'created_by' => $guruUser->id,
+                'material_id' => $mtkMat1Odd ? $mtkMat1Odd->id : null,
+                'category' => 'ujian',
+                'type' => 'ujian_harian',
+                'title' => 'Ujian Harian I : Aritmatika',
+                'uploaded_by_name' => $guruUser->name,
+                'is_active' => true,
+            ]);
+
+            foreach ($studentsInClass as $st) {
+                AssessmentScore::create([
+                    'assessment_id' => $ujianOdd1->id,
+                    'student_id' => $st->id,
+                    'score' => $st->nisn === '0012345678' ? 75.00 : 80.00,
+                ]);
+            }
+
+            // Assessment 4: UTS (No material)
+            $utsOdd = Assessment::create([
+                'school_id' => $school->id,
+                'subject_id' => $subjectMtk->id,
+                'classroom_id' => $classroomOdd->id,
+                'academic_year_id' => $academicYearOdd->id,
+                'created_by' => $guruUser->id,
+                'material_id' => null,
+                'category' => 'ujian',
+                'type' => 'uts',
+                'title' => 'UTS',
+                'uploaded_by_name' => $guruUser->name,
+                'is_active' => true,
+            ]);
+
+            foreach ($studentsInClass as $st) {
+                AssessmentScore::create([
+                    'assessment_id' => $utsOdd->id,
+                    'student_id' => $st->id,
+                    'score' => $st->nisn === '0012345678' ? 90.00 : 94.00,
+                ]);
+            }
+
+            // Assessment 5: UAS (No material)
+            $uasOdd = Assessment::create([
+                'school_id' => $school->id,
+                'subject_id' => $subjectMtk->id,
+                'classroom_id' => $classroomOdd->id,
+                'academic_year_id' => $academicYearOdd->id,
+                'created_by' => $guruUser->id,
+                'material_id' => null,
+                'category' => 'ujian',
+                'type' => 'uas',
+                'title' => 'UAS',
+                'uploaded_by_name' => $guruUser->name,
+                'is_active' => true,
+            ]);
+
+            foreach ($studentsInClass as $st) {
+                AssessmentScore::create([
+                    'assessment_id' => $uasOdd->id,
+                    'student_id' => $st->id,
+                    'score' => $st->nisn === '0012345678' ? 88.00 : 91.00,
+                ]);
+            }
+        }
+        // ─────────────────────────────────────────────
+        //  12. Active Student Certificates (Persuratan)
+        // ─────────────────────────────────────────────
+        $this->call(ActiveStudentCertificateSeeder::class);
+        $this->call(StudentDispensationCertificateSeeder::class);
+        $this->call(StudentWarningCertificateSeeder::class);
+        $this->call(ActivityNewsSeeder::class);
     }
 }

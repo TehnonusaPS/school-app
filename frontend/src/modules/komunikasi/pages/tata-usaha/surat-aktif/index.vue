@@ -199,22 +199,23 @@ function viewSurat(id, item) {
   isPrintModalOpen.value = true
 }
 
-function editSurat(item) {
+function editSurat(id, item) {
   isEditMode.value = true
+  const resolvedItem = (item && typeof item === 'object') ? item : id
   
   // Cari data terbaru siswa di database/state
-  const currentStudent = siswaList.value.find(s => s.id === item.studentId || s.name === item.nama || s.nisn === item.nisn)
+  const currentStudent = siswaList.value.find(s => s.id === resolvedItem.studentId || s.name === resolvedItem.nama || s.nisn === resolvedItem.nisn)
   
   formItem.value = {
-    id: item.id,
-    nama: item.nama,
-    nisn: item.nisn,
-    academicYearId: item.academicYearId ? item.academicYearId.toString() : '',
-    tahunAkademik: item.tahunAkademik,
-    semester: item.semester,
-    kelas: currentStudent ? (currentStudent.kelas || '') : item.kelas,
-    tanggalLahir: currentStudent ? (currentStudent.tanggalLahir || '') : item.tanggalLahir,
-    alamat: currentStudent ? (currentStudent.alamat || '') : (item.alamat || '')
+    id: resolvedItem.id,
+    nama: resolvedItem.nama,
+    nisn: resolvedItem.nisn,
+    academicYearId: resolvedItem.academicYearId ? resolvedItem.academicYearId.toString() : '',
+    tahunAkademik: resolvedItem.tahunAkademik,
+    semester: resolvedItem.semester,
+    kelas: currentStudent ? (currentStudent.kelas || '') : resolvedItem.kelas,
+    tanggalLahir: currentStudent ? (currentStudent.tanggalLahir || '') : resolvedItem.tanggalLahir,
+    alamat: currentStudent ? (currentStudent.alamat || '') : (resolvedItem.alamat || '')
   }
   isFormSheetOpen.value = true
 }

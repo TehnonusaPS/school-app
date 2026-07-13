@@ -203,23 +203,24 @@ function viewSurat(id, item) {
   isPrintModalOpen.value = true
 }
 
-function editSurat(item) {
+function editSurat(id, item) {
   isEditMode.value = true
+  const resolvedItem = (item && typeof item === 'object') ? item : id
   
   // Find database latest student details if possible
-  const currentStudent = siswaList.value.find(s => s.id === item.studentId || s.name === item.namaSiswa || s.nisn === item.nisn)
+  const currentStudent = siswaList.value.find(s => s.id === resolvedItem.studentId || s.name === resolvedItem.namaSiswa || s.nisn === resolvedItem.nisn)
 
   formItem.value = {
-    id: item.id,
-    jenisSurat: item.jenisSurat,
-    siswaId: currentStudent ? currentStudent.id : item.siswaId,
-    namaSiswa: item.namaSiswa,
-    nisn: item.nisn,
-    kelas: currentStudent ? (currentStudent.kelas || '') : item.kelas,
-    tanggal: item.tanggal,
-    perihalPelanggaran: item.perihalPelanggaran || '',
-    jumlahTunggakan: item.jumlahTunggakan || '',
-    status: item.status || 'Selesai'
+    id: resolvedItem.id,
+    jenisSurat: resolvedItem.jenisSurat,
+    siswaId: currentStudent ? currentStudent.id : resolvedItem.siswaId,
+    namaSiswa: resolvedItem.namaSiswa,
+    nisn: resolvedItem.nisn,
+    kelas: currentStudent ? (currentStudent.kelas || '') : resolvedItem.kelas,
+    tanggal: resolvedItem.tanggal,
+    perihalPelanggaran: resolvedItem.perihalPelanggaran || '',
+    jumlahTunggakan: resolvedItem.jumlahTunggakan || '',
+    status: resolvedItem.status || 'Selesai'
   }
   isFormSheetOpen.value = true
 }

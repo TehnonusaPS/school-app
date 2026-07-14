@@ -899,5 +899,6 @@ class DatabaseSeeder extends Seeder
         $this->call(StudentDispensationCertificateSeeder::class);
         $this->call(StudentWarningCertificateSeeder::class);
         $this->call(ActivityNewsSeeder::class);
+        $this->call(SppSeeder::class);
     }
 }

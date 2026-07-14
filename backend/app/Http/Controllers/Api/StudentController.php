@@ -19,10 +19,20 @@ class StudentController extends Controller
     /**
      * Map frontend gender to database.
      */
+    /**
+     * Map frontend gender to database.
+     */
     private function mapGenderToDb(?string $gender): ?string
     {
         if (!$gender) return null;
-        return in_array(strtolower($gender), ['laki-laki', 'male']) ? 'male' : 'female';
+        $lower = strtolower($gender);
+        if (in_array($lower, ['laki-laki', 'male', 'jk01'])) {
+            return 'male';
+        }
+        if (in_array($lower, ['perempuan', 'female', 'jk02'])) {
+            return 'female';
+        }
+        return null;
     }
 
     /**
@@ -42,12 +52,16 @@ class StudentController extends Controller
     {
         if (!$status) return 'active';
         switch (strtolower($status)) {
+            case '0':
             case 'nonaktif':
                 return 'expelled';
+            case '2':
             case 'pindah':
                 return 'transferred';
+            case '3':
             case 'lulus':
                 return 'alumni';
+            case '1':
             case 'aktif':
             default:
                 return 'active';
@@ -96,12 +110,12 @@ class StudentController extends Controller
     {
         switch ($relation) {
             case 'father':
-                return 'Ayah';
+                return 'ayah';
             case 'mother':
-                return 'Ibu';
+                return 'ibu';
             case 'guardian':
             default:
-                return 'Wali';
+                return 'wali';
         }
     }
 
@@ -392,24 +406,27 @@ class StudentController extends Controller
 
         $feForm = [
             'id'             => $student->id,
+            'nama'           => $student->name,
             'nama_depan'     => explode(' ', $student->name)[0],
             'nama_belakang'  => count(explode(' ', $student->name)) > 1 ? implode(' ', array_slice(explode(' ', $student->name), 1)) : '',
             'nisn'           => $profile ? $profile->nisn : '',
             'tempat_lahir'   => $profile ? $profile->birth_place : '',
             'tanggal_lahir'  => $profile && $profile->birth_date ? $profile->birth_date->format('Y-m-d') : '',
-            'jenis_kelamin'  => $profile ? $this->mapGenderToFe($profile->gender) : '',
+            'jenis_kelamin'  => $profile ? ($profile->gender === 'male' ? 'JK01' : 'JK02') : '',
             'agama'          => 'Islam', // default or custom mapping if exist
             'alamat'         => $profile ? $profile->address : '',
             'kelas'          => $profile ? (string)$profile->classroom_id : '',
-            'status'         => $profile ? $this->mapStatusToFe($profile->status) : 'Aktif',
+            'kelas_nama'     => $profile && $profile->classroom ? $profile->classroom->name : '-',
+            'status'         => $profile ? ($profile->status === 'active' ? '1' : ($profile->status === 'expelled' ? '0' : ($profile->status === 'transferred' ? '2' : '3'))) : '1',
             'tahun_masuk'    => $profile && $profile->enrollment_date ? $profile->enrollment_date->format('Y-m-d') : '',
             'email'          => $student->email,
             'no_hp'          => $student->phone,
+            'foto'           => $student->photo,
             
             // Parent
             'nama_wali'      => $parent && $parent->user ? $parent->user->name : '',
             'hubungan_siswa' => $parent ? $this->mapRelationshipToFe($parent->relationship) : '',
-            'kelamin_wali'   => $parent ? $this->mapGenderToFe($parent->gender) : '',
+            'kelamin_wali'   => $parent ? ($parent->gender === 'male' ? 'JK01' : 'JK02') : '',
             'pekerjaan_wali' => $parent ? $parent->occupation : '',
             'email_wali'     => $parent && $parent->user ? $parent->user->email : '',
             'no_hp_wali'     => $parent && $parent->user ? $parent->user->phone : '',

@@ -192,5 +192,19 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/stats', [\App\Http\Controllers\Api\SiswaAkademikController::class, 'getGlobalStats']);
             Route::get('/materials/{id}/download', [\App\Http\Controllers\Api\SubjectMaterialController::class, 'download']);
         });
+
+    // Student SPP & Finance routes
+    Route::prefix('finance')->group(function () {
+        Route::get('/spp/dashboard', [\App\Http\Controllers\Api\SppController::class, 'getDashboard']);
+        Route::get('/spp/bills', [\App\Http\Controllers\Api\SppController::class, 'getBills']);
+        Route::post('/spp/payments', [\App\Http\Controllers\Api\SppController::class, 'createPayment']);
+        Route::post('/spp/payments/{id}/verify', [\App\Http\Controllers\Api\SppController::class, 'verifyPayment']);
+        
+        // Tariffs CRUD
+        Route::get('/spp/tariffs', [\App\Http\Controllers\Api\SppController::class, 'getTariffs']);
+        Route::post('/spp/tariffs', [\App\Http\Controllers\Api\SppController::class, 'storeTariff']);
+        Route::put('/spp/tariffs/{id}', [\App\Http\Controllers\Api\SppController::class, 'updateTariff']);
+        Route::delete('/spp/tariffs/{id}', [\App\Http\Controllers\Api\SppController::class, 'deleteTariff']);
+    });
 });
 

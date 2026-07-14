@@ -11,7 +11,7 @@ import { toast } from 'vue-sonner'
 import DataSheet from '@/components/data-sheet/DataSheet.vue'
 import { rawSiswaItem, siswaSheetSections} from './data/dataSheetDetail.js'
 import { useRouter } from 'vue-router'
-import { fetchAllSiswa, deleteSiswa } from '@/services/siswaService'
+import { fetchAllSiswa, deleteSiswa, getSiswaDetail } from '@/services/siswaService'
 import { getClassrooms } from '@/services/managementService'
 import { Users, UserCheck, UserRound, UserRoundCheck } from 'lucide-vue-next'
 
@@ -188,11 +188,36 @@ watch(filteredItems, () => {
 const isDetailSheetOpen = ref(false)
 const selectedItemForDetail = ref(null)
 
-const handleViewDetail = id => {
-  const item = items.value.find(x => x.id === id)
-  if (item) {
-    selectedItemForDetail.value = item
+const handleViewDetail = async id => {
+  try {
+    const res = await getSiswaDetail(id)
+    const statusMap = {
+      '1': 'Aktif',
+      '0': 'Nonaktif',
+      '2': 'Pindah',
+      '3': 'Lulus'
+    }
+    const genderMap = {
+      'JK01': 'Laki-laki',
+      'JK02': 'Perempuan'
+    }
+    const relationMap = {
+      'ayah': 'Ayah',
+      'ibu': 'Ibu',
+      'wali': 'Wali',
+      'lainnya': 'Lainnya'
+    }
+    selectedItemForDetail.value = {
+      ...res.data,
+      status: statusMap[res.data.status] || res.data.status,
+      jenis_kelamin: genderMap[res.data.jenis_kelamin] || res.data.jenis_kelamin,
+      kelamin_wali: genderMap[res.data.kelamin_wali] || res.data.kelamin_wali,
+      hubungan_siswa: relationMap[res.data.hubungan_siswa] || res.data.hubungan_siswa,
+      kelas: res.data.kelas_nama || '-'
+    }
     isDetailSheetOpen.value = true
+  } catch (err) {
+    toast.error('Gagal memuat detail siswa')
   }
 }
 
@@ -247,7 +272,7 @@ const handleEdit = (idOrItem) => {
   <!-- Detail Sheet -->
   <DataSheet
     v-model:open="isDetailSheetOpen"
-    :item="rawSiswaItem"
+    :item="selectedItemForDetail || rawSiswaItem"
     title-key="nama"
     description-key="nisn"
     description-prefix="NISN: "

@@ -1,6 +1,6 @@
 # 🏫 School App - Sistem Manajemen Sekolah Terintegrasi
 
-Aplikasi manajemen sekolah modern dengan arsitektur modular yang dirancang untuk performa tinggi, kemudahan pemeliharaan, dan skalabilitas..
+Aplikasi manajemen sekolah modern dengan arsitektur modular yang dirancang untuk performa tinggi, kemudahan pemeliharaan, dan skalabilitas.
 
 ---
 

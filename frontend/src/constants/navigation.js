@@ -61,7 +61,7 @@ export const navMain = [
       { 
         title: 'Jadwal Pelajaran', 
         url: '/manajemen-data/jadwal',
-        roles: ['kepala_sekolah']
+        roles: ['kepala_sekolah', 'admin_sekolah']
       },
       { title: 'Kelas', 
         url: '/manajemen-data/kelas', 

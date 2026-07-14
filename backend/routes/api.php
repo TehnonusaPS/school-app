@@ -161,37 +161,49 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('/extracurriculars', ExtracurricularController::class);
         Route::apiResource('/subjects', SubjectController::class);
         Route::apiResource('/academic-years', AcademicYearController::class);
+
+        // Time slots routes
+        Route::post('/time-slots/bulk', [\App\Http\Controllers\Api\TimeSlotController::class, 'bulkStore']);
+        Route::apiResource('/time-slots', \App\Http\Controllers\Api\TimeSlotController::class)->only(['index', 'destroy']);
+
+        // Schedule routes
+        Route::get('/schedules/unassigned-subjects', [\App\Http\Controllers\Api\ScheduleController::class, 'unassignedSubjects']);
+        Route::get('/schedules/teacher-conflicts', [\App\Http\Controllers\Api\ScheduleController::class, 'teacherConflicts']);
+        Route::post('/schedules/bulk', [\App\Http\Controllers\Api\ScheduleController::class, 'bulkStore']);
+        Route::apiResource('/schedules', \App\Http\Controllers\Api\ScheduleController::class);
     });
 
     // Akademik Routes (Guru, Wali Kelas, Admin Sekolah, Kepala Sekolah)
     Route::middleware('role:guru,wali_kelas,admin_sekolah,kepala_sekolah')
         ->prefix('akademik')
         ->group(function () {
-            // Data lookup
-            Route::get('/my-subjects', [\App\Http\Controllers\Api\AkademikDataController::class, 'getMySubjects']);
-            Route::get('/subjects/{subjectId}/my-classrooms', [\App\Http\Controllers\Api\AkademikDataController::class, 'getMyClassrooms']);
-            Route::get('/classrooms/{id}/students', [\App\Http\Controllers\Api\AkademikDataController::class, 'getStudentsByClassroom']);
-            Route::get('/active-academic-year', [\App\Http\Controllers\Api\AkademikDataController::class, 'getActiveAcademicYear']);
-
-            // Materi Pelajaran
-            Route::apiResource('/materials', \App\Http\Controllers\Api\SubjectMaterialController::class);
-            Route::get('/materials/{id}/download', [\App\Http\Controllers\Api\SubjectMaterialController::class, 'download']);
-            Route::patch('/materials/{id}/toggle-status', [\App\Http\Controllers\Api\SubjectMaterialController::class, 'toggleStatus']);
-
-            // Penilaian (Tugas & Ujian digabung)
-            Route::apiResource('/assessments', \App\Http\Controllers\Api\AssessmentController::class);
-            Route::patch('/assessments/{id}/toggle-status', [\App\Http\Controllers\Api\AssessmentController::class, 'toggleStatus']);
-        });
-
-    Route::middleware('role:siswa')
-        ->prefix('siswa/akademik')
-        ->group(function () {
-            Route::get('/my-classrooms', [\App\Http\Controllers\Api\SiswaAkademikController::class, 'getMyClassrooms']);
-            Route::get('/subjects', [\App\Http\Controllers\Api\SiswaAkademikController::class, 'getSubjects']);
-            Route::get('/overview', [\App\Http\Controllers\Api\SiswaAkademikController::class, 'getSubjectOverview']);
-            Route::get('/stats', [\App\Http\Controllers\Api\SiswaAkademikController::class, 'getGlobalStats']);
-            Route::get('/materials/{id}/download', [\App\Http\Controllers\Api\SubjectMaterialController::class, 'download']);
-        });
+             // Data lookup
+             Route::get('/my-subjects', [\App\Http\Controllers\Api\AkademikDataController::class, 'getMySubjects']);
+             Route::get('/subjects/{subjectId}/my-classrooms', [\App\Http\Controllers\Api\AkademikDataController::class, 'getMyClassrooms']);
+             Route::get('/classrooms/{id}/students', [\App\Http\Controllers\Api\AkademikDataController::class, 'getStudentsByClassroom']);
+             Route::get('/active-academic-year', [\App\Http\Controllers\Api\AkademikDataController::class, 'getActiveAcademicYear']);
+             Route::get('/my-schedule', [\App\Http\Controllers\Api\ScheduleController::class, 'mySchedule']);
+ 
+             // Materi Pelajaran
+             Route::apiResource('/materials', \App\Http\Controllers\Api\SubjectMaterialController::class);
+             Route::get('/materials/{id}/download', [\App\Http\Controllers\Api\SubjectMaterialController::class, 'download']);
+             Route::patch('/materials/{id}/toggle-status', [\App\Http\Controllers\Api\SubjectMaterialController::class, 'toggleStatus']);
+ 
+             // Penilaian (Tugas & Ujian digabung)
+             Route::apiResource('/assessments', \App\Http\Controllers\Api\AssessmentController::class);
+             Route::patch('/assessments/{id}/toggle-status', [\App\Http\Controllers\Api\AssessmentController::class, 'toggleStatus']);
+         });
+ 
+     Route::middleware('role:siswa')
+         ->prefix('siswa/akademik')
+         ->group(function () {
+             Route::get('/my-classrooms', [\App\Http\Controllers\Api\SiswaAkademikController::class, 'getMyClassrooms']);
+             Route::get('/subjects', [\App\Http\Controllers\Api\SiswaAkademikController::class, 'getSubjects']);
+             Route::get('/overview', [\App\Http\Controllers\Api\SiswaAkademikController::class, 'getSubjectOverview']);
+             Route::get('/stats', [\App\Http\Controllers\Api\SiswaAkademikController::class, 'getGlobalStats']);
+             Route::get('/schedule', [\App\Http\Controllers\Api\ScheduleController::class, 'studentSchedule']);
+             Route::get('/materials/{id}/download', [\App\Http\Controllers\Api\SubjectMaterialController::class, 'download']);
+         });
 
     // Student SPP & Finance routes
     Route::prefix('finance')->group(function () {

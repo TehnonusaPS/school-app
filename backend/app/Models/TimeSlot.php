@@ -6,28 +6,27 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class AcademicYear extends Model
+class TimeSlot extends Model
 {
     protected $fillable = [
         'school_id',
-        'name',
-        'semester',
-        'start_date',
-        'end_date',
-        'is_active',
+        'slot_number',
+        'start_time',
+        'end_time',
+        'is_break',
+        'label',
     ];
 
     protected function casts(): array
     {
         return [
-            'start_date' => 'date',
-            'end_date'   => 'date',
-            'is_active'  => 'boolean',
+            'slot_number' => 'integer',
+            'is_break'    => 'boolean',
         ];
     }
 
     /**
-     * Get the school this academic year belongs to.
+     * Get the school this time slot belongs to.
      */
     public function school(): BelongsTo
     {
@@ -35,15 +34,7 @@ class AcademicYear extends Model
     }
 
     /**
-     * Get all classrooms in this academic year.
-     */
-    public function classrooms(): HasMany
-    {
-        return $this->hasMany(Classroom::class);
-    }
-
-    /**
-     * Get all schedules in this academic year.
+     * Get the schedules assigned to this time slot.
      */
     public function schedules(): HasMany
     {

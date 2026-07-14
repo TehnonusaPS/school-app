@@ -37,9 +37,11 @@ import {
   XCircle
 } from 'lucide-vue-next'
 import {
-  getTahunAjaranList,
-  saveTahunAjaranList
-} from './data/mockTahunAjaran'
+  fetchAllAcademicYears,
+  createAcademicYear,
+  updateAcademicYear,
+  deleteAcademicYear
+} from '@/services/academicYearService'
 import { glassSlide, glassFade } from '@/config/motion'
 
 // --- State ---
@@ -49,9 +51,29 @@ const filterValues = ref({
   search: '',
   status: 'all'
 })
+const isLoading = ref(false)
+
+async function fetchData() {
+  isLoading.value = true
+  try {
+    const res = await fetchAllAcademicYears()
+    dbItems.value = res.data.map(item => ({
+      id: item.id,
+      tahun: item.name,
+      semester: item.semester,
+      tanggalMulai: item.start_date ? item.start_date.substring(0, 10) : '',
+      tanggalSelesai: item.end_date ? item.end_date.substring(0, 10) : '',
+      status: item.is_active ? 'aktif' : 'nonaktif'
+    }))
+  } catch (err) {
+    toast.error('Gagal mengambil data tahun ajaran')
+  } finally {
+    isLoading.value = false
+  }
+}
 
 onMounted(() => {
-  dbItems.value = getTahunAjaranList()
+  fetchData()
 })
 
 // --- Computed Stats ---
@@ -107,6 +129,7 @@ const headerActions = computed(() => [
 // --- Data Table Configurations ---
 const columns = [
   { key: 'tahun', label: 'Tahun Ajaran' },
+  { key: 'semester', label: 'Semester' },
   { key: 'tanggalMulai', label: 'Tanggal Mulai' },
   { key: 'tanggalSelesai', label: 'Tanggal Selesai' },
   {
@@ -146,6 +169,7 @@ const formErrors = ref({})
 const formItem = ref({
   id: '',
   tahun: '',
+  semester: 'odd',
   tanggalMulai: '',
   tanggalSelesai: '',
   status: 'nonaktif'
@@ -157,6 +181,7 @@ function handleCreate() {
   formItem.value = {
     id: '',
     tahun: '',
+    semester: 'odd',
     tanggalMulai: '',
     tanggalSelesai: '',
     status: 'nonaktif'
@@ -170,6 +195,7 @@ function handleEdit(item) {
   formItem.value = {
     id: item.id,
     tahun: item.tahun,
+    semester: item.semester,
     tanggalMulai: item.tanggalMulai,
     tanggalSelesai: item.tanggalSelesai,
     status: item.status
@@ -184,6 +210,7 @@ function validateForm() {
   } else if (!/^\d{4}\/\d{4}$/.test(formItem.value.tahun.trim())) {
     errors.tahun = 'Format harus YYYY/YYYY (contoh: 2025/2026).'
   }
+  if (!formItem.value.semester) errors.semester = 'Semester wajib dipilih.'
   if (!formItem.value.tanggalMulai) errors.tanggalMulai = 'Tanggal mulai wajib dipilih.'
   if (!formItem.value.tanggalSelesai) errors.tanggalSelesai = 'Tanggal selesai wajib dipilih.'
   if (formItem.value.tanggalMulai && formItem.value.tanggalSelesai) {
@@ -195,37 +222,33 @@ function validateForm() {
   return Object.keys(errors).length === 0
 }
 
-function handleSave() {
+async function handleSave() {
   if (!validateForm()) {
     toast.error('Gagal Menyimpan', { description: 'Harap periksa kembali isian formulir Anda.' })
     return
   }
 
   const payload = {
-    tahun: formItem.value.tahun.trim(),
-    tanggalMulai: formItem.value.tanggalMulai,
-    tanggalSelesai: formItem.value.tanggalSelesai,
-    status: formItem.value.status
+    name: formItem.value.tahun.trim(),
+    semester: formItem.value.semester,
+    start_date: formItem.value.tanggalMulai,
+    end_date: formItem.value.tanggalSelesai,
+    is_active: formItem.value.status === 'aktif'
   }
 
-  let updatedList = []
-  let activeIdToSet = null
-  if (isEditMode.value) {
-    updatedList = dbItems.value.map(item =>
-      String(item.id) === String(formItem.value.id) ? { ...item, ...payload } : item
-    )
-    if (payload.status === 'aktif') activeIdToSet = formItem.value.id
-    toast.success('Berhasil Diperbarui', { description: `Tahun ajaran "${payload.tahun}" telah diperbarui.` })
-  } else {
-    const newItem = { id: String(Date.now()), ...payload }
-    updatedList = [newItem, ...dbItems.value]
-    if (payload.status === 'aktif') activeIdToSet = newItem.id
-    toast.success('Berhasil Ditambahkan', { description: `Tahun ajaran "${payload.tahun}" telah ditambahkan.` })
+  try {
+    if (isEditMode.value) {
+      await updateAcademicYear(formItem.value.id, payload)
+      toast.success('Berhasil Diperbarui', { description: `Tahun ajaran "${formItem.value.tahun}" telah diperbarui.` })
+    } else {
+      await createAcademicYear(payload)
+      toast.success('Berhasil Ditambahkan', { description: `Tahun ajaran "${formItem.value.tahun}" telah ditambahkan.` })
+    }
+    fetchData()
+    isFormSheetOpen.value = false
+  } catch (err) {
+    toast.error('Gagal menyimpan tahun ajaran')
   }
-
-  // Jika item yang disimpan berstatus aktif, handler saveTahunAjaranList otomatis menonaktifkan yang lain
-  dbItems.value = saveTahunAjaranList(updatedList, activeIdToSet)
-  isFormSheetOpen.value = false
 }
 
 // --- Detail Sheet ---
@@ -257,6 +280,7 @@ const detailSections = computed(() => {
       title: 'Detail Informasi',
       fields: [
         { label: 'Tahun Ajaran', value: t.tahun },
+        { label: 'Semester', value: t.semester === 'odd' ? 'Ganjil' : 'Genap' },
         { label: 'Tanggal Mulai', value: formatDate(t.tanggalMulai) },
         { label: 'Tanggal Selesai', value: formatDate(t.tanggalSelesai) },
         { label: 'Status', value: getStatusLabel(t.status) }
@@ -266,18 +290,23 @@ const detailSections = computed(() => {
 })
 
 // --- Aktivasi Status (Toggle) ---
-function handleToggleStatus(item) {
-  // Hanya bisa mengaktifkan. Jika dinonaktifkan langsung, sistem harus tetap memiliki minimal 1 yang aktif.
-  // Oleh karena itu, jika klik nonaktifkan, tidak terjadi apa-apa / peringatkan. Jika klik aktifkan, maka yang lain dinonaktifkan.
+async function handleToggleStatus(item) {
   if (item.status === 'aktif') {
     toast.warning('Aksi Dibatalkan', { description: 'Harus ada minimal satu tahun ajaran yang aktif pada sistem.' })
     return
   }
   
-  dbItems.value = saveTahunAjaranList(dbItems.value, item.id)
-  toast.success('Tahun Ajaran Diaktifkan', {
-    description: `Tahun ajaran "${item.tahun}" kini aktif. Tahun ajaran lainnya telah dinonaktifkan.`
-  })
+  try {
+    await updateAcademicYear(item.id, {
+      is_active: true
+    })
+    toast.success('Tahun Ajaran Diaktifkan', {
+      description: `Tahun ajaran "${item.tahun}" kini aktif. Tahun ajaran lainnya telah dinonaktifkan.`
+    })
+    fetchData()
+  } catch (err) {
+    toast.error('Gagal mengaktifkan tahun ajaran')
+  }
 }
 
 // --- Delete ---
@@ -293,13 +322,17 @@ function openDeleteConfirm(item) {
   isDeleteConfirmOpen.value = true
 }
 
-function confirmDelete() {
+async function confirmDelete() {
   if (!selectedItemToDelete.value) return
-  const updated = dbItems.value.filter(t => t.id !== selectedItemToDelete.value.id)
-  dbItems.value = saveTahunAjaranList(updated)
-  isDeleteConfirmOpen.value = false
-  toast.success('Berhasil Dihapus', { description: `Tahun ajaran "${selectedItemToDelete.value.tahun}" telah dihapus.` })
-  selectedItemToDelete.value = null
+  try {
+    await deleteAcademicYear(selectedItemToDelete.value.id)
+    isDeleteConfirmOpen.value = false
+    toast.success('Berhasil Dihapus', { description: `Tahun ajaran "${selectedItemToDelete.value.tahun}" telah dihapus.` })
+    selectedItemToDelete.value = null
+    fetchData()
+  } catch (err) {
+    toast.error('Gagal menghapus tahun ajaran')
+  }
 }
 </script>
 
@@ -366,6 +399,12 @@ function confirmDelete() {
         @update:page="currentPage = $event"
       >
         <!-- Format Date Cells -->
+        <template #cell-semester="{ value }">
+          <span class="text-sm font-medium text-foreground">
+            {{ value === 'odd' ? 'Ganjil' : 'Genap' }}
+          </span>
+        </template>
+
         <template #cell-tanggalMulai="{ value }">
           <span class="text-sm font-medium text-foreground">
             {{ formatDate(value) }}
@@ -471,6 +510,21 @@ function confirmDelete() {
               :class="formErrors.tahun ? 'border-rose-500' : ''"
             />
             <p v-if="formErrors.tahun" class="text-[10px] text-rose-500">{{ formErrors.tahun }}</p>
+          </div>
+
+          <!-- Semester -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-muted-foreground">Semester <span class="text-rose-500">*</span></label>
+            <Select v-model="formItem.semester">
+              <SelectTrigger class="h-10 rounded-xl">
+                <SelectValue placeholder="Pilih Semester..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="odd">Ganjil (Odd)</SelectItem>
+                <SelectItem value="even">Genap (Even)</SelectItem>
+              </SelectContent>
+            </Select>
+            <p v-if="formErrors.semester" class="text-[10px] text-rose-500">{{ formErrors.semester }}</p>
           </div>
 
           <!-- Durasi Tanggal -->

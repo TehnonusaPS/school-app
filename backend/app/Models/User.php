@@ -144,4 +144,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(TeacherSubjectAssignment::class, 'teacher_id');
     }
+
+    /**
+     * Get all teaching schedules for this teacher user.
+     */
+    public function teachingSchedules(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Schedule::class, 'teacher_id');
+    }
 }

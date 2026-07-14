@@ -7,7 +7,7 @@ const msg = ref('')
 const phone = '6281234567890'
 
 const handleSend = () => {
-  const text = msg.value.trim() || 'Halo, saya tertarik dengan Sekolahku ERP.'
+  const text = msg.value.trim() || 'Halo, saya tertarik dengan App School Tehnonusa.'
   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank')
 }
 </script>

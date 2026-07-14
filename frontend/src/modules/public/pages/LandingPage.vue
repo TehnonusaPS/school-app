@@ -55,7 +55,7 @@ onMounted(() => {
   <div class="font-sans antialiased text-foreground bg-background overflow-x-hidden">
     <!-- Navbar (floating glass) -->
     <LandingNavbar
-      brandName="Sekolahku ERP"
+      brandName="App School Tehnonusa"
       loginPath="/login"
     />
 
@@ -81,7 +81,7 @@ onMounted(() => {
     <LandingCtaSection />
 
     <!-- Footer Section -->
-    <LandingFooter brandName="Sekolahku ERP" />
+    <LandingFooter brandName="App School Tehnonusa" />
 
     <!-- Live Floating WhatsApp Chat Helper -->
     <LandingChatWidget />

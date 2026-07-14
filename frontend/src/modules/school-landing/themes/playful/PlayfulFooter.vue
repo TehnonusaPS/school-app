@@ -124,7 +124,7 @@ const props = defineProps({ branding: Object, contact: Object, social: Object, d
           class="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500"
         >
           <p>&copy; {{ new Date().getFullYear() }} {{ data?.meta_title || 'Sekolah Kami' }} ✨</p>
-          <p>Powered by <span class="text-yellow-400/70 font-extrabold">Sekolahku ERP</span></p>
+          <p>Powered by <span class="text-yellow-400/70 font-extrabold">App School Tehnonusa</span></p>
         </div>
       </div>
     </div>

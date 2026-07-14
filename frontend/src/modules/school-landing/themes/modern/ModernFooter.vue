@@ -144,7 +144,7 @@ const props = defineProps({
             &copy; {{ new Date().getFullYear() }} {{ data?.meta_title || 'Sekolah Kami' }}. All
             rights reserved.
           </p>
-          <p>Powered by <span class="font-semibold text-gray-400">Sekolahku ERP</span></p>
+          <p>Powered by <span class="font-semibold text-gray-400">App School Tehnonusa</span></p>
         </div>
       </div>
     </div>

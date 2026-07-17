@@ -104,6 +104,46 @@ class ManagementDataTest extends TestCase
         $this->assertSoftDeleted('foundations', ['id' => $foundationId]);
     }
 
+    public function test_superadmin_can_search_and_filter_foundations(): void
+    {
+        // Create auxiliary foundations
+        Foundation::create(['name' => 'Yayasan Alfa', 'code' => 'YALFA', 'status' => 'active']);
+        Foundation::create(['name' => 'Yayasan Beta', 'code' => 'YBETA', 'status' => 'trial']);
+        Foundation::create(['name' => 'Yayasan Gamma', 'code' => 'YGAMMA', 'status' => 'inactive']);
+
+        // 1. Search by name
+        $response = $this->actingAs($this->superAdmin, 'sanctum')
+            ->getJson('/api/management/foundations?search=Alfa');
+        $response->assertStatus(200);
+        $data = $response->json('data.data');
+        $this->assertCount(1, $data);
+        $this->assertEquals('Yayasan Alfa', $data[0]['name']);
+
+        // 2. Search by code
+        $response = $this->actingAs($this->superAdmin, 'sanctum')
+            ->getJson('/api/management/foundations?search=YBETA');
+        $response->assertStatus(200);
+        $data = $response->json('data.data');
+        $this->assertCount(1, $data);
+        $this->assertEquals('Yayasan Beta', $data[0]['name']);
+
+        // 3. Filter by status
+        $response = $this->actingAs($this->superAdmin, 'sanctum')
+            ->getJson('/api/management/foundations?status=trial');
+        $response->assertStatus(200);
+        $data = $response->json('data.data');
+        foreach ($data as $item) {
+            $this->assertEquals('trial', $item['status']);
+        }
+
+        // 4. Pagination per_page
+        $response = $this->actingAs($this->superAdmin, 'sanctum')
+            ->getJson('/api/management/foundations?per_page=2');
+        $response->assertStatus(200);
+        $this->assertCount(2, $response->json('data.data'));
+        $this->assertEquals(2, $response->json('data.per_page'));
+    }
+
     public function test_admin_yayasan_scoping_for_foundation(): void
     {
         // 1. Index should return only their own foundation

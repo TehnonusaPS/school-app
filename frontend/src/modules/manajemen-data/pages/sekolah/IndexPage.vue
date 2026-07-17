@@ -103,6 +103,8 @@ const fetchSchools = async () => {
       status: item.status.charAt(0).toUpperCase() + item.status.slice(1),
       foto: item.logo || 'https://picsum.photos/200',
       logo: item.logo || 'https://picsum.photos/200',
+      emailLogin: item.users && item.users[0] ? item.users[0].email : '-',
+      noHpLogin: item.users && item.users[0] ? item.users[0].phone : '-',
       jmlSiswa: item.students_count || 0,
       ...item
     }))

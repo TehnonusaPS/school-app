@@ -39,11 +39,12 @@ import {
   ToggleRight
 } from 'lucide-vue-next'
 import {
-  getSubjects,
-  saveSubjects,
-  columns,
-  filters
-} from './data/mockMataPelajaran'
+  fetchAllSubjects,
+  createSubject,
+  updateSubject,
+  deleteSubject
+} from '@/services/subjectService'
+import { columns, filters } from './data/mockMataPelajaran'
 
 const auth = useAuthStore()
 
@@ -59,15 +60,35 @@ const filterValues = ref({
   search: '',
   status: 'all'
 })
+const isLoading = ref(false)
+
+async function fetchSubjectsData() {
+  isLoading.value = true
+  try {
+    const res = await fetchAllSubjects()
+    subjects.value = res.data.map(item => ({
+      id: item.id,
+      kode: item.code,
+      nama: item.name,
+      deskripsi: item.description,
+      status: item.is_active ? 'approved' : 'draft',
+      isActive: item.is_active
+    }))
+  } catch (err) {
+    toast.error('Gagal mengambil data mata pelajaran')
+  } finally {
+    isLoading.value = false
+  }
+}
 
 onMounted(() => {
-  subjects.value = getSubjects()
+  fetchSubjectsData()
 })
 
 // --- Computed Stats ---
 const totalCount = computed(() => subjects.value.length)
 const approvedCount = computed(() => subjects.value.filter(s => s.status === 'approved').length)
-const pendingCount = computed(() => subjects.value.filter(s => s.status === 'pending').length)
+const pendingCount = computed(() => 0)
 const draftOrRejectedCount = computed(() => subjects.value.filter(s => s.status === 'draft' || s.status === 'rejected').length)
 
 const stats = computed(() => [
@@ -132,7 +153,8 @@ const handleCreate = () => {
     id: '',
     kode: '',
     nama: '',
-    deskripsi: ''
+    deskripsi: '',
+    status: 'draft'
   }
   isFormSheetOpen.value = true
 }
@@ -143,12 +165,13 @@ const handleEdit = (item) => {
     id: item.id,
     kode: item.kode,
     nama: item.nama,
-    deskripsi: item.deskripsi || ''
+    deskripsi: item.deskripsi || '',
+    status: item.status
   }
   isFormSheetOpen.value = true
 }
 
-const handleSave = () => {
+const handleSave = async () => {
   const code = formItem.value.kode?.trim().toUpperCase()
   const name = formItem.value.nama?.trim()
   const desc = formItem.value.deskripsi?.trim()
@@ -164,7 +187,7 @@ const handleSave = () => {
   const isDuplicate = subjects.value.some(s => {
     const isSameCode = s.kode.toUpperCase() === code
     if (isEditMode.value) {
-      return isSameCode && s.id !== formItem.value.id
+      return isSameCode && String(s.id) !== String(formItem.value.id)
     }
     return isSameCode
   })
@@ -176,45 +199,30 @@ const handleSave = () => {
     return
   }
 
-  if (isEditMode.value) {
-    // Edit mode
-    const updated = subjects.value.map(s => {
-      if (s.id === formItem.value.id) {
-        return {
-          ...s,
-          kode: code,
-          nama: name,
-          deskripsi: desc,
-          status: s.status === 'rejected' ? 'draft' : s.status,
-          rejectedReason: s.status === 'rejected' ? '' : s.rejectedReason
-        }
-      }
-      return s
-    })
-    subjects.value = updated
-    saveSubjects(updated)
-    toast.success('Berhasil Diperbarui', {
-      description: `Mata pelajaran "${name}" telah diperbarui.`
-    })
-  } else {
-    // Create mode
-    const newSubject = {
-      id: String(Date.now()),
-      kode: code,
-      nama: name,
-      deskripsi: desc,
-      status: 'draft',
-      rejectedReason: ''
-    }
-    const updated = [newSubject, ...subjects.value]
-    subjects.value = updated
-    saveSubjects(updated)
-    toast.success('Berhasil Ditambahkan', {
-      description: `Mata pelajaran "${name}" telah ditambahkan sebagai Draft.`
-    })
+  const payload = {
+    code: code,
+    name: name,
+    description: desc,
+    is_active: isEditMode.value ? formItem.value.status === 'approved' : true
   }
 
-  isFormSheetOpen.value = false
+  try {
+    if (isEditMode.value) {
+      await updateSubject(formItem.value.id, payload)
+      toast.success('Berhasil Diperbarui', {
+        description: `Mata pelajaran "${name}" telah diperbarui.`
+      })
+    } else {
+      await createSubject(payload)
+      toast.success('Berhasil Ditambahkan', {
+        description: `Mata pelajaran "${name}" telah ditambahkan.`
+      })
+    }
+    fetchSubjectsData()
+    isFormSheetOpen.value = false
+  } catch (err) {
+    toast.error('Gagal menyimpan mata pelajaran')
+  }
 }
 
 // Search & Filter
@@ -314,24 +322,25 @@ const openRequestConfirm = (item) => {
   isRequestConfirmOpen.value = true
 }
 
-const confirmRequest = () => {
+const confirmRequest = async () => {
   if (!selectedItemToRequest.value) return
   
-  const updated = subjects.value.map(s => {
-    if (s.id === selectedItemToRequest.value.id) {
-      return { ...s, status: 'pending', rejectedReason: '' }
-    }
-    return s
-  })
-  
-  subjects.value = updated
-  saveSubjects(updated)
-  isRequestConfirmOpen.value = false
-  
-  toast.success('Pengajuan Dikirim', {
-    description: `Mata pelajaran "${selectedItemToRequest.value.nama}" telah diajukan ke Kepala Sekolah.`
-  })
-  selectedItemToRequest.value = null
+  try {
+    await updateSubject(selectedItemToRequest.value.id, {
+      code: selectedItemToRequest.value.kode,
+      name: selectedItemToRequest.value.nama,
+      description: selectedItemToRequest.value.deskripsi,
+      is_active: true // Auto approve for now
+    })
+    isRequestConfirmOpen.value = false
+    toast.success('Pengajuan Dikirim', {
+      description: `Mata pelajaran "${selectedItemToRequest.value.nama}" telah diaktifkan.`
+    })
+    selectedItemToRequest.value = null
+    fetchSubjectsData()
+  } catch (err) {
+    toast.error('Gagal mengajukan mata pelajaran')
+  }
 }
 
 // 2. DELETE (Admin)
@@ -343,18 +352,20 @@ const openDeleteConfirm = (item) => {
   isDeleteConfirmOpen.value = true
 }
 
-const confirmDelete = () => {
+const confirmDelete = async () => {
   if (!selectedItemToDelete.value) return
   
-  const updated = subjects.value.filter(s => s.id !== selectedItemToDelete.value.id)
-  subjects.value = updated
-  saveSubjects(updated)
-  isDeleteConfirmOpen.value = false
-  
-  toast.success('Berhasil Dihapus', {
-    description: `Mata pelajaran "${selectedItemToDelete.value.nama}" telah dihapus.`
-  })
-  selectedItemToDelete.value = null
+  try {
+    await deleteSubject(selectedItemToDelete.value.id)
+    isDeleteConfirmOpen.value = false
+    toast.success('Berhasil Dihapus', {
+      description: `Mata pelajaran "${selectedItemToDelete.value.nama}" telah dihapus.`
+    })
+    selectedItemToDelete.value = null
+    fetchSubjectsData()
+  } catch (err) {
+    toast.error('Gagal menghapus mata pelajaran')
+  }
 }
 
 // 3. APPROVE (Kepsek)
@@ -366,24 +377,25 @@ const openApproveConfirm = (item) => {
   isApproveConfirmOpen.value = true
 }
 
-const confirmApprove = () => {
+const confirmApprove = async () => {
   if (!selectedItemToApprove.value) return
   
-  const updated = subjects.value.map(s => {
-    if (s.id === selectedItemToApprove.value.id) {
-      return { ...s, status: 'approved', rejectedReason: '' }
-    }
-    return s
-  })
-  
-  subjects.value = updated
-  saveSubjects(updated)
-  isApproveConfirmOpen.value = false
-  
-  toast.success('Mata Pelajaran Disetujui', {
-    description: `Mata pelajaran "${selectedItemToApprove.value.nama}" kini berstatus Aktif.`
-  })
-  selectedItemToApprove.value = null
+  try {
+    await updateSubject(selectedItemToApprove.value.id, {
+      code: selectedItemToApprove.value.kode,
+      name: selectedItemToApprove.value.nama,
+      description: selectedItemToApprove.value.deskripsi,
+      is_active: true
+    })
+    isApproveConfirmOpen.value = false
+    toast.success('Mata Pelajaran Disetujui', {
+      description: `Mata pelajaran "${selectedItemToApprove.value.nama}" kini berstatus Aktif.`
+    })
+    selectedItemToApprove.value = null
+    fetchSubjectsData()
+  } catch (err) {
+    toast.error('Gagal menyetujui mata pelajaran')
+  }
 }
 
 // 4. REJECT (Kepsek)
@@ -399,43 +411,46 @@ const openRejectDialog = (item) => {
   isRejectDialogOpen.value = true
 }
 
-const confirmReject = () => {
+const confirmReject = async () => {
   if (!rejectReason.value.trim()) {
     rejectReasonError.value = 'Alasan penolakan wajib diisi.'
     return
   }
   
-  const updated = subjects.value.map(s => {
-    if (s.id === selectedItemToReject.value.id) {
-      return { ...s, status: 'rejected', rejectedReason: rejectReason.value.trim() }
-    }
-    return s
-  })
-  
-  subjects.value = updated
-  saveSubjects(updated)
-  isRejectDialogOpen.value = false
-  
-  toast.success('Pengajuan Ditolak', {
-    description: `Mata pelajaran "${selectedItemToReject.value.nama}" telah ditolak dengan alasan.`
-  })
-  selectedItemToReject.value = null
+  try {
+    await updateSubject(selectedItemToReject.value.id, {
+      code: selectedItemToReject.value.kode,
+      name: selectedItemToReject.value.nama,
+      description: selectedItemToReject.value.deskripsi,
+      is_active: false
+    })
+    isRejectDialogOpen.value = false
+    toast.success('Pengajuan Ditolak', {
+      description: `Mata pelajaran "${selectedItemToReject.value.nama}" telah dinonaktifkan.`
+    })
+    selectedItemToReject.value = null
+    fetchSubjectsData()
+  } catch (err) {
+    toast.error('Gagal menolak mata pelajaran')
+  }
 }
 
-const toggleActiveState = (item) => {
-  const nextState = item.isActive === false
-  const updated = subjects.value.map(s => {
-    if (s.id === item.id) {
-      return { ...s, isActive: nextState }
-    }
-    return s
-  })
-  subjects.value = updated
-  saveSubjects(updated)
-  
-  toast.success(nextState ? 'Mata Pelajaran Diaktifkan' : 'Mata Pelajaran Dinonaktifkan', {
-    description: `Mata pelajaran "${item.nama}" telah ${nextState ? 'diaktifkan' : 'dinonaktifkan'}.`
-  })
+const toggleActiveState = async (item) => {
+  const nextState = !item.isActive
+  try {
+    await updateSubject(item.id, {
+      code: item.kode,
+      name: item.nama,
+      description: item.deskripsi,
+      is_active: nextState
+    })
+    toast.success(nextState ? 'Mata Pelajaran Diaktifkan' : 'Mata Pelajaran Dinonaktifkan', {
+      description: `Mata pelajaran "${item.nama}" telah ${nextState ? 'diaktifkan' : 'dinonaktifkan'}.`
+    })
+    fetchSubjectsData()
+  } catch (err) {
+    toast.error('Gagal mengubah status aktif')
+  }
 }
 </script>
 

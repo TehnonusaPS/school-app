@@ -180,17 +180,18 @@ function viewSurat(id, item) {
   isPrintModalOpen.value = true
 }
 
-function editSurat(item) {
+function editSurat(id, item) {
   isEditMode.value = true
+  const resolvedItem = (item && typeof item === 'object') ? item : id
   formItem.value = {
-    id: item.id,
-    tanggalAwal: item.tanggalAwal,
-    tanggalAkhir: item.tanggalAkhir,
-    perihal: item.perihal
+    id: resolvedItem.id,
+    tanggalAwal: resolvedItem.tanggalAwal,
+    tanggalAkhir: resolvedItem.tanggalAkhir,
+    perihal: resolvedItem.perihal
   }
   
-  if (item.siswa && item.siswa.length > 0) {
-    selectedSiswa.value = item.siswa.map(s => {
+  if (resolvedItem.siswa && resolvedItem.siswa.length > 0) {
+    selectedSiswa.value = resolvedItem.siswa.map(s => {
       // Find matching siswa in options to set selected ID and load current database details
       const opt = siswaOptions.value.find(o => o.name === s.nama || o.nisn === s.nisn)
       return {

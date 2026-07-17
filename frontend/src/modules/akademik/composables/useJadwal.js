@@ -1,7 +1,8 @@
 import { ref, computed, watch } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { fetchIndonesianHolidays } from '@/services/api/nagerDate';
-import { mockScheduleSiswa, mockScheduleGuru, mockExams, mockAssignments } from '../data/jadwalData';
+import { mockExams, mockAssignments } from '../data/jadwalData';
+import { getMySchedule, getStudentSchedule } from '@/services/scheduleService';
 
 // Helper to format Date to YYYY-MM-DD in local time
 export function formatDateISO(date) {
@@ -27,6 +28,31 @@ export function useJadwal() {
   const holidays = ref([]);
   const isLoadingHolidays = ref(false);
 
+  // Weekly schedule from API
+  const apiScheduleData = ref({});
+  const isLoadingSchedule = ref(false);
+
+  const fetchSchedule = async () => {
+    isLoadingSchedule.value = true;
+    try {
+      let res;
+      if (role.value === 'guru' || role.value === 'wali_kelas') {
+        res = await getMySchedule();
+      } else {
+        res = await getStudentSchedule();
+      }
+      apiScheduleData.value = res.data;
+    } catch (e) {
+      console.error('Failed to load schedule from API', e);
+    } finally {
+      isLoadingSchedule.value = false;
+    }
+  };
+
+  watch(role, () => {
+    fetchSchedule();
+  }, { immediate: true });
+
   // Fetch holidays for the visible year
   const loadHolidays = async (year) => {
     isLoadingHolidays.value = true;
@@ -47,7 +73,7 @@ export function useJadwal() {
 
   // Get active schedule list for the current role
   const scheduleData = computed(() => {
-    return role.value === 'guru' ? mockScheduleGuru : mockScheduleSiswa;
+    return apiScheduleData.value || {};
   });
 
   // Check if a specific date string is a Sunday or National Holiday
@@ -178,12 +204,14 @@ export function useJadwal() {
     const holiday = getHolidayForDate(dateStr);
     const exams = getExamsForDate(dateStr);
     const assignments = getAssignmentsForDate(dateStr);
+    const lessons = getLessonsForDate(dateStr);
 
     return {
       isHoliday: !!holiday,
       isSunday: new Date(dateStr).getDay() === 0,
       isExam: exams.length > 0,
-      isAssignment: assignments.length > 0
+      isAssignment: assignments.length > 0,
+      isLesson: lessons.length > 0
     };
   };
 

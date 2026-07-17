@@ -41,4 +41,12 @@ class AcademicYear extends Model
     {
         return $this->hasMany(Classroom::class);
     }
+
+    /**
+     * Get all schedules in this academic year.
+     */
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(Schedule::class);
+    }
 }

@@ -61,7 +61,7 @@ export const navMain = [
       { 
         title: 'Jadwal Pelajaran', 
         url: '/manajemen-data/jadwal',
-        roles: ['kepala_sekolah']
+        roles: ['kepala_sekolah', 'admin_sekolah']
       },
       { title: 'Kelas', 
         url: '/manajemen-data/kelas', 
@@ -190,11 +190,34 @@ export const navMain = [
     items: [
       { title: 'Absensi Siswa', url: '/absensi/siswa', roles: ['admin_sekolah'] },
       { title: 'Absensi Staff', url: '/absensi/guru-staff', roles: ['admin_sekolah', 'kepala_sekolah', 'tata_usaha'] },
+      { title: 'Persetujuan Cuti/Izin', url: '/absensi/admin-sekolah/persetujuan-cuti', roles: ['admin_sekolah'] },
+      { title: 'Pengaturan Absensi', url: '/absensi/admin-sekolah/pengaturan', roles: ['admin_sekolah'] },
+      { title: 'Pengajuan Izin/Cuti', url: '/absensi/admin-sekolah/izin-cuti', roles: ['admin_sekolah'] },
       { title: 'Rekap Bulanan', url: '/absensi/rekap', roles: ['admin_sekolah'] },
       {
         title: 'Absensi Guru',
         url: '/absensi/guru-staff',
         roles: ['guru', 'wali_kelas']
+      },
+      {
+        title: 'Pengajuan Izin/Cuti',
+        url: '/absensi/guru/izin-cuti',
+        roles: ['guru']
+      },
+      {
+        title: 'Pengajuan Izin/Cuti',
+        url: '/absensi/wali-kelas/izin-cuti',
+        roles: ['wali_kelas']
+      },
+      {
+        title: 'Pengajuan Izin/Cuti',
+        url: '/absensi/kepala-sekolah/izin-cuti',
+        roles: ['kepala_sekolah']
+      },
+      {
+        title: 'Pengajuan Izin/Cuti',
+        url: '/absensi/tata-usaha/izin-cuti',
+        roles: ['tata_usaha']
       },
       {
         title: 'Kehadiran',

@@ -1,8 +1,7 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
-import { useRoute } from 'vue-router'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -13,6 +12,8 @@ import StatCard from '@/components/stat-card/StatCard.vue'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { toast } from 'vue-sonner'
+import { getSppDashboard, createSppPayment, verifySppPayment } from '@/services/sppService'
 
 const auth = useAuthStore()
 const route = useRoute()
@@ -43,18 +44,44 @@ const gotoPenerimaPembayaran = () => {
   router.push('/keuangan/penerimaan-pembayaran')
 }
 
-// State untuk Dashboard Orang Tua
-const paySpp = ref(true)
-const payLab = ref(true)
-const payFieldTrip = ref(true)
+const isLoading = ref(false)
+const outstandingBalance = ref(0)
+const nextPaymentDue = ref('-')
+const studentName = ref('')
+const currentBills = ref([])
+const paymentHistory = ref([])
+const antrianPembayaran = ref([])
+const logKasKecil = ref([])
+const stats = ref({
+  kas_kecil: 4500000,
+  total_spp_bulan_ini: 0,
+  pending_verifikasi_count: 0
+})
+
+// Parent/Student selection states
+const selectedBillIds = ref([])
 const selectedPaymentMethod = ref('bca')
 
+const toggleSelectBill = (id) => {
+  if (selectedBillIds.value.includes(id)) {
+    selectedBillIds.value = selectedBillIds.value.filter(x => x !== id)
+  } else {
+    selectedBillIds.value.push(id)
+  }
+}
+
 const totalPayment = computed(() => {
-  let total = 0
-  if (paySpp.value) total += 1200000
-  if (payLab.value) total += 150000
-  if (payFieldTrip.value) total += 100000
-  return total
+  return selectedBillIds.value.reduce((acc, id) => {
+    const bill = currentBills.value.find(b => b.id === id)
+    return acc + (bill ? parseFloat(bill.amount) - parseFloat(bill.paid_amount) : 0)
+  }, 0)
+})
+
+const paidProgress = computed(() => {
+  if (currentBills.value.length === 0) return 100
+  const totalAmount = currentBills.value.reduce((acc, b) => acc + parseFloat(b.amount), 0)
+  const totalPaid = currentBills.value.reduce((acc, b) => acc + parseFloat(b.paid_amount), 0)
+  return totalAmount > 0 ? Math.round((totalPaid / totalAmount) * 100) : 100
 })
 
 const formatRupiah = (value) => {
@@ -64,6 +91,81 @@ const formatRupiah = (value) => {
     minimumFractionDigits: 0
   }).format(value)
 }
+
+const loadDashboard = async () => {
+  try {
+    isLoading.value = true
+    const res = await getSppDashboard()
+    
+    if (isSiswa.value) {
+      outstandingBalance.value = res.data.outstanding_balance
+      nextPaymentDue.value = res.data.next_payment_due
+      currentBills.value = res.data.current_bills
+      paymentHistory.value = res.data.payment_history
+    } else if (isOrangTua.value) {
+      studentName.value = res.data.student_name
+      outstandingBalance.value = res.data.outstanding_balance
+      nextPaymentDue.value = res.data.next_payment_due
+      currentBills.value = res.data.current_bills
+      paymentHistory.value = res.data.payment_history
+      
+      // Auto-select all unpaid bills for parent
+      selectedBillIds.value = currentBills.value.filter(b => b.status !== 'paid').map(b => b.id)
+    } else if (isAdminSekolah.value || isTataUsaha.value) {
+      stats.value = {
+        kas_kecil: res.data.kas_kecil,
+        total_spp_bulan_ini: res.data.total_spp_bulan_ini,
+        pending_verifikasi_count: res.data.pending_verifikasi_count
+      }
+      antrianPembayaran.value = res.data.antrian_pembayaran
+      logKasKecil.value = res.data.log_kas_kecil
+    }
+  } catch (err) {
+    toast.error('Gagal memuat data keuangan')
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const handlePayment = async () => {
+  if (selectedBillIds.value.length === 0) {
+    toast.error('Pilih setidaknya satu tagihan untuk dibayar')
+    return
+  }
+
+  try {
+    isLoading.value = true
+    await createSppPayment({
+      payment_method: selectedPaymentMethod.value,
+      amount: totalPayment.value,
+      bill_ids: selectedBillIds.value
+    })
+    toast.success('Pendaftaran pembayaran berhasil. Silakan tunggu verifikasi.')
+    selectedBillIds.value = []
+    loadDashboard()
+  } catch (err) {
+    toast.error('Gagal memproses pembayaran')
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const handleVerify = async (paymentId, status) => {
+  try {
+    isLoading.value = true
+    await verifySppPayment(paymentId, status)
+    toast.success(`Pembayaran berhasil di-${status === 'success' ? 'setujui' : 'tolak'}`)
+    loadDashboard()
+  } catch (err) {
+    toast.error('Gagal memproses verifikasi pembayaran')
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  loadDashboard()
+})
 </script>
 
 <template>
@@ -472,7 +574,7 @@ const formatRupiah = (value) => {
           <!-- Kas Kecil Tersedia -->
           <StatCard
             label="Kas Kecil Tersedia"
-            value="Rp 4.500.000"
+            :value="formatRupiah(stats.kas_kecil)"
             variant="blue"
             :icon="Wallet"
           />
@@ -480,7 +582,7 @@ const formatRupiah = (value) => {
           <!-- Total SPP Terkumpul -->
           <StatCard
             label="Total SPP Terkumpul (Bulan Ini)"
-            value="Rp 128.450.000"
+            :value="formatRupiah(stats.total_spp_bulan_ini)"
             variant="emerald"
             :icon="Banknote"
           />
@@ -488,7 +590,7 @@ const formatRupiah = (value) => {
           <!-- Pending Verifikasi -->
           <StatCard
             label="Pending Verifikasi"
-            value="12 Transaksi"
+            :value="stats.pending_verifikasi_count + ' Transaksi'"
             variant="amber"
             :icon="ClipboardList"
           />
@@ -522,85 +624,36 @@ const formatRupiah = (value) => {
               </tr>
             </thead>
             <tbody>
-              <!-- Row 1 -->
-              <tr class="border-b hover:bg-muted/50">
-                <td class="px-4 py-4 text-center w-[50px]">1</td>
+              <tr v-for="(item, idx) in antrianPembayaran" :key="item.id" class="border-b hover:bg-muted/50">
+                <td class="px-4 py-4 text-center">{{ idx + 1 }}</td>
                 <td class="px-4 py-4">
                   <div class="flex items-center gap-2">
-                    <div class="bg-secondary text-secondary-foreground rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">AS</div>
-                    <span class="font-medium">Aditya Saputra</span>
+                    <div class="bg-primary/10 text-primary rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">{{ item.initials }}</div>
+                    <span class="font-medium">{{ item.nama_siswa }}</span>
                   </div>
                 </td>
-                <td class="px-4 py-4">XII IPA 1</td>
-                <td class="px-4 py-4">Oktober 2023</td>
-                <td class="px-4 py-4">Rp 750.000</td>
-                <td class="px-4 py-4"><span class="bg-secondary text-secondary-foreground px-2 py-1 rounded text-xs font-semibold">PENDING</span></td>
+                <td class="px-4 py-4">{{ item.kelas }}</td>
+                <td class="px-4 py-4">{{ item.bulan }}</td>
+                <td class="px-4 py-4">{{ formatRupiah(item.jumlah) }}</td>
                 <td class="px-4 py-4">
-                  <div class="flex gap-2">
-                    <button class="bg-primary text-primary-foreground px-3 py-1 rounded text-xs font-semibold hover:bg-primary/90">Proses</button>
-                    <button class="border border-border text-foreground px-3 py-1 rounded text-xs hover:bg-accent">📄</button>
+                  <span :class="[
+                    'px-2 py-1 rounded text-xs font-semibold uppercase',
+                    item.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-500' :
+                    item.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500' : 'bg-destructive/10 text-destructive'
+                  ]">
+                    {{ item.status }}
+                  </span>
+                </td>
+                <td class="px-4 py-4">
+                  <div class="flex gap-2" v-if="item.status === 'PENDING'">
+                    <button @click="handleVerify(item.id, 'success')" class="bg-primary text-primary-foreground px-3 py-1 rounded text-xs font-semibold hover:bg-primary/90">Terima</button>
+                    <button @click="handleVerify(item.id, 'failed')" class="bg-destructive text-destructive-foreground px-3 py-1 rounded text-xs font-semibold hover:bg-destructive/90">Tolak</button>
                   </div>
+                  <span v-else class="text-xs text-muted-foreground">Selesai ({{ item.payment_method }})</span>
                 </td>
               </tr>
-              <!-- Row 2 -->
-              <tr class="border-b hover:bg-muted/50">
-                <td class="px-4 py-4 text-center align-middle">2</td>
-                <td class="px-4 py-4">
-                  <div class="flex items-center gap-2">
-                    <div class="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">BN</div>
-                    <span class="font-medium">Bella Novita</span>
-                  </div>
-                </td>
-                <td class="px-4 py-4">X IPS 2</td>
-                <td class="px-4 py-4">Oktober 2023</td>
-                <td class="px-4 py-4">Rp 650.000</td>
-                <td class="px-4 py-4"><span class="bg-primary/10 text-primary px-2 py-1 rounded text-xs font-semibold">PAID</span></td>
-                <td class="px-4 py-4">
-                  <div class="flex gap-2">
-                    <button class="border border-border text-foreground px-3 py-1 rounded text-xs hover:bg-accent">Selesai</button>
-                    <button class="border border-border text-foreground px-3 py-1 rounded text-xs hover:bg-accent">⚙️</button>
-                  </div>
-                </td>
-              </tr>
-              <!-- Row 3 -->
-              <tr class="border-b hover:bg-muted/50">
-                <td class="px-4 py-4 text-center align-middle">3</td>
-                <td class="px-4 py-4">
-                  <div class="flex items-center gap-2">
-                    <div class="bg-muted-foreground text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">DW</div>
-                    <span class="font-medium">Diki Wahyudi</span>
-                  </div>
-                </td>
-                <td class="px-4 py-4">XI IPA 4</td>
-                <td class="px-4 py-4">Oktober 2023</td>
-                <td class="px-4 py-4">Rp 750.000</td>
-                <td class="px-4 py-4"><span class="bg-destructive/10 text-destructive px-2 py-1 rounded text-xs font-semibold">OVERDUE</span></td>
-                <td class="px-4 py-4">
-                  <div class="flex gap-2">
-                    <button class="bg-primary text-primary-foreground px-3 py-1 rounded text-xs font-semibold hover:bg-primary/90">Proses</button>
-                    <button class="border border-border text-foreground px-3 py-1 rounded text-xs hover:bg-accent">✉️</button>
-                  </div>
-                </td>
-              </tr>
-              <!-- Row 4 -->
-              <tr class="border-b hover:bg-muted/50">
-                <td class="px-4 py-4 text-center">4</td>
-                <td class="px-4 py-4">
-                  <div class="flex items-center gap-2">
-                    <div class="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">FL</div>
-                    <span class="font-medium">Farah Lestari</span>
-                  </div>
-                </td>
-                <td class="px-4 py-4">XII IPS 1</td>
-                <td class="px-4 py-4">Oktober 2023</td>
-                <td class="px-4 py-4">Rp 750.000</td>
-                <td class="px-4 py-4"><span class="bg-secondary text-secondary-foreground px-2 py-1 rounded text-xs font-semibold">PENDING</span></td>
-                <td class="px-4 py-4">
-                  <div class="flex gap-2">
-                    <button class="bg-primary text-primary-foreground px-3 py-1 rounded text-xs font-semibold hover:bg-primary/90">Proses</button>
-                    <button class="border border-border text-foreground px-3 py-1 rounded text-xs hover:bg-accent">📄</button>
-                  </div>
-                </td>
+              <tr v-if="antrianPembayaran.length === 0">
+                <td colspan="7" class="text-center py-6 text-muted-foreground">Tidak ada antrian pembayaran.</td>
               </tr>
             </tbody>
           </table>
@@ -608,12 +661,10 @@ const formatRupiah = (value) => {
 
         <!-- Pagination -->
         <div class="flex items-center justify-between mt-4">
-          <p class="text-xs text-muted-foreground">Menampilkan 4 dari 48 antriaan pembayaran hari ini.</p>
+          <p class="text-xs text-muted-foreground">Menampilkan {{ antrianPembayaran.length }} antrian pembayaran hari ini.</p>
           <div class="flex gap-1">
             <button class="px-2 py-1 hover:bg-muted rounded text-sm">←</button>
             <button class="px-2 py-1 bg-primary text-primary-foreground rounded text-sm">1</button>
-            <button class="px-2 py-1 hover:bg-muted rounded text-sm">2</button>
-            <button class="px-2 py-1 hover:bg-muted rounded text-sm">3</button>
             <button class="px-2 py-1 hover:bg-muted rounded text-sm">→</button>
           </div>
         </div>
@@ -719,7 +770,7 @@ const formatRupiah = (value) => {
           <!-- Kas Kecil Tersedia -->
           <StatCard
             label="Kas Kecil Tersedia"
-            value="Rp 4.500.000"
+            :value="formatRupiah(stats.kas_kecil)"
             variant="blue"
             :icon="Wallet"
           />
@@ -727,7 +778,7 @@ const formatRupiah = (value) => {
           <!-- Total SPP Terkumpul -->
           <StatCard
             label="Total SPP Terkumpul (Bulan Ini)"
-            value="Rp 128.450.000"
+            :value="formatRupiah(stats.total_spp_bulan_ini)"
             variant="emerald"
             :icon="Banknote"
           />
@@ -735,7 +786,7 @@ const formatRupiah = (value) => {
           <!-- Pending Verifikasi -->
           <StatCard
             label="Pending Verifikasi"
-            value="12 Transaksi"
+            :value="stats.pending_verifikasi_count + ' Transaksi'"
             variant="amber"
             :icon="ClipboardList"
           />
@@ -769,93 +820,36 @@ const formatRupiah = (value) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <!-- Row 1 -->
-              <TableRow>
-                <TableCell class="text-center font-medium">1</TableCell>
+              <TableRow v-for="(item, idx) in antrianPembayaran" :key="item.id">
+                <TableCell class="text-center font-medium">{{ idx + 1 }}</TableCell>
                 <TableCell>
                   <div class="flex items-center gap-2">
-                    <div class="bg-secondary text-secondary-foreground rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">AS</div>
-                    <span class="font-medium">Aditya Saputra</span>
+                    <div class="bg-primary/10 text-primary rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">{{ item.initials }}</div>
+                    <span class="font-medium">{{ item.nama_siswa }}</span>
                   </div>
                 </TableCell>
-                <TableCell>XII IPA 1</TableCell>
-                <TableCell>Oktober 2023</TableCell>
-                <TableCell>Rp 750.000</TableCell>
+                <TableCell>{{ item.kelas }}</TableCell>
+                <TableCell>{{ item.bulan }}</TableCell>
+                <TableCell>{{ formatRupiah(item.jumlah) }}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" class="bg-secondary text-secondary-foreground font-semibold">PENDING</Badge>
+                  <Badge variant="outline" :class="[
+                    item.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-100' :
+                    item.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500 border-amber-100' : 'bg-destructive/10 text-destructive border-destructive/10',
+                    'font-semibold'
+                  ]">
+                    {{ item.status }}
+                  </Badge>
                 </TableCell>
                 <TableCell class="text-right">
-                  <div class="flex justify-end gap-2">
-                    <Button size="sm" class="h-8 px-2.5 bg-primary text-primary-foreground hover:bg-primary/90">Proses</Button>
-                    <Button size="sm" variant="outline" class="h-8 px-2.5"><FileText class="size-3.5" /></Button>
+                  <div class="flex justify-end gap-2" v-if="item.status === 'PENDING'">
+                    <Button size="sm" @click="handleVerify(item.id, 'success')" class="h-8 px-2.5 bg-primary text-primary-foreground hover:bg-primary/90">Terima</Button>
+                    <Button size="sm" @click="handleVerify(item.id, 'failed')" variant="destructive" class="h-8 px-2.5">Tolak</Button>
                   </div>
+                  <span v-else class="text-xs text-muted-foreground">Selesai ({{ item.payment_method }})</span>
                 </TableCell>
               </TableRow>
-              <!-- Row 2 -->
-              <TableRow>
-                <TableCell class="text-center font-medium">2</TableCell>
-                <TableCell>
-                  <div class="flex items-center gap-2">
-                    <div class="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">BN</div>
-                    <span class="font-medium">Bella Novita</span>
-                  </div>
-                </TableCell>
-                <TableCell>X IPS 2</TableCell>
-                <TableCell>Oktober 2023</TableCell>
-                <TableCell>Rp 650.000</TableCell>
-                <TableCell>
-                  <Badge variant="outline" class="bg-primary/10 text-primary border-primary/20 hover:bg-primary/10 font-semibold">PAID</Badge>
-                </TableCell>
-                <TableCell class="text-right">
-                  <div class="flex justify-end gap-2">
-                    <Button size="sm" variant="outline" class="h-8 px-2.5">Selesai</Button>
-                    <Button size="sm" variant="outline" class="h-8 px-2.5"><Settings class="size-3.5" /></Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-              <!-- Row 3 -->
-              <TableRow>
-                <TableCell class="text-center font-medium">3</TableCell>
-                <TableCell>
-                  <div class="flex items-center gap-2">
-                    <div class="bg-muted-foreground text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">DW</div>
-                    <span class="font-medium">Diki Wahyudi</span>
-                  </div>
-                </TableCell>
-                <TableCell>XI IPA 4</TableCell>
-                <TableCell>Oktober 2023</TableCell>
-                <TableCell>Rp 750.000</TableCell>
-                <TableCell>
-                  <Badge variant="destructive" class="bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/10 font-semibold">OVERDUE</Badge>
-                </TableCell>
-                <TableCell class="text-right">
-                  <div class="flex justify-end gap-2">
-                    <Button size="sm" class="h-8 px-2.5 bg-primary text-primary-foreground hover:bg-primary/90">Proses</Button>
-                    <Button size="sm" variant="outline" class="h-8 px-2.5"><Mail class="size-3.5" /></Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-              <!-- Row 4 -->
-              <TableRow>
-                <TableCell class="text-center font-medium">4</TableCell>
-                <TableCell>
-                  <div class="flex items-center gap-2">
-                    <div class="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">FL</div>
-                    <span class="font-medium">Farah Lestari</span>
-                  </div>
-                </TableCell>
-                <TableCell>XII IPS 1</TableCell>
-                <TableCell>Oktober 2023</TableCell>
-                <TableCell>Rp 750.000</TableCell>
-                <TableCell>
-                  <Badge variant="outline" class="bg-secondary text-secondary-foreground font-semibold">PENDING</Badge>
-                </TableCell>
-                <TableCell class="text-right">
-                  <div class="flex justify-end gap-2">
-                    <Button size="sm" class="h-8 px-2.5 bg-primary text-primary-foreground hover:bg-primary/90">Proses</Button>
-                    <Button size="sm" variant="outline" class="h-8 px-2.5"><FileText class="size-3.5" /></Button>
-                  </div>
-                </TableCell>
+              <TableRow v-if="antrianPembayaran.length === 0">
+                <TableCell colspan="7" class="text-center py-6 text-muted-foreground">Tidak ada antrian pembayaran.</TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -863,12 +857,10 @@ const formatRupiah = (value) => {
 
         <!-- Pagination -->
         <div class="flex items-center justify-between mt-4">
-          <p class="text-xs text-muted-foreground">Menampilkan 4 dari 48 antrian pembayaran hari ini.</p>
+          <p class="text-xs text-muted-foreground">Menampilkan {{ antrianPembayaran.length }} antrian pembayaran hari ini.</p>
           <div class="flex gap-1">
             <Button variant="outline" size="sm" class="h-8 w-8 p-0">←</Button>
             <Button size="sm" class="h-8 w-8 p-0 bg-primary text-primary-foreground">1</Button>
-            <Button variant="outline" size="sm" class="h-8 w-8 p-0">2</Button>
-            <Button variant="outline" size="sm" class="h-8 w-8 p-0">3</Button>
             <Button variant="outline" size="sm" class="h-8 w-8 p-0">→</Button>
           </div>
         </div>
@@ -977,9 +969,9 @@ const formatRupiah = (value) => {
         <!-- Outstanding Balance Card -->
         <StatCard
           label="Total Outstanding Balance"
-          value="Rp 4.250.000"
-          sub="Sudah dibayar (65% Lunas)"
-          :progress="65"
+          :value="formatRupiah(outstandingBalance)"
+          :sub="'Sudah dibayar (' + paidProgress + '% Lunas)'"
+          :progress="paidProgress"
           variant="primary"
           :icon="Wallet"
         />
@@ -988,9 +980,9 @@ const formatRupiah = (value) => {
         <Card class="p-6 flex flex-col justify-between shadow-sm border-border bg-card text-card-foreground rounded-xl">
           <div>
             <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Next Payment Due</p>
-            <h2 class="text-3xl font-bold text-foreground mt-3">15 Oktober 2023</h2>
+            <h2 class="text-2xl font-bold text-foreground mt-3">{{ nextPaymentDue }}</h2>
           </div>
-          <Button class="mt-6 w-full bg-primary text-primary-foreground hover:bg-primary/90 transition flex items-center justify-center gap-2 font-bold h-11">
+          <Button @click="router.push('/keuangan/penerimaan-pembayaran')" class="mt-6 w-full bg-primary text-primary-foreground hover:bg-primary/90 transition flex items-center justify-center gap-2 font-bold h-11">
             <CreditCard class="size-4" />
             Bayar Sekarang
           </Button>
@@ -1020,41 +1012,23 @@ const formatRupiah = (value) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell class="text-center font-medium text-muted-foreground">1</TableCell>
-                  <TableCell class="font-medium text-foreground">SPP Bulanan - Oktober</TableCell>
-                  <TableCell class="text-muted-foreground">10 Okt 2023</TableCell>
-                  <TableCell class="font-bold">Rp 1.500.000</TableCell>
+                <TableRow v-for="(bill, index) in currentBills" :key="bill.id">
+                  <TableCell class="text-center font-medium text-muted-foreground">{{ index + 1 }}</TableCell>
+                  <TableCell class="font-medium text-foreground">{{ bill.title }}</TableCell>
+                  <TableCell class="text-muted-foreground">{{ bill.due_date }}</TableCell>
+                  <TableCell class="font-bold">{{ formatRupiah(bill.amount) }}</TableCell>
                   <TableCell class="text-right">
-                    <Badge variant="outline" class="text-red-500 bg-red-50 border-red-100 px-2 py-0.5 font-medium">Unpaid</Badge>
+                    <Badge variant="outline" :class="[
+                      bill.status === 'paid' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' :
+                      bill.status === 'partial' ? 'text-amber-600 bg-amber-50 border-amber-100' : 'text-red-500 bg-red-50 border-red-100',
+                      'px-2 py-0.5 font-medium'
+                    ]">
+                      {{ bill.status === 'paid' ? 'Paid' : (bill.status === 'partial' ? 'Partial' : 'Unpaid') }}
+                    </Badge>
                   </TableCell>
                 </TableRow>
-                <TableRow>
-                  <TableCell class="text-center font-medium text-muted-foreground">2</TableCell>
-                  <TableCell class="font-medium text-foreground">Lab Fees (IPA & Komputer)</TableCell>
-                  <TableCell class="text-muted-foreground">25 Sep 2023</TableCell>
-                  <TableCell class="font-bold">Rp 750.000</TableCell>
-                  <TableCell class="text-right">
-                    <Badge variant="outline" class="text-amber-600 bg-amber-50 border-amber-100 px-2 py-0.5 font-medium">Partial</Badge>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell class="text-center font-medium text-muted-foreground">3</TableCell>
-                  <TableCell class="font-medium text-foreground">Field Trip ke Bandung</TableCell>
-                  <TableCell class="text-muted-foreground">15 Sep 2023</TableCell>
-                  <TableCell class="font-bold">Rp 2.000.000</TableCell>
-                  <TableCell class="text-right">
-                    <Badge variant="outline" class="text-emerald-600 bg-emerald-50 border-emerald-100 px-2 py-0.5 font-medium">Paid</Badge>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell class="text-center font-medium text-muted-foreground">4</TableCell>
-                  <TableCell class="font-medium text-foreground">Biaya Wisuda & Foto Album</TableCell>
-                  <TableCell class="text-muted-foreground">01 Nov 2023</TableCell>
-                  <TableCell class="font-bold">Rp 1.000.000</TableCell>
-                  <TableCell class="text-right">
-                    <Badge variant="outline" class="text-red-500 bg-red-50 border-red-100 px-2 py-0.5 font-medium">Unpaid</Badge>
-                  </TableCell>
+                <TableRow v-if="currentBills.length === 0">
+                  <TableCell colspan="5" class="text-center py-6 text-muted-foreground">Tidak ada tagihan aktif.</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -1068,37 +1042,25 @@ const formatRupiah = (value) => {
           </div>
 
           <div class="space-y-3 overflow-y-auto flex-1 pr-2">
-            <div class="rounded-lg bg-muted/60 p-3 text-sm border border-border/50">
+            <div v-for="pay in paymentHistory" :key="pay.id" class="rounded-lg bg-muted/60 p-3 text-sm border border-border/50">
               <div class="flex items-center justify-between font-bold mb-1">
-                <span>Pembayaran SPP Sept</span>
-                <span class="text-primary font-bold">-Rp 1.500k</span>
+                <span class="truncate font-semibold max-w-[120px]">{{ pay.reference_number }}</span>
+                <span class="text-primary font-bold">{{ formatRupiah(pay.amount) }}</span>
               </div>
-              <p class="text-xs text-muted-foreground font-medium">12 Sep 2023 • 14:30</p>
-              <a href="#" class="text-xs text-primary hover:underline mt-2 flex items-center gap-1 font-semibold">
-                <Download class="w-3.5 h-3.5" /> Receipt_120923.pdf
-              </a>
+              <p class="text-xs text-muted-foreground font-medium">
+                {{ new Date(pay.payment_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) }}
+              </p>
+              <div class="mt-2 flex items-center justify-between">
+                <span :class="[
+                  'text-[10px] px-1.5 py-0.5 rounded font-bold uppercase',
+                  pay.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-500' :
+                  pay.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500' : 'bg-destructive/10 text-destructive'
+                ]">{{ pay.status }}</span>
+                <span class="text-[10px] text-muted-foreground font-medium uppercase">{{ pay.payment_method }}</span>
+              </div>
             </div>
-
-            <div class="rounded-lg bg-muted/60 p-3 text-sm border border-border/50">
-              <div class="flex items-center justify-between font-bold mb-1">
-                <span>Deposit Lab Fee</span>
-                <span class="text-primary font-bold">-Rp 350k</span>
-              </div>
-              <p class="text-xs text-muted-foreground font-medium">05 Sep 2023 • 09:15</p>
-              <a href="#" class="text-xs text-primary hover:underline mt-2 flex items-center gap-1 font-semibold">
-                <Download class="w-3.5 h-3.5" /> Receipt_050923.pdf
-              </a>
-            </div>
-
-            <div class="rounded-lg bg-muted/60 p-3 text-sm border border-border/50">
-              <div class="flex items-center justify-between font-bold mb-1">
-                <span>Seragam Olahraga</span>
-                <span class="text-primary font-bold">-Rp 450k</span>
-              </div>
-              <p class="text-xs text-muted-foreground font-medium">28 Aug 2023 • 11:45</p>
-              <a href="#" class="text-xs text-primary hover:underline mt-2 flex items-center gap-1 font-semibold">
-                <Download class="w-3.5 h-3.5" /> Receipt_280823.pdf
-              </a>
+            <div v-if="paymentHistory.length === 0" class="text-center py-6 text-muted-foreground text-xs">
+              Belum ada riwayat transaksi.
             </div>
           </div>
 
@@ -1146,7 +1108,7 @@ const formatRupiah = (value) => {
           </div>
           <div>
             <p class="text-xs text-muted-foreground font-medium">Siswa</p>
-            <p class="text-sm font-bold text-foreground">Lucas Henderson</p>
+            <p class="text-sm font-bold text-foreground">{{ studentName }}</p>
           </div>
         </div>
         <div class="flex items-center gap-3">
@@ -1155,7 +1117,7 @@ const formatRupiah = (value) => {
           </div>
           <div>
             <p class="text-xs text-muted-foreground font-medium">Periode Tagihan</p>
-            <p class="text-sm font-bold text-foreground">Oktober 2023</p>
+            <p class="text-sm font-bold text-foreground">Oktober 2026</p>
           </div>
         </div>
       </div>
@@ -1174,7 +1136,7 @@ const formatRupiah = (value) => {
           <!-- Total Sisa Tagihan -->
           <div class="mb-6 pb-6 border-b">
             <p class="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">Total Sisa Tagihan</p>
-            <h3 class="text-4xl font-extrabold text-foreground">Rp 1.450.000</h3>
+            <h3 class="text-4xl font-extrabold text-foreground">{{ formatRupiah(outstandingBalance) }}</h3>
           </div>
 
           <!-- Tabel Ringkasan Tagihan -->
@@ -1190,73 +1152,39 @@ const formatRupiah = (value) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <!-- SPP Bulanan -->
-                <TableRow class="hover:bg-accent/30 cursor-pointer" @click="paySpp = !paySpp">
-                  <TableCell class="text-center font-medium">1</TableCell>
+                <TableRow v-for="(bill, index) in currentBills" :key="bill.id" class="hover:bg-accent/30 cursor-pointer" @click="toggleSelectBill(bill.id)">
+                  <TableCell class="text-center font-medium">{{ index + 1 }}</TableCell>
                   <TableCell>
                     <div class="flex items-center gap-2">
                       <span class="text-lg">🎓</span>
-                      <span class="font-medium text-foreground">SPP Bulanan</span>
+                      <span class="font-medium text-foreground">{{ bill.title }}</span>
                     </div>
                   </TableCell>
                   <TableCell class="text-center">
-                    <Badge variant="destructive" class="bg-destructive/10 text-destructive border-destructive/20 font-medium">Wajib</Badge>
+                    <Badge variant="outline" :class="[
+                      bill.status === 'paid' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' :
+                      bill.status === 'partial' ? 'text-amber-600 bg-amber-50 border-amber-100' : 'text-red-500 bg-red-50 border-red-100',
+                      'font-medium'
+                    ]">{{ bill.status === 'paid' ? 'Paid' : (bill.status === 'partial' ? 'Partial' : 'Unpaid') }}</Badge>
                   </TableCell>
-                  <TableCell class="text-right font-semibold text-foreground">Rp 1.200.000</TableCell>
+                  <TableCell class="text-right font-semibold text-foreground">{{ formatRupiah(bill.amount - bill.paid_amount) }}</TableCell>
                   <TableCell>
                     <div class="flex items-center justify-center">
-                      <Checkbox id="summary-spp" :checked="paySpp" @click.prevent />
+                      <Checkbox :id="'summary-' + bill.id" :checked="selectedBillIds.includes(bill.id)" @click.prevent />
                     </div>
                   </TableCell>
                 </TableRow>
-
-                <!-- Biaya Praktikum & Laboratorium -->
-                <TableRow class="hover:bg-accent/30 cursor-pointer" @click="payLab = !payLab">
-                  <TableCell class="text-center font-medium">2</TableCell>
-                  <TableCell>
-                    <div class="flex items-center gap-2">
-                      <span class="text-lg">🔬</span>
-                      <span class="font-medium text-foreground">Biaya Praktikum & Laboratorium</span>
-                    </div>
-                  </TableCell>
-                  <TableCell class="text-center">
-                    <Badge variant="destructive" class="bg-destructive/10 text-destructive border-destructive/20 font-medium">Wajib</Badge>
-                  </TableCell>
-                  <TableCell class="text-right font-semibold text-foreground">Rp 150.000</TableCell>
-                  <TableCell>
-                    <div class="flex items-center justify-center">
-                      <Checkbox id="summary-lab" :checked="payLab" @click.prevent />
-                    </div>
-                  </TableCell>
-                </TableRow>
-
-                <!-- Kunjungan Lapangan (Field Trip) - Museum -->
-                <TableRow class="hover:bg-accent/30 cursor-pointer" @click="payFieldTrip = !payFieldTrip">
-                  <TableCell class="text-center font-medium">3</TableCell>
-                  <TableCell>
-                    <div class="flex items-center gap-2">
-                      <span class="text-lg">🚌</span>
-                      <span class="font-medium text-foreground">Kunjungan Lapangan (Field Trip) - Museum</span>
-                    </div>
-                  </TableCell>
-                  <TableCell class="text-center">
-                    <Badge variant="outline" class="bg-secondary text-secondary-foreground font-medium border-secondary/20">Add-on</Badge>
-                  </TableCell>
-                  <TableCell class="text-right font-semibold text-foreground">Rp 100.000</TableCell>
-                  <TableCell>
-                    <div class="flex items-center justify-center">
-                      <Checkbox id="summary-trip" :checked="payFieldTrip" @click.prevent />
-                    </div>
-                  </TableCell>
+                <TableRow v-if="currentBills.length === 0">
+                  <TableCell colspan="5" class="text-center py-6 text-muted-foreground">Tidak ada tagihan aktif.</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
           </div>
 
           <!-- Peringatan Pembayaran -->
-          <div class="mt-6 rounded-lg bg-destructive/10 border border-destructive/20 p-4 flex gap-3 items-center">
+          <div class="mt-6 rounded-lg bg-destructive/10 border border-destructive/20 p-4 flex gap-3 items-center" v-if="nextPaymentDue && nextPaymentDue !== '-'">
             <AlertTriangle class="size-5 text-destructive shrink-0" />
-            <p class="text-sm font-medium text-destructive">Batas pembayaran dalam 4 hari lagi (15 Oktober 2023)</p>
+            <p class="text-sm font-medium text-destructive">Batas pembayaran terdekat: {{ nextPaymentDue }}</p>
           </div>
         </Card>
 
@@ -1265,29 +1193,15 @@ const formatRupiah = (value) => {
           <h2 class="text-xl font-bold mb-6 text-foreground">Bayar Sekarang</h2>
 
           <!-- Pilihan Item yang Akan Dibayar (Daftar Dinamis) -->
-          <div v-if="paySpp || payLab || payFieldTrip" class="space-y-3 mb-6 pb-6 border-b">
-            <div v-if="paySpp" class="flex items-center justify-between bg-muted/40 px-3 py-2.5 rounded-lg border border-border/50 transition-all duration-200">
+          <div v-if="selectedBillIds.length > 0" class="space-y-3 mb-6 pb-6 border-b">
+            <div v-for="billId in selectedBillIds" :key="billId" class="flex items-center justify-between bg-muted/40 px-3 py-2.5 rounded-lg border border-border/50 transition-all duration-200">
               <div class="flex items-center gap-2">
                 <span class="text-base">🎓</span>
-                <span class="font-medium text-sm text-foreground">Biaya SPP Sekolah</span>
+                <span class="font-medium text-sm text-foreground">{{ currentBills.find(b => b.id === billId)?.title }}</span>
               </div>
-              <span class="font-semibold text-sm text-foreground">Rp 1.200.000</span>
-            </div>
-
-            <div v-if="payLab" class="flex items-center justify-between bg-muted/40 px-3 py-2.5 rounded-lg border border-border/50 transition-all duration-200">
-              <div class="flex items-center gap-2">
-                <span class="text-base">🔬</span>
-                <span class="font-medium text-sm text-foreground">Biaya Lab & Praktikum</span>
-              </div>
-              <span class="font-semibold text-sm text-foreground">Rp 150.000</span>
-            </div>
-
-            <div v-if="payFieldTrip" class="flex items-center justify-between bg-muted/40 px-3 py-2.5 rounded-lg border border-border/50 transition-all duration-200">
-              <div class="flex items-center gap-2">
-                <span class="text-base">🚌</span>
-                <span class="font-medium text-sm text-foreground">Kunjungan Lapangan</span>
-              </div>
-              <span class="font-semibold text-sm text-foreground">Rp 100.000</span>
+              <span class="font-semibold text-sm text-foreground">
+                {{ formatRupiah(currentBills.find(b => b.id === billId) ? (currentBills.find(b => b.id === billId).amount - currentBills.find(b => b.id === billId).paid_amount) : 0) }}
+              </span>
             </div>
           </div>
 
@@ -1389,6 +1303,7 @@ const formatRupiah = (value) => {
 
           <!-- Tombol Bayar -->
           <Button 
+            @click="handlePayment"
             class="w-full bg-primary text-primary-foreground hover:bg-primary/90 py-6 font-bold text-base transition-all duration-200 shadow-md"
             :disabled="totalPayment === 0"
           >
@@ -1421,14 +1336,19 @@ const formatRupiah = (value) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <!-- Transaksi 1 -->
-              <TableRow class="hover:bg-accent/50">
-                <TableCell class="font-medium text-foreground">10 Sep 2023</TableCell>
-                <TableCell class="font-semibold text-foreground">INV-882910</TableCell>
-                <TableCell class="text-muted-foreground">SPP Agustus + Biaya Perpustakaan</TableCell>
-                <TableCell class="font-bold text-foreground">Rp 1.245.000</TableCell>
+              <TableRow v-for="pay in paymentHistory" :key="pay.id" class="hover:bg-accent/50">
+                <TableCell class="font-medium text-foreground">
+                  {{ new Date(pay.payment_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) }}
+                </TableCell>
+                <TableCell class="font-semibold text-foreground">{{ pay.reference_number }}</TableCell>
+                <TableCell class="text-muted-foreground">Pembayaran SPP ({{ pay.payment_method.toUpperCase() }})</TableCell>
+                <TableCell class="font-bold text-foreground">{{ formatRupiah(pay.amount) }}</TableCell>
                 <TableCell>
-                  <Badge class="bg-primary/10 text-primary border-primary/20 hover:bg-primary/10 font-bold">LUNAS</Badge>
+                  <Badge :class="[
+                    pay.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/10' :
+                    pay.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500 hover:bg-amber-500/10' : 'bg-destructive/10 text-destructive hover:bg-destructive/10',
+                    'font-bold border-transparent'
+                  ]">{{ pay.status }}</Badge>
                 </TableCell>
                 <TableCell class="text-center">
                   <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-primary">
@@ -1436,37 +1356,8 @@ const formatRupiah = (value) => {
                   </Button>
                 </TableCell>
               </TableRow>
-
-              <!-- Transaksi 2 -->
-              <TableRow class="hover:bg-accent/50">
-                <TableCell class="font-medium text-foreground">12 Agt 2023</TableCell>
-                <TableCell class="font-semibold text-foreground">INV-871104</TableCell>
-                <TableCell class="text-muted-foreground">Paket Seragam & Buku Sekolah</TableCell>
-                <TableCell class="font-bold text-foreground">Rp 320.000</TableCell>
-                <TableCell>
-                  <Badge class="bg-primary/10 text-primary border-primary/20 hover:bg-primary/10 font-bold">LUNAS</Badge>
-                </TableCell>
-                <TableCell class="text-center">
-                  <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-primary">
-                    <Download class="size-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-
-              <!-- Transaksi 3 -->
-              <TableRow class="hover:bg-accent/50">
-                <TableCell class="font-medium text-foreground">15 Jul 2023</TableCell>
-                <TableCell class="font-semibold text-foreground">INV-860022</TableCell>
-                <TableCell class="text-muted-foreground">Biaya Pendaftaran (Tahunan)</TableCell>
-                <TableCell class="font-bold text-foreground">Rp 500.000</TableCell>
-                <TableCell>
-                  <Badge class="bg-primary/10 text-primary border-primary/20 hover:bg-primary/10 font-bold">LUNAS</Badge>
-                </TableCell>
-                <TableCell class="text-center">
-                  <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-primary">
-                    <Download class="size-4" />
-                  </Button>
-                </TableCell>
+              <TableRow v-if="paymentHistory.length === 0">
+                <TableCell colspan="6" class="text-center py-6 text-muted-foreground">Belum ada riwayat transaksi.</TableCell>
               </TableRow>
             </TableBody>
           </Table>

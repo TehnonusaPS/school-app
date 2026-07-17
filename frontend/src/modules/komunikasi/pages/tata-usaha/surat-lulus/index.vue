@@ -166,16 +166,17 @@ function viewSurat(id, item) {
   isPrintModalOpen.value = true
 }
 
-function editSurat(item) {
+function editSurat(id, item) {
   isEditMode.value = true
+  const resolvedItem = (item && typeof item === 'object') ? item : id
   formItem.value = {
-    id: item.id,
-    nama: item.nama,
-    nisn: item.nisn,
-    nis: item.nis,
-    tempatLahir: item.tempatLahir,
-    tanggalLahir: item.tanggalLahir,
-    namaOrangTua: item.namaOrangTua
+    id: resolvedItem.id,
+    nama: resolvedItem.nama,
+    nisn: resolvedItem.nisn,
+    nis: resolvedItem.nis,
+    tempatLahir: resolvedItem.tempatLahir,
+    tanggalLahir: resolvedItem.tanggalLahir,
+    namaOrangTua: resolvedItem.namaOrangTua
   }
   isFormSheetOpen.value = true
 }

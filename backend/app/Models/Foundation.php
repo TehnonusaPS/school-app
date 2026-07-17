@@ -77,4 +77,18 @@ class Foundation extends Model
             ->where('ends_at', '>=', now()->toDateString())
             ->latestOfMany();
     }
+
+    /**
+     * Get the logo URL.
+     */
+    public function getLogoAttribute($value)
+    {
+        if (!$value) {
+            return null;
+        }
+        if (filter_var($value, FILTER_VALIDATE_URL)) {
+            return $value;
+        }
+        return asset('storage/' . $value);
+    }
 }

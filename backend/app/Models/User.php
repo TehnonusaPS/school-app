@@ -109,6 +109,22 @@ class User extends Authenticatable
         return $this->hasOne(ParentProfile::class);
     }
 
+    /**
+     * Get staff attendances.
+     */
+    public function staffAttendances(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(StaffAttendance::class);
+    }
+
+    /**
+     * Get leave requests.
+     */
+    public function leaveRequests(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(LeaveRequest::class);
+    }
+
     // ──────────────────────────────────────────────
     //  Helper Methods
     // ──────────────────────────────────────────────
@@ -143,5 +159,13 @@ class User extends Authenticatable
     public function teacherSubjectAssignments(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(TeacherSubjectAssignment::class, 'teacher_id');
+    }
+
+    /**
+     * Get all teaching schedules for this teacher user.
+     */
+    public function teachingSchedules(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Schedule::class, 'teacher_id');
     }
 }

@@ -44,4 +44,12 @@ class Subject extends Model
     {
         return $this->hasMany(TeacherSubjectAssignment::class);
     }
+
+    /**
+     * Get all schedules for this subject.
+     */
+    public function schedules(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Schedule::class);
+    }
 }

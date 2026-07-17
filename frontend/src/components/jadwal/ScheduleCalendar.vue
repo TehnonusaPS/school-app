@@ -19,7 +19,7 @@ const props = defineProps<{
   month: number; // 0-11
   year: number;
   selectedDate: Date;
-  getDateMarkers: (dateStr: string) => { isHoliday: boolean; isSunday: boolean; isExam: boolean; isAssignment: boolean };
+  getDateMarkers: (dateStr: string) => { isHoliday: boolean; isSunday: boolean; isExam: boolean; isAssignment: boolean; isLesson: boolean };
   getHolidayForDate: (dateStr: string) => any;
   getExamsForDate: (dateStr: string) => any[];
   getAssignmentsForDate: (dateStr: string) => any[];
@@ -45,7 +45,7 @@ const modelValue = computed({
 });
 
 // Placeholder controls which month is displayed
-const placeholder = ref(new CalendarDate(props.year, props.month + 1, 1));
+const placeholder = ref<any>(new CalendarDate(props.year, props.month + 1, 1));
 
 watch([() => props.year, () => props.month], ([y, m]) => {
   placeholder.value = new CalendarDate(y, m + 1, 1);
@@ -75,27 +75,13 @@ const getCellClasses = (weekDate: any, monthValue: any) => {
 
 <template>
   <div class="flex-1 min-h-0 flex flex-col px-3 pb-3">
-    <CalendarRoot
-      v-slot="{ grid }"
-      v-model="modelValue"
-      v-model:placeholder="placeholder"
-      locale="id-ID"
-      :week-starts-on="1"
-      class="sched-calendar-root flex-1 min-h-0 flex flex-col"
-    >
-      <CalendarGrid
-        v-for="month in grid"
-        :key="month.value.toString()"
-        class="sched-grid flex-1"
-      >
+    <CalendarRoot v-slot="{ grid }" v-model="modelValue" v-model:placeholder="placeholder" locale="id-ID"
+      :week-starts-on="1" class="sched-calendar-root flex-1 min-h-0 flex flex-col">
+      <CalendarGrid v-for="month in grid" :key="month.value.toString()" class="sched-grid flex-1">
         <!-- Weekday header row -->
         <CalendarGridHead>
           <CalendarGridRow class="sched-row">
-            <CalendarHeadCell
-              v-for="day in WEEKDAYS"
-              :key="day"
-              class="sched-head-cell"
-            >
+            <CalendarHeadCell v-for="day in WEEKDAYS" :key="day" class="sched-head-cell">
               {{ day }}
             </CalendarHeadCell>
           </CalendarGridRow>
@@ -103,46 +89,24 @@ const getCellClasses = (weekDate: any, monthValue: any) => {
 
         <!-- Day cells -->
         <CalendarGridBody class="sched-body flex-1 min-h-0">
-          <CalendarGridRow
-            v-for="(weekDates, index) in month.rows"
-            :key="`weekDate-${index}`"
-            class="sched-row sched-row--body"
-          >
-            <CalendarCell
-              v-for="weekDate in weekDates"
-              :key="weekDate.toString()"
-              :date="weekDate"
-              class="sched-td"
-            >
+          <CalendarGridRow v-for="(weekDates, index) in month.rows" :key="`weekDate-${index}`"
+            class="sched-row sched-row--body">
+            <CalendarCell v-for="weekDate in weekDates" :key="weekDate.toString()" :date="weekDate" class="sched-td">
               <!-- Raw reka-ui CellTrigger — no button variant sizing -->
-              <CalendarCellTrigger
-                :day="weekDate"
-                :month="month.value"
-                :class="getCellClasses(weekDate, month.value)"
-              >
+              <CalendarCellTrigger :day="weekDate" :month="month.value" :class="getCellClasses(weekDate, month.value)">
                 <!-- Day number -->
                 <span class="sched-day-num">{{ weekDate.day }}</span>
 
                 <!-- Micro badges -->
                 <div class="sched-badges">
-                  <Badge
-                    v-if="getDateMarkers(weekDate.toString()).isHoliday"
-                    variant="red"
-                    class="sched-micro-badge"
-                    :title="getHolidayForDate(weekDate.toString())?.localName"
-                  >Libur</Badge>
-                  <Badge
-                    v-if="getDateMarkers(weekDate.toString()).isExam"
-                    variant="purple"
-                    class="sched-micro-badge"
-                    :title="getExamsForDate(weekDate.toString())[0]?.nama"
-                  >Ujian</Badge>
-                  <Badge
-                    v-if="getDateMarkers(weekDate.toString()).isAssignment"
-                    variant="green"
-                    class="sched-micro-badge"
-                    :title="getAssignmentsForDate(weekDate.toString())[0]?.nama"
-                  >Tugas</Badge>
+                  <Badge v-if="getDateMarkers(weekDate.toString()).isLesson" variant="outline" showDot pulse
+                    class="sched-micro-badge bg-primary/10 text-primary border-none font-bold">KBM</Badge>
+                  <Badge v-if="getDateMarkers(weekDate.toString()).isHoliday" variant="red" showDot pulse
+                    :title="getHolidayForDate(weekDate.toString())?.localName" class="sched-micro-badge">Libur</Badge>
+                  <Badge v-if="getDateMarkers(weekDate.toString()).isExam" variant="purple" showDot pulse
+                    :title="getExamsForDate(weekDate.toString())[0]?.nama" class="sched-micro-badge">Ujian</Badge>
+                  <Badge v-if="getDateMarkers(weekDate.toString()).isAssignment" variant="green" showDot pulse
+                    :title="getAssignmentsForDate(weekDate.toString())[0]?.nama" class="sched-micro-badge">Tugas</Badge>
                 </div>
               </CalendarCellTrigger>
             </CalendarCell>
@@ -232,7 +196,8 @@ const getCellClasses = (weekDate: any, monthValue: any) => {
   justify-content: flex-start;
   padding: 5px 6px;
   border: 1px solid var(--border);
-  border-radius: 4px; /* LESS ROUNDED, MORE PROPORTIONAL */
+  border-radius: 4px;
+  /* LESS ROUNDED, MORE PROPORTIONAL */
   background: transparent;
   cursor: pointer;
   text-align: left;
@@ -322,12 +287,11 @@ const getCellClasses = (weekDate: any, monthValue: any) => {
   font-size: 7px !important;
   height: 13px !important;
   padding: 0 4px !important;
-  border-radius: 3px !important;
   line-height: 13px !important;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  display: block;
+  display: flex;
   width: 100%;
   text-align: center;
   font-weight: 700;

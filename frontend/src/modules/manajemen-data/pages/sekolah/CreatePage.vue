@@ -53,7 +53,6 @@ const generatedAccount = ref({
 const formErrors = ref({})
 
 const handleSubmit = async () => {
-  isLoading.value = true
   formErrors.value = {}
 
   let foundationId = null
@@ -63,11 +62,93 @@ const handleSubmit = async () => {
     foundationId = auth.user?.foundation_id
   }
 
-  if (!foundationId) {
-    toast.error('Gagal', { description: 'Yayasan tidak boleh kosong.' })
-    isLoading.value = false
+  // Client-side Validation: All fields must be filled
+  const errors = {}
+  if (!logoFile.value) {
+    errors.logo = 'Logo sekolah harus diunggah'
+  }
+  if (!form.value.email) {
+    errors.email = 'E-mail sekolah harus diisi'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+    errors.email = 'Format e-mail tidak valid'
+  }
+  if (!form.value.no_hp) {
+    errors.phone = 'No. Telp harus diisi'
+  }
+  if (!form.value.website) {
+    errors.website = 'Website harus diisi'
+  }
+  if (!form.value.instagram) {
+    errors.instagram = 'Instagram harus diisi'
+  }
+  if (!form.value.facebook) {
+    errors.facebook = 'Facebook harus diisi'
+  }
+  if (!form.value.nama) {
+    errors.name = 'Nama sekolah harus diisi'
+  }
+  if (!form.value.npsn) {
+    errors.npsn = 'NPSN harus diisi'
+  }
+  if (isSuperAdmin.value && !form.value.yayasan) {
+    errors.foundation_id = 'Yayasan harus dipilih'
+  }
+  if (!form.value.jenjang) {
+    errors.level = 'Jenjang pendidikan harus dipilih'
+  }
+  if (!form.value.tanggal_berdiri) {
+    errors.established_date = 'Tanggal berdiri harus diisi'
+  }
+  if (!form.value.status) {
+    errors.status = 'Status harus dipilih'
+  }
+  if (!form.value.alamat) {
+    errors.address = 'Alamat lengkap harus diisi'
+  }
+  if (!form.value.no_sk) {
+    errors.decree_number = 'No. SK Pendirian harus diisi'
+  }
+  if (!form.value.tanggal_sk) {
+    errors.decree_date = 'Tanggal SK Pendirian harus diisi'
+  }
+  if (!form.value.no_izin) {
+    errors.permit_number = 'No. Izin Operasional harus diisi'
+  }
+  if (!form.value.tanggal_izin) {
+    errors.permit_date = 'Tanggal Izin Operasional harus diisi'
+  }
+  if (!form.value.akreditasi) {
+    errors.accreditation = 'Akreditasi harus dipilih'
+  }
+  if (!form.value.tanggal_akreditasi) {
+    errors.accreditation_date = 'Tanggal akreditasi harus diisi'
+  }
+  if (!form.value.no_akreditasi) {
+    errors.accreditation_number = 'No. SK Akreditasi harus diisi'
+  }
+  if (!form.value.emailLogin) {
+    errors.emailLogin = 'E-mail login administrator harus diisi'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.emailLogin)) {
+    errors.emailLogin = 'Format e-mail login tidak valid'
+  }
+  if (!form.value.noHpLogin) {
+    errors.noHpLogin = 'No. HP login administrator harus diisi'
+  }
+
+  if (Object.keys(errors).length > 0) {
+    formErrors.value = errors
+    toast.error('Gagal Menyimpan', {
+      description: 'Harap lengkapi semua data formulir sebelum menyimpan.'
+    })
     return
   }
+
+  if (!foundationId) {
+    toast.error('Gagal', { description: 'Yayasan tidak boleh kosong.' })
+    return
+  }
+
+  isLoading.value = true
 
   let newSchoolId = null
 

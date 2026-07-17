@@ -218,5 +218,19 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/spp/tariffs/{id}', [\App\Http\Controllers\Api\SppController::class, 'updateTariff']);
         Route::delete('/spp/tariffs/{id}', [\App\Http\Controllers\Api\SppController::class, 'deleteTariff']);
     });
+
+    // Staff Attendance & Leaves
+    Route::post('/absensi/clock-in', [\App\Http\Controllers\Api\StaffAttendanceController::class, 'clockIn']);
+    Route::get('/absensi/history', [\App\Http\Controllers\Api\StaffAttendanceController::class, 'myHistory']);
+    Route::post('/absensi/leaves', [\App\Http\Controllers\Api\StaffAttendanceController::class, 'submitLeaveRequest']);
+    Route::get('/absensi/leaves', [\App\Http\Controllers\Api\StaffAttendanceController::class, 'myLeaveRequests']);
+
+    // Admin Sekolah Attendance Control
+    Route::middleware('role:admin_sekolah')->group(function () {
+        Route::put('/admin/absensi/settings', [\App\Http\Controllers\Api\AdminAttendanceController::class, 'updateThreshold']);
+        Route::get('/admin/absensi/settings', [\App\Http\Controllers\Api\AdminAttendanceController::class, 'getSettings']);
+        Route::get('/admin/absensi/leaves', [\App\Http\Controllers\Api\AdminAttendanceController::class, 'getPendingLeaves']);
+        Route::post('/admin/absensi/leaves/{id}/action', [\App\Http\Controllers\Api\AdminAttendanceController::class, 'approveRejectLeave']);
+    });
 });
 

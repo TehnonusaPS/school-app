@@ -109,6 +109,22 @@ class User extends Authenticatable
         return $this->hasOne(ParentProfile::class);
     }
 
+    /**
+     * Get staff attendances.
+     */
+    public function staffAttendances(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(StaffAttendance::class);
+    }
+
+    /**
+     * Get leave requests.
+     */
+    public function leaveRequests(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(LeaveRequest::class);
+    }
+
     // ──────────────────────────────────────────────
     //  Helper Methods
     // ──────────────────────────────────────────────

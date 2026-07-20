@@ -32,7 +32,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
   <nav
     :class="[
       'fixed top-0 w-full z-50 transition-all duration-500',
-      isScrolled ? 'bg-emerald-950/95 backdrop-blur-xl shadow-lg py-3' : 'bg-transparent py-5'
+      isScrolled ? 'bg-primary backdrop-blur-xl shadow-lg py-3' : 'bg-transparent py-5'
     ]"
   >
     <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
@@ -44,7 +44,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
       >
         <div
           v-if="branding.logo"
-          class="w-11 h-11 rounded-xl overflow-hidden shadow-md border-2 border-amber-500/30"
+          class="w-11 h-11 rounded-xl overflow-hidden shadow-md border-2 border-secondary/20"
         >
           <img
             :src="branding.logo"
@@ -54,15 +54,15 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
         </div>
         <div
           v-else
-          class="w-11 h-11 rounded-xl flex items-center justify-center shadow-md font-bold text-amber-400 text-lg bg-emerald-800 border-2 border-amber-500/30"
+          class="w-11 h-11 rounded-xl flex items-center justify-center shadow-md font-bold text-secondary text-lg bg-primary border-2 border-secondary/20"
         >
           {{ (data?.meta_title || 'S')[0] }}
         </div>
         <div class="leading-tight">
           <div class="font-bold text-base tracking-tight text-white">
-            {{ data?.meta_title || 'Sekolah Kami' }}
+            {{ data?.meta_title || (branding?.entityName || 'Instansi') }}
           </div>
-          <div class="text-xs text-amber-300/70">{{ data?.hero_subtitle || '' }}</div>
+          <div class="text-xs text-secondary">{{ data?.hero_subtitle || '' }}</div>
         </div>
       </a>
 
@@ -72,7 +72,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
           v-for="link in navLinks"
           :key="link.id"
           @click="scrollTo(link.id)"
-          class="px-4 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-amber-300 hover:bg-white/5 transition-all"
+          class="px-4 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-secondary hover:bg-white/5 transition-all"
         >
           {{ link.label }}
         </button>
@@ -81,7 +81,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
       <div class="hidden lg:block">
         <button
           @click="scrollTo('registration_cta')"
-          class="px-6 py-2.5 rounded-xl text-sm font-semibold bg-amber-500 text-emerald-950 shadow-lg hover:bg-amber-400 transition-all hover:-translate-y-0.5"
+          class="px-6 py-2.5 rounded-xl text-sm font-semibold bg-secondary text-primary shadow-lg hover:bg-secondary transition-all hover:-translate-y-0.5"
         >
           Daftar Sekarang
         </button>
@@ -113,20 +113,20 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
     >
       <div
         v-if="isMobileOpen"
-        class="lg:hidden absolute top-full left-0 w-full bg-emerald-950/98 backdrop-blur-xl border-t border-amber-500/20 px-6 py-6"
+        class="lg:hidden absolute top-full left-0 w-full bg-primary backdrop-blur-xl border-t border-secondary/20 px-6 py-6"
       >
         <div class="flex flex-col gap-1">
           <button
             v-for="link in navLinks"
             :key="link.id"
             @click="scrollTo(link.id)"
-            class="text-left text-white/80 font-medium py-3 px-4 rounded-xl hover:bg-white/5 hover:text-amber-300 transition-colors"
+            class="text-left text-white/80 font-medium py-3 px-4 rounded-xl hover:bg-white/5 hover:text-secondary transition-colors"
           >
             {{ link.label }}
           </button>
           <button
             @click="scrollTo('registration_cta')"
-            class="mt-3 py-3 rounded-xl bg-amber-500 text-emerald-950 font-semibold text-center"
+            class="mt-3 py-3 rounded-xl bg-secondary text-primary font-semibold text-center"
           >
             Daftar Sekarang
           </button>

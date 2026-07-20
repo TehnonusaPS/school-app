@@ -74,7 +74,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
               isScrolled ? 'text-gray-800' : 'text-white'
             ]"
           >
-            {{ data?.meta_title || 'Sekolah Kami' }}
+            {{ data?.meta_title || (branding?.entityName || 'Instansi') }}
           </div>
           <div :class="['text-xs', isScrolled ? 'text-gray-400' : 'text-white/70']">
             {{ data?.hero_subtitle || '' }}

@@ -43,7 +43,7 @@ function openLightbox(i) {
           class="inline-block px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest mb-4 bg-cyan-100 text-cyan-600"
           >📸 Galeri</span
         >
-        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-purple-800 mb-6">
+        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-6">
           {{ section.title || 'Galeri Kegiatan' }}
         </h2>
       </div>
@@ -60,7 +60,7 @@ function openLightbox(i) {
           @click="openLightbox(i)"
         >
           <div
-            class="rounded-3xl overflow-hidden border-3 border-gray-100 hover:border-yellow-400 shadow-lg hover:shadow-xl transition-all"
+            class="rounded-3xl overflow-hidden border-3 border-gray-100 hover:border-accent/20 shadow-lg hover:shadow-xl transition-all"
           >
             <div class="relative overflow-hidden aspect-[4/3]">
               <img
@@ -71,15 +71,15 @@ function openLightbox(i) {
               />
               <div
                 v-else
-                class="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center"
+                class="w-full h-full bg-gradient-to-br from-primary to-secondary/50 flex items-center justify-center"
               >
                 <span class="text-5xl">🖼️</span>
               </div>
               <div
-                class="absolute inset-0 bg-purple-900/0 group-hover:bg-purple-900/20 transition-colors flex items-center justify-center"
+                class="absolute inset-0 bg-primary group-hover:bg-primary transition-colors flex items-center justify-center"
               >
                 <div
-                  class="w-14 h-14 rounded-full bg-yellow-400 flex items-center justify-center opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-100 transition-all text-2xl"
+                  class="w-14 h-14 rounded-full bg-accent flex items-center justify-center opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-100 transition-all text-2xl"
                 >
                   🔍
                 </div>
@@ -89,7 +89,7 @@ function openLightbox(i) {
               v-if="item.title"
               class="px-5 py-4 bg-white"
             >
-              <h4 class="text-sm font-extrabold text-purple-800">{{ item.title }}</h4>
+              <h4 class="text-sm font-extrabold text-primary">{{ item.title }}</h4>
             </div>
           </div>
         </div>

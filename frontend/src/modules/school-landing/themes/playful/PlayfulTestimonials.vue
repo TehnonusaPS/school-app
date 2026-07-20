@@ -17,9 +17,9 @@ onMounted(() => {
   if (el.value) obs.observe(el.value)
 })
 const cardColors = [
-  'border-purple-200 hover:border-purple-400',
-  'border-pink-200 hover:border-pink-400',
-  'border-yellow-200 hover:border-yellow-400',
+  'border-primary/20 hover:border-primary/20',
+  'border-secondary/20 hover:border-secondary/20',
+  'border-accent/20 hover:border-accent/20',
   'border-cyan-200 hover:border-cyan-400'
 ]
 </script>
@@ -27,7 +27,7 @@ const cardColors = [
 <template>
   <section
     ref="el"
-    class="py-24 lg:py-32 bg-purple-50/50 relative"
+    class="py-24 lg:py-32 bg-primary/5 relative"
   >
     <div class="max-w-7xl mx-auto px-6 relative z-10">
       <div
@@ -40,7 +40,7 @@ const cardColors = [
           class="inline-block px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest mb-4 bg-green-100 text-green-600"
           >💬 Testimoni</span
         >
-        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-purple-800">
+        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-primary">
           {{ section.title || 'Kata Mereka' }}
         </h2>
       </div>
@@ -61,7 +61,7 @@ const cardColors = [
           <div class="flex items-center gap-4">
             <div
               v-if="item.image"
-              class="w-12 h-12 rounded-full overflow-hidden border-3 border-yellow-400"
+              class="w-12 h-12 rounded-full overflow-hidden border-3 border-accent/20"
             >
               <img
                 :src="item.image"
@@ -71,12 +71,12 @@ const cardColors = [
             </div>
             <div
               v-else
-              class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-extrabold border-3 border-yellow-400"
+              class="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary/50 flex items-center justify-center text-white font-extrabold border-3 border-accent/20"
             >
               {{ (item.title || 'U')[0] }}
             </div>
             <div>
-              <h4 class="font-extrabold text-purple-800 text-sm">{{ item.title }}</h4>
+              <h4 class="font-extrabold text-primary text-sm">{{ item.title }}</h4>
               <p class="text-xs text-gray-400">{{ item.value || '' }}</p>
             </div>
           </div>

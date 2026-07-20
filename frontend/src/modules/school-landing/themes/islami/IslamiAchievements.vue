@@ -31,10 +31,10 @@ onMounted(() => {
         ]"
       >
         <span
-          class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 bg-amber-50 text-amber-700"
+          class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 bg-secondary text-secondary"
           >Prestasi</span
         >
-        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-emerald-900">
+        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-primary">
           {{ section.title || 'Prestasi' }}
         </h2>
       </div>
@@ -51,19 +51,19 @@ onMounted(() => {
           :style="{ transitionDelay: `${i * 100}ms` }"
         >
           <div
-            class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center flex-shrink-0 shadow-lg"
+            class="w-14 h-14 rounded-2xl bg-gradient-to-br from-secondary/10 to-secondary/5 flex items-center justify-center flex-shrink-0 shadow-lg"
           >
             <Trophy class="w-6 h-6 text-white" />
           </div>
-          <div class="flex-1 bg-white rounded-2xl p-6 border-2 border-emerald-100/50 shadow-sm">
+          <div class="flex-1 bg-white rounded-2xl p-6 border-2 border-primary/20 shadow-sm">
             <div class="flex items-start justify-between gap-4">
               <div>
-                <h3 class="font-bold text-emerald-900 text-lg">{{ item.title }}</h3>
+                <h3 class="font-bold text-primary text-lg">{{ item.title }}</h3>
                 <p class="text-gray-500 text-sm mt-1">{{ item.description }}</p>
               </div>
               <span
                 v-if="item.value"
-                class="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700"
+                class="px-3 py-1 rounded-full text-xs font-bold bg-secondary text-secondary"
                 >{{ item.value }}</span
               >
             </div>

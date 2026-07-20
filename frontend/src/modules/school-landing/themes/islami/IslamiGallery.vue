@@ -40,10 +40,10 @@ function openLightbox(i) {
         ]"
       >
         <span
-          class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 bg-emerald-50 text-emerald-700"
+          class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 bg-primary/5 text-primary"
           >Galeri</span
         >
-        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-emerald-900 mb-6">
+        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-6">
           {{ section.title || 'Galeri' }}
         </h2>
       </div>
@@ -61,7 +61,7 @@ function openLightbox(i) {
           @click="openLightbox(i)"
         >
           <div
-            class="rounded-2xl overflow-hidden border-2 border-amber-200/30 shadow-lg hover:shadow-xl hover:border-amber-400/50 transition-all"
+            class="rounded-2xl overflow-hidden border-2 border-secondary/20 shadow-lg hover:shadow-xl hover:border-secondary/20 transition-all"
           >
             <div class="relative overflow-hidden aspect-[4/3]">
               <img
@@ -72,15 +72,15 @@ function openLightbox(i) {
               />
               <div
                 v-else
-                class="w-full h-full bg-gradient-to-br from-emerald-100 to-amber-50 flex items-center justify-center"
+                class="w-full h-full bg-gradient-to-br from-primary/10 to-secondary/5 flex items-center justify-center"
               >
                 <span class="text-4xl">🖼️</span>
               </div>
               <div
-                class="absolute inset-0 bg-emerald-900/0 group-hover:bg-emerald-900/30 transition-colors flex items-center justify-center"
+                class="absolute inset-0 bg-primary group-hover:bg-primary transition-colors flex items-center justify-center"
               >
                 <div
-                  class="w-12 h-12 rounded-full bg-amber-500/90 flex items-center justify-center opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all"
+                  class="w-12 h-12 rounded-full bg-secondary flex items-center justify-center opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all"
                 >
                   <svg
                     class="w-5 h-5 text-white"
@@ -102,7 +102,7 @@ function openLightbox(i) {
               v-if="item.title"
               class="px-5 py-4 bg-white"
             >
-              <h4 class="text-sm font-semibold text-emerald-900">{{ item.title }}</h4>
+              <h4 class="text-sm font-semibold text-primary">{{ item.title }}</h4>
             </div>
           </div>
         </div>

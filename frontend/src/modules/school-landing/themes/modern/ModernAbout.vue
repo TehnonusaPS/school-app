@@ -51,7 +51,7 @@ onMounted(() => {
           Tentang Kami
         </span>
         <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-          {{ about.title || 'Tentang Sekolah Kami' }}
+          {{ about.title || ('Tentang ' + (branding?.entityName || 'Instansi')) }}
         </h2>
         <p class="text-lg text-gray-500 leading-relaxed">
           {{

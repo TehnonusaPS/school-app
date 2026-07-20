@@ -31,10 +31,10 @@ const medals = ['🥇', '🥈', '🥉', '🏅', '🎖️', '🏆']
         ]"
       >
         <span
-          class="inline-block px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest mb-4 bg-yellow-100 text-yellow-600"
+          class="inline-block px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest mb-4 bg-accent/10 text-accent"
           >🏆 Prestasi</span
         >
-        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-purple-800">
+        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-primary">
           {{ section.title || 'Prestasi' }}
         </h2>
       </div>
@@ -50,19 +50,19 @@ const medals = ['🥇', '🥈', '🥉', '🏅', '🎖️', '🏆']
           :style="{ transitionDelay: `${i * 100}ms` }"
         >
           <div
-            class="w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-300 to-orange-400 flex items-center justify-center flex-shrink-0 shadow-lg text-3xl"
+            class="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-orange-400 flex items-center justify-center flex-shrink-0 shadow-lg text-3xl"
           >
             {{ medals[i % medals.length] }}
           </div>
-          <div class="flex-1 bg-purple-50 rounded-2xl p-6 border-2 border-purple-100">
+          <div class="flex-1 bg-primary/5 rounded-2xl p-6 border-2 border-primary/20">
             <div class="flex items-start justify-between gap-4">
               <div>
-                <h3 class="font-extrabold text-purple-800 text-lg">{{ item.title }}</h3>
+                <h3 class="font-extrabold text-primary text-lg">{{ item.title }}</h3>
                 <p class="text-gray-500 text-sm mt-1">{{ item.description }}</p>
               </div>
               <span
                 v-if="item.value"
-                class="px-3 py-1 rounded-full text-xs font-extrabold bg-yellow-100 text-yellow-700"
+                class="px-3 py-1 rounded-full text-xs font-extrabold bg-accent/10 text-accent"
                 >{{ item.value }}</span
               >
             </div>

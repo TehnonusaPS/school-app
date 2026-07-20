@@ -6,7 +6,7 @@ import api from './api'
 
 // ─── PUBLIC ───
 export function getPublicLandingPage(slug) {
-  return api.get(`/landing-pages/${slug}`).then(r => r.data)
+  return api.get(`/landing-page/public/${slug}`).then(r => r.data)
 }
 
 // ─── ADMIN ───

@@ -20,7 +20,7 @@ onMounted(() => {
 <template>
   <section
     ref="el"
-    class="py-24 lg:py-32 bg-purple-50/50 relative"
+    class="py-24 lg:py-32 bg-primary/5 relative"
   >
     <div class="max-w-7xl mx-auto px-6">
       <div
@@ -30,10 +30,10 @@ onMounted(() => {
         ]"
       >
         <span
-          class="inline-block px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest mb-4 bg-purple-100 text-purple-600"
+          class="inline-block px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest mb-4 bg-primary/50 text-primary"
           >👨‍🏫 Guru</span
         >
-        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-purple-800">
+        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-primary">
           {{ section.title || 'Tenaga Pendidik' }}
         </h2>
       </div>
@@ -49,7 +49,7 @@ onMounted(() => {
           :style="{ transitionDelay: `${i * 80}ms` }"
         >
           <div
-            class="relative mb-5 mx-auto w-36 h-36 rounded-full overflow-hidden border-4 border-yellow-400 shadow-xl hover:scale-105 transition-transform"
+            class="relative mb-5 mx-auto w-36 h-36 rounded-full overflow-hidden border-4 border-accent/20 shadow-xl hover:scale-105 transition-transform"
           >
             <img
               v-if="item.image"
@@ -59,12 +59,12 @@ onMounted(() => {
             />
             <div
               v-else
-              class="w-full h-full bg-gradient-to-br from-purple-500 via-pink-500 to-yellow-400 flex items-center justify-center text-white text-4xl font-extrabold"
+              class="w-full h-full bg-gradient-to-br from-primary via-secondary to-accent/50 flex items-center justify-center text-white text-4xl font-extrabold"
             >
               {{ (item.title || 'T')[0] }}
             </div>
           </div>
-          <h4 class="font-extrabold text-purple-800">{{ item.title }}</h4>
+          <h4 class="font-extrabold text-primary">{{ item.title }}</h4>
           <p class="text-sm text-gray-400 mt-1">{{ item.description || item.value }}</p>
         </div>
       </div>

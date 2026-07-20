@@ -58,12 +58,12 @@ function scrollTo(id) {
       </TransitionGroup>
       <div
         v-if="!images.length"
-        class="absolute inset-0 bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900"
+        class="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/20 to-accent"
       ></div>
 
       <!-- Islamic arch overlay -->
       <div
-        class="absolute inset-0 bg-gradient-to-t from-emerald-950/90 via-emerald-900/60 to-emerald-950/40 z-[1]"
+        class="absolute inset-0 bg-gradient-to-t from-primary/10 via-primary/20 to-primary/5 z-[1]"
       ></div>
 
       <!-- Geometric pattern overlay -->
@@ -99,7 +99,7 @@ function scrollTo(id) {
       <div class="max-w-3xl">
         <!-- Bismillah badge -->
         <div
-          class="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-amber-500/30 bg-amber-500/10 backdrop-blur-sm text-amber-300 text-sm font-medium mb-8"
+          class="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-secondary/20 bg-secondary backdrop-blur-sm text-secondary text-sm font-medium mb-8"
         >
           ﷽
         </div>
@@ -107,12 +107,12 @@ function scrollTo(id) {
         <h1
           class="heading-font text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-[1.15] mb-6"
         >
-          {{ hero.title || 'Selamat Datang di Sekolah Kami' }}
+          {{ hero.title || ('Selamat Datang di ' + (branding?.entityName || 'Instansi')) }}
         </h1>
 
         <p
           v-if="hero.subtitle"
-          class="text-xl md:text-2xl text-amber-200/90 font-medium mb-4"
+          class="text-xl md:text-2xl text-secondary font-medium mb-4"
         >
           {{ hero.subtitle }}
         </p>
@@ -127,14 +127,14 @@ function scrollTo(id) {
         <div class="flex flex-wrap gap-4">
           <button
             @click="scrollTo('registration_cta')"
-            class="group flex items-center gap-2 px-8 py-4 rounded-2xl bg-amber-500 text-emerald-950 font-bold text-sm hover:bg-amber-400 shadow-lg shadow-amber-500/20 transition-all hover:-translate-y-1"
+            class="group flex items-center gap-2 px-8 py-4 rounded-2xl bg-secondary text-primary font-bold text-sm hover:bg-secondary shadow-lg shadow-amber-500/20 transition-all hover:-translate-y-1"
           >
             {{ hero.ctaText || 'Daftar Sekarang' }}
             <ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>
           <button
             @click="scrollTo('about')"
-            class="px-8 py-4 rounded-2xl text-white border-2 border-amber-500/30 font-semibold text-sm hover:bg-white/5 transition-all hover:-translate-y-1"
+            class="px-8 py-4 rounded-2xl text-white border-2 border-secondary/20 font-semibold text-sm hover:bg-white/5 transition-all hover:-translate-y-1"
           >
             Tentang Kami
           </button>
@@ -146,13 +146,13 @@ function scrollTo(id) {
     <template v-if="images.length > 1">
       <button
         @click="prevSlide"
-        class="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-amber-500/20 hover:bg-amber-500/30 backdrop-blur-sm flex items-center justify-center text-amber-300 transition-all"
+        class="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-secondary hover:bg-secondary backdrop-blur-sm flex items-center justify-center text-secondary transition-all"
       >
         <ChevronLeft class="w-6 h-6" />
       </button>
       <button
         @click="nextSlide"
-        class="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-amber-500/20 hover:bg-amber-500/30 backdrop-blur-sm flex items-center justify-center text-amber-300 transition-all"
+        class="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-secondary hover:bg-secondary backdrop-blur-sm flex items-center justify-center text-secondary transition-all"
       >
         <ChevronRight class="w-6 h-6" />
       </button>
@@ -163,13 +163,13 @@ function scrollTo(id) {
           @click="currentSlide = i"
           :class="[
             'w-3 h-3 rounded-full transition-all duration-300',
-            i === currentSlide ? 'bg-amber-400 scale-125 w-8' : 'bg-white/30 hover:bg-white/50'
+            i === currentSlide ? 'bg-secondary scale-125 w-8' : 'bg-white/30 hover:bg-white/50'
           ]"
         />
       </div>
     </template>
 
-    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 text-amber-300/60 animate-bounce">
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 text-secondary animate-bounce">
       <ChevronDown class="w-8 h-8" />
     </div>
   </section>

@@ -9,7 +9,7 @@ function scrollTo(id) {
 <template>
   <section
     id="registration_cta"
-    class="py-24 lg:py-32 bg-gradient-to-r from-purple-600 via-pink-500 to-yellow-400 relative overflow-hidden"
+    class="py-24 lg:py-32 bg-gradient-to-r from-primary via-secondary to-accent/50 relative overflow-hidden"
   >
     <div class="absolute inset-0 pointer-events-none">
       <div class="absolute top-10 left-[10%] text-6xl opacity-20 fun-bounce">🎉</div>
@@ -29,7 +29,7 @@ function scrollTo(id) {
       </p>
       <button
         @click="scrollTo('contact')"
-        class="group inline-flex items-center gap-2 px-10 py-4 rounded-2xl bg-white text-purple-700 font-extrabold text-lg shadow-lg hover:shadow-2xl transition-all hover:-translate-y-1 hover:scale-105"
+        class="group inline-flex items-center gap-2 px-10 py-4 rounded-2xl bg-white text-primary font-extrabold text-lg shadow-lg hover:shadow-2xl transition-all hover:-translate-y-1 hover:scale-105"
       >
         🎒 Daftar Sekarang!
         <ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />

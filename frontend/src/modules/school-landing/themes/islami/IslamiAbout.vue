@@ -32,11 +32,11 @@ onMounted(() => {
         ]"
       >
         <span
-          class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 bg-emerald-50 text-emerald-700"
+          class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 bg-primary/5 text-primary"
           >Tentang Kami</span
         >
-        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-emerald-900 mb-6">
-          {{ about.title || 'Tentang Sekolah Kami' }}
+        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-6">
+          {{ about.title || ('Tentang ' + (branding?.entityName || 'Instansi')) }}
         </h2>
         <p class="text-lg text-gray-600 leading-relaxed">{{ about.description }}</p>
       </div>
@@ -53,11 +53,11 @@ onMounted(() => {
         >
           <div class="relative">
             <div
-              class="absolute -inset-3 rounded-3xl bg-gradient-to-br from-emerald-200/40 to-amber-200/40 blur-xl"
+              class="absolute -inset-3 rounded-3xl bg-gradient-to-br from-primary/10 to-secondary/5 blur-xl"
             ></div>
             <!-- Ornamental border frame -->
             <div
-              class="relative rounded-3xl overflow-hidden border-4 border-amber-500/20 shadow-2xl"
+              class="relative rounded-3xl overflow-hidden border-4 border-secondary/20 shadow-2xl"
             >
               <img
                 v-if="about.image"
@@ -67,7 +67,7 @@ onMounted(() => {
               />
               <div
                 v-else
-                class="w-full aspect-[4/3] bg-gradient-to-br from-emerald-100 to-amber-50 flex items-center justify-center"
+                class="w-full aspect-[4/3] bg-gradient-to-br from-primary/10 to-secondary/5 flex items-center justify-center"
               >
                 <span class="text-6xl">🕌</span>
               </div>
@@ -83,16 +83,16 @@ onMounted(() => {
         >
           <div
             v-if="about.vision"
-            class="bg-white rounded-2xl p-8 shadow-lg border border-emerald-100"
+            class="bg-white rounded-2xl p-8 shadow-lg border border-primary/20"
           >
             <div class="flex items-start gap-4">
               <div
-                class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center flex-shrink-0"
+                class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0"
               >
                 <Eye class="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 class="text-xl font-bold text-emerald-900 mb-2">Visi</h3>
+                <h3 class="text-xl font-bold text-primary mb-2">Visi</h3>
                 <p class="text-gray-600 leading-relaxed">{{ about.vision }}</p>
               </div>
             </div>
@@ -100,23 +100,23 @@ onMounted(() => {
 
           <div
             v-if="about.mission?.length"
-            class="bg-white rounded-2xl p-8 shadow-lg border border-emerald-100"
+            class="bg-white rounded-2xl p-8 shadow-lg border border-primary/20"
           >
             <div class="flex items-start gap-4">
               <div
-                class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center flex-shrink-0"
+                class="w-12 h-12 rounded-xl bg-gradient-to-br from-secondary/10 to-secondary/5 flex items-center justify-center flex-shrink-0"
               >
                 <Target class="w-6 h-6 text-white" />
               </div>
               <div class="flex-1">
-                <h3 class="text-xl font-bold text-emerald-900 mb-4">Misi</h3>
+                <h3 class="text-xl font-bold text-primary mb-4">Misi</h3>
                 <ul class="space-y-3">
                   <li
                     v-for="(item, i) in about.mission"
                     :key="i"
                     class="flex items-start gap-3"
                   >
-                    <CheckCircle class="w-5 h-5 flex-shrink-0 mt-0.5 text-emerald-600" />
+                    <CheckCircle class="w-5 h-5 flex-shrink-0 mt-0.5 text-primary" />
                     <span class="text-gray-600">{{ item }}</span>
                   </li>
                 </ul>

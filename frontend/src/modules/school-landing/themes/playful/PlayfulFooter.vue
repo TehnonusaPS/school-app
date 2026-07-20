@@ -6,7 +6,7 @@ const props = defineProps({ branding: Object, contact: Object, social: Object, d
 <template>
   <footer
     id="contact"
-    class="bg-purple-950 text-white pt-20 pb-8 relative"
+    class="bg-primary text-white pt-20 pb-8 relative"
   >
     <div class="absolute top-0 left-0 w-full overflow-hidden">
       <svg
@@ -27,7 +27,7 @@ const props = defineProps({ branding: Object, contact: Object, social: Object, d
           <div class="flex items-center gap-3 mb-6">
             <div
               v-if="branding.logo"
-              class="w-12 h-12 rounded-2xl overflow-hidden border-3 border-yellow-400"
+              class="w-12 h-12 rounded-2xl overflow-hidden border-3 border-accent/20"
             >
               <img
                 :src="branding.logo"
@@ -37,13 +37,13 @@ const props = defineProps({ branding: Object, contact: Object, social: Object, d
             </div>
             <div
               v-else
-              class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-yellow-400 flex items-center justify-center font-extrabold text-xl text-white border-3 border-yellow-400"
+              class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary via-secondary to-accent/50 flex items-center justify-center font-extrabold text-xl text-white border-3 border-accent/20"
             >
               {{ (data?.meta_title || 'S')[0] }}
             </div>
             <div>
-              <h3 class="font-extrabold text-lg">{{ data?.meta_title || 'Sekolah Kami' }}</h3>
-              <p class="text-yellow-300/60 text-xs font-bold">{{ data?.hero_subtitle || '' }}</p>
+              <h3 class="font-extrabold text-lg">{{ data?.meta_title || (branding?.entityName || 'Instansi') }}</h3>
+              <p class="text-accent text-xs font-bold">{{ data?.hero_subtitle || '' }}</p>
             </div>
           </div>
           <p class="text-gray-400 leading-relaxed max-w-md text-sm">
@@ -52,33 +52,33 @@ const props = defineProps({ branding: Object, contact: Object, social: Object, d
         </div>
 
         <div>
-          <h4 class="font-extrabold text-sm uppercase tracking-widest text-yellow-400/70 mb-6">
+          <h4 class="font-extrabold text-sm uppercase tracking-widest text-accent mb-6">
             📞 Kontak
           </h4>
           <div class="space-y-4 text-sm">
             <a
               v-if="contact.email"
               :href="`mailto:${contact.email}`"
-              class="flex items-center gap-3 text-gray-300 hover:text-yellow-300 transition-colors"
-              ><Mail class="w-4 h-4 text-yellow-400" />{{ contact.email }}</a
+              class="flex items-center gap-3 text-gray-300 hover:text-accent transition-colors"
+              ><Mail class="w-4 h-4 text-accent" />{{ contact.email }}</a
             >
             <a
               v-if="contact.phone"
               :href="`tel:${contact.phone}`"
-              class="flex items-center gap-3 text-gray-300 hover:text-yellow-300 transition-colors"
-              ><Phone class="w-4 h-4 text-yellow-400" />{{ contact.phone }}</a
+              class="flex items-center gap-3 text-gray-300 hover:text-accent transition-colors"
+              ><Phone class="w-4 h-4 text-accent" />{{ contact.phone }}</a
             >
             <div
               v-if="contact.address"
               class="flex items-start gap-3 text-gray-300"
             >
-              <MapPin class="w-4 h-4 text-yellow-400 mt-0.5" />{{ contact.address }}
+              <MapPin class="w-4 h-4 text-accent mt-0.5" />{{ contact.address }}
             </div>
           </div>
         </div>
 
         <div>
-          <h4 class="font-extrabold text-sm uppercase tracking-widest text-yellow-400/70 mb-6">
+          <h4 class="font-extrabold text-sm uppercase tracking-widest text-accent mb-6">
             🌐 Ikuti Kami
           </h4>
           <div class="flex gap-3">
@@ -86,7 +86,7 @@ const props = defineProps({ branding: Object, contact: Object, social: Object, d
               v-if="social.instagram"
               :href="social.instagram"
               target="_blank"
-              class="w-10 h-10 rounded-xl bg-white/10 hover:bg-pink-500/30 flex items-center justify-center transition-colors fun-wiggle"
+              class="w-10 h-10 rounded-xl bg-white/10 hover:bg-secondary flex items-center justify-center transition-colors fun-wiggle"
               ><Instagram class="w-5 h-5"
             /></a>
             <a
@@ -109,7 +109,7 @@ const props = defineProps({ branding: Object, contact: Object, social: Object, d
 
       <div
         v-if="contact.mapsEmbed"
-        class="mb-16 rounded-3xl overflow-hidden border-3 border-yellow-400/20"
+        class="mb-16 rounded-3xl overflow-hidden border-3 border-accent/20"
       >
         <iframe
           :src="contact.mapsEmbed"
@@ -119,12 +119,12 @@ const props = defineProps({ branding: Object, contact: Object, social: Object, d
         ></iframe>
       </div>
 
-      <div class="border-t border-purple-800 pt-8">
+      <div class="border-t border-primary/20 pt-8">
         <div
           class="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500"
         >
-          <p>&copy; {{ new Date().getFullYear() }} {{ data?.meta_title || 'Sekolah Kami' }} ✨</p>
-          <p>Powered by <span class="text-yellow-400/70 font-extrabold">App School Tehnonusa</span></p>
+          <p>&copy; {{ new Date().getFullYear() }} {{ data?.meta_title || (branding?.entityName || 'Instansi') }} ✨</p>
+          <p>Powered by <span class="text-accent font-extrabold">App School Tehnonusa</span></p>
         </div>
       </div>
     </div>

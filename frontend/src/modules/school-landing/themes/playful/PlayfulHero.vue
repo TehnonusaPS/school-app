@@ -51,20 +51,20 @@ function scrollTo(id) {
       </TransitionGroup>
       <div
         v-if="!images.length"
-        class="absolute inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-yellow-400"
+        class="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-accent/50"
       ></div>
       <div
-        class="absolute inset-0 bg-gradient-to-br from-purple-900/60 via-pink-800/40 to-transparent z-[1]"
+        class="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-transparent z-[1]"
       ></div>
     </div>
 
     <!-- Fun floating shapes -->
     <div class="absolute inset-0 z-[2] pointer-events-none overflow-hidden">
       <div
-        class="absolute top-20 right-10 w-32 h-32 rounded-full bg-yellow-400/20 blur-2xl fun-bounce"
+        class="absolute top-20 right-10 w-32 h-32 rounded-full bg-accent blur-2xl fun-bounce"
       ></div>
       <div
-        class="absolute bottom-40 left-10 w-24 h-24 rounded-full bg-pink-400/20 blur-2xl fun-bounce-2"
+        class="absolute bottom-40 left-10 w-24 h-24 rounded-full bg-secondary blur-2xl fun-bounce-2"
       ></div>
       <div class="absolute top-1/3 right-1/4 text-6xl fun-bounce opacity-20">⭐</div>
       <div class="absolute bottom-1/3 left-20 text-5xl fun-bounce-2 opacity-20">🎈</div>
@@ -102,12 +102,12 @@ function scrollTo(id) {
         <h1
           class="heading-font text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-[1.1] mb-6"
         >
-          {{ hero.title || 'Selamat Datang di Sekolah Kami!' }} 🎉
+          {{ hero.title || ('Selamat Datang di ' + (branding?.entityName || 'Instansi') + '!') }} 🎉
         </h1>
 
         <p
           v-if="hero.subtitle"
-          class="text-xl md:text-2xl text-yellow-200 font-bold mb-4"
+          class="text-xl md:text-2xl text-accent font-bold mb-4"
         >
           {{ hero.subtitle }}
         </p>
@@ -119,7 +119,7 @@ function scrollTo(id) {
         <div class="flex flex-wrap gap-4">
           <button
             @click="scrollTo('registration_cta')"
-            class="group flex items-center gap-2 px-8 py-4 rounded-2xl bg-yellow-400 text-purple-900 font-extrabold text-sm shadow-lg shadow-yellow-400/30 hover:bg-yellow-300 transition-all hover:-translate-y-1 hover:scale-105"
+            class="group flex items-center gap-2 px-8 py-4 rounded-2xl bg-accent text-primary font-extrabold text-sm shadow-lg shadow-yellow-400/30 hover:bg-accent/10 transition-all hover:-translate-y-1 hover:scale-105"
           >
             {{ hero.ctaText || '🎉 Daftar Sekarang!' }}
             <ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -155,7 +155,7 @@ function scrollTo(id) {
           @click="currentSlide = i"
           :class="[
             'w-3 h-3 rounded-full transition-all',
-            i === currentSlide ? 'bg-yellow-400 scale-125 w-8' : 'bg-white/40'
+            i === currentSlide ? 'bg-accent scale-125 w-8' : 'bg-white/40'
           ]"
         />
       </div>

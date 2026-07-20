@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
+import api from '@/services/api'
 import { useRouter } from 'vue-router'
 import PageHeader from '@/components/page-header/PageHeader.vue'
 import DataTableCard from '@/components/data-table/DataTableCard.vue'
@@ -127,7 +128,7 @@ const colorPalettes = computed(() => {
   const t = form.value.theme
   if (t === 'islami') {
     return [
-      { name: '↩ Bawaan Islami', primary: '#047857', secondary: '#fbbf24', accent: '#14b8a6' },
+      { name: 'Default', primary: '#047857', secondary: '#fbbf24', accent: '#14b8a6' },
       { name: 'Desert Gold', primary: '#b45309', secondary: '#fcd34d', accent: '#064e3b' },
       { name: 'Royal Sapphire', primary: '#1e3a8a', secondary: '#38bdf8', accent: '#0ea5e9' },
       { name: 'Serene Sage', primary: '#4d7c0f', secondary: '#a3e635', accent: '#15803d' }
@@ -135,7 +136,7 @@ const colorPalettes = computed(() => {
   }
   if (t === 'playful') {
     return [
-      { name: '↩ Bawaan Playful', primary: '#ec4899', secondary: '#fcd34d', accent: '#06b6d4' },
+      { name: 'Default', primary: '#ec4899', secondary: '#fcd34d', accent: '#06b6d4' },
       { name: 'Candy Pop', primary: '#8b5cf6', secondary: '#f472b6', accent: '#34d399' },
       { name: 'Sunshine Kids', primary: '#eab308', secondary: '#fb923c', accent: '#38bdf8' },
       { name: 'Minty Fresh', primary: '#10b981', secondary: '#6366f1', accent: '#fbbf24' }
@@ -143,7 +144,7 @@ const colorPalettes = computed(() => {
   }
   // default: modern
   return [
-    { name: '↩ Bawaan Akademik', primary: '#1e40af', secondary: '#f59e0b', accent: '#0ea5e9' },
+    { name: 'Default', primary: '#1e40af', secondary: '#f59e0b', accent: '#0ea5e9' },
     { name: 'Elegant Ruby', primary: '#be123c', secondary: '#fbbf24', accent: '#172554' },
     { name: 'Forest Scholar', primary: '#047857', secondary: '#eab308', accent: '#14b8a6' },
     { name: 'Executive Slate', primary: '#334155', secondary: '#94a3b8', accent: '#2563eb' }
@@ -156,6 +157,29 @@ const applyPalette = (palette) => {
   form.value.secondary_color = palette.secondary
   form.value.accent_color = palette.accent
 }
+
+const applyDefaultThemeColor = (newTheme) => {
+  let defPrimary = '#1e40af', defSec = '#f59e0b', defAcc = '#0ea5e9'
+  if (newTheme === 'islami') {
+    defPrimary = '#047857'; defSec = '#fbbf24'; defAcc = '#14b8a6'
+  } else if (newTheme === 'playful') {
+    defPrimary = '#ec4899'; defSec = '#fcd34d'; defAcc = '#06b6d4'
+  }
+  form.value.primary_color = defPrimary
+  form.value.secondary_color = defSec
+  form.value.accent_color = defAcc
+  isCustomColor.value = false
+}
+
+const isPaletteMatch = (palette) => {
+  if (!form.value.primary_color || !palette.primary) return false
+  return form.value.primary_color.toLowerCase() === palette.primary.toLowerCase() &&
+         form.value.secondary_color.toLowerCase() === palette.secondary.toLowerCase()
+}
+
+const isAnyPaletteMatch = computed(() => {
+  return colorPalettes.value.some(p => isPaletteMatch(p))
+})
 
 // Temp state untuk mengedit/menambah item section di dalam modal
 const newMissionItem = ref('')
@@ -181,31 +205,52 @@ const sectionItemForm = ref({
 })
 
 // Methods untuk upload hero (prototipe frontend)
-function onHeroImageUpload(e) {
+const uploadFile = async (file) => {
+  const formData = new FormData()
+  formData.append('image', file)
+  const res = await api.post('/landing-page/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+  return res.data.url
+}
+
+async function onHeroImageUpload(e) {
   const file = e.target.files[0]
   if (!file) return
-  const fakeUrl = URL.createObjectURL(file)
-  if (!form.value.hero_images) form.value.hero_images = []
-  form.value.hero_images.push({ url: fakeUrl, caption: '' })
-  toast.success('Gambar berhasil ditambahkan ke carousel!')
+  try {
+    const uploadedUrl = await uploadFile(file)
+    if (!form.value.hero_images) form.value.hero_images = []
+    form.value.hero_images.push({ url: uploadedUrl, caption: '' })
+    toast.success('Gambar berhasil diupload dan ditambahkan ke carousel!')
+  } catch (err) {
+    toast.error('Gagal mengunggah gambar.')
+  }
 }
 
 function removeHeroImage(index) {
   form.value.hero_images.splice(index, 1)
 }
 
-function onAboutImageUpload(e) {
+async function onAboutImageUpload(e) {
   const file = e.target.files[0]
   if (!file) return
-  form.value.about_image = URL.createObjectURL(file)
-  toast.success('Foto profil berhasil diupload!')
+  try {
+    form.value.about_image = await uploadFile(file)
+    toast.success('Foto profil berhasil diupload!')
+  } catch (err) {
+    toast.error('Gagal mengunggah foto profil.')
+  }
 }
 
-function onSectionItemImageUpload(e) {
+async function onSectionItemImageUpload(e) {
   const file = e.target.files[0]
   if (!file) return
-  sectionItemForm.value.image = URL.createObjectURL(file)
-  toast.success('Gambar item berhasil diupload!')
+  try {
+    sectionItemForm.value.image = await uploadFile(file)
+    toast.success('Gambar item berhasil diupload!')
+  } catch (err) {
+    toast.error('Gagal mengunggah gambar item.')
+  }
 }
 
 // Helper dummy item data generator
@@ -214,49 +259,90 @@ const createSchoolSections = () => [
     { id: 11, title: 'Siswa Aktif', value: '850+' },
     { id: 12, title: 'Guru Profesional', value: '45' },
     { id: 13, title: 'Kelas / Rombel', value: '24' },
-    { id: 14, title: 'Akreditasi', value: 'A+' }
+    { id: 14, title: 'Akreditasi', value: 'A' },
+    { id: 15, title: 'Lulusan PTN', value: '95%' }
   ] },
   { id: 2, type: 'features', title: 'Mengapa Memilih Kami?', is_visible: true, sort_order: 2, items: [
     { id: 21, title: 'Guru Tersertifikasi', description: 'Tenaga pendidik profesional lulusan universitas ternama yang ramah dan kompeten.', icon: 'award' },
     { id: 22, title: 'Kurikulum Modern', description: 'Pembelajaran berbasis proyek (Project-Based Learning) terintegrasi dengan teknologi digital.', icon: 'book' },
-    { id: 23, title: 'Fasilitas Lengkap', description: 'Ruang kelas ber-AC, laboratorium canggih, dan sarana olahraga yang memadai.', icon: 'monitor' }
+    { id: 23, title: 'Fasilitas Lengkap', description: 'Ruang kelas ber-AC, laboratorium canggih, dan sarana olahraga yang memadai.', icon: 'monitor' },
+    { id: 24, title: 'Lingkungan Asri', description: 'Area sekolah hijau dan luas untuk mendukung kegiatan belajar mengajar yang nyaman.', icon: 'heart' }
   ] },
   { id: 3, type: 'programs', title: 'Program Unggulan', is_visible: true, sort_order: 3, items: [
     { id: 31, title: 'Kelas Bilingual', description: 'Pengantar bahasa Inggris di mata pelajaran Matematika dan Sains.', image: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=600' },
-    { id: 32, title: 'Tahfidz Al-Quran', description: 'Program hafalan Al-Quran dengan target 3 Juz untuk tingkat SD.', image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=600' }
+    { id: 32, title: 'Tahfidz Al-Quran', description: 'Program hafalan Al-Quran dengan target 3 Juz untuk tingkat SD.', image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=600' },
+    { id: 33, title: 'Klub Sains & Robotika', description: 'Mengembangkan logika anak melalui praktik sains aplikatif dan pembuatan robot sederhana.', image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=600' }
   ] },
   { id: 4, type: 'gallery', title: 'Galeri Kegiatan Belajar', is_visible: true, sort_order: 4, items: [
     { id: 41, title: 'Lomba Cerdas Cermat', image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=600' },
-    { id: 42, title: 'Pentas Seni Tahunan', image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=600' }
+    { id: 42, title: 'Pentas Seni Tahunan', image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=600' },
+    { id: 43, title: 'Kunjungan Edukatif', image: 'https://images.unsplash.com/photo-1523580494112-071dcb92a11d?q=80&w=600' },
+    { id: 44, title: 'Praktikum Biologi', image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=600' }
   ] },
   { id: 5, type: 'testimonials', title: 'Apa Kata Orang Tua Murid?', is_visible: true, sort_order: 5, items: [
     { id: 51, title: 'Bunda Larasati', description: 'Sangat senang menyekolahkan anak di sini. Gurunya sangat peduli perkembangan emosional anak.', value: 'Wali Murid Kelas 3' },
-    { id: 52, title: 'Bapak Hermawan', description: 'Fasilitas IT dan Coding-nya luar biasa. Anak saya jadi punya hobi baru yang produktif.', value: 'Wali Murid Kelas 5' }
+    { id: 52, title: 'Bapak Hermawan', description: 'Fasilitas IT dan Coding-nya luar biasa. Anak saya jadi punya hobi baru yang produktif.', value: 'Wali Murid Kelas 5' },
+    { id: 53, title: 'Ibu Dina', description: 'Lingkungannya sangat mendukung anak untuk berekspresi. Sangat recommended.', value: 'Wali Murid Kelas 1' }
   ] },
   { id: 6, type: 'faq', title: 'Pertanyaan yang Sering Diajukan', is_visible: true, sort_order: 6, items: [
     { id: 61, title: 'Bagaimana cara melakukan pendaftaran?', description: 'Anda dapat menekan tombol Daftar Sekarang di atas lalu mengisi formulir secara online.' },
-    { id: 62, title: 'Apakah tersedia antar jemput sekolah?', description: 'Ya, sekolah menyediakan armada antar jemput resmi untuk radius maksimal 10 KM.' }
+    { id: 62, title: 'Apakah tersedia antar jemput sekolah?', description: 'Ya, sekolah menyediakan armada antar jemput resmi untuk radius maksimal 10 KM.' },
+    { id: 63, title: 'Apakah ada fasilitas makan siang?', description: 'Kami menyediakan kantin sehat yang terintegrasi dengan sistem uang saku digital anak.' }
   ] }
 ]
 
-const createFoundationSections = () => [
+const createFoundationSections = (schools = []) => {
+  const images = [
+    'https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=600',
+    'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=600',
+    'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=600',
+    'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=600'
+  ];
+  
+  const programItems = schools.length > 0 
+    ? schools.map((s, idx) => ({
+        id: 31 + idx,
+        title: s.name,
+        description: s.level ? `Pendidikan tingkat ${s.level}.` : 'Lembaga pendidikan unggulan.',
+        image: images[idx % images.length]
+      }))
+    : [
+        { id: 31, title: 'Pondok Pesantren', description: 'Pusat pendidikan agama dan pengkajian kitab kuning.', image: images[1] },
+        { id: 32, title: 'Sekolah Terpadu', description: 'Pendidikan formal dari tingkat TK hingga SMA.', image: images[0] },
+        { id: 33, title: 'Pusat Diklat Terpadu', description: 'Lembaga pengembangan SDM untuk mencetak profesional tangguh.', image: images[2] }
+      ];
+
+  return [
   { id: 1, type: 'stats', title: 'Jejaring Yayasan', is_visible: true, sort_order: 1, items: [
-    { id: 11, title: 'Lembaga Pendidikan', value: '12' },
+    { id: 11, title: 'Lembaga Pendidikan', value: schools.length > 0 ? schools.length.toString() : '12' },
     { id: 12, title: 'Total Siswa/Santri', value: '5,400+' },
-    { id: 13, title: 'Alumni Tersebar', value: '15,000+' }
+    { id: 13, title: 'Alumni Tersebar', value: '15,000+' },
+    { id: 14, title: 'Pondok Pesantren', value: '3' }
   ] },
   { id: 2, type: 'features', title: 'Fokus Yayasan Kami', is_visible: true, sort_order: 2, items: [
     { id: 21, title: 'Pendidikan Inklusif', description: 'Membangun lembaga yang dapat diakses oleh seluruh lapisan masyarakat.', icon: 'award' },
-    { id: 22, title: 'Pemberdayaan Umat', description: 'Menyelenggarakan program beasiswa dan bantuan pendidikan bagi yatim dhuafa.', icon: 'heart' }
+    { id: 22, title: 'Pemberdayaan Umat', description: 'Menyelenggarakan program beasiswa dan bantuan pendidikan bagi yatim dhuafa.', icon: 'heart' },
+    { id: 23, title: 'Jejaring Global', description: 'Berkomitmen mendidik dengan kurikulum yang diakui secara internasional.', icon: 'book' }
   ] },
-  { id: 3, type: 'programs', title: 'Lembaga Pendidikan', is_visible: true, sort_order: 3, items: [
-    { id: 31, title: 'Pondok Pesantren', description: 'Pusat pendidikan agama dan pengkajian kitab kuning.', image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=600' },
-    { id: 32, title: 'Sekolah Terpadu', description: 'Pendidikan formal dari tingkat TK hingga SMA.', image: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=600' }
+  { id: 3, type: 'programs', title: 'Lembaga Pendidikan', is_visible: true, sort_order: 3, items: programItems },
+  { id: 4, type: 'gallery', title: 'Kegiatan Sosial & Diklat', is_visible: true, sort_order: 4, items: [
+    { id: 41, title: 'Santunan Yatim & Dhuafa', image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=600' },
+    { id: 42, title: 'Pelatihan Guru Nasional', image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=600' },
+    { id: 43, title: 'Bakti Sosial Kesehatan', image: 'https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?q=80&w=600' },
+    { id: 44, title: 'Perayaan Hari Besar', image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=600' }
   ] },
-  { id: 4, type: 'gallery', title: 'Kegiatan Sosial & Diklat', is_visible: true, sort_order: 4, items: [] },
-  { id: 5, type: 'testimonials', title: 'Kata Mitra Kami', is_visible: true, sort_order: 5, items: [] },
-  { id: 6, type: 'faq', title: 'FAQ Yayasan', is_visible: true, sort_order: 6, items: [] }
-]
+  { id: 5, type: 'testimonials', title: 'Kata Mitra Kami', is_visible: true, sort_order: 5, items: [
+    { id: 51, title: 'Bapak H. Abdullah', description: 'Yayasan yang sangat amanah dalam menyalurkan dana umat untuk pendidikan berkualitas.', value: 'Donatur Tetap' },
+    { id: 52, title: 'Dinas Pendidikan Daerah', description: 'Lembaga pendidikan di bawah yayasan ini selalu menjadi teladan dalam penerapan kurikulum.', value: 'Mitra Pemerintah' },
+    { id: 53, title: 'Aksi Cepat Tanggap', description: 'Kolaborasi yang luar biasa gesit saat terjun di lapangan. Profesional dan amanah.', value: 'NGO Partner' }
+  ] },
+  { id: 6, type: 'faq', title: 'FAQ Yayasan', is_visible: true, sort_order: 6, items: [
+    { id: 61, title: 'Bagaimana cara berdonasi ke yayasan?', description: 'Anda dapat menyalurkan donasi melalui rekening resmi yayasan atau menghubungi kami secara langsung.' },
+    { id: 62, title: 'Apakah yayasan membuka kerja sama CSR?', description: 'Ya, kami sangat terbuka untuk bersinergi dalam program sosial dan pemberdayaan.' },
+    { id: 63, title: 'Di mana cabang yayasan ini?', description: 'Pusat kami ada di Jakarta, namun unit-unit sekolah kami tersebar di berbagai provinsi.' }
+  ] }
+];
+}
 
 // Helper data factory
 const createDefaultEntity = (id, name, slug, avatarLetter, colorClass, type, status = 'Aktif') => ({
@@ -279,7 +365,7 @@ const createDefaultEntity = (id, name, slug, avatarLetter, colorClass, type, sta
   about_vision: 'Menjadi institusi pendidikan terbaik yang menginspirasi kreativitas dan mencerdaskan bangsa.', 
   about_mission: ['Menyelenggarakan pendidikan inovatif', 'Menanamkan budi pekerti luhur'],
   contact_email: 'halo@' + slug + '.sch.id', contact_phone: '0812-3456-7890', contact_address: 'Jl. Pendidikan No. 123, Kota Nusantara', contact_maps_embed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.2736417711413!2d106.79724127585258!3d-6.227606360984852!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f14be6d7d6f5%3A0x6e2df40fe930!2sJakarta%20Selatan!5e0!3m2!1sid!2sid!4v1700000000000!5m2!1sid!2sid', social_instagram: 'https://instagram.com/' + slug, social_facebook: 'https://facebook.com/' + slug, social_youtube: 'https://youtube.com/c/' + slug, social_tiktok: 'https://tiktok.com/@' + slug,
-  sections: type === 'Yayasan' ? createFoundationSections() : createSchoolSections()
+  sections: type === 'Yayasan' ? createFoundationSections([]) : createSchoolSections()
 })
 
 const defaultFoundationMappings = [
@@ -299,11 +385,86 @@ const defaultSchoolMappings = [
   createDefaultEntity('SCH-2023-006', 'SDIT Al-Falah', 'sdit-alfalah', 'SA', 'bg-green-500/10 text-green-500 border border-green-500/20', 'Sekolah')
 ]
 
-const storedFoundations = localStorage.getItem('superadmin_foundations')
-const foundationMappings = ref(storedFoundations ? JSON.parse(storedFoundations) : defaultFoundationMappings)
+const foundationMappings = ref([])
+const schoolMappings = ref([])
 
-const storedSchools = localStorage.getItem('superadmin_schools')
-const schoolMappings = ref(storedSchools ? JSON.parse(storedSchools) : defaultSchoolMappings)
+const generateSlug = (name) => {
+  if (!name) return ''
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
+}
+
+const fetchConfigData = async () => {
+  try {
+    const fRes = await api.get('/landing-page/foundations')
+    foundationMappings.value = fRes.data.map(f => {
+      let config = f.landing_page_config || {}
+      if (typeof config === 'string') {
+        try { config = JSON.parse(config) } catch(e){}
+      }
+      return {
+        id: f.id,
+        name: f.name,
+        slug: config.slug || generateSlug(f.name),
+        avatarLetter: f.name.charAt(0),
+        avatarColor: 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20',
+        status: 'Aktif',
+        type: 'Yayasan',
+        template: f.landing_page_theme === 'islami' ? 'Islami Elegant' : (f.landing_page_theme === 'playful' ? 'Colorful Playful' : 'Modern Akademik'),
+        landing_page_enabled: !!f.landing_page_enabled,
+        is_published: !!f.landing_page_enabled,
+        lastUpdated: f.updated_at ? new Date(f.updated_at).toLocaleDateString() : 'Baru saja',
+        indicatorColor: 'bg-emerald-500',
+        theme: f.landing_page_theme || 'modern',
+        ...config,
+        contact_email: f.email || '',
+        contact_phone: f.phone || '',
+        contact_address: f.address || '',
+        meta_title: f.name,
+        legal_number: f.deed_number || '',
+        schools: f.schools || [],
+        sections: config.sections || createFoundationSections(f.schools || [])
+      }
+    })
+
+    const sRes = await api.get('/landing-page/schools')
+    schoolMappings.value = sRes.data.map(s => {
+      let config = s.landing_page_config || {}
+      if (typeof config === 'string') {
+        try { config = JSON.parse(config) } catch(e){}
+      }
+      return {
+        id: s.id,
+        name: s.name,
+        slug: config.slug || generateSlug(s.name),
+        avatarLetter: s.name.charAt(0),
+        avatarColor: 'bg-sky-500/10 text-sky-500 border border-sky-500/20',
+        status: 'Aktif',
+        type: 'Sekolah',
+        template: s.landing_page_theme === 'islami' ? 'Islami Elegant' : (s.landing_page_theme === 'playful' ? 'Colorful Playful' : 'Modern Akademik'),
+        landing_page_enabled: !!s.landing_page_enabled,
+        is_published: !!s.landing_page_enabled,
+        lastUpdated: s.updated_at ? new Date(s.updated_at).toLocaleDateString() : 'Baru saja',
+        indicatorColor: 'bg-emerald-500',
+        theme: s.landing_page_theme || 'modern',
+        ...config,
+        contact_email: s.email || '',
+        contact_phone: s.phone || '',
+        contact_address: s.address || '',
+        social_instagram: s.instagram || '',
+        social_facebook: s.facebook || '',
+        meta_title: s.name,
+        legal_number: s.npsn || '',
+        sections: config.sections || createSchoolSections()
+      }
+    })
+  } catch (err) {
+    console.error('Error fetching config data:', err)
+  }
+}
+
+onMounted(() => {
+  fetchConfigData()
+})
 
 const filterValues = ref({})
 const page = ref(1)
@@ -345,15 +506,27 @@ const confirmToggleAccess = item => {
   showAccessDialog.value = true
 }
 
-const saveToLocalStorage = () => {
-  localStorage.setItem('superadmin_foundations', JSON.stringify(foundationMappings.value))
-  localStorage.setItem('superadmin_schools', JSON.stringify(schoolMappings.value))
+const saveToBackend = async (item) => {
+  const payload = {
+    landing_page_enabled: item.landing_page_enabled,
+    landing_page_theme: item.theme,
+    landing_page_config: { ...item }
+  }
+  try {
+    if (item.type === 'Yayasan') {
+      await api.put(`/landing-page/foundations/${item.id}`, payload)
+    } else {
+      await api.put(`/landing-page/schools/${item.id}`, payload)
+    }
+  } catch (err) {
+    console.error(err)
+  }
 }
 
-const executeToggleAccess = () => {
+const executeToggleAccess = async () => {
   if (itemToToggleAccess.value) {
     itemToToggleAccess.value.landing_page_enabled = !itemToToggleAccess.value.landing_page_enabled
-    saveToLocalStorage()
+    await saveToBackend(itemToToggleAccess.value)
     toast.success(`Akses untuk ${itemToToggleAccess.value.name} berhasil diubah!`)
     showAccessDialog.value = false
     itemToToggleAccess.value = null
@@ -368,10 +541,10 @@ const confirmTogglePublish = item => {
   showPublishDialog.value = true
 }
 
-const executeTogglePublish = () => {
+const executeTogglePublish = async () => {
   if (itemToTogglePublish.value) {
     itemToTogglePublish.value.is_published = !itemToTogglePublish.value.is_published
-    saveToLocalStorage()
+    await saveToBackend(itemToTogglePublish.value)
     toast.success(`Status publikasi untuk ${itemToTogglePublish.value.name} berhasil diubah!`)
     showPublishDialog.value = false
     itemToTogglePublish.value = null
@@ -386,27 +559,40 @@ const openModalEditor = item => {
   selectedItemForEdit.value = item
   modalActiveTab.value = 'general'
   isCustomColor.value = false
+  
+  const defaultTheme = item.theme || 'modern'
+  
   form.value = {
-    theme: item.theme || 'modern',
+    theme: defaultTheme,
     slug: item.slug || '',
     legal_number: item.legal_number || '',
-    slogan: item.slogan || '',
-    meta_title: item.meta_title || '',
-    meta_description: item.meta_description || '',
-    primary_color: item.primary_color || '#7c3aed',
-    secondary_color: item.secondary_color || '#f59e0b',
-    accent_color: item.accent_color || '#06b6d4',
-    hero_title: item.hero_title || '',
-    hero_subtitle: item.hero_subtitle || '',
-    hero_description: item.hero_description || '',
-    hero_cta_text: item.hero_cta_text || '',
-    hero_cta_link: item.hero_cta_link || '',
-    hero_images: item.hero_images ? [...item.hero_images] : [],
-    about_image: item.about_image || '',
-    about_title: item.about_title || '',
-    about_description: item.about_description || '',
-    about_vision: item.about_vision || '',
-    about_mission: [...(item.about_mission || [])],
+    slogan: item.slogan || (item.type === 'Yayasan' ? 'Membangun Generasi Emas dan Berakhlak' : 'Sekolah Masa Depan Anda'),
+    meta_title: item.meta_title || item.name,
+    meta_description: item.meta_description || ('Situs web resmi ' + item.name + '. ' + (item.type === 'Yayasan' ? 'Membangun Generasi Emas dan Berakhlak.' : 'Sekolah Masa Depan Anda.')),
+    primary_color: item.primary_color || (defaultTheme === 'islami' ? '#047857' : defaultTheme === 'playful' ? '#ec4899' : '#1e40af'),
+    secondary_color: item.secondary_color || (defaultTheme === 'islami' ? '#fbbf24' : defaultTheme === 'playful' ? '#fcd34d' : '#f59e0b'),
+    accent_color: item.accent_color || (defaultTheme === 'islami' ? '#14b8a6' : defaultTheme === 'playful' ? '#06b6d4' : '#0ea5e9'),
+    hero_title: item.hero_title || ('Selamat Datang di ' + item.name),
+    hero_subtitle: item.hero_subtitle || 'Pendidikan Berkualitas untuk Masa Depan',
+    hero_description: item.hero_description || 'Kami berkomitmen memberikan pendidikan terbaik dengan fasilitas modern dan pengajar profesional.',
+    hero_cta_text: item.hero_cta_text || 'Daftar Sekarang',
+    hero_cta_link: item.hero_cta_link || '#daftar',
+    hero_images: item.hero_images && item.hero_images.length ? [...item.hero_images] : [
+      { url: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1200', caption: 'Gedung Sekolah Utama' },
+      { url: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=1200', caption: 'Fasilitas Terpadu' },
+      { url: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=1200', caption: 'Kenyamanan Belajar' }
+    ],
+    about_image: item.about_image || 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=800',
+    about_title: item.about_title || ('Tentang ' + item.name),
+    about_description: item.about_description || 'Berdiri sebagai pusat pendidikan terpadu, kami tidak hanya mengedepankan prestasi akademik namun juga penanaman nilai moral yang kuat.',
+    about_vision: item.about_vision || 'Menjadi institusi pendidikan terbaik yang menginspirasi kreativitas dan mencerdaskan bangsa.',
+    about_mission: item.about_mission && item.about_mission.length ? [...item.about_mission] : [
+      'Menyelenggarakan pendidikan inovatif dan bermutu tinggi',
+      'Menanamkan budi pekerti luhur dan akhlak mulia',
+      'Mengembangkan potensi dan minat bakat siswa',
+      'Menyediakan fasilitas belajar yang modern dan memadai',
+      'Membina kerja sama erat dengan orang tua dan masyarakat'
+    ],
     contact_email: item.contact_email || '',
     contact_phone: item.contact_phone || '',
     contact_address: item.contact_address || '',
@@ -417,7 +603,7 @@ const openModalEditor = item => {
     social_tiktok: item.social_tiktok || '',
     sections: JSON.parse(
       JSON.stringify(
-        item.sections || (activeTab.value === 'sekolah' ? createSchoolSections() : createFoundationSections())
+        item.sections || (activeTab.value === 'sekolah' ? createSchoolSections() : createFoundationSections(item.schools || []))
       )
     )
   }
@@ -425,7 +611,7 @@ const openModalEditor = item => {
 }
 
 // Simpan data lengkap dari modal editor asisten ke baris instansi
-const saveModalData = () => {
+const saveModalData = async () => {
   if (selectedItemForEdit.value) {
     const item = selectedItemForEdit.value
     Object.assign(item, {
@@ -467,9 +653,9 @@ const saveModalData = () => {
           : 'Colorful Playful'
     item.lastUpdated = 'Baru saja'
 
-    saveToLocalStorage()
+    await saveToBackend(item)
     isModalOpen.value = false
-    toast.success(`Konfigurasi landing page lengkap untuk ${item.name} disimpan secara lokal!`)
+    toast.success(`Konfigurasi landing page lengkap untuk ${item.name} disimpan ke database!`)
   }
 }
 
@@ -819,6 +1005,7 @@ const closeSectionItemEditor = () => {
                       v-model="form.theme"
                       :value="opt.id"
                       class="sr-only"
+                      @change="applyDefaultThemeColor(opt.id)"
                     />
                     <span class="font-bold text-xs text-foreground">{{ opt.name }}</span>
                     <span class="text-[10px] text-muted-foreground mt-1">{{ opt.desc }}</span>
@@ -837,7 +1024,8 @@ const closeSectionItemEditor = () => {
                   <Input
                     type="text"
                     v-model="form.slug"
-                    class="flex-1 rounded-none border-0 text-xs focus-visible:ring-0 bg-transparent"
+                    readonly
+                    class="flex-1 rounded-none border-0 text-xs focus-visible:ring-0 bg-transparent text-muted-foreground cursor-not-allowed"
                     placeholder="contoh: sdit-nur-iman"
                   />
                 </div>
@@ -847,22 +1035,6 @@ const closeSectionItemEditor = () => {
               <div class="space-y-3 pt-4 border-t border-border mt-4">
                 <Label class="text-xs font-bold text-foreground block">🎨 Rekomendasi Palet Harmonik & Kustomisasi</Label>
                 <div class="flex flex-wrap gap-3">
-                  <!-- Tombol Mode Custom -->
-                  <button
-                    @click="isCustomColor = true"
-                    type="button"
-                    class="group relative flex flex-col items-center gap-1.5 p-2 rounded-xl border transition-all focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    :class="isCustomColor ? 'border-primary bg-primary/10' : 'border-border bg-background/50 hover:bg-muted/50 hover:border-primary/50'"
-                    title="Kustomisasi Bebas"
-                  >
-                    <div class="flex items-center -space-x-1">
-                      <div class="w-5 h-5 rounded-full shadow-sm ring-2 ring-background z-[3]" :style="{ backgroundColor: isCustomColor ? form.primary_color : '#000000' }"></div>
-                      <div class="w-5 h-5 rounded-full shadow-sm ring-2 ring-background z-[2]" :style="{ backgroundColor: isCustomColor ? form.secondary_color : '#000000' }"></div>
-                      <div class="w-5 h-5 rounded-full shadow-sm ring-2 ring-background z-[1]" :style="{ backgroundColor: isCustomColor ? form.accent_color : '#000000' }"></div>
-                    </div>
-                    <span class="text-[9px] font-medium transition-colors" :class="isCustomColor ? 'text-primary font-bold' : 'text-muted-foreground group-hover:text-foreground'">Warna Custom</span>
-                  </button>
-
                   <!-- Tombol Palet Preset -->
                   <button
                     v-for="(palette, idx) in colorPalettes"
@@ -870,7 +1042,7 @@ const closeSectionItemEditor = () => {
                     @click="applyPalette(palette)"
                     type="button"
                     class="group relative flex flex-col items-center gap-1.5 p-2 rounded-xl border transition-all focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    :class="!isCustomColor && form.primary_color === palette.primary && form.secondary_color === palette.secondary ? 'border-primary bg-primary/10' : 'border-border bg-background/50 hover:bg-muted/50 hover:border-primary/50'"
+                    :class="isPaletteMatch(palette) ? 'border-primary bg-primary/10 ring-2 ring-primary/20' : 'border-border bg-background/50 hover:bg-muted/50 hover:border-primary/50'"
                     :title="palette.name"
                   >
                     <div class="flex items-center -space-x-1">
@@ -878,12 +1050,28 @@ const closeSectionItemEditor = () => {
                       <div class="w-5 h-5 rounded-full shadow-sm ring-2 ring-background z-[2]" :style="{ backgroundColor: palette.secondary }"></div>
                       <div class="w-5 h-5 rounded-full shadow-sm ring-2 ring-background z-[1]" :style="{ backgroundColor: palette.accent }"></div>
                     </div>
-                    <span class="text-[9px] font-medium transition-colors" :class="!isCustomColor && form.primary_color === palette.primary && form.secondary_color === palette.secondary ? 'text-primary font-bold' : 'text-muted-foreground group-hover:text-foreground'">{{ palette.name }}</span>
+                    <span class="text-[9px] font-medium transition-colors" :class="isPaletteMatch(palette) ? 'text-primary font-bold' : 'text-muted-foreground group-hover:text-foreground'">{{ palette.name }}</span>
+                  </button>
+
+                  <!-- Tombol Mode Custom -->
+                  <button
+                    @click="isCustomColor = true"
+                    type="button"
+                    class="group relative flex flex-col items-center gap-1.5 p-2 rounded-xl border transition-all focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    :class="(!isAnyPaletteMatch || isCustomColor) ? 'border-primary bg-primary/10' : 'border-border bg-background/50 hover:bg-muted/50 hover:border-primary/50'"
+                    title="Kustomisasi Bebas"
+                  >
+                    <div class="flex items-center -space-x-1">
+                      <div class="w-5 h-5 rounded-full shadow-sm ring-2 ring-background z-[3]" :style="{ backgroundColor: (!isAnyPaletteMatch || isCustomColor) ? form.primary_color : '#000000' }"></div>
+                      <div class="w-5 h-5 rounded-full shadow-sm ring-2 ring-background z-[2]" :style="{ backgroundColor: (!isAnyPaletteMatch || isCustomColor) ? form.secondary_color : '#000000' }"></div>
+                      <div class="w-5 h-5 rounded-full shadow-sm ring-2 ring-background z-[1]" :style="{ backgroundColor: (!isAnyPaletteMatch || isCustomColor) ? form.accent_color : '#000000' }"></div>
+                    </div>
+                    <span class="text-[9px] font-medium transition-colors" :class="(!isAnyPaletteMatch || isCustomColor) ? 'text-primary font-bold' : 'text-muted-foreground group-hover:text-foreground'">Warna Custom</span>
                   </button>
                 </div>
               </div>
 
-              <div v-if="isCustomColor" class="grid grid-cols-3 gap-4 pt-4 border-t border-border mt-4">
+              <div v-if="!isAnyPaletteMatch || isCustomColor" class="grid grid-cols-3 gap-4 pt-4 border-t border-border mt-4">
                 <div>
                   <Label class="text-[10px] font-bold text-muted-foreground uppercase mb-1 block"
                     >Warna Utama</Label
@@ -936,14 +1124,15 @@ const closeSectionItemEditor = () => {
                   </div>
                 </div>
               </div>
+
               <div class="space-y-4">
                 <div>
-                  <Label class="text-xs text-muted-foreground mb-1.5 block">Meta Title SEO</Label>
+                  <Label class="text-xs text-muted-foreground mb-1.5 block">Meta Title SEO <span class="text-[10px] text-blue-500 font-normal">(Otomatis dari Profil)</span></Label>
                   <Input
                     type="text"
-                    v-model="form.meta_title"
-                    class="rounded-xl text-xs"
-                    :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'Contoh: Yayasan Pendidikan Nusantara' : 'Contoh: SMA Nusantara Unggul'"
+                    :model-value="selectedItemForEdit?.name || '(Belum Diatur)'"
+                    readonly
+                    class="rounded-xl text-xs bg-muted/30 text-muted-foreground cursor-not-allowed"
                   />
                 </div>
                 <div>
@@ -959,12 +1148,12 @@ const closeSectionItemEditor = () => {
 
               <div class="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label class="text-xs text-muted-foreground mb-1.5 block">Nomor Legalitas / Izin (Opsional)</Label>
+                  <Label class="text-xs text-muted-foreground mb-1.5 block">Nomor Legalitas / Izin <span class="text-[10px] text-blue-500 font-normal">(Otomatis dari Profil)</span></Label>
                   <Input
                     type="text"
-                    v-model="form.legal_number"
-                    class="rounded-xl text-xs"
-                    :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'Contoh: AHU-1234.56.78' : 'Contoh: NPSN 20123456'"
+                    :model-value="selectedItemForEdit?.legal_number || '(Belum Diatur di Profil)'"
+                    readonly
+                    class="rounded-xl text-xs bg-muted/30 text-muted-foreground cursor-not-allowed"
                   />
                   <p class="text-[10px] text-muted-foreground mt-1.5">Ditampilkan di bagian catatan kaki (footer) web.</p>
                 </div>
@@ -1369,32 +1558,34 @@ const closeSectionItemEditor = () => {
               class="space-y-6"
             >
               <h4 class="text-sm font-bold text-foreground">Hubungi Kami & Media Sosial</h4>
+              <p class="text-[10px] text-muted-foreground -mt-5">Info dengan label biru otomatis diambil dari pengaturan profil utama instansi.</p>
+              
               <div class="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label class="text-xs text-muted-foreground mb-1.5 block">Email {{ selectedItemForEdit?.type || 'Instansi' }}</Label>
+                  <Label class="text-xs text-muted-foreground mb-1.5 block">Email {{ selectedItemForEdit?.type || 'Instansi' }} <span class="text-[10px] text-blue-500 font-normal">(Sinkron Profil)</span></Label>
                   <Input
                     type="email"
                     v-model="form.contact_email"
                     class="rounded-xl text-xs"
-                    :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'Contoh: info@yayasan.org' : 'Contoh: info@sekolah.sch.id'"
+                    :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'Contoh: info@yayasan.com' : 'Contoh: info@sekolah.com'"
                   />
                 </div>
                 <div>
-                  <Label class="text-xs text-muted-foreground mb-1.5 block">Telepon</Label
-                  ><Input
+                  <Label class="text-xs text-muted-foreground mb-1.5 block">Telepon <span class="text-[10px] text-blue-500 font-normal">(Sinkron Profil)</span></Label>
+                  <Input
                     type="text"
                     v-model="form.contact_phone"
                     class="rounded-xl text-xs"
-                    placeholder="Contoh: +62 812-3456-7890"
+                    placeholder="Contoh: 021-1234567"
                   />
                 </div>
                 <div class="md:col-span-2">
-                  <Label class="text-xs text-muted-foreground mb-1.5 block">Alamat Lengkap</Label
-                  ><Textarea
+                  <Label class="text-xs text-muted-foreground mb-1.5 block">Alamat Lengkap <span class="text-[10px] text-blue-500 font-normal">(Sinkron Profil)</span></Label>
+                  <Textarea
                     v-model="form.contact_address"
                     rows="2"
                     class="rounded-xl text-xs"
-                    placeholder="Contoh: Jl. Pendidikan No. 12, Jakarta..."
+                    :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'Masukkan alamat lengkap yayasan di sini...' : 'Masukkan alamat lengkap sekolah di sini...'"
                   ></Textarea>
                 </div>
                 <div class="md:col-span-2">
@@ -1408,18 +1599,10 @@ const closeSectionItemEditor = () => {
                   ></Textarea>
                 </div>
               </div>
+
               <div class="grid md:grid-cols-2 gap-4 pt-2">
                 <div>
-                  <Label class="text-xs text-muted-foreground mb-1.5 block">TikTok URL</Label>
-                  <Input
-                    type="text"
-                    v-model="form.social_tiktok"
-                    class="rounded-xl text-xs"
-                    :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'https://tiktok.com/@yayasan' : 'https://tiktok.com/@sekolah'"
-                  />
-                </div>
-                <div>
-                  <Label class="text-xs text-muted-foreground mb-1.5 block">Instagram URL</Label>
+                  <Label class="text-xs text-muted-foreground mb-1.5 block">Instagram URL <span class="text-[10px] text-blue-500 font-normal">(Sinkron Profil)</span></Label>
                   <Input
                     type="text"
                     v-model="form.social_instagram"
@@ -1428,12 +1611,21 @@ const closeSectionItemEditor = () => {
                   />
                 </div>
                 <div>
-                  <Label class="text-xs text-muted-foreground mb-1.5 block">Facebook URL</Label>
+                  <Label class="text-xs text-muted-foreground mb-1.5 block">Facebook URL <span class="text-[10px] text-blue-500 font-normal">(Sinkron Profil)</span></Label>
                   <Input
                     type="text"
                     v-model="form.social_facebook"
                     class="rounded-xl text-xs"
                     :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'https://facebook.com/yayasan' : 'https://facebook.com/sekolah'"
+                  />
+                </div>
+                <div>
+                  <Label class="text-xs text-muted-foreground mb-1.5 block">TikTok URL</Label>
+                  <Input
+                    type="text"
+                    v-model="form.social_tiktok"
+                    class="rounded-xl text-xs"
+                    :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'https://tiktok.com/@yayasan' : 'https://tiktok.com/@sekolah'"
                   />
                 </div>
                 <div>

@@ -39,7 +39,7 @@ const props = defineProps({
               {{ (data?.meta_title || 'S')[0] }}
             </div>
             <div>
-              <h3 class="font-bold text-lg">{{ data?.meta_title || 'Sekolah Kami' }}</h3>
+              <h3 class="font-bold text-lg">{{ data?.meta_title || (branding?.entityName || 'Instansi') }}</h3>
               <p class="text-gray-400 text-xs">{{ data?.hero_subtitle || '' }}</p>
             </div>
           </div>
@@ -141,7 +141,7 @@ const props = defineProps({
           class="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500"
         >
           <p>
-            &copy; {{ new Date().getFullYear() }} {{ data?.meta_title || 'Sekolah Kami' }}. All
+            &copy; {{ new Date().getFullYear() }} {{ data?.meta_title || (branding?.entityName || 'Instansi') }}. All
             rights reserved.
           </p>
           <p>Powered by <span class="font-semibold text-gray-400">App School Tehnonusa</span></p>

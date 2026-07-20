@@ -22,7 +22,7 @@ onMounted(() => {
   <section
     id="about"
     ref="el"
-    class="py-24 lg:py-32 bg-purple-50/50 relative overflow-hidden"
+    class="py-24 lg:py-32 bg-primary/5 relative overflow-hidden"
   >
     <div class="absolute top-10 right-10 text-8xl opacity-5 fun-bounce">🌟</div>
     <div class="absolute bottom-10 left-10 text-8xl opacity-5 fun-bounce-2">📚</div>
@@ -35,11 +35,11 @@ onMounted(() => {
         ]"
       >
         <span
-          class="inline-block px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest mb-4 bg-purple-100 text-purple-600"
+          class="inline-block px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest mb-4 bg-primary/50 text-primary"
           >🏫 Tentang Kami</span
         >
-        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-purple-800 mb-6">
-          {{ about.title || 'Tentang Sekolah Kami' }}
+        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-6">
+          {{ about.title || ('Tentang ' + (branding?.entityName || 'Instansi')) }}
         </h2>
         <p class="text-lg text-gray-500 leading-relaxed">{{ about.description }}</p>
       </div>
@@ -53,10 +53,10 @@ onMounted(() => {
         >
           <div class="relative">
             <div
-              class="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-purple-200/50 via-pink-200/50 to-yellow-200/50 blur-xl"
+              class="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-primary via-secondary to-accent/50 blur-xl"
             ></div>
             <div
-              class="relative rounded-[2rem] overflow-hidden border-4 border-yellow-400/40 shadow-2xl shadow-purple-200/30"
+              class="relative rounded-[2rem] overflow-hidden border-4 border-accent/20 shadow-2xl shadow-purple-200/30"
             >
               <img
                 v-if="about.image"
@@ -66,7 +66,7 @@ onMounted(() => {
               />
               <div
                 v-else
-                class="w-full aspect-[4/3] bg-gradient-to-br from-purple-200 via-pink-100 to-yellow-100 flex items-center justify-center"
+                class="w-full aspect-[4/3] bg-gradient-to-br from-primary via-secondary to-accent/50 flex items-center justify-center"
               >
                 <span class="text-8xl">🏫</span>
               </div>
@@ -82,16 +82,16 @@ onMounted(() => {
         >
           <div
             v-if="about.vision"
-            class="bg-white rounded-2xl p-8 shadow-lg border-2 border-purple-100 fun-wiggle"
+            class="bg-white rounded-2xl p-8 shadow-lg border-2 border-primary/20 fun-wiggle"
           >
             <div class="flex items-start gap-4">
               <div
-                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0 text-2xl"
+                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-secondary/50 flex items-center justify-center flex-shrink-0 text-2xl"
               >
                 👁️
               </div>
               <div>
-                <h3 class="text-xl font-bold text-purple-800 mb-2">Visi</h3>
+                <h3 class="text-xl font-bold text-primary mb-2">Visi</h3>
                 <p class="text-gray-600 leading-relaxed">{{ about.vision }}</p>
               </div>
             </div>
@@ -99,16 +99,16 @@ onMounted(() => {
 
           <div
             v-if="about.mission?.length"
-            class="bg-white rounded-2xl p-8 shadow-lg border-2 border-pink-100 fun-wiggle"
+            class="bg-white rounded-2xl p-8 shadow-lg border-2 border-secondary/20 fun-wiggle"
           >
             <div class="flex items-start gap-4">
               <div
-                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center flex-shrink-0 text-2xl"
+                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent to-orange-500 flex items-center justify-center flex-shrink-0 text-2xl"
               >
                 🎯
               </div>
               <div class="flex-1">
-                <h3 class="text-xl font-bold text-purple-800 mb-4">Misi</h3>
+                <h3 class="text-xl font-bold text-primary mb-4">Misi</h3>
                 <ul class="space-y-3">
                   <li
                     v-for="(item, i) in about.mission"

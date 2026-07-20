@@ -17,16 +17,18 @@ onMounted(() => {
   if (el.value) obs.observe(el.value)
 })
 function parseValue(val) {
-  const num = parseInt(String(val).replace(/\D/g, ''))
-  const suffix = String(val).replace(/[\d,. ]/g, '')
-  return { num: isNaN(num) ? 0 : num, suffix }
+  const strVal = String(val)
+  const hasNumber = /\d/.test(strVal)
+  const num = parseInt(strVal.replace(/\D/g, ''))
+  const suffix = strVal.replace(/[\d,. ]/g, '')
+  return { hasNumber, num: isNaN(num) ? 0 : num, suffix }
 }
 </script>
 
 <template>
   <section
     ref="el"
-    class="py-20 bg-emerald-900 relative overflow-hidden"
+    class="py-20 bg-primary relative overflow-hidden"
   >
     <div class="absolute inset-0 islamic-pattern opacity-20"></div>
     <div class="max-w-7xl mx-auto px-6 relative z-10">
@@ -48,12 +50,17 @@ function parseValue(val) {
           class="text-center"
           :style="{ transitionDelay: `${i * 100}ms` }"
         >
-          <div class="text-4xl md:text-5xl font-extrabold text-amber-400 mb-2">
-            <CounterAnimation
-              v-if="isVisible"
-              :target="parseValue(item.value).num"
-              :suffix="parseValue(item.value).suffix"
-            />
+          <div class="text-4xl md:text-5xl font-extrabold text-secondary mb-2">
+            <template v-if="parseValue(item.value).hasNumber">
+              <CounterAnimation
+                v-if="isVisible"
+                :target="parseValue(item.value).num"
+                :suffix="parseValue(item.value).suffix"
+              />
+            </template>
+            <template v-else>
+              {{ item.value }}
+            </template>
           </div>
           <div class="text-white/80 text-sm font-medium">{{ item.title }}</div>
         </div>

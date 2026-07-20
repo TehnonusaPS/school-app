@@ -37,10 +37,10 @@ function getIcon(name) {
         ]"
       >
         <span
-          class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 bg-emerald-50 text-emerald-700"
+          class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 bg-primary/5 text-primary"
           >Keunggulan</span
         >
-        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-emerald-900 mb-6">
+        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-6">
           {{ section.title || 'Keunggulan Kami' }}
         </h2>
       </div>
@@ -51,13 +51,13 @@ function getIcon(name) {
           v-for="(item, i) in section.items"
           :key="item.id"
           :class="[
-            'group bg-white rounded-2xl p-8 border-2 border-emerald-100/50 hover:border-amber-400/50 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2',
+            'group bg-white rounded-2xl p-8 border-2 border-primary/20 hover:border-secondary/20 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2',
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           ]"
           :style="{ transitionDelay: `${i * 80}ms` }"
         >
           <div
-            class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center mb-6 group-hover:from-amber-500 group-hover:to-amber-600 transition-all"
+            class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center mb-6 group-hover:from-secondary/10 group-hover:to-secondary/5 transition-all"
           >
             <component
               v-if="getIcon(item.icon)"
@@ -70,7 +70,7 @@ function getIcon(name) {
               >{{ item.icon || '✨' }}</span
             >
           </div>
-          <h3 class="text-lg font-bold text-emerald-900 mb-3">{{ item.title }}</h3>
+          <h3 class="text-lg font-bold text-primary mb-3">{{ item.title }}</h3>
           <p class="text-gray-500 text-sm leading-relaxed">{{ item.description }}</p>
         </div>
       </div>

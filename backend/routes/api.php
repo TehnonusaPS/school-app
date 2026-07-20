@@ -98,11 +98,21 @@ Route::post('/broadcasting/auth', [\Illuminate\Broadcasting\BroadcastController:
     ->middleware('auth:sanctum')
     ->name('broadcasting.auth');
 
+use App\Http\Controllers\Api\LandingPageConfigController;
+
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/landing-page/upload', [LandingPageConfigController::class, 'uploadImage']);
+Route::get('/landing-page/public/{slug}', [LandingPageConfigController::class, 'getPublicLandingPageBySlug']);
+Route::get('/landing-page/foundations', [LandingPageConfigController::class, 'getFoundationsList']);
+Route::get('/landing-page/schools', [LandingPageConfigController::class, 'getSchoolsList']);
+Route::get('/landing-page/foundations/{id}', [LandingPageConfigController::class, 'getFoundationConfig']);
+Route::get('/landing-page/schools/{id}', [LandingPageConfigController::class, 'getSchoolConfig']);
 
 // Protected routes (Sanctum)
 Route::middleware('auth:sanctum')->group(function () {
+    Route::put('/landing-page/foundations/{id}', [LandingPageConfigController::class, 'updateFoundationConfig']);
+    Route::put('/landing-page/schools/{id}', [LandingPageConfigController::class, 'updateSchoolConfig']);
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
 

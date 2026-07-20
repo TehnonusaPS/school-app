@@ -39,7 +39,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
       >
         <div
           v-if="branding.logo"
-          class="w-12 h-12 rounded-2xl overflow-hidden shadow-md border-3 border-yellow-400/50 group-hover:scale-110 transition-transform"
+          class="w-12 h-12 rounded-2xl overflow-hidden shadow-md border-3 border-accent/20 group-hover:scale-110 transition-transform"
         >
           <img
             :src="branding.logo"
@@ -49,15 +49,15 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
         </div>
         <div
           v-else
-          class="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md font-bold text-white text-xl bg-gradient-to-br from-purple-500 via-pink-500 to-yellow-400 group-hover:scale-110 transition-transform"
+          class="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md font-bold text-white text-xl bg-gradient-to-br from-primary via-secondary to-accent/50 group-hover:scale-110 transition-transform"
         >
           {{ (data?.meta_title || 'S')[0] }}
         </div>
         <div class="leading-tight">
-          <div :class="['font-extrabold text-base', isScrolled ? 'text-purple-700' : 'text-white']">
-            {{ data?.meta_title || 'Sekolah Kami' }}
+          <div :class="['font-extrabold text-base', isScrolled ? 'text-primary' : 'text-white']">
+            {{ data?.meta_title || (branding?.entityName || 'Instansi') }}
           </div>
-          <div :class="['text-xs font-medium', isScrolled ? 'text-pink-400' : 'text-yellow-300']">
+          <div :class="['text-xs font-medium', isScrolled ? 'text-secondary' : 'text-accent']">
             {{ data?.hero_subtitle || '✨ Belajar sambil bermain!' }}
           </div>
         </div>
@@ -71,7 +71,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
           :class="[
             'px-4 py-2 rounded-xl text-sm font-bold transition-all fun-wiggle',
             isScrolled
-              ? 'text-gray-600 hover:text-purple-600 hover:bg-purple-50'
+              ? 'text-gray-600 hover:text-primary hover:bg-primary/5'
               : 'text-white/90 hover:text-white hover:bg-white/10'
           ]"
         >
@@ -82,7 +82,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
       <div class="hidden lg:block">
         <button
           @click="scrollTo('registration_cta')"
-          class="px-6 py-2.5 rounded-2xl text-sm font-extrabold text-white shadow-lg bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400 hover:shadow-xl transition-all hover:-translate-y-0.5 hover:scale-105"
+          class="px-6 py-2.5 rounded-2xl text-sm font-extrabold text-white shadow-lg bg-gradient-to-r from-primary via-secondary to-accent/50 hover:shadow-xl transition-all hover:-translate-y-0.5 hover:scale-105"
         >
           🎉 Daftar Yuk!
         </button>
@@ -91,7 +91,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
       <button
         @click="isMobileOpen = !isMobileOpen"
         class="lg:hidden p-2"
-        :class="isScrolled ? 'text-purple-700' : 'text-white'"
+        :class="isScrolled ? 'text-primary' : 'text-white'"
       >
         <Menu
           v-if="!isMobileOpen"
@@ -113,20 +113,20 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
     >
       <div
         v-if="isMobileOpen"
-        class="lg:hidden absolute top-full left-0 w-full bg-white/98 backdrop-blur-xl border-t-4 border-purple-400 shadow-xl px-6 py-6"
+        class="lg:hidden absolute top-full left-0 w-full bg-white/98 backdrop-blur-xl border-t-4 border-primary/20 shadow-xl px-6 py-6"
       >
         <div class="flex flex-col gap-1">
           <button
             v-for="link in navLinks"
             :key="link.id"
             @click="scrollTo(link.id)"
-            class="text-left text-gray-700 font-bold py-3 px-4 rounded-xl hover:bg-purple-50 transition-colors"
+            class="text-left text-gray-700 font-bold py-3 px-4 rounded-xl hover:bg-primary/5 transition-colors"
           >
             {{ link.label }}
           </button>
           <button
             @click="scrollTo('registration_cta')"
-            class="mt-3 py-3 rounded-2xl text-white font-extrabold text-center bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400"
+            class="mt-3 py-3 rounded-2xl text-white font-extrabold text-center bg-gradient-to-r from-primary via-secondary to-accent/50"
           >
             🎉 Daftar Yuk!
           </button>

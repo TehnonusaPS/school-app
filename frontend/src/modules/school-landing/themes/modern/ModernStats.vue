@@ -24,9 +24,11 @@ onMounted(() => {
 })
 
 function parseValue(val) {
-  const num = parseInt(String(val).replace(/\D/g, ''))
-  const suffix = String(val).replace(/[\d,. ]/g, '')
-  return { num: isNaN(num) ? 0 : num, suffix }
+  const strVal = String(val)
+  const hasNumber = /\d/.test(strVal)
+  const num = parseInt(strVal.replace(/\D/g, ''))
+  const suffix = strVal.replace(/[\d,. ]/g, '')
+  return { hasNumber, num: isNaN(num) ? 0 : num, suffix }
 }
 </script>
 
@@ -73,11 +75,16 @@ function parseValue(val) {
           :style="{ transitionDelay: `${i * 100}ms` }"
         >
           <div class="text-4xl md:text-5xl font-extrabold text-white mb-2">
-            <CounterAnimation
-              v-if="isVisible"
-              :target="parseValue(item.value).num"
-              :suffix="parseValue(item.value).suffix"
-            />
+            <template v-if="parseValue(item.value).hasNumber">
+              <CounterAnimation
+                v-if="isVisible"
+                :target="parseValue(item.value).num"
+                :suffix="parseValue(item.value).suffix"
+              />
+            </template>
+            <template v-else>
+              {{ item.value }}
+            </template>
           </div>
           <div class="text-white/80 text-sm font-medium">
             {{ item.title }}

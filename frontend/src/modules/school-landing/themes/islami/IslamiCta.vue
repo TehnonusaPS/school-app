@@ -9,7 +9,7 @@ function scrollTo(id) {
 <template>
   <section
     id="registration_cta"
-    class="py-24 lg:py-32 bg-emerald-900 islamic-pattern relative overflow-hidden"
+    class="py-24 lg:py-32 bg-primary islamic-pattern relative overflow-hidden"
   >
     <div
       class="absolute inset-0 opacity-20"
@@ -29,7 +29,7 @@ function scrollTo(id) {
       </p>
       <button
         @click="scrollTo('contact')"
-        class="group inline-flex items-center gap-2 px-10 py-4 rounded-2xl bg-amber-500 text-emerald-950 font-bold text-lg hover:bg-amber-400 shadow-lg shadow-amber-500/20 transition-all hover:-translate-y-1"
+        class="group inline-flex items-center gap-2 px-10 py-4 rounded-2xl bg-secondary text-primary font-bold text-lg hover:bg-secondary shadow-lg shadow-amber-500/20 transition-all hover:-translate-y-1"
       >
         Daftar Sekarang
         <ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />

@@ -21,7 +21,7 @@ onMounted(() => {
 <template>
   <section
     ref="el"
-    class="py-24 lg:py-32 bg-emerald-50/50 islamic-pattern relative"
+    class="py-24 lg:py-32 bg-primary/5 islamic-pattern relative"
   >
     <div class="max-w-7xl mx-auto px-6 relative z-10">
       <div
@@ -31,10 +31,10 @@ onMounted(() => {
         ]"
       >
         <span
-          class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 bg-emerald-50 text-emerald-700"
+          class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 bg-primary/5 text-primary"
           >Testimoni</span
         >
-        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-emerald-900">
+        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-primary">
           {{ section.title || 'Kata Mereka' }}
         </h2>
       </div>
@@ -45,17 +45,17 @@ onMounted(() => {
           v-for="(item, i) in section.items"
           :key="item.id"
           :class="[
-            'bg-white rounded-2xl p-8 shadow-lg border-2 border-emerald-100/50 transition-all duration-500 hover:shadow-xl hover:border-amber-300/50',
+            'bg-white rounded-2xl p-8 shadow-lg border-2 border-primary/20 transition-all duration-500 hover:shadow-xl hover:border-secondary/20',
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           ]"
           :style="{ transitionDelay: `${i * 100}ms` }"
         >
-          <Quote class="w-8 h-8 mb-4 text-amber-400/40" />
+          <Quote class="w-8 h-8 mb-4 text-secondary" />
           <p class="text-gray-600 leading-relaxed mb-6 italic">"{{ item.description }}"</p>
           <div class="flex items-center gap-4">
             <div
               v-if="item.image"
-              class="w-12 h-12 rounded-full overflow-hidden border-2 border-amber-400/30"
+              class="w-12 h-12 rounded-full overflow-hidden border-2 border-secondary/20"
             >
               <img
                 :src="item.image"
@@ -65,12 +65,12 @@ onMounted(() => {
             </div>
             <div
               v-else
-              class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center text-white font-bold border-2 border-amber-400/30"
+              class="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold border-2 border-secondary/20"
             >
               {{ (item.title || 'U')[0] }}
             </div>
             <div>
-              <h4 class="font-semibold text-emerald-900 text-sm">{{ item.title }}</h4>
+              <h4 class="font-semibold text-primary text-sm">{{ item.title }}</h4>
               <p class="text-xs text-gray-400">{{ item.value || '' }}</p>
             </div>
           </div>

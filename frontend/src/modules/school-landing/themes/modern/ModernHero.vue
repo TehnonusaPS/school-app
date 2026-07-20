@@ -120,7 +120,7 @@ function scrollTo(id) {
         <h1
           class="heading-font text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-white leading-[1.1] mb-6"
         >
-          {{ hero.title || 'Selamat Datang di Sekolah Kami' }}
+          {{ hero.title || ('Selamat Datang di ' + (branding?.entityName || 'Instansi')) }}
         </h1>
 
         <!-- Subtitle -->

@@ -38,7 +38,7 @@ onMounted(() => {
           class="inline-block px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest mb-4 bg-orange-100 text-orange-600"
           >❓ FAQ</span
         >
-        <h2 class="heading-font text-3xl md:text-4xl font-bold text-purple-800">
+        <h2 class="heading-font text-3xl md:text-4xl font-bold text-primary">
           {{ section.title || 'Pertanyaan Umum' }}
         </h2>
       </div>
@@ -50,8 +50,8 @@ onMounted(() => {
           :class="[
             'rounded-2xl border-3 transition-all duration-500',
             openIndex === i
-              ? 'border-yellow-400 shadow-lg bg-white'
-              : 'border-gray-100 bg-purple-50/50 hover:bg-white hover:border-purple-200',
+              ? 'border-accent/20 shadow-lg bg-white'
+              : 'border-gray-100 bg-primary/5 hover:bg-white hover:border-primary/20',
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           ]"
           :style="{ transitionDelay: `${i * 60}ms` }"
@@ -60,10 +60,10 @@ onMounted(() => {
             @click="toggle(i)"
             class="w-full flex items-center justify-between gap-4 px-6 py-5 text-left"
           >
-            <span class="font-extrabold text-purple-800">{{ item.title }}</span>
+            <span class="font-extrabold text-primary">{{ item.title }}</span>
             <ChevronDown
               :class="[
-                'w-5 h-5 flex-shrink-0 text-yellow-500 transition-transform duration-300',
+                'w-5 h-5 flex-shrink-0 text-accent transition-transform duration-300',
                 openIndex === i ? 'rotate-180' : ''
               ]"
             />

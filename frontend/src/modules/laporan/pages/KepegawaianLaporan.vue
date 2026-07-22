@@ -14,6 +14,8 @@ import {
   ChevronDown,
 } from 'lucide-vue-next'
 import { Skeleton } from '@/components/ui/skeleton'
+import StatCardGrid from '@/components/stat-card/StatCardGrid.vue'
+import StatCard from '@/components/stat-card/StatCard.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -25,17 +27,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
 import { today, getLocalTimeZone, startOfMonth, endOfMonth } from '@internationalized/date'
-
-const mockStaf = [
-  { id: 1, nik: 'GTK001', nama: 'Pak Ahmad Siregar, S.Pd', jabatan: 'Guru Matematika', status: 'Tetap', hadir: 22, terlambat: 0, izin: 0, sakit: 0, alpa: 0 },
-  { id: 2, nik: 'GTK002', nama: 'Bu Dewi Rahayu, M.Pd', jabatan: 'Guru B. Indonesia', status: 'Tetap', hadir: 21, terlambat: 1, izin: 1, sakit: 0, alpa: 0 },
-  { id: 3, nik: 'GTK003', nama: 'Pak Rizky Pratama, S.Pd', jabatan: 'Guru Fisika', status: 'Honorer', hadir: 18, terlambat: 2, izin: 0, sakit: 2, alpa: 1 },
-  { id: 4, nik: 'GTK004', nama: 'Bu Siti Nurhaliza, S.Pd', jabatan: 'Guru Biologi', status: 'Tetap', hadir: 22, terlambat: 0, izin: 0, sakit: 0, alpa: 0 },
-  { id: 5, nik: 'GTK005', nama: 'Pak Hendra Wijaya', jabatan: 'Tenaga Administrasi', status: 'Tetap', hadir: 20, terlambat: 3, izin: 0, sakit: 0, alpa: 2 },
-  { id: 6, nik: 'GTK006', nama: 'Bu Laila Sari, S.E', jabatan: 'Bendahara', status: 'Tetap', hadir: 22, terlambat: 0, izin: 0, sakit: 0, alpa: 0 },
-  { id: 7, nik: 'GTK007', nama: 'Pak Doni Setiawan', jabatan: 'Guru Olahraga', status: 'Honorer', hadir: 16, terlambat: 4, izin: 2, sakit: 0, alpa: 3 },
-  { id: 8, nik: 'GTK008', nama: 'Bu Farida Hanum, S.Pd', jabatan: 'Guru B. Inggris', status: 'Tetap', hadir: 22, terlambat: 0, izin: 0, sakit: 0, alpa: 0 },
-]
+import { getSchoolStaff } from '@/services/api/reports'
 
 const HARI_KERJA = 22
 
@@ -51,14 +43,21 @@ const itemsPerPage = 8
 const startDate = ref()
 const endDate = ref()
 
-onMounted(() => {
+onMounted(async () => {
   try {
     const tz = getLocalTimeZone()
     const now = today(tz)
     startDate.value = startOfMonth(now)
     endDate.value = endOfMonth(now)
   } catch(e) {}
-  setTimeout(() => { stafData.value = mockStaf; isLoading.value = false }, 500)
+  try {
+    const data = await getSchoolStaff()
+    stafData.value = data || []
+  } catch (error) {
+    console.error('Failed to fetch staff data:', error)
+  } finally {
+    isLoading.value = false
+  }
 })
 
 function displayDate(dateObj) {
@@ -152,31 +151,41 @@ const bulanList = [
     </div>
 
     <!-- Stats -->
-    <div class="grid gap-4 grid-cols-2 lg:grid-cols-4">
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Staf</span><div class="p-1.5 bg-primary/10 rounded-lg"><Users class="size-4 text-primary" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-12" />
-        <div v-else class="text-3xl font-bold text-primary">{{ stafData.length }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Guru & Tenaga Kependidikan</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Kehadiran Baik</span><div class="p-1.5 bg-green-50 dark:bg-green-950/40 rounded-lg"><CheckCircle2 class="size-4 text-green-600" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-12" />
-        <div v-else class="text-3xl font-bold text-green-600 dark:text-green-400">{{ totalHadir }}</div>
-        <p class="text-xs text-muted-foreground mt-1">≥ 90% kehadiran</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Hari Kerja</span><div class="p-1.5 bg-muted rounded-lg"><Clock class="size-4 text-muted-foreground" /></div></div>
-        <div class="text-3xl font-bold">{{ HARI_KERJA }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Hari bulan ini</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Ada Pelanggaran</span><div class="p-1.5 bg-red-50 dark:bg-red-950/40 rounded-lg"><AlertTriangle class="size-4 text-red-600" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-12" />
-        <div v-else class="text-3xl font-bold text-red-600 dark:text-red-400">{{ totalBermasalah }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Memiliki alpa</p>
-      </Card>
-    </div>
+    <StatCardGrid cols="4">
+      <StatCard
+        label="Total Staf"
+        :value="stafData.length"
+        sub="Guru & Tenaga Kependidikan"
+        :icon="Users"
+        variant="primary"
+        :delay="100"
+      />
+      <StatCard
+        label="Kehadiran Baik"
+        :value="totalHadir"
+        sub="≥ 90% kehadiran"
+        :icon="CheckCircle2"
+        variant="emerald"
+        :delay="200"
+      />
+      <StatCard
+        label="Hari Kerja"
+        :value="HARI_KERJA"
+        sub="Hari bulan ini"
+        :icon="Clock"
+        variant="default"
+        color="slate"
+        :delay="300"
+      />
+      <StatCard
+        label="Ada Pelanggaran"
+        :value="totalBermasalah"
+        sub="Memiliki alpa"
+        :icon="AlertTriangle"
+        variant="amber"
+        :delay="400"
+      />
+    </StatCardGrid>
 
     <!-- Alert -->
     <Alert v-if="!isLoading && totalBermasalah > 0" variant="destructive" class="border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900/30">

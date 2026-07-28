@@ -13,9 +13,40 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class StudentController extends Controller
 {
+    /**
+     * Hitung Cosine Similarity antara dua vektor float array (Facenet512: 512 dimensi)
+     */
+    private function cosineSimilarity(array $vecA, array $vecB): float
+    {
+        $dotProduct = 0.0;
+        $normA = 0.0;
+        $normB = 0.0;
+        
+        $count = count($vecA);
+        if ($count !== count($vecB) || $count === 0) {
+            return 0.0;
+        }
+        
+        for ($i = 0; $i < $count; $i++) {
+            $dotProduct += $vecA[$i] * $vecB[$i];
+            $normA += $vecA[$i] * $vecA[$i];
+            $normB += $vecB[$i] * $vecB[$i];
+        }
+        
+        if ($normA === 0.0 || $normB === 0.0) {
+            return 0.0;
+        }
+        
+        return $dotProduct / (sqrt($normA) * sqrt($normB));
+    }
+
     /**
      * Map frontend gender to database.
      */
@@ -271,12 +302,16 @@ class StudentController extends Controller
             'nama_depan'     => 'required|string|max:100',
             'nama_belakang'  => 'nullable|string|max:100',
             'nisn'           => 'required|string|max:50|unique:student_profiles,nisn',
+            'nik'            => 'nullable|string|max:50',
             'kelas'          => 'required', // classroom_id
             'status'         => 'required|string',
             'jenis_kelamin'  => 'required|string',
             'tanggal_lahir'  => 'required|date',
             'email'          => 'nullable|email|unique:users,email',
             'no_hp'          => 'nullable|string',
+            'foto'           => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
+        ], [
+            'foto.max' => 'Tolong masukkan foto kurang dari 10 MB.',
         ]);
 
         if ($validator->fails()) {
@@ -323,6 +358,7 @@ class StudentController extends Controller
                 'user_id'         => $studentUser->id,
                 'classroom_id'    => $request->kelas,
                 'nisn'            => $request->nisn,
+                'nik'             => $request->nik,
                 'birth_place'     => $request->tempat_lahir,
                 'birth_date'      => $request->tanggal_lahir,
                 'gender'          => $this->mapGenderToDb($request->jenis_kelamin),
@@ -330,6 +366,63 @@ class StudentController extends Controller
                 'enrollment_date' => $enrollDate,
                 'status'          => $this->mapStatusToDb($request->status),
             ]);
+
+            // Foto Profil & Registrasi Biometrik AI
+            if ($request->hasFile('foto')) {
+                $path = $request->file('foto')->store('student_faces', 'public');
+                $fullPath = storage_path('app/public/' . $path);
+
+                $embedding = null;
+                try {
+                    $response = Http::timeout(60)
+                        ->attach('image', file_get_contents($fullPath), basename($fullPath))
+                        ->attach('name', $fullName)
+                        ->post(config('services.ai.url') . '/api/represent');
+
+                    if ($response->successful()) {
+                        $resData = $response->json();
+                        if (isset($resData['success']) && $resData['success'] === true) {
+                            $embedding = $resData['embedding'];
+                        } else {
+                            Log::error("AI represent returned success false: " . json_encode($resData));
+                        }
+                    } else {
+                        Log::error("AI represent HTTP failed (status " . $response->status() . "): " . $response->body());
+                    }
+                } catch (\Exception $e) {
+                    Log::warning("AI represent extraction failed: " . $e->getMessage());
+                }
+
+                if ($embedding) {
+                    // Validasi Wajah Ganda
+                    $otherStudents = StudentProfile::whereNotNull('embedding')->get();
+                    foreach ($otherStudents as $other) {
+                        if (is_array($other->embedding)) {
+                            $sim = $this->cosineSimilarity($embedding, $other->embedding);
+                            if ($sim >= 0.75) {
+                                if (file_exists($fullPath)) {
+                                    unlink($fullPath);
+                                }
+                                throw new \Exception("Foto wajah sudah terdaftar atas nama siswa lain (" . $other->user->name . "). Registrasi ditolak.");
+                            }
+                        }
+                    }
+
+                    $studentProfile->is_face_registered = true;
+                    $studentProfile->embedding = $embedding;
+                    $studentProfile->save();
+
+                    $studentUser->photo = '/storage/' . $path;
+                    $studentUser->save();
+                    
+                    Cache::forget('student_embeddings:global');
+                } else {
+                    if (file_exists($fullPath)) {
+                        unlink($fullPath);
+                    }
+                    throw new \Exception("Gagal mendeteksi wajah pada foto profil. Pastikan wajah tegak lurus.");
+                }
+            }
 
             // 3. Create Parent (if provided)
             if ($request->has('nama_wali') && !empty($request->nama_wali)) {
@@ -410,6 +503,7 @@ class StudentController extends Controller
             'nama_depan'     => explode(' ', $student->name)[0],
             'nama_belakang'  => count(explode(' ', $student->name)) > 1 ? implode(' ', array_slice(explode(' ', $student->name), 1)) : '',
             'nisn'           => $profile ? $profile->nisn : '',
+            'nik'            => $profile ? $profile->nik : '',
             'tempat_lahir'   => $profile ? $profile->birth_place : '',
             'tanggal_lahir'  => $profile && $profile->birth_date ? $profile->birth_date->format('Y-m-d') : '',
             'jenis_kelamin'  => $profile ? ($profile->gender === 'male' ? 'JK01' : 'JK02') : '',
@@ -467,12 +561,16 @@ class StudentController extends Controller
             'nama_depan'     => 'required|string|max:100',
             'nama_belakang'  => 'nullable|string|max:100',
             'nisn'           => 'required|string|max:50|unique:student_profiles,nisn,' . ($profile ? $profile->id : 'NULL'),
+            'nik'            => 'nullable|string|max:50',
             'kelas'          => 'required',
             'status'         => 'required|string',
             'jenis_kelamin'  => 'required|string',
             'tanggal_lahir'  => 'required|date',
             'email'          => 'nullable|email|unique:users,email,' . $studentUser->id,
             'no_hp'          => 'nullable|string',
+            'foto'           => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
+        ], [
+            'foto.max' => 'Tolong masukkan foto kurang dari 10 MB.',
         ]);
 
         if ($validator->fails()) {
@@ -504,6 +602,7 @@ class StudentController extends Controller
                 $profile->update([
                     'classroom_id'    => $request->kelas,
                     'nisn'            => $request->nisn,
+                    'nik'             => $request->nik,
                     'birth_place'     => $request->tempat_lahir,
                     'birth_date'      => $request->tanggal_lahir,
                     'gender'          => $this->mapGenderToDb($request->jenis_kelamin),
@@ -511,6 +610,71 @@ class StudentController extends Controller
                     'enrollment_date' => $enrollDate,
                     'status'          => $this->mapStatusToDb($request->status),
                 ]);
+            }
+
+            // Foto Profil & Registrasi Biometrik AI
+            if ($request->hasFile('foto') && $profile) {
+                $path = $request->file('foto')->store('student_faces', 'public');
+                $fullPath = storage_path('app/public/' . $path);
+
+                $embedding = null;
+                try {
+                    $response = Http::timeout(60)
+                        ->attach('image', file_get_contents($fullPath), basename($fullPath))
+                        ->attach('name', $fullName)
+                        ->post(config('services.ai.url') . '/api/represent');
+
+                    if ($response->successful()) {
+                        $resData = $response->json();
+                        if (isset($resData['success']) && $resData['success'] === true) {
+                            $embedding = $resData['embedding'];
+                        } else {
+                            Log::error("AI represent returned success false: " . json_encode($resData));
+                        }
+                    } else {
+                        Log::error("AI represent HTTP failed (status " . $response->status() . "): " . $response->body());
+                    }
+                } catch (\Exception $e) {
+                    Log::warning("AI represent extraction failed: " . $e->getMessage());
+                }
+
+                if ($embedding) {
+                    // Validasi Wajah Ganda
+                    $otherStudents = StudentProfile::where('id', '!=', $profile->id)
+                        ->whereNotNull('embedding')
+                        ->get();
+                    foreach ($otherStudents as $other) {
+                        if (is_array($other->embedding)) {
+                            $sim = $this->cosineSimilarity($embedding, $other->embedding);
+                            if ($sim >= 0.75) {
+                                if (file_exists($fullPath)) {
+                                    unlink($fullPath);
+                                }
+                                throw new \Exception("Foto wajah sudah terdaftar atas nama siswa lain (" . $other->user->name . "). Registrasi ditolak.");
+                            }
+                        }
+                    }
+
+                    // Hapus berkas wajah lama jika ada
+                    if ($studentUser->photo) {
+                        $oldPath = str_replace('/storage/', '', $studentUser->photo);
+                        Storage::disk('public')->delete($oldPath);
+                    }
+
+                    $profile->is_face_registered = true;
+                    $profile->embedding = $embedding;
+                    $profile->save();
+
+                    $studentUser->photo = '/storage/' . $path;
+                    $studentUser->save();
+                    
+                    Cache::forget('student_embeddings:global');
+                } else {
+                    if (file_exists($fullPath)) {
+                        unlink($fullPath);
+                    }
+                    throw new \Exception("Gagal mendeteksi wajah pada foto profil. Pastikan wajah tegak lurus.");
+                }
             }
 
             // 3. Update parent (if provided)

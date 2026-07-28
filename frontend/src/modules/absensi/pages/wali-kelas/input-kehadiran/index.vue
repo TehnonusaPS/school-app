@@ -26,6 +26,7 @@ import {
   waliKelasAssignments,
   academicMonths
 } from '../../../data/mockAbsensi'
+import { getStudents, getMonthlyGrid, updateMonthlyCell } from '@/services/api/absensi'
 import AttendanceTable from '../../../components/AttendanceTable.vue'
 import AttendanceLegend from '../../../components/AttendanceLegend.vue'
 import PageHeader from '@/components/page-header/PageHeader.vue'
@@ -34,29 +35,71 @@ import { glassSlide, glassFade } from '@/config/motion'
 const auth = useAuthStore()
 
 // --- Data Siswa ---
-const students = ref(mockStudents)
+const students = ref([])
 
 const isWaliKelas = computed(() => auth.user?.role === 'wali_kelas')
 
 // --- State Filter Aktif ---
 const selectedTahun = ref('2026/2027')
-const selectedKelas = ref('2 D')
+const selectedKelas = ref('2-D')
 
-// Default to June (index 11 in academicMonths) to match June 2026 / June 2027 wireframes
-const activeMonthIdx = ref(11)
+const getCurrentAcademicMonthIdx = () => {
+  const currentMonth = new Date().getMonth()
+  const mapJsMonthToAcademicIdx = {
+    6: 0,  // Juli
+    7: 1,  // Agustus
+    8: 2,  // September
+    9: 3,  // Oktober
+    10: 4, // November
+    11: 5, // Desember
+    0: 6,  // Januari
+    1: 7,  // Februari
+    2: 8,  // Maret
+    3: 9,  // April
+    4: 10, // Mei
+    5: 11  // Juni
+  }
+  return mapJsMonthToAcademicIdx[currentMonth] ?? 0
+}
+
+// State Filter Aktif (Default to current ongoing academic month)
+const activeMonthIdx = ref(getCurrentAcademicMonthIdx())
 
 // --- Lock Class for Wali Kelas ---
 watch(selectedTahun, (newTahun) => {
   if (isWaliKelas.value) {
-    selectedKelas.value = waliKelasAssignments[newTahun] || '2 D'
+    selectedKelas.value = waliKelasAssignments[newTahun] || '2-D'
   }
 })
 
+const loadGridData = async () => {
+  try {
+    const resStudents = await getStudents({ kelas: selectedKelas.value })
+    students.value = resStudents.map(s => ({
+      id: s.id,
+      nama: s.nama,
+      nis: s.nisn || '-',
+      gender: s.gender || (s.jenisKelamin === 'Laki-laki' ? 'L' : (s.jenisKelamin === 'Perempuan' ? 'P' : 'L'))
+    }))
+
+    const resGrid = await getMonthlyGrid({
+      kelas: selectedKelas.value,
+      tahun: selectedTahun.value,
+      monthIdx: activeMonthIdx.value
+    })
+    if (resGrid.success) {
+      attendanceMap.value = resGrid.data
+    }
+  } catch (err) {
+    toast.error('Gagal mengambil data absensi')
+  }
+}
+
 onMounted(() => {
   if (isWaliKelas.value) {
-    selectedKelas.value = waliKelasAssignments[selectedTahun.value] || '2 D'
+    selectedKelas.value = waliKelasAssignments[selectedTahun.value] || '2-D'
   }
-  seedAttendance()
+  loadGridData()
 })
 
 // --- Computed Date Calculations ---
@@ -146,9 +189,9 @@ const seedAttendance = () => {
   })
 }
 
-// Watch filters to trigger seeding for new combinations
+// Watch filters to trigger loading for new combinations
 watch([selectedKelas, selectedTahun, activeMonthIdx], () => {
-  seedAttendance()
+  loadGridData()
 })
 
 const getStatus = (studentId, dayNum) => {
@@ -156,8 +199,8 @@ const getStatus = (studentId, dayNum) => {
   return attendanceMap.value[key] || null
 }
 
-// --- Toggle Status (H -> S -> I -> A -> ?) ---
-const toggleStatus = (studentId, dayNum) => {
+// --- Toggle Status (H -> T -> I -> S -> A -> ?) ---
+const toggleStatus = async (studentId, dayNum) => {
   if (isReadOnly.value) {
     toast.error('Mode Riwayat Aktif', {
       description: 'Absensi di semester atau tahun pelajaran lampau tidak dapat diubah.'
@@ -168,20 +211,34 @@ const toggleStatus = (studentId, dayNum) => {
   const key = getAttendanceKey(selectedKelas.value, selectedTahun.value, activeMonthIdx.value, studentId, dayNum)
   const currentVal = attendanceMap.value[key]
   
+  // Cycle: null (?) -> H -> T -> I -> S -> A -> null (?)
   let newVal = null
   if (!currentVal) newVal = 'H'
-  else if (currentVal === 'H') newVal = 'S'
-  else if (currentVal === 'S') newVal = 'I'
-  else if (currentVal === 'I') newVal = 'A'
+  else if (currentVal === 'H') newVal = 'T'
+  else if (currentVal === 'T') newVal = 'I'
+  else if (currentVal === 'I') newVal = 'S'
+  else if (currentVal === 'S') newVal = 'A'
   else if (currentVal === 'A') newVal = null
   
-  attendanceMap.value[key] = newVal
-
-  // Tampilkan konfirmasi penyimpanan otomatis
-  toast.success('Absensi diperbarui', {
-    id: 'attendance-update',
-    duration: 1500
-  })
+  try {
+    await updateMonthlyCell({
+      kelas: selectedKelas.value,
+      tahun: selectedTahun.value,
+      monthIdx: activeMonthIdx.value,
+      studentId,
+      dayNum,
+      status: newVal
+    })
+    attendanceMap.value[key] = newVal
+    
+    // Tampilkan konfirmasi penyimpanan otomatis
+    toast.success('Absensi diperbarui', {
+      id: 'attendance-update',
+      duration: 1500
+    })
+  } catch (err) {
+    toast.error('Gagal memperbarui absensi bulanan.')
+  }
 }
 
 // Calculate total checkmarks dynamically
@@ -323,7 +380,7 @@ const handlePrint = () => {
 
     <!-- Active Class Information Box (Wireframe Match) -->
     <div class="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-6">
-      <div class="space-y-6">
+      <div class="space-y-6 min-w-0">
         
         <!-- Wireframe Info Panel & Pagers -->
         <Card

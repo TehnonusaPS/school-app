@@ -12,20 +12,33 @@ class StudentProfile extends Model
         'user_id',
         'classroom_id',
         'nisn',
+        'nik',
         'birth_place',
         'birth_date',
         'gender',
         'address',
         'enrollment_date',
         'status',
+        'is_face_registered',
+        'embedding',
     ];
 
     protected function casts(): array
     {
         return [
-            'birth_date'      => 'date',
-            'enrollment_date' => 'date',
+            'birth_date'          => 'date',
+            'enrollment_date'     => 'date',
+            'is_face_registered'  => 'boolean',
+            'embedding'           => 'array',
         ];
+    }
+
+    /**
+     * Get the student attendances.
+     */
+    public function attendances(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(StudentAttendance::class);
     }
 
     /**

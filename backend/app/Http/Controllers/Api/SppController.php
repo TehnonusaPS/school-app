@@ -347,7 +347,7 @@ class SppController extends Controller
             DB::beginTransaction();
 
             $paymentMethod = strtolower($request->payment_method);
-            $isManualAdmin = in_array($user->role->name, ['admin_sekolah', 'tata_usaha']);
+            $isManualAdmin = $user->hasAnyRole(['admin_sekolah', 'tata_usaha']);
             
             // Generate references
             $refNumber = 'INV-' . Carbon::now()->format('Ymd') . '-' . strtoupper(Str::random(6));
@@ -393,6 +393,18 @@ class SppController extends Controller
                     
                     if ($bill->paid_amount >= $bill->amount) {
                         $bill->status = 'paid';
+                        
+                        // Automatically approve/success any other pending payments for this bill
+                        $pendingPaymentIds = StudentPaymentItem::where('student_bill_id', $bill->id)
+                            ->pluck('student_payment_id');
+                            
+                        StudentPayment::whereIn('id', $pendingPaymentIds)
+                            ->where('status', 'pending')
+                            ->update([
+                                'status' => 'success',
+                                'verified_by' => $user->id,
+                                'notes' => 'Auto-approved on manual payment entry.'
+                            ]);
                     } elseif ($bill->paid_amount > 0) {
                         $bill->status = 'partial';
                     }
@@ -529,6 +541,32 @@ class SppController extends Controller
             'type' => $request->type
         ]);
 
+        // Generate student bills automatically for matching students
+        $studentQuery = User::where('school_id', $user->school_id)
+            ->whereHas('role', function ($q) {
+                $q->where('name', 'siswa');
+            });
+
+        if ($tariff->classroom_id) {
+            $studentQuery->whereHas('studentProfile', function ($q) use ($tariff) {
+                $q->where('classroom_id', $tariff->classroom_id);
+            });
+        }
+
+        $students = $studentQuery->get();
+
+        foreach ($students as $student) {
+            StudentBill::create([
+                'student_id' => $student->id,
+                'spp_tariff_id' => $tariff->id,
+                'title' => $tariff->name,
+                'amount' => $tariff->amount,
+                'paid_amount' => 0,
+                'due_date' => Carbon::now()->addDays(15)->format('Y-m-d'),
+                'status' => 'unpaid',
+            ]);
+        }
+
         return response()->json([
             'status' => 'success',
             'data' => $tariff
@@ -551,6 +589,55 @@ class SppController extends Controller
 
         $tariff->update($request->only(['name', 'amount', 'classroom_id', 'type']));
 
+        // Update existing unpaid student bills title & amount
+        StudentBill::where('spp_tariff_id', $tariff->id)
+            ->where('status', 'unpaid')
+            ->where('paid_amount', 0)
+            ->update([
+                'title' => $tariff->name,
+                'amount' => $tariff->amount
+            ]);
+
+        // Synchronize scope: add eligible students, delete no longer eligible
+        $studentQuery = User::where('school_id', $tariff->school_id)
+            ->whereHas('role', function ($q) {
+                $q->where('name', 'siswa');
+            });
+
+        if ($tariff->classroom_id) {
+            $studentQuery->whereHas('studentProfile', function ($q) use ($tariff) {
+                $q->where('classroom_id', $tariff->classroom_id);
+            });
+        }
+
+        $eligibleStudentIds = $studentQuery->pluck('id')->toArray();
+
+        // 1. Create bills for newly eligible students
+        foreach ($eligibleStudentIds as $sId) {
+            $exists = StudentBill::where('student_id', $sId)
+                ->where('spp_tariff_id', $tariff->id)
+                ->exists();
+
+            if (!$exists) {
+                StudentBill::create([
+                    'student_id' => $sId,
+                    'spp_tariff_id' => $tariff->id,
+                    'title' => $tariff->name,
+                    'amount' => $tariff->amount,
+                    'paid_amount' => 0,
+                    'due_date' => Carbon::now()->addDays(15)->format('Y-m-d'),
+                    'status' => 'unpaid',
+                ]);
+            }
+        }
+
+        // 2. Remove bills for students no longer eligible (if unpaid)
+        StudentBill::where('spp_tariff_id', $tariff->id)
+            ->whereNotIn('student_id', $eligibleStudentIds)
+            ->where('status', 'unpaid')
+            ->where('paid_amount', 0)
+            ->delete();
+
         return response()->json([
             'status' => 'success',
             'data' => $tariff
@@ -563,11 +650,18 @@ class SppController extends Controller
     public function deleteTariff(string $id): JsonResponse
     {
         $tariff = SppTariff::findOrFail($id);
+
+        // Delete associated unpaid bills
+        StudentBill::where('spp_tariff_id', $tariff->id)
+            ->where('status', 'unpaid')
+            ->where('paid_amount', 0)
+            ->delete();
+
         $tariff->delete();
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Tariff deleted successfully.'
+            'message' => 'Tariff and associated unpaid bills deleted successfully.'
         ]);
     }
 }

@@ -15,6 +15,8 @@ import {
   BarChart3,
 } from 'lucide-vue-next'
 import { Skeleton } from '@/components/ui/skeleton'
+import StatCardGrid from '@/components/stat-card/StatCardGrid.vue'
+import StatCard from '@/components/stat-card/StatCard.vue'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -48,27 +50,7 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
-
-const mockKelasData = [
-  { id: 1, kelas: 'X IPA 1', waliKelas: 'Pak Budi, S.Pd', totalSiswa: 32, lulus: 30, tidakLulus: 2, rataNilai: 81.2, kehadiran: 93 },
-  { id: 2, kelas: 'X IPA 2', waliKelas: 'Bu Rina, M.Pd', totalSiswa: 30, lulus: 28, tidakLulus: 2, rataNilai: 79.5, kehadiran: 91 },
-  { id: 3, kelas: 'XI IPA 1', waliKelas: 'Bu Sari Dewi, S.Pd', totalSiswa: 35, lulus: 33, tidakLulus: 2, rataNilai: 83.7, kehadiran: 95 },
-  { id: 4, kelas: 'XI IPA 2', waliKelas: 'Pak Rahmat, M.Pd', totalSiswa: 34, lulus: 31, tidakLulus: 3, rataNilai: 77.4, kehadiran: 88 },
-  { id: 5, kelas: 'XI IPS 1', waliKelas: 'Bu Laila, S.Pd', totalSiswa: 33, lulus: 32, tidakLulus: 1, rataNilai: 80.1, kehadiran: 90 },
-  { id: 6, kelas: 'XII IPA 1', waliKelas: 'Pak Hasan, M.Pd', totalSiswa: 31, lulus: 31, tidakLulus: 0, rataNilai: 85.6, kehadiran: 97 },
-  { id: 7, kelas: 'XII IPS 1', waliKelas: 'Bu Dewi, S.Pd', totalSiswa: 29, lulus: 27, tidakLulus: 2, rataNilai: 78.9, kehadiran: 89 },
-]
-
-const mockMapelData = [
-  { mapel: 'Matematika', avg: 79.2, tertinggi: 98, terendah: 55, tuntas: 78 },
-  { mapel: 'Fisika', avg: 77.8, tertinggi: 95, terendah: 52, tuntas: 72 },
-  { mapel: 'Kimia', avg: 80.1, tertinggi: 97, terendah: 58, tuntas: 81 },
-  { mapel: 'Biologi', avg: 82.4, tertinggi: 99, terendah: 61, tuntas: 85 },
-  { mapel: 'Bahasa Indonesia', avg: 84.6, tertinggi: 98, terendah: 64, tuntas: 92 },
-  { mapel: 'Bahasa Inggris', avg: 76.3, tertinggi: 94, terendah: 50, tuntas: 69 },
-  { mapel: 'Sejarah', avg: 81.5, tertinggi: 96, terendah: 60, tuntas: 83 },
-  { mapel: 'Ekonomi', avg: 79.9, tertinggi: 95, terendah: 57, tuntas: 78 },
-]
+import { getSchoolAcademic } from '@/services/api/reports'
 
 const isLoading = ref(true)
 const kelasData = ref([])
@@ -79,12 +61,16 @@ const searchQuery = ref('')
 const sortField = ref('kelas')
 const sortDir = ref('asc')
 
-onMounted(() => {
-  setTimeout(() => {
-    kelasData.value = mockKelasData
-    mapelData.value = mockMapelData
+onMounted(async () => {
+  try {
+    const res = await getSchoolAcademic()
+    kelasData.value = res.kelas || []
+    mapelData.value = res.mapel || []
+  } catch (error) {
+    console.error('Failed to fetch school academic data:', error)
+  } finally {
     isLoading.value = false
-  }, 600)
+  }
 })
 
 const totalSiswa = computed(() => kelasData.value.reduce((s, k) => s + k.totalSiswa, 0))
@@ -172,44 +158,41 @@ function sortIconClass(field) {
     </div>
 
     <!-- Stat Cards -->
-    <div class="grid gap-4 grid-cols-2 lg:grid-cols-4">
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Siswa</span>
-          <div class="p-1.5 bg-muted rounded-lg"><Users class="size-4 text-muted-foreground" /></div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-8 w-14" />
-        <div v-else class="text-3xl font-bold">{{ totalSiswa }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Di {{ kelasData.length }} kelas</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Rata-rata Nilai</span>
-          <div class="p-1.5 bg-primary/10 rounded-lg"><BarChart3 class="size-4 text-primary" /></div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-8 w-14" />
-        <div v-else class="text-3xl font-bold text-primary">{{ avgNilai }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Seluruh mata pelajaran</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Lulus KKM</span>
-          <div class="p-1.5 bg-green-50 dark:bg-green-950/40 rounded-lg"><Award class="size-4 text-green-600" /></div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-8 w-14" />
-        <div v-else class="text-3xl font-bold text-green-600 dark:text-green-400">{{ totalLulus }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Siswa tuntas</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Kehadiran</span>
-          <div class="p-1.5 bg-blue-50 dark:bg-blue-950/40 rounded-lg"><GraduationCap class="size-4 text-blue-600" /></div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-8 w-14" />
-        <div v-else class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ avgKehadiran }}%</div>
-        <p class="text-xs text-muted-foreground mt-1">Rata-rata kehadiran</p>
-      </Card>
-    </div>
+    <StatCardGrid cols="4">
+      <StatCard
+        label="Total Siswa"
+        :value="totalSiswa"
+        :sub="`Di ${kelasData.length} kelas`"
+        :icon="Users"
+        variant="default"
+        color="slate"
+        :delay="100"
+      />
+      <StatCard
+        label="Rata-rata Nilai"
+        :value="avgNilai"
+        sub="Seluruh mata pelajaran"
+        :icon="BarChart3"
+        variant="primary"
+        :delay="200"
+      />
+      <StatCard
+        label="Lulus KKM"
+        :value="totalLulus"
+        sub="Siswa tuntas"
+        :icon="Award"
+        variant="emerald"
+        :delay="300"
+      />
+      <StatCard
+        label="Kehadiran"
+        :value="avgKehadiran + '%'"
+        sub="Rata-rata kehadiran"
+        :icon="GraduationCap"
+        variant="blue"
+        :delay="400"
+      />
+    </StatCardGrid>
 
     <!-- Tabs -->
     <Tabs default-value="kelas">

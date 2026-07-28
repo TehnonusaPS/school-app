@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('foundation_id')->constrained('foundations')->cascadeOnDelete();
             $table->foreignId('school_id')->constrained('schools')->cascadeOnDelete();
-            $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
+            $table->foreignUuid('created_by')->constrained('users')->cascadeOnDelete();
             $table->string('title');
             $table->text('content');
             $table->string('category')->default('UMUM'); // UMUM, AKADEMIK, KEUANGAN

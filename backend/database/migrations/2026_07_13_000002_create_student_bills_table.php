@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('student_bills', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('student_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignUuid('student_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('spp_tariff_id')->nullable()->constrained('spp_tariffs')->nullOnDelete();
             $table->string('title');
             $table->decimal('amount', 15, 2);

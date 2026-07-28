@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('parent_profiles', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->unique()->constrained('users')->cascadeOnDelete();
+            $table->foreignUuid('user_id')->unique()->constrained('users')->cascadeOnDelete();
             $table->string('nik')->nullable();
             $table->enum('gender', ['male', 'female'])->nullable();
             $table->string('birth_place')->nullable();

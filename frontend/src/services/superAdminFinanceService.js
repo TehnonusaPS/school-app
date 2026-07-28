@@ -65,6 +65,22 @@ export async function deleteSubscription(id) {
 }
 
 /**
+ * Get a specific subscription's detail.
+ */
+export async function getSubscription(id) {
+  const response = await api.get(`/superadmin/finance/subscriptions/${id}`)
+  return response.data
+}
+
+/**
+ * Update an existing subscription.
+ */
+export async function updateSubscription(id, data) {
+  const response = await api.put(`/superadmin/finance/subscriptions/${id}`, data)
+  return response.data
+}
+
+/**
  * List subscriptions with optional parameters (status, search, page).
  */
 export async function getSubscriptions(params) {

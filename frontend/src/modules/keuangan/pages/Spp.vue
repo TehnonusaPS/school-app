@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'vue-sonner'
 import { getSppDashboard, createSppPayment, verifySppPayment } from '@/services/sppService'
+import { fetchAllSiswa } from '@/services/siswaService'
 
 const auth = useAuthStore()
 const route = useRoute()
@@ -52,6 +53,17 @@ const currentBills = ref([])
 const paymentHistory = ref([])
 const antrianPembayaran = ref([])
 const logKasKecil = ref([])
+const students = ref([])
+const siswaSearchQuery = ref('')
+const filteredStudentsList = computed(() => {
+  const q = siswaSearchQuery.value.trim().toLowerCase()
+  if (!q) return students.value
+  return students.value.filter(s => 
+    (s.nama && s.nama.toLowerCase().includes(q)) || 
+    (s.nisn && s.nisn.toLowerCase().includes(q)) ||
+    (s.kelas && s.kelas.toLowerCase().includes(q))
+  )
+})
 const stats = ref({
   kas_kecil: 4500000,
   total_spp_bulan_ini: 0,
@@ -119,6 +131,12 @@ const loadDashboard = async () => {
       }
       antrianPembayaran.value = res.data.antrian_pembayaran
       logKasKecil.value = res.data.log_kas_kecil
+      
+      // Load all students
+      const studentRes = await fetchAllSiswa()
+      if (studentRes.status === 'success') {
+        students.value = studentRes.data
+      }
     }
   } catch (err) {
     toast.error('Gagal memuat data keuangan')
@@ -546,7 +564,7 @@ onMounted(() => {
             <div class="bg-primary text-primary-foreground rounded-lg w-10 h-10 flex items-center justify-center mb-3">
               <CreditCard class="size-5" />
             </div>
-            <h3 class="font-semibold text-sm">Terima Pembayaran SPP</h3>
+            <h3 class="font-semibold text-sm">Terima Pembayaran</h3>
             <p class="text-xs text-muted-foreground mt-2">Catat pembayaran SPP siswa secara instan.</p>
           </Card>
 
@@ -599,14 +617,30 @@ onMounted(() => {
 
       <!-- Tabs and Table Section -->
       <Card class=" p-6">
-        <!-- Tabs -->
-        <div class="flex gap-6 border-b mb-6">
-          <button class="pb-3 font-medium text-sm border-b-2 border-primary text-primary">
-            Antrian Pembayaran SPP
-          </button>
-          <button class="pb-3 font-medium text-sm text-muted-foreground hover:text-primary">
-            Log Kas Kecil
-          </button>
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center border-b mb-6 gap-4 pb-2">
+          <!-- Tabs -->
+          <div class="flex gap-6">
+            <button class="pb-2 font-medium text-sm border-b-2 border-primary -mb-[10px] text-primary">
+              Daftar Siswa
+            </button>
+            <button class="pb-2 font-medium text-sm text-muted-foreground hover:text-primary">
+              Log Kas Kecil
+            </button>
+          </div>
+
+          <!-- Search field -->
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-muted-foreground font-semibold">Cari:</span>
+            <div class="relative">
+              <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+              <Input 
+                type="text" 
+                v-model="siswaSearchQuery" 
+                placeholder="Nama, NISN, atau kelas..." 
+                class="pl-8 w-[220px] h-8 text-xs bg-muted/40" 
+              />
+            </div>
+          </div>
         </div>
 
         <!-- Table -->
@@ -615,45 +649,38 @@ onMounted(() => {
             <thead>
               <tr class="border-b bg-muted/50">
                 <th class="px-4 py-3 text-center font-semibold text-xs uppercase text-muted-foreground w-[50px]">No</th>
-                <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground w-[200px]">NAMA SISWA</th>
-                <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground w-[100px]">KELAS</th>
-                <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground w-[120px]">BULAN</th>
-                <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground w-[120px]">JUMLAH</th>
+                <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground w-[220px]">NAMA SISWA</th>
+                <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground w-[150px]">NISN</th>
+                <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground w-[120px]">KELAS</th>
                 <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground w-[100px]">STATUS</th>
-                <th class="px-4 py-3 text-left font-semibold text-xs uppercase text-muted-foreground w-[100px]">AKSI</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, idx) in antrianPembayaran" :key="item.id" class="border-b hover:bg-muted/50">
+              <tr v-for="(item, idx) in filteredStudentsList" :key="item.id" class="border-b hover:bg-muted/50">
                 <td class="px-4 py-4 text-center">{{ idx + 1 }}</td>
                 <td class="px-4 py-4">
                   <div class="flex items-center gap-2">
-                    <div class="bg-primary/10 text-primary rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">{{ item.initials }}</div>
-                    <span class="font-medium">{{ item.nama_siswa }}</span>
+                    <div class="bg-primary/10 text-primary rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">
+                      {{ item.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() }}
+                    </div>
+                    <span class="font-semibold text-foreground">{{ item.nama }}</span>
                   </div>
                 </td>
+                <td class="px-4 py-4 text-muted-foreground font-mono text-xs">{{ item.nisn || '-' }}</td>
                 <td class="px-4 py-4">{{ item.kelas }}</td>
-                <td class="px-4 py-4">{{ item.bulan }}</td>
-                <td class="px-4 py-4">{{ formatRupiah(item.jumlah) }}</td>
                 <td class="px-4 py-4">
-                  <span :class="[
-                    'px-2 py-1 rounded text-xs font-semibold uppercase',
-                    item.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-500' :
-                    item.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500' : 'bg-destructive/10 text-destructive'
-                  ]">
-                    {{ item.status }}
+                  <span 
+                    :class="[
+                      'px-2.5 py-0.5 rounded text-[10px] font-bold uppercase',
+                      item.payment_status === 'Lunas' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-destructive/10 text-destructive'
+                    ]"
+                  >
+                    {{ item.payment_status || 'Belum Lunas' }}
                   </span>
                 </td>
-                <td class="px-4 py-4">
-                  <div class="flex gap-2" v-if="item.status === 'PENDING'">
-                    <button @click="handleVerify(item.id, 'success')" class="bg-primary text-primary-foreground px-3 py-1 rounded text-xs font-semibold hover:bg-primary/90">Terima</button>
-                    <button @click="handleVerify(item.id, 'failed')" class="bg-destructive text-destructive-foreground px-3 py-1 rounded text-xs font-semibold hover:bg-destructive/90">Tolak</button>
-                  </div>
-                  <span v-else class="text-xs text-muted-foreground">Selesai ({{ item.payment_method }})</span>
-                </td>
               </tr>
-              <tr v-if="antrianPembayaran.length === 0">
-                <td colspan="7" class="text-center py-6 text-muted-foreground">Tidak ada antrian pembayaran.</td>
+              <tr v-if="filteredStudentsList.length === 0">
+                <td colspan="5" class="text-center py-6 text-muted-foreground">Tidak ada siswa yang ditemukan.</td>
               </tr>
             </tbody>
           </table>
@@ -742,7 +769,7 @@ onMounted(() => {
             <div class="bg-primary text-primary-foreground rounded-lg w-10 h-10 flex items-center justify-center mb-3">
               <CreditCard class="size-5" />
             </div>
-            <h3 class="font-semibold text-sm">Terima Pembayaran SPP</h3>
+            <h3 class="font-semibold text-sm">Terima Pembayaran</h3>
             <p class="text-xs text-muted-foreground mt-2">Catat pembayaran SPP siswa secara instan.</p>
           </Card>
 
@@ -795,14 +822,30 @@ onMounted(() => {
 
       <!-- Tabs and Table Section -->
       <Card class=" p-6">
-        <!-- Tabs -->
-        <div class="flex gap-6 border-b mb-6">
-          <button class="pb-3 font-medium text-sm border-b-2 border-primary text-primary">
-            Antrian Pembayaran SPP
-          </button>
-          <button class="pb-3 font-medium text-sm text-muted-foreground hover:text-primary">
-            Log Kas Kecil
-          </button>
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center border-b mb-6 gap-4 pb-2">
+          <!-- Tabs -->
+          <div class="flex gap-6">
+            <button class="pb-2 font-medium text-sm border-b-2 border-primary -mb-[10px] text-primary">
+              Daftar Siswa
+            </button>
+            <button class="pb-2 font-medium text-sm text-muted-foreground hover:text-primary">
+              Log Kas Kecil
+            </button>
+          </div>
+
+          <!-- Search field -->
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-muted-foreground font-semibold">Cari:</span>
+            <div class="relative">
+              <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+              <Input 
+                type="text" 
+                v-model="siswaSearchQuery" 
+                placeholder="Nama, NISN, atau kelas..." 
+                class="pl-8 w-[220px] h-8 text-xs bg-muted/40" 
+              />
+            </div>
+          </div>
         </div>
 
         <!-- Table -->
@@ -811,45 +854,39 @@ onMounted(() => {
             <TableHeader>
               <TableRow>
                 <TableHead class="w-[50px] text-center font-semibold text-xs uppercase text-muted-foreground">NO</TableHead>
-                <TableHead class="font-semibold text-xs uppercase text-muted-foreground">NAMA SISWA</TableHead>
-                <TableHead class="font-semibold text-xs uppercase text-muted-foreground">KELAS</TableHead>
-                <TableHead class="font-semibold text-xs uppercase text-muted-foreground">BULAN</TableHead>
-                <TableHead class="font-semibold text-xs uppercase text-muted-foreground">JUMLAH</TableHead>
-                <TableHead class="font-semibold text-xs uppercase text-muted-foreground">STATUS</TableHead>
-                <TableHead class="font-semibold text-xs uppercase text-muted-foreground text-right">AKSI</TableHead>
+                <TableHead class="font-semibold text-xs uppercase text-muted-foreground w-[220px]">NAMA SISWA</TableHead>
+                <TableHead class="font-semibold text-xs uppercase text-muted-foreground w-[150px]">NISN</TableHead>
+                <TableHead class="font-semibold text-xs uppercase text-muted-foreground w-[120px]">KELAS</TableHead>
+                <TableHead class="font-semibold text-xs uppercase text-muted-foreground w-[100px]">STATUS</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow v-for="(item, idx) in antrianPembayaran" :key="item.id">
+              <TableRow v-for="(item, idx) in filteredStudentsList" :key="item.id">
                 <TableCell class="text-center font-medium">{{ idx + 1 }}</TableCell>
                 <TableCell>
                   <div class="flex items-center gap-2">
-                    <div class="bg-primary/10 text-primary rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">{{ item.initials }}</div>
-                    <span class="font-medium">{{ item.nama_siswa }}</span>
+                    <div class="bg-primary/10 text-primary rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">
+                      {{ item.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() }}
+                    </div>
+                    <span class="font-semibold text-foreground">{{ item.nama }}</span>
                   </div>
                 </TableCell>
+                <TableCell class="text-muted-foreground font-mono text-xs">{{ item.nisn || '-' }}</TableCell>
                 <TableCell>{{ item.kelas }}</TableCell>
-                <TableCell>{{ item.bulan }}</TableCell>
-                <TableCell>{{ formatRupiah(item.jumlah) }}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" :class="[
-                    item.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-100' :
-                    item.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500 border-amber-100' : 'bg-destructive/10 text-destructive border-destructive/10',
-                    'font-semibold'
-                  ]">
-                    {{ item.status }}
+                  <Badge 
+                    variant="outline" 
+                    :class="[
+                      'font-semibold uppercase',
+                      item.payment_status === 'Lunas' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-100' : 'bg-destructive/10 text-destructive border-destructive/20'
+                    ]"
+                  >
+                    {{ item.payment_status || 'Belum Lunas' }}
                   </Badge>
                 </TableCell>
-                <TableCell class="text-right">
-                  <div class="flex justify-end gap-2" v-if="item.status === 'PENDING'">
-                    <Button size="sm" @click="handleVerify(item.id, 'success')" class="h-8 px-2.5 bg-primary text-primary-foreground hover:bg-primary/90">Terima</Button>
-                    <Button size="sm" @click="handleVerify(item.id, 'failed')" variant="destructive" class="h-8 px-2.5">Tolak</Button>
-                  </div>
-                  <span v-else class="text-xs text-muted-foreground">Selesai ({{ item.payment_method }})</span>
-                </TableCell>
               </TableRow>
-              <TableRow v-if="antrianPembayaran.length === 0">
-                <TableCell colspan="7" class="text-center py-6 text-muted-foreground">Tidak ada antrian pembayaran.</TableCell>
+              <TableRow v-if="filteredStudentsList.length === 0">
+                <TableCell colspan="5" class="text-center py-6 text-muted-foreground">Tidak ada siswa yang ditemukan.</TableCell>
               </TableRow>
             </TableBody>
           </Table>

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('subject_id')->constrained('subjects')->cascadeOnDelete();
             $table->foreignId('classroom_id')->constrained('classrooms')->cascadeOnDelete();
             $table->foreignId('academic_year_id')->constrained('academic_years')->cascadeOnDelete();
-            $table->foreignId('uploaded_by')->constrained('users')->cascadeOnDelete();
+            $table->foreignUuid('uploaded_by')->constrained('users')->cascadeOnDelete();
             $table->string('title');
             $table->string('file_path');
             $table->string('file_name');

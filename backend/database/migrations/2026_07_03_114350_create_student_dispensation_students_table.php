@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('student_dispensation_students', function (Blueprint $table) {
             $table->id();
             $table->foreignId('dispensation_id')->constrained('student_dispensation_certificates')->cascadeOnDelete();
-            $table->foreignId('student_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignUuid('student_id')->constrained('users')->cascadeOnDelete();
             $table->string('nama');
             $table->string('nisn');
             $table->string('kelas');

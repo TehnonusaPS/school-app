@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { getSchoolGrades } from '@/services/api/reports'
 
 const mataPelajaranList = [
   'Matematika',
@@ -34,140 +35,6 @@ const mataPelajaranList = [
   'Bahasa Inggris',
   'Sejarah',
   'PJOK'
-]
-
-const mockRaportData = [
-  {
-    id: 1,
-    nisn: '0051234567',
-    nama: 'Ahmad Fadil',
-    kelas: 'XI IPA 1',
-    waliKelas: 'Bu Sari Dewi, S.Pd',
-    tp: '2025/2026',
-    semester: '1',
-    nilai: {
-      Matematika: 88,
-      Fisika: 82,
-      Kimia: 90,
-      Biologi: 85,
-      'Bahasa Indonesia': 88,
-      'Bahasa Inggris': 79,
-      Sejarah: 85,
-      PJOK: 90
-    },
-    kehadiran: { hadir: 95, terlambat: 4, izin: 2, sakit: 1, alpa: 0 },
-    catatan:
-      'Ahmad menunjukkan kemajuan yang baik di bidang sains. Perlu meningkatkan kemampuan bahasa Inggris.'
-  },
-  {
-    id: 2,
-    nisn: '0069876543',
-    nama: 'Bunga Citra',
-    kelas: 'XI IPA 1',
-    waliKelas: 'Bu Sari Dewi, S.Pd',
-    tp: '2025/2026',
-    semester: '1',
-    nilai: {
-      Matematika: 92,
-      Fisika: 88,
-      Kimia: 85,
-      Biologi: 91,
-      'Bahasa Indonesia': 90,
-      'Bahasa Inggris': 87,
-      Sejarah: 88,
-      PJOK: 85
-    },
-    kehadiran: { hadir: 100, terlambat: 1, izin: 1, sakit: 0, alpa: 0 },
-    catatan:
-      'Siswa berprestasi dengan nilai konsisten di semua mata pelajaran. Direkomendasikan untuk program pengembangan bakat.'
-  },
-  {
-    id: 3,
-    nisn: '0054321987',
-    nama: 'Cakra Khan',
-    kelas: 'XI IPA 1',
-    waliKelas: 'Bu Sari Dewi, S.Pd',
-    tp: '2025/2026',
-    semester: '1',
-    nilai: {
-      Matematika: 72,
-      Fisika: 68,
-      Kimia: 74,
-      Biologi: 70,
-      'Bahasa Indonesia': 75,
-      'Bahasa Inggris': 65,
-      Sejarah: 73,
-      PJOK: 80
-    },
-    kehadiran: { hadir: 78, terlambat: 8, izin: 5, sakit: 4, alpa: 7 },
-    catatan:
-      'Perlu peningkatan di banyak aspek terutama kedisiplinan. Disarankan untuk mengikuti program remedial.'
-  },
-  {
-    id: 4,
-    nisn: '0061122334',
-    nama: 'Dian Sastro',
-    kelas: 'XI IPA 1',
-    waliKelas: 'Bu Sari Dewi, S.Pd',
-    tp: '2025/2026',
-    semester: '1',
-    nilai: {
-      Matematika: 95,
-      Fisika: 93,
-      Kimia: 88,
-      Biologi: 92,
-      'Bahasa Indonesia': 89,
-      'Bahasa Inggris': 91,
-      Sejarah: 90,
-      PJOK: 88
-    },
-    kehadiran: { hadir: 100, terlambat: 0, izin: 2, sakit: 0, alpa: 0 },
-    catatan:
-      'Siswa terbaik di kelas dengan dedikasi tinggi. Kandidat kuat untuk beasiswa berprestasi.'
-  },
-  {
-    id: 5,
-    nisn: '0055566778',
-    nama: 'Elsa Novita',
-    kelas: 'XI IPA 2',
-    waliKelas: 'Pak Rahmat, M.Pd',
-    tp: '2025/2026',
-    semester: '1',
-    nilai: {
-      Matematika: 80,
-      Fisika: 75,
-      Kimia: 82,
-      Biologi: 78,
-      'Bahasa Indonesia': 82,
-      'Bahasa Inggris': 70,
-      Sejarah: 79,
-      PJOK: 85
-    },
-    kehadiran: { hadir: 100, terlambat: 0, izin: 0, sakit: 2, alpa: 0 },
-    catatan: 'Siswa yang rajin dan disiplin. Nilai konsisten di atas KKM.'
-  },
-  {
-    id: 6,
-    nisn: '0068899001',
-    nama: 'Farhan Ramdan',
-    kelas: 'XI IPA 2',
-    waliKelas: 'Pak Rahmat, M.Pd',
-    tp: '2025/2026',
-    semester: '1',
-    nilai: {
-      Matematika: 65,
-      Fisika: 60,
-      Kimia: 68,
-      Biologi: 63,
-      'Bahasa Indonesia': 70,
-      'Bahasa Inggris': 55,
-      Sejarah: 67,
-      PJOK: 78
-    },
-    kehadiran: { hadir: 68, terlambat: 10, izin: 5, sakit: 8, alpa: 11 },
-    catatan:
-      'Perlu perhatian khusus. Kehadiran dan nilai jauh di bawah standar. Disarankan konsultasi dengan orang tua.'
-  }
 ]
 
 const KKM = 75
@@ -185,11 +52,15 @@ const filterValues = ref({
   semester: '1'
 })
 
-onMounted(() => {
-  setTimeout(() => {
-    raportData.value = mockRaportData
+onMounted(async () => {
+  try {
+    const res = await getSchoolGrades()
+    raportData.value = res || []
+  } catch (error) {
+    console.error('Failed to fetch grades data:', error)
+  } finally {
     isLoading.value = false
-  }, 600)
+  }
 })
 
 watch(
@@ -450,7 +321,7 @@ const rowActions = [
     v-motion
     :initial="glassFade.initial"
     :visible-once="glassFade.visible"
-    class="space-y-6 max-w-[1400px] mx-auto pb-8 text-left"
+    class="space-y-6 w-full pb-8 text-left"
   >
     <!-- Header -->
     <PageHeader

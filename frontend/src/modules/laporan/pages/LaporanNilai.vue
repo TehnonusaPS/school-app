@@ -31,6 +31,7 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
+import { getSchoolGrades } from '@/services/api/reports'
 
 // Common Components
 import PageHeader from '@/components/page-header/PageHeader.vue'
@@ -40,20 +41,7 @@ import DataTableCard from '@/components/data-table/DataTableCard.vue'
 import { glassSlide, glassFade } from '@/config/motion'
 import { toast } from 'vue-sonner'
 
-// Mock Data
 const mataPelajaranList = ['Matematika', 'Fisika', 'Kimia', 'Biologi', 'Bahasa Indonesia', 'Bahasa Inggris', 'Sejarah', 'Ekonomi']
-
-const mockNilaiSiswa = [
-  { id: 1, nisn: '0051234567', nama: 'Ahmad Fadil', kelas: 'XI IPA 1', nilai: { Matematika: 88, Fisika: 82, Kimia: 90, Biologi: 85, 'Bahasa Indonesia': 88, 'Bahasa Inggris': 79 } },
-  { id: 2, nisn: '0069876543', nama: 'Bunga Citra', kelas: 'XI IPA 1', nilai: { Matematika: 92, Fisika: 88, Kimia: 85, Biologi: 91, 'Bahasa Indonesia': 90, 'Bahasa Inggris': 87 } },
-  { id: 3, nisn: '0054321987', nama: 'Cakra Khan', kelas: 'XI IPA 1', nilai: { Matematika: 72, Fisika: 68, Kimia: 74, Biologi: 70, 'Bahasa Indonesia': 75, 'Bahasa Inggris': 65 } },
-  { id: 4, nisn: '0061122334', nama: 'Dian Sastro', kelas: 'XI IPA 1', nilai: { Matematika: 95, Fisika: 93, Kimia: 88, Biologi: 92, 'Bahasa Indonesia': 89, 'Bahasa Inggris': 91 } },
-  { id: 5, nisn: '0055566778', nama: 'Elsa Novita', kelas: 'XI IPA 2', nilai: { Matematika: 80, Fisika: 75, Kimia: 82, Biologi: 78, 'Bahasa Indonesia': 82, 'Bahasa Inggris': 70 } },
-  { id: 6, nisn: '0068899001', nama: 'Farhan Ramdan', kelas: 'XI IPA 2', nilai: { Matematika: 65, Fisika: 60, Kimia: 68, Biologi: 63, 'Bahasa Indonesia': 70, 'Bahasa Inggris': 55 } },
-  { id: 7, nisn: '0052233445', nama: 'Gita Nirmala', kelas: 'XI IPA 2', nilai: { Matematika: 85, Fisika: 80, Kimia: 83, Biologi: 87, 'Bahasa Indonesia': 86, 'Bahasa Inggris': 82 } },
-  { id: 8, nisn: '0067788990', nama: 'Hendra Saputra', kelas: 'XI IPA 1', nilai: { Matematika: 78, Fisika: 73, Kimia: 76, Biologi: 80, 'Bahasa Indonesia': 77, 'Bahasa Inggris': 72 } },
-]
-
 const KKM = 75 // Kriteria Ketuntasan Minimal
 
 const isLoading = ref(true)
@@ -69,11 +57,15 @@ const filterValues = ref({
   mapel: 'all'
 })
 
-onMounted(() => {
-  setTimeout(() => {
-    nilaiData.value = mockNilaiSiswa
+onMounted(async () => {
+  try {
+    const res = await getSchoolGrades()
+    nilaiData.value = res || []
+  } catch (error) {
+    console.error('Failed to fetch school grades data:', error)
+  } finally {
     isLoading.value = false
-  }, 700)
+  }
 })
 
 watch(() => filterValues.value, () => {
@@ -232,7 +224,7 @@ const pageHeaderActions = computed(() => [
     v-motion
     :initial="glassFade.initial"
     :visible-once="glassFade.visible"
-    class="space-y-6 max-w-[1400px] mx-auto pb-8 text-left"
+    class="space-y-6 w-full pb-8 text-left"
   >
     <!-- Header -->
     <PageHeader

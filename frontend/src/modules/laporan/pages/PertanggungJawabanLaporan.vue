@@ -15,6 +15,8 @@ import {
   ChevronDown,
 } from 'lucide-vue-next'
 import { Skeleton } from '@/components/ui/skeleton'
+import StatCardGrid from '@/components/stat-card/StatCardGrid.vue'
+import StatCard from '@/components/stat-card/StatCard.vue'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -23,15 +25,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-
-const mockData = [
-  { id: 1, kegiatan: 'Porseni Tingkat Sekolah', unit: 'SMPN Harapan Ilmu', pic: 'Pak Doni Setiawan', anggaran: 15000000, realisasi: 14850000, tglLapor: '20 Mei 2026', status: 'Disetujui' },
-  { id: 2, kegiatan: 'Kunjungan Industri SMK', unit: 'SMK Teknologi Maju', pic: 'Bu Ratna Sari', anggaran: 25000000, realisasi: 26500000, tglLapor: '18 Mei 2026', status: 'Revisi' },
-  { id: 3, kegiatan: 'Perbaikan Atap Lab Komputer', unit: 'SMAN Bina Prestasi', pic: 'Pak Herman', anggaran: 8500000, realisasi: 8500000, tglLapor: '15 Mei 2026', status: 'Disetujui' },
-  { id: 4, kegiatan: 'Lomba Cerdas Cermat SD', unit: 'SDN Tunas Bangsa', pic: 'Bu Dewi Rahayu', anggaran: 5000000, realisasi: 0, tglLapor: '-', status: 'Belum Lapor' },
-  { id: 5, kegiatan: 'Pelatihan Guru Kurikulum Merdeka', unit: 'SMAN Bina Prestasi', pic: 'Pak Hasan, M.Pd', anggaran: 12000000, realisasi: 11500000, tglLapor: '25 Mei 2026', status: 'Menunggu Review' },
-  { id: 6, kegiatan: 'Pengadaan Buku Perpustakaan', unit: 'SMPN Harapan Ilmu', pic: 'Bu Endang', anggaran: 10000000, realisasi: 9800000, tglLapor: '22 Mei 2026', status: 'Disetujui' },
-]
+import { getSchoolAccountability } from '@/services/api/reports'
 
 const isLoading = ref(true)
 const data = ref([])
@@ -41,7 +35,16 @@ const selectedTahun = ref('2026')
 const sortField = ref('tglLapor')
 const sortDir = ref('desc')
 
-onMounted(() => { setTimeout(() => { data.value = mockData; isLoading.value = false }, 500) })
+onMounted(async () => {
+  try {
+    const res = await getSchoolAccountability()
+    data.value = res || []
+  } catch (error) {
+    console.error('Failed to fetch school accountability data:', error)
+  } finally {
+    isLoading.value = false
+  }
+})
 
 function formatRp(v) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(v) }
 
@@ -125,32 +128,40 @@ function getStatusColor(status) {
     </div>
 
     <!-- Stats -->
-    <div class="grid gap-4 grid-cols-2 lg:grid-cols-4">
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Kegiatan</span><div class="p-1.5 bg-primary/10 rounded-lg"><Building2 class="size-4 text-primary" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-10" />
-        <div v-else class="text-3xl font-bold text-primary">{{ totalKegiatan }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Dalam tahun berjalan</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">LPJ Disetujui</span><div class="p-1.5 bg-green-50 dark:bg-green-950/40 rounded-lg"><CheckCircle2 class="size-4 text-green-600" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-10" />
-        <div v-else class="text-3xl font-bold text-green-600 dark:text-green-400">{{ totalDisetujui }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Selesai & ditutup</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Menunggu Lapor</span><div class="p-1.5 bg-yellow-50 dark:bg-yellow-950/40 rounded-lg"><Clock class="size-4 text-yellow-600" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-10" />
-        <div v-else class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">{{ totalMenunggu }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Belum dikonfirmasi</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Perlu Revisi</span><div class="p-1.5 bg-red-50 dark:bg-red-950/40 rounded-lg"><AlertTriangle class="size-4 text-red-600" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-10" />
-        <div v-else class="text-3xl font-bold text-red-600 dark:text-red-400">{{ totalRevisi }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Dokumen ditolak/kurang</p>
-      </Card>
-    </div>
+    <StatCardGrid cols="4">
+      <StatCard
+        label="Total Kegiatan"
+        :value="totalKegiatan"
+        sub="Dalam tahun berjalan"
+        :icon="Building2"
+        variant="primary"
+        :delay="100"
+      />
+      <StatCard
+        label="LPJ Disetujui"
+        :value="totalDisetujui"
+        sub="Selesai & ditutup"
+        :icon="CheckCircle2"
+        variant="emerald"
+        :delay="200"
+      />
+      <StatCard
+        label="Menunggu Lapor"
+        :value="totalMenunggu"
+        sub="Belum dikonfirmasi"
+        :icon="Clock"
+        variant="amber"
+        :delay="300"
+      />
+      <StatCard
+        label="Perlu Revisi"
+        :value="totalRevisi"
+        sub="Dokumen ditolak/kurang"
+        :icon="AlertTriangle"
+        variant="destructive"
+        :delay="400"
+      />
+    </StatCardGrid>
 
     <Card class="overflow-hidden">
       <Table>

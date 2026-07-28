@@ -173,11 +173,14 @@ class FoundationController extends Controller
         }
 
         if ($user->isSuperAdmin() || ($user->hasRole('admin_yayasan') && $user->foundation_id == $foundation->id)) {
-            $foundation->load(['users' => function ($q) {
-                $q->whereIn('role_id', function ($sq) {
-                    $sq->select('id')->from('roles')->where('name', 'admin_yayasan');
-                });
-            }]);
+            $foundation->load([
+                'users' => function ($q) {
+                    $q->whereIn('role_id', function ($sq) {
+                        $sq->select('id')->from('roles')->where('name', 'admin_yayasan');
+                    });
+                },
+                'activeSubscription.plan'
+            ]);
 
             return response()->json([
                 'status' => 'success',

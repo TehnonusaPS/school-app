@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Classroom;
 use App\Models\StudentProfile;
+use App\Models\StudentBiometric;
 use App\Models\StudentAttendance;
 use App\Models\School;
 use App\Models\User;
@@ -101,7 +102,7 @@ class StudentAttendanceController extends Controller
                 'jamKeluar' => $attendance ? $attendance->time_out : null,
                 'status' => $attendance ? strtolower($attendance->status) : 'belum_absen',
                 'is_face_registered' => (bool)$student->is_face_registered,
-                'foto' => $student->user->photo,
+                'foto' => $student->user->photo ? (str_starts_with($student->user->photo, 'http') ? $student->user->photo : asset($student->user->photo)) : null,
             ];
         });
 
@@ -142,7 +143,7 @@ class StudentAttendanceController extends Controller
                 'nisn' => $student->nisn,
                 'inisial' => strtoupper($initials),
                 'waktu' => $att->time_in,
-                'tipe' => $att->time_out ? 'Keluar' : 'Masuk',
+                'tipe' => 'Masuk',
             ];
         });
 
@@ -182,27 +183,49 @@ class StudentAttendanceController extends Controller
                     if (isset($resData['success']) && $resData['success'] === true && !empty($resData['embedding'])) {
                         $scanEmbedding = $resData['embedding'];
 
-                        // Bandingkan dengan semua vektor biometrik terdaftar di sekolah ini (Cache RAM)
-                        $students = Cache::remember("student_embeddings:school_{$schoolId}", 3600, function () use ($schoolId) {
-                            return StudentProfile::whereHas('user', function ($q) use ($schoolId) {
+                        // Bandingkan dengan semua sampel biometrik terdaftar di sekolah ini (Cache RAM)
+                        $biometricsData = Cache::remember("student_embeddings:school_{$schoolId}", 3600, function () use ($schoolId) {
+                            return StudentBiometric::whereHas('studentProfile.user', function ($q) use ($schoolId) {
                                 $q->where('school_id', $schoolId);
-                            })->whereNotNull('embedding')->get();
+                            })->with('studentProfile.user', 'studentProfile.classroom')->get();
                         });
 
                         $bestMatch = null;
                         $highestSimilarity = 0.0;
                         $similarityThreshold = 0.65;
 
-                        foreach ($students as $student) {
-                            $studentEmbedding = $student->embedding;
-                            if (!is_array($studentEmbedding)) {
+                        foreach ($biometricsData as $bio) {
+                            $sampleEmbedding = $bio->embedding;
+                            if (!is_array($sampleEmbedding)) {
                                 continue;
                             }
                             
-                            $sim = $this->cosineSimilarity($scanEmbedding, $studentEmbedding);
+                            $sim = $this->cosineSimilarity($scanEmbedding, $sampleEmbedding);
                             if ($sim > $highestSimilarity) {
                                 $highestSimilarity = $sim;
-                                $bestMatch = $student;
+                                $bestMatch = $bio->studentProfile;
+
+                                // Optimasi Early Exit: Jika kemiripan sangat tinggi (>= 80%), langsung hentikan loop pencarian!
+                                if ($sim >= 0.80) {
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Fallback ke legacy embedding jika ada sampel lama
+                        if (!$bestMatch || $highestSimilarity < $similarityThreshold) {
+                            $legacyStudents = StudentProfile::whereHas('user', function ($q) use ($schoolId) {
+                                $q->where('school_id', $schoolId);
+                            })->whereNotNull('embedding')->get();
+
+                            foreach ($legacyStudents as $student) {
+                                $legacyEmbedding = $student->embedding;
+                                if (!is_array($legacyEmbedding)) continue;
+                                $sim = $this->cosineSimilarity($scanEmbedding, $legacyEmbedding);
+                                if ($sim > $highestSimilarity) {
+                                    $highestSimilarity = $sim;
+                                    $bestMatch = $student;
+                                }
                             }
                         }
 
@@ -241,32 +264,25 @@ class StudentAttendanceController extends Controller
             ->where('date', $today)
             ->first();
 
-        // Tentukan tipe log (Masuk atau Keluar)
-        $isKeluar = false;
+        // Apabila siswa sudah pernah melakukan presensi hari ini, tolak presensi kedua
         if ($attendance) {
-            if (!$attendance->time_out) {
-                $attendance->time_out = $timeIn;
-                $attendance->save();
-                $isKeluar = true;
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Siswa sudah melakukan absensi hari ini.'
-                ], 400);
-            }
-        } else {
-            // Log Absensi Masuk baru
-            // Tentukan status: H (Hadir) jika sebelum threshold, T (Terlambat) jika setelah threshold
-            $status = (strtotime($timeIn) <= strtotime($lateThreshold)) ? 'H' : 'T';
-
-            $attendance = StudentAttendance::create([
-                'student_profile_id' => $studentProfile->id,
-                'date' => $today,
-                'time_in' => $timeIn,
-                'status' => $status,
-                'verification_method' => $verificationMethod,
-            ]);
+            return response()->json([
+                'success' => false,
+                'message' => "Siswa {$studentProfile->user->name} sudah melakukan presensi masuk hari ini."
+            ], 400);
         }
+
+        // Log Absensi Masuk baru
+        // Tentukan status: H (Hadir) jika sebelum threshold, T (Terlambat) jika setelah threshold
+        $status = (strtotime($timeIn) <= strtotime($lateThreshold)) ? 'H' : 'T';
+
+        $attendance = StudentAttendance::create([
+            'student_profile_id' => $studentProfile->id,
+            'date' => $today,
+            'time_in' => $timeIn,
+            'status' => $status,
+            'verification_method' => $verificationMethod,
+        ]);
 
         $initials = collect(explode(' ', $studentProfile->user->name))
             ->map(fn($n) => mb_substr($n, 0, 1))
@@ -280,100 +296,138 @@ class StudentAttendanceController extends Controller
             'nisn' => $studentProfile->nisn,
             'inisial' => strtoupper($initials),
             'waktu' => $timeIn,
-            'tipe' => $isKeluar ? 'Keluar' : 'Masuk',
+            'tipe' => 'Masuk',
         ];
 
         return response()->json($newLog);
     }
 
     /**
-     * Register student face via webcam photo in dashboard.
+     * Register student face biometrics (Supports Multi-Angle batch images).
      */
     public function registerFace(Request $request, $id): JsonResponse
     {
-        $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-        ]);
-
         $studentProfile = StudentProfile::findOrFail($id);
+        $schoolId = $studentProfile->user->school_id;
 
-        // Simpan file secara lokal
-        $path = $request->file('image')->store('student_faces', 'public');
-        $fullPath = storage_path('app/public/' . $path);
-
-        $embedding = null;
-
-        try {
-            if (file_exists($fullPath)) {
-                $response = Http::attach('image', file_get_contents($fullPath), basename($fullPath))
-                    ->attach('name', $studentProfile->user->name)
-                    ->post($this->getAiUrl() . '/api/represent');
-
-                if ($response->successful()) {
-                    $resData = $response->json();
-                    if (isset($resData['success']) && $resData['success'] === true) {
-                        $embedding = $resData['embedding'];
-                    }
-                }
-            }
-        } catch (\Exception $e) {
-            Log::warning("Gagal ekstraksi embedding dari Python AI secara real-time: " . $e->getMessage());
+        // Ambil file yang dikirim (bisa berupa map/array images[] atau file tunggal image)
+        $filesToProcess = [];
+        if ($request->hasFile('images')) {
+            $filesToProcess = $request->file('images');
+        } elseif ($request->hasFile('image')) {
+            $filesToProcess = ['front' => $request->file('image')];
         }
 
-        if (!$embedding) {
-            if (file_exists($fullPath)) {
-                unlink($fullPath);
-            }
+        if (empty($filesToProcess)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mendeteksi wajah. Pastikan posisi wajah tegak lurus di depan kamera.'
+                'message' => 'Tidak ada berkas sampel biometrik yang dikirim.'
             ], 422);
         }
 
-        // Validasi Duplikasi Wajah
-        $otherStudents = StudentProfile::where('id', '!=', $studentProfile->id)
-            ->whereNotNull('embedding')
-            ->get();
+        // Ambil biometrik milik siswa lain untuk validasi duplikasi
+        $otherBiometrics = StudentBiometric::whereHas('studentProfile.user', function ($q) use ($schoolId) {
+            $q->where('school_id', $schoolId);
+        })->where('student_profile_id', '!=', $studentProfile->id)->get();
 
         $duplicateThreshold = 0.75;
-        foreach ($otherStudents as $other) {
-            $otherEmbedding = $other->embedding;
-            if (is_array($otherEmbedding)) {
-                $sim = $this->cosineSimilarity($embedding, $otherEmbedding);
-                if ($sim >= $duplicateThreshold) {
-                    if (file_exists($fullPath)) {
-                        unlink($fullPath);
+        $extractedSamples = [];
+
+        foreach ($filesToProcess as $labelKey => $file) {
+            $label = is_string($labelKey) ? $labelKey : 'front';
+            $path = $file->store('student_biometrics', 'public');
+            $fullPath = storage_path('app/public/' . $path);
+            $embedding = null;
+
+            try {
+                if (file_exists($fullPath)) {
+                    $response = Http::attach('image', file_get_contents($fullPath), basename($fullPath))
+                        ->attach('name', $studentProfile->user->name)
+                        ->post($this->getAiUrl() . '/api/represent');
+
+                    if ($response->successful()) {
+                        $resData = $response->json();
+                        if (isset($resData['success']) && $resData['success'] === true && !empty($resData['embedding'])) {
+                            $embedding = $resData['embedding'];
+                        }
                     }
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Wajah ini sudah terdaftar atas nama: " . $other->user->name . " (Kemiripan: " . round($sim * 100, 1) . "%)."
-                    ], 422);
+                }
+            } catch (\Exception $e) {
+                Log::warning("Gagal ekstraksi embedding dari Python AI secara real-time: " . $e->getMessage());
+            }
+
+            if (!$embedding) {
+                if (file_exists($fullPath)) {
+                    unlink($fullPath);
+                }
+                return response()->json([
+                    'success' => false,
+                    'message' => "Gagal mendeteksi wajah pada posisi [{$label}]. Pastikan posisi wajah terlihat jelas di depan kamera."
+                ], 422);
+            }
+
+            // Validasi Duplikasi Wajah terhadap siswa lain
+            foreach ($otherBiometrics as $other) {
+                $otherEmbedding = $other->embedding;
+                if (is_array($otherEmbedding)) {
+                    $sim = $this->cosineSimilarity($embedding, $otherEmbedding);
+                    if ($sim >= $duplicateThreshold) {
+                        if (file_exists($fullPath)) {
+                            unlink($fullPath);
+                        }
+                        $otherName = $other->studentProfile->user->name ?? 'Siswa Lain';
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Sampel wajah posisi [{$label}] sudah terdaftar atas nama: {$otherName} (Kemiripan: " . round($sim * 100, 1) . "%)."
+                        ], 422);
+                    }
                 }
             }
+
+            $extractedSamples[] = [
+                'angle_label' => $label,
+                'embedding' => $embedding,
+                'face_photo_path' => '/storage/' . $path,
+            ];
         }
 
-        // Hapus berkas wajah lama jika ada
-        if ($studentProfile->face_photo_path) {
-            Storage::disk('public')->delete($studentProfile->face_photo_path);
+        // Hapus sampel biometrik lama milik siswa ini
+        foreach ($studentProfile->biometrics as $oldBio) {
+            if ($oldBio->face_photo_path) {
+                $cleanPath = str_replace('/storage/', '', $oldBio->face_photo_path);
+                Storage::disk('public')->delete($cleanPath);
+            }
+        }
+        $studentProfile->biometrics()->delete();
+
+        // Simpan sampel biometrik baru ke tabel student_biometrics
+        foreach ($extractedSamples as $sample) {
+            $studentProfile->biometrics()->create([
+                'angle_label' => $sample['angle_label'],
+                'embedding' => $sample['embedding'],
+                'face_photo_path' => $sample['face_photo_path'],
+            ]);
         }
 
+        // Tandai status biometrik terdaftar (User.photo TIDAK DITIMPA agar foto profil sosial tetap utuh!)
         $studentProfile->is_face_registered = true;
-        $studentProfile->embedding = $embedding;
+        // Simpan embedding sampel pertama sebagai fallback legacy jika diperlukan
+        if (!empty($extractedSamples[0]['embedding'])) {
+            $studentProfile->embedding = $extractedSamples[0]['embedding'];
+        }
         $studentProfile->save();
 
-        // Update photo profil user jika belum diatur
-        if (!$studentProfile->user->photo) {
-            $studentProfile->user->photo = '/storage/' . $path;
-            $studentProfile->user->save();
-        }
-
-        $schoolId = $studentProfile->user->school_id;
+        // Clear RAM cache
         Cache::forget("student_embeddings:school_{$schoolId}");
         Cache::forget('student_embeddings:global');
 
         return response()->json([
             'success' => true,
-            'message' => 'Wajah berhasil didaftarkan secara biometrik.'
+            'message' => 'Registrasi biometrik multi-angle berhasil disimpan!',
+            'data' => [
+                'is_face_registered' => true,
+                'samples_count' => count($extractedSamples)
+            ]
         ]);
     }
 

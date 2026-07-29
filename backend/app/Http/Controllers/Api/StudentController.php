@@ -214,7 +214,7 @@ class StudentController extends Controller
                 'nama'           => $student->name,
                 'email'          => $student->email,
                 'no_hp'          => $student->phone,
-                'foto'           => $student->photo,
+                'foto'           => $student->photo ? (str_starts_with($student->photo, 'http') ? $student->photo : asset($student->photo)) : null,
                 'nisn'           => $profile ? $profile->nisn : '',
                 'kelasId'        => $profile ? $profile->classroom_id : null,
                 'kelas'          => $profile && $profile->classroom ? $profile->classroom->name : '-',
@@ -515,7 +515,7 @@ class StudentController extends Controller
             'tahun_masuk'    => $profile && $profile->enrollment_date ? $profile->enrollment_date->format('Y-m-d') : '',
             'email'          => $student->email,
             'no_hp'          => $student->phone,
-            'foto'           => $student->photo,
+            'foto'           => $student->photo ? (str_starts_with($student->photo, 'http') ? $student->photo : asset($student->photo)) : null,
             
             // Parent
             'nama_wali'      => $parent && $parent->user ? $parent->user->name : '',

@@ -42,6 +42,14 @@ class StudentProfile extends Model
     }
 
     /**
+     * Get the student biometric samples.
+     */
+    public function biometrics(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(StudentBiometric::class);
+    }
+
+    /**
      * Get the user account for this student profile.
      */
     public function user(): BelongsTo

@@ -161,6 +161,15 @@ class ChatController extends Controller
             \Log::warning('WebSocket broadcast failed: ' . $e->getMessage());
         }
 
+        // Passive cleanup: 1 out of 20 chance to prune messages older than 60 days (2 months)
+        if (rand(1, 20) === 1) {
+            try {
+                Message::where('created_at', '<', now()->subDays(60))->delete();
+            } catch (\Exception $e) {
+                \Log::warning('Passive chat cleanup error: ' . $e->getMessage());
+            }
+        }
+
         return response()->json([
             'message' => 'Pesan berhasil dikirim.',
             'data' => [

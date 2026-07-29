@@ -22,6 +22,16 @@ import {
   Users,
   CheckCircle,
   CalendarDays,
+  ArrowLeft,
+  ArrowRight,
+  Smile,
+  RotateCcw,
+  Sparkles,
+  Eye,
+  Pencil,
+  CreditCard,
+  IdCard,
+  Target,
 } from 'lucide-vue-next'
 import {
   getStudents,
@@ -30,6 +40,7 @@ import {
   registerStudentFace,
 } from '@/services/api/absensi'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { toast } from 'vue-sonner'
 import {
   Dialog,
@@ -71,13 +82,9 @@ const filterValues = ref({
 })
 
 const statusOptions = [
-  { label: 'Semua Status', value: 'semua' },
-  { label: 'Hadir', value: 'hadir' },
-  { label: 'Terlambat', value: 'terlambat' },
-  { label: 'Izin', value: 'izin' },
-  { label: 'Sakit', value: 'sakit' },
-  { label: 'Alpa (Tanpa Keterangan)', value: 'alpa' },
-  { label: 'Belum Absen', value: 'belum_absen' },
+  { label: 'Semua Status Registrasi', value: 'semua' },
+  { label: 'Wajah Terdaftar (FaceID)', value: 'wajah_terdaftar' },
+  { label: 'Wajah Belum Terdaftar', value: 'wajah_belum' },
 ]
 
 const filters = computed(() => {
@@ -96,8 +103,8 @@ const filters = computed(() => {
     {
       type: 'select',
       key: 'status',
-      label: 'Status:',
-      placeholder: 'Semua Status',
+      label: 'Status Registrasi:',
+      placeholder: 'Semua Status Registrasi',
       options: statusOptions,
     },
   ]
@@ -106,10 +113,7 @@ const filters = computed(() => {
 // ─── Table Columns ───────────────────────────────────────
 const columns = computed(() => [
   { key: 'nama', label: 'Nama Siswa & Kelas' },
-  { key: 'is_face_registered', label: 'Biometrik Wajah' },
-  { key: 'jamMasuk', label: 'Jam Masuk', type: 'code' },
-  { key: 'jamKeluar', label: 'Jam Keluar', type: 'code' },
-  { key: 'status', label: 'Status Presensi' },
+  { key: 'status_registrasi', label: 'Status Biometrik & Perangkat' },
   { key: 'actions', label: 'Aksi' },
 ])
 
@@ -169,7 +173,8 @@ const filteredData = computed(() => {
       item.kelas === filterValues.value.kelas
     const matchStatus =
       filterValues.value.status === 'semua' ||
-      item.status === filterValues.value.status
+      (filterValues.value.status === 'wajah_terdaftar' && item.is_face_registered) ||
+      (filterValues.value.status === 'wajah_belum' && !item.is_face_registered)
     const searchLower = filterValues.value.search.toLowerCase()
     const matchSearch =
       !filterValues.value.search ||
@@ -193,17 +198,60 @@ const filteredLogs = computed(() => {
 
 // Stats Computation
 const totalSiswa = computed(() => absensiData.value.length)
-const sudahHadir = computed(() => absensiData.value.filter((d) => d.status === 'hadir').length)
-const terlambat = computed(() => absensiData.value.filter((d) => d.status === 'terlambat').length)
-const izinSakitAlpa = computed(() => absensiData.value.filter((d) => ['izin', 'sakit', 'alpa'].includes(d.status)).length)
-const belumScan = computed(() => absensiData.value.filter((d) => d.status === 'belum_absen').length)
+const wajahTerdaftar = computed(() => absensiData.value.filter((d) => d.is_face_registered).length)
+const rfidTerhubung = computed(() => absensiData.value.filter((d) => d.rfid_uid).length)
+const belumTerdaftar = computed(() => absensiData.value.filter((d) => !d.is_face_registered).length)
 
 const perPage = ref(10)
 const { currentPage, total, from, to, paginatedItems: paginatedData } = usePagination(filteredData, perPage)
 
-watch(filteredData, () => {
-  currentPage.value = 1
-})
+// Reset page to 1 ONLY when user actively changes search/filter parameters, NOT on background auto-sync
+watch(
+  () => [filterValues.value.search, filterValues.value.kelas, filterValues.value.status],
+  () => {
+    currentPage.value = 1
+  }
+)
+
+// ─── Show Detail Modal State ──────────────────────────────
+const isShowModalOpen = ref(false)
+const detailStudent = ref(null)
+
+function openDetailModal(student) {
+  detailStudent.value = student
+  isShowModalOpen.value = true
+}
+
+function closeDetailModal() {
+  isShowModalOpen.value = false
+  detailStudent.value = null
+}
+
+// ─── Edit Data & RFID Modal State ─────────────────────────
+const isEditModalOpen = ref(false)
+const editStudent = ref(null)
+const rfidCardUid = ref('')
+
+function openEditModal(student) {
+  editStudent.value = student
+  rfidCardUid.value = student.rfid_uid || ''
+  isEditModalOpen.value = true
+}
+
+function closeEditModal() {
+  isEditModalOpen.value = false
+  editStudent.value = null
+  rfidCardUid.value = ''
+}
+
+function saveEditModal() {
+  if (!editStudent.value) return
+  editStudent.value.rfid_uid = rfidCardUid.value
+  toast.success('Data RFID Berhasil Diperbarui', {
+    description: `Nomor kartu RFID untuk ${editStudent.value.nama} telah disimpan.`
+  })
+  closeEditModal()
+}
 
 // ─── Action Handlers ─────────────────────────────────────
 function openScanTab() {
@@ -229,6 +277,13 @@ function getInitials(nama) {
   return (words[0][0] + words[1][0]).toUpperCase()
 }
 
+function getPhotoUrl(photo) {
+  if (!photo) return null
+  if (photo.startsWith('http://') || photo.startsWith('https://')) return photo
+  const cleanPath = photo.startsWith('/') ? photo : `/${photo}`
+  return `http://localhost:8000${cleanPath}`
+}
+
 async function changeStatus(studentId, newStatus) {
   try {
     await updateStudentStatus(studentId, newStatus)
@@ -243,7 +298,7 @@ async function changeStatus(studentId, newStatus) {
   }
 }
 
-// ─── Face Registration Setup ─────────────────────────────
+// ─── Face Registration Setup (Apple FaceID Multi-Angle Stepper) ─────────────────────────────
 const isRegisterModalOpen = ref(false)
 const selectedStudent = ref(null)
 const videoRef = ref(null)
@@ -251,6 +306,218 @@ const canvasRef = ref(null)
 const cameraStatus = ref('idle') // idle | loading | active | error
 const isRegistering = ref(false)
 let mediaStream = null
+
+const faceSteps = [
+  { key: 'front', label: 'Hadap Depan', desc: 'Menghadap lurus ke depan', hint: 'Posisikan wajah di dalam lingkaran' },
+  { key: 'left', label: 'Tengok Kiri', desc: 'Tengokkan kepala sedikit ke kiri', hint: 'Kemiringan sekitar 20 derajat' },
+  { key: 'right', label: 'Tengok Kanan', desc: 'Tengokkan kepala sedikit ke kanan', hint: 'Kemiringan sekitar 20 derajat' },
+  { key: 'smile', label: 'Tersenyum', desc: 'Harap tersenyum ke kamera', hint: 'Ekspresi ramah' }
+]
+
+const currentStepIdx = ref(0)
+const capturedBlobs = ref({ front: null, left: null, right: null, smile: null })
+const capturedPreviews = ref({ front: null, left: null, right: null, smile: null })
+
+const isAllSamplesCaptured = computed(() => {
+  return (
+    capturedBlobs.value.front &&
+    capturedBlobs.value.left &&
+    capturedBlobs.value.right &&
+    capturedBlobs.value.smile
+  )
+})
+
+import * as faceapi from 'face-api.js'
+
+// ─── Auto-Detect & Pose Guided State ─────────────────────────────
+const detectProgress = ref(0) // 0 to 100
+const isAutoDetectActive = ref(true)
+const autoDetectHint = ref('Mohon hadap lurus ke depan 🎯')
+const isPoseMatched = ref(false)
+const isFlashing = ref(false)
+const isAiModelLoaded = ref(false)
+const aiModelStatusText = ref('')
+const isStepTransitioning = ref(false)
+let detectTimer = null
+
+function triggerFlashEffect() {
+  isFlashing.value = true
+  setTimeout(() => {
+    isFlashing.value = false
+  }, 300)
+}
+
+async function loadAiModels() {
+  if (isAiModelLoaded.value) return true
+  aiModelStatusText.value = 'Memuat AI Face Recognition...'
+  try {
+    const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model'
+    await Promise.all([
+      faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+      faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+      faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL)
+    ])
+    isAiModelLoaded.value = true
+    aiModelStatusText.value = 'AI Face Engine Siap!'
+    return true
+  } catch (err) {
+    console.warn('Gagal memuat model CDN, mencoba fallback...', err)
+    try {
+      const FALLBACK_URL = 'https://justadudewhohacks.github.io/face-api.js/models'
+      await Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(FALLBACK_URL),
+        faceapi.nets.faceLandmark68Net.loadFromUri(FALLBACK_URL),
+        faceapi.nets.faceExpressionNet.loadFromUri(FALLBACK_URL)
+      ])
+      isAiModelLoaded.value = true
+      return true
+    } catch (e) {
+      aiModelStatusText.value = 'AI Detector Fallback'
+      return false
+    }
+  }
+}
+
+function evaluatePoseWithAi(detection, currentStepKey) {
+  if (!detection) {
+    return { valid: false, message: 'Wajah tidak terdeteksi di kamera 🎯' }
+  }
+
+  const landmarks = detection.landmarks
+  const nose = landmarks.getNose()[3]
+  const leftEye = landmarks.getLeftEye()
+  const rightEye = landmarks.getRightEye()
+
+  const eyeCenterX = (leftEye[0].x + rightEye[rightEye.length - 1].x) / 2
+  const noseOffset = nose.x - eyeCenterX
+  const eyeDist = Math.abs(rightEye[rightEye.length - 1].x - leftEye[0].x)
+  const relativeYaw = noseOffset / (eyeDist + 0.001)
+
+  const expressions = detection.expressions
+  const happyScore = expressions ? expressions.happy : 0
+
+  switch (currentStepKey) {
+    case 'front': {
+      const isFront = Math.abs(relativeYaw) < 0.10
+      if (isFront) {
+        return { valid: true, message: `Posisi Lurus Sesuai. Menahan... ${Math.round(detectProgress.value)}%` }
+      } else {
+        return { valid: false, message: 'Mohon hadap lurus ke depan' }
+      }
+    }
+    case 'left': {
+      if (relativeYaw < -0.08) {
+        return { valid: false, message: 'Wajah terdeteksi ke kanan. Mohon tengokkan kepala ke kiri' }
+      }
+      const isLeft = relativeYaw > 0.18
+      if (isLeft) {
+        return { valid: true, message: `Sudut Kiri Terdeteksi. Menahan... ${Math.round(detectProgress.value)}%` }
+      } else {
+        return { valid: false, message: 'Mohon tengokkan kepala ke kiri' }
+      }
+    }
+    case 'right': {
+      if (relativeYaw > 0.08) {
+        return { valid: false, message: 'Wajah terdeteksi ke kiri. Mohon tengokkan kepala ke kanan' }
+      }
+      const isRight = relativeYaw < -0.18
+      if (isRight) {
+        return { valid: true, message: `Sudut Kanan Terdeteksi. Menahan... ${Math.round(detectProgress.value)}%` }
+      } else {
+        return { valid: false, message: 'Mohon tengokkan kepala ke kanan' }
+      }
+    }
+    case 'smile': {
+      const isSmile = happyScore > 0.45
+      if (isSmile) {
+        return { valid: true, message: `Senyum Terdeteksi. Menahan... ${Math.round(detectProgress.value)}%` }
+      } else {
+        return { valid: false, message: 'Mohon tersenyum manis ke kamera' }
+      }
+    }
+    default:
+      return { valid: false, message: 'Posisikan wajah di dalam lingkaran' }
+  }
+}
+
+async function startAutoDetector() {
+  stopAutoDetector()
+  detectProgress.value = 0
+
+  await loadAiModels()
+
+  detectTimer = setInterval(async () => {
+    if (cameraStatus.value !== 'active' || isRegistering.value || !isRegisterModalOpen.value || !isAutoDetectActive.value) {
+      return
+    }
+
+    if (isAllSamplesCaptured.value) {
+      stopAutoDetector()
+      return
+    }
+
+    if (isStepTransitioning.value) {
+      isPoseMatched.value = false
+      autoDetectHint.value = 'Persiapan langkah berikutnya...'
+      detectProgress.value = 0
+      return
+    }
+
+    if (videoRef.value) {
+      const video = videoRef.value
+
+      if (video.videoWidth > 0 && video.videoHeight > 0) {
+        let evaluation = { valid: false, message: 'Mencari posisi wajah...' }
+
+        try {
+          if (isAiModelLoaded.value) {
+            const detection = await faceapi
+              .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.4 }))
+              .withFaceLandmarks()
+              .withFaceExpressions()
+
+            const currentStepKey = faceSteps[currentStepIdx.value]?.key
+            evaluation = evaluatePoseWithAi(detection, currentStepKey)
+          }
+        } catch (err) {
+          console.warn('Face AI error:', err)
+        }
+
+        isPoseMatched.value = evaluation.valid
+        autoDetectHint.value = evaluation.message
+
+        if (evaluation.valid) {
+          detectProgress.value = Math.min(100, detectProgress.value + 35)
+
+          if (detectProgress.value >= 100) {
+            triggerFlashEffect()
+            captureCurrentSample()
+            detectProgress.value = 0
+            isPoseMatched.value = false
+
+            nextTick(() => {
+              if (isAllSamplesCaptured.value) {
+                stopAutoDetector()
+                submitMultiAngleRegistration()
+              }
+            })
+          }
+        } else {
+          detectProgress.value = Math.max(0, detectProgress.value - 20)
+        }
+      }
+    }
+  }, 250)
+}
+
+function stopAutoDetector() {
+  if (detectTimer) {
+    clearInterval(detectTimer)
+    detectTimer = null
+  }
+  detectProgress.value = 0
+  isPoseMatched.value = false
+}
 
 async function startCamera() {
   cameraStatus.value = 'loading'
@@ -266,6 +533,7 @@ async function startCamera() {
       videoRef.value.srcObject = stream
       videoRef.value.play()
     }
+    startAutoDetector()
   } catch (err) {
     cameraStatus.value = 'error'
     toast.error('Gagal mengakses kamera. Mohon aktifkan izin kamera.')
@@ -273,6 +541,7 @@ async function startCamera() {
 }
 
 function stopCamera() {
+  stopAutoDetector()
   if (mediaStream) {
     mediaStream.getTracks().forEach(track => track.stop())
     mediaStream = null
@@ -284,6 +553,9 @@ function stopCamera() {
 function openFaceRegistration(student) {
   selectedStudent.value = student
   isRegisterModalOpen.value = true
+  currentStepIdx.value = 0
+  capturedBlobs.value = { front: null, left: null, right: null, smile: null }
+  capturedPreviews.value = { front: null, left: null, right: null, smile: null }
   startCamera()
 }
 
@@ -291,39 +563,71 @@ function closeFaceRegistration() {
   stopCamera()
   isRegisterModalOpen.value = false
   selectedStudent.value = null
+  currentStepIdx.value = 0
+  capturedBlobs.value = { front: null, left: null, right: null, smile: null }
+  capturedPreviews.value = { front: null, left: null, right: null, smile: null }
 }
 
-async function captureAndRegister() {
-  if (!videoRef.value || !canvasRef.value || !selectedStudent.value) return
+function resetFaceRegistration() {
+  currentStepIdx.value = 0
+  capturedBlobs.value = { front: null, left: null, right: null, smile: null }
+  capturedPreviews.value = { front: null, left: null, right: null, smile: null }
+  startAutoDetector()
+}
+
+async function captureCurrentSample() {
+  if (!videoRef.value || !canvasRef.value) return
+
+  const video = videoRef.value
+  const canvas = canvasRef.value
+  const context = canvas.getContext('2d')
+
+  const size = Math.min(video.videoWidth, video.videoHeight)
+  const sx = (video.videoWidth - size) / 2
+  const sy = (video.videoHeight - size) / 2
+
+  canvas.width = 480
+  canvas.height = 480
+  context.drawImage(video, sx, sy, size, size, 0, 0, 480, 480)
+
+  const currentStep = faceSteps[currentStepIdx.value]
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85))
+  const previewUrl = canvas.toDataURL('image/jpeg', 0.85)
+
+  capturedBlobs.value[currentStep.key] = blob
+  capturedPreviews.value[currentStep.key] = previewUrl
+
+  if (currentStepIdx.value < faceSteps.length - 1) {
+    currentStepIdx.value++
+    isStepTransitioning.value = true
+    detectProgress.value = 0
+    setTimeout(() => {
+      isStepTransitioning.value = false
+    }, 850)
+  }
+}
+
+async function submitMultiAngleRegistration() {
+  if (!selectedStudent.value || !isAllSamplesCaptured.value) return
   isRegistering.value = true
 
   try {
-    const video = videoRef.value
-    const canvas = canvasRef.value
-    const context = canvas.getContext('2d')
-
-    const size = Math.min(video.videoWidth, video.videoHeight)
-    const sx = (video.videoWidth - size) / 2
-    const sy = (video.videoHeight - size) / 2
-
-    canvas.width = 480
-    canvas.height = 480
-    context.drawImage(video, sx, sy, size, size, 0, 0, 480, 480)
-
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85))
     const formData = new FormData()
-    formData.append('image', blob, 'face_registration.jpg')
+    formData.append('images[front]', capturedBlobs.value.front, 'front.jpg')
+    formData.append('images[left]', capturedBlobs.value.left, 'left.jpg')
+    formData.append('images[right]', capturedBlobs.value.right, 'right.jpg')
+    formData.append('images[smile]', capturedBlobs.value.smile, 'smile.jpg')
 
     const res = await registerStudentFace(selectedStudent.value.id, formData)
     if (res.success) {
-      toast.success('Registrasi Sukses', {
-        description: `Wajah ${selectedStudent.value.nama} berhasil didaftarkan secara biometrik.`
+      toast.success('Registrasi Biometrik Sukses', {
+        description: `4 Sampel sudut wajah ${selectedStudent.value.nama} berhasil didaftarkan!`
       })
       closeFaceRegistration()
       await loadData(true)
     }
   } catch (err) {
-    const msg = err.response?.data?.message || 'Gagal meregistrasi wajah.'
+    const msg = err.response?.data?.message || 'Gagal meregistrasi biometrik wajah.'
     toast.error('Registrasi Gagal', { description: msg })
   } finally {
     isRegistering.value = false
@@ -349,8 +653,8 @@ const tableActions = computed(() => [
   >
     <!-- ── Page Header ── -->
     <PageHeader
-      title="Dashboard Presensi Siswa"
-      description="Rekam dan pantau rekapitulasi kehadiran siswa secara real-time dari pemindai Kiosk Sekolah."
+      title="Pendaftaran Absensi & Biometrik Siswa"
+      description="Kelola pendaftaran biometrik wajah (FaceID), nomor kartu RFID, dan status perangkat absensi siswa."
       :actions="[
         {
           label: 'Buka Kamera Absensi',
@@ -362,7 +666,7 @@ const tableActions = computed(() => [
     />
 
     <!-- ── Stat Cards ── -->
-    <StatCardGrid cols="5">
+    <StatCardGrid cols="4">
       <StatCard
         label="Total Siswa"
         :value="isLoading ? '-' : totalSiswa"
@@ -371,32 +675,25 @@ const tableActions = computed(() => [
         variant="primary"
       />
       <StatCard
-        label="Hadir Tepat Waktu"
-        :value="isLoading ? '-' : sudahHadir"
-        :icon="CheckCircle"
+        label="Wajah Terdaftar (FaceID)"
+        :value="isLoading ? '-' : wajahTerdaftar"
+        :icon="Sparkles"
         illustration="school_bell"
         variant="emerald"
       />
       <StatCard
-        label="Terlambat"
-        :value="isLoading ? '-' : terlambat"
-        :icon="Clock"
+        label="Kartu RFID Terhubung"
+        :value="isLoading ? '-' : rfidTerhubung"
+        :icon="CreditCard"
         illustration="ruler"
-        variant="amber"
-      />
-      <StatCard
-        label="Izin / Sakit / Alpa"
-        :value="isLoading ? '-' : izinSakitAlpa"
-        :icon="AlertCircle"
-        illustration="paper_sheet"
-        variant="violet"
-      />
-      <StatCard
-        label="Belum Absen"
-        :value="isLoading ? '-' : belumScan"
-        :icon="HelpCircle"
-        illustration="pencil"
         variant="blue"
+      />
+      <StatCard
+        label="Belum Terdaftar Biometrik"
+        :value="isLoading ? '-' : belumTerdaftar"
+        :icon="UserX"
+        illustration="paper_sheet"
+        variant="amber"
       />
     </StatCardGrid>
 
@@ -411,7 +708,7 @@ const tableActions = computed(() => [
             : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
         >
           <Users class="size-4" />
-          Daftar Presensi Siswa Hari Ini
+          Daftar Biometrik Siswa
           <Badge variant="secondary" class="ml-1 text-[10px] px-1.5 py-0.2">
             {{ filteredData.length }}
           </Badge>
@@ -425,7 +722,7 @@ const tableActions = computed(() => [
             : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
         >
           <Activity class="size-4" />
-          Log Pemindai Real-Time
+          Riwayat Absensi Siswa Hari Ini
           <Badge variant="secondary" class="ml-1 text-[10px] px-1.5 py-0.2 bg-indigo-500/10 text-indigo-500">
             {{ filteredLogs.length }}
           </Badge>
@@ -434,11 +731,7 @@ const tableActions = computed(() => [
 
       <div class="flex items-center gap-2">
         <span class="text-xs text-slate-500 dark:text-slate-400 hidden md:inline-flex items-center gap-1.5">
-          <span class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-          </span>
-          Sync otomatis tiap 5s
+    
         </span>
         <Button variant="ghost" size="sm" class="h-8 gap-1.5 text-xs text-slate-600 dark:text-slate-300" @click="loadData(false)">
           <RefreshCw class="size-3.5" :class="{ 'animate-spin': isLoading }" />
@@ -447,7 +740,7 @@ const tableActions = computed(() => [
       </div>
     </div>
 
-    <!-- ── TAB 1: REKAP PRESENSI SISWA ── -->
+    <!-- ── TAB 1: REKAP BIOMETRIK SISWA ── -->
     <div v-if="activeTab === 'rekap'">
       <DataTableCard
         :columns="columns"
@@ -466,7 +759,7 @@ const tableActions = computed(() => [
         <template #cell-nama="{ item }">
           <div class="flex items-center gap-3">
             <div class="relative size-10 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0">
-              <img v-if="item.foto" :src="item.foto" :alt="item.nama" class="size-full object-cover" />
+              <img v-if="item.foto" :src="getPhotoUrl(item.foto)" :alt="item.nama" class="size-full object-cover" />
               <span v-else class="font-bold text-xs text-indigo-600 dark:text-indigo-400">
                 {{ getInitials(item.nama) }}
               </span>
@@ -478,93 +771,65 @@ const tableActions = computed(() => [
               <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 <span>NISN: <code class="font-mono">{{ item.nisn || '-' }}</code></span>
                 <span>•</span>
-                <span class="font-medium text-slate-700 dark:text-slate-300">{{ item.kelas || '-' }}</span>
+                <span class="font-medium text-slate-700 dark:text-slate-300">Kelas {{ item.kelas || '-' }}</span>
               </div>
             </div>
           </div>
         </template>
 
-        <template #cell-is_face_registered="{ item }">
-          <Badge
-            :variant="item.is_face_registered ? 'default' : 'secondary'"
-            :class="item.is_face_registered 
-              ? 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 dark:bg-emerald-500/20 dark:text-emerald-400 border border-emerald-500/30' 
-              : 'bg-slate-500/10 text-slate-500 hover:bg-slate-500/20 dark:bg-slate-500/20 dark:text-slate-400 border border-slate-500/20'"
-            class="text-[11px] gap-1 px-2 py-0.5 font-medium"
-          >
-            <ShieldCheck v-if="item.is_face_registered" class="size-3" />
-            {{ item.is_face_registered ? 'Terdaftar (AI)' : 'Belum Terdaftar' }}
-          </Badge>
-        </template>
+        <template #cell-status_registrasi="{ item }">
+          <div class="flex items-center gap-2 flex-wrap">
+            <Badge
+              :variant="item.is_face_registered ? 'default' : 'secondary'"
+              :class="item.is_face_registered 
+                ? 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 dark:bg-emerald-500/20 dark:text-emerald-400 border border-emerald-500/30' 
+                : 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 dark:bg-amber-500/20 dark:text-amber-400 border border-amber-500/30'"
+              class="text-[11px] gap-1 px-2.5 py-0.5 font-semibold"
+            >
+              <ShieldCheck v-if="item.is_face_registered" class="size-3" />
+              <UserX v-else class="size-3" />
+              {{ item.is_face_registered ? 'Wajah Terdaftar (AI)' : 'Wajah Belum Terdaftar' }}
+            </Badge>
 
-        <template #cell-jamMasuk="{ value }">
-          <div class="font-mono text-xs font-semibold" :class="value ? 'text-slate-900 dark:text-slate-200' : 'text-slate-400 dark:text-slate-600'">
-            {{ value || '--:--' }}
+            <Badge
+              v-if="item.rfid_uid"
+              class="bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 border border-indigo-500/30 text-[11px] gap-1 px-2 py-0.5 font-mono font-medium"
+            >
+              <CreditCard class="size-3" />
+              RFID: {{ item.rfid_uid }}
+            </Badge>
           </div>
-        </template>
-
-        <template #cell-jamKeluar="{ value }">
-          <div class="font-mono text-xs font-semibold" :class="value ? 'text-slate-900 dark:text-slate-200' : 'text-slate-400 dark:text-slate-600'">
-            {{ value || '--:--' }}
-          </div>
-        </template>
-
-        <template #cell-status="{ value }">
-          <Badge
-            :class="{
-              'bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-500/30': value === 'hadir',
-              'bg-amber-500/15 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 border-amber-500/30': value === 'terlambat',
-              'bg-indigo-500/15 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 border-indigo-500/30': value === 'sakit',
-              'bg-purple-500/15 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400 border-purple-500/30': value === 'izin',
-              'bg-rose-500/15 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400 border-rose-500/30': value === 'alpa',
-              'bg-slate-500/10 text-slate-500 dark:bg-slate-500/20 dark:text-slate-400 border-slate-500/20': value === 'belum_absen',
-            }"
-            class="px-2.5 py-1 text-xs font-semibold border"
-          >
-            {{ getStatusLabel(value) }}
-          </Badge>
         </template>
 
         <template #cell-actions="{ item }">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" class="h-8 w-8 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800">
+              <Button variant="ghost" size="icon" class="size-8 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800">
                 <span class="sr-only">Buka menu</span>
-                <MoreVertical class="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                <MoreVertical class="size-4 text-slate-600 dark:text-slate-400" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" class="w-56">
-              <DropdownMenuLabel class="text-xs text-slate-500">Biometrik Wajah</DropdownMenuLabel>
-              <DropdownMenuItem class="cursor-pointer gap-2" @click="openFaceRegistration(item)">
+              <DropdownMenuLabel class="text-xs text-slate-500">Aksi Registrasi Siswa</DropdownMenuLabel>
+              
+              <!-- 1. SHOW DETAIL -->
+              <DropdownMenuItem class="cursor-pointer gap-2" @click="openDetailModal(item)">
+                <Eye class="size-4 text-slate-500" />
+                <span>Show Detail Biometrik</span>
+              </DropdownMenuItem>
+
+              <!-- 2. EDIT RFID / DATA -->
+              <DropdownMenuItem class="cursor-pointer gap-2 text-blue-600 dark:text-blue-400" @click="openEditModal(item)">
+                <Pencil class="size-4" />
+                <span>Edit Data RFID</span>
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              <!-- 3. REGISTRASI WAJAH FACEID -->
+              <DropdownMenuItem class="cursor-pointer gap-2 text-indigo-600 dark:text-indigo-400 font-semibold" @click="openFaceRegistration(item)">
                 <Camera class="size-4 text-indigo-500" />
-                Registrasi Wajah AI
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel class="text-xs text-slate-500">Ubah Status Presensi Hari Ini</DropdownMenuLabel>
-              <DropdownMenuItem class="cursor-pointer gap-2 text-emerald-600 dark:text-emerald-400" @click="changeStatus(item.id, 'hadir')">
-                <CheckCircle2 class="size-4" />
-                Hadir
-              </DropdownMenuItem>
-              <DropdownMenuItem class="cursor-pointer gap-2 text-amber-600 dark:text-amber-400" @click="changeStatus(item.id, 'terlambat')">
-                <Clock class="size-4" />
-                Terlambat
-              </DropdownMenuItem>
-              <DropdownMenuItem class="cursor-pointer gap-2 text-purple-600 dark:text-purple-400" @click="changeStatus(item.id, 'izin')">
-                <AlertCircle class="size-4" />
-                Izin
-              </DropdownMenuItem>
-              <DropdownMenuItem class="cursor-pointer gap-2 text-indigo-600 dark:text-indigo-400" @click="changeStatus(item.id, 'sakit')">
-                <AlertCircle class="size-4" />
-                Sakit
-              </DropdownMenuItem>
-              <DropdownMenuItem class="cursor-pointer gap-2 text-rose-600 dark:text-rose-400" @click="changeStatus(item.id, 'alpa')">
-                <XCircle class="size-4" />
-                Tanpa Keterangan (Alpa)
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem class="cursor-pointer gap-2 text-slate-500" @click="changeStatus(item.id, 'belum_absen')">
-                <UserX class="size-4" />
-                Reset (Belum Absen)
+                <span>Registrasi Wajah (FaceID)</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -579,7 +844,7 @@ const tableActions = computed(() => [
           <div>
             <h3 class="font-semibold text-base text-slate-900 dark:text-white flex items-center gap-2">
               <Activity class="size-4 text-indigo-500" />
-              Feed Scan Kiosk Real-Time Hari Ini
+              Riwayat Absensi Siswa Hari Ini
             </h3>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Riwayat siswa yang melakukan verifikasi presensi via Wajah AI, RFID, atau Fingerprint.
@@ -645,24 +910,113 @@ const tableActions = computed(() => [
       </div>
     </div>
 
-    <!-- ── Modal Registrasi Wajah AI ── -->
+    <!-- ── Modal Registrasi Biometrik Multi-Angle FaceID ── -->
     <Dialog :open="isRegisterModalOpen" @update:open="val => !val && closeFaceRegistration()">
-      <DialogContent class="sm:max-w-[480px]">
+      <DialogContent class="sm:max-w-[540px]">
         <DialogHeader>
-          <DialogTitle class="flex items-center gap-2">
-            <Camera class="size-5 text-indigo-500" />
-            Registrasi Wajah Siswa (AI)
+          <DialogTitle class="flex items-center gap-2 text-base font-bold">
+            <Sparkles class="size-5 text-indigo-500" />
+            Registrasi Biometrik Wajah (Multi-Angle FaceID)
           </DialogTitle>
-          <DialogDescription>
-            Mendaftarkan biometrik wajah untuk <strong>{{ selectedStudent?.nama }}</strong> (NISN: {{ selectedStudent?.nisn || '-' }}).
+          <DialogDescription class="text-xs">
+            Mendaftarkan 4 sudut sampel wajah untuk <strong>{{ selectedStudent?.nama }}</strong> (NISN: {{ selectedStudent?.nisn || '-' }}).
           </DialogDescription>
         </DialogHeader>
 
-        <div class="flex flex-col items-center justify-center p-4 space-y-4">
-          <!-- Kamera Feed -->
-          <div class="relative w-full aspect-video rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 flex items-center justify-center shadow-inner">
-            <video v-if="cameraStatus === 'active'" ref="videoRef" autoplay playsinline class="w-full h-full object-cover scale-x-[-1]" />
-            
+        <div class="flex flex-col items-center justify-center p-2 space-y-4">
+          <!-- Stepper Progress Bar & Badge -->
+          <div class="w-full space-y-2">
+            <div class="flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-slate-200">
+              <span class="flex items-center gap-1.5">
+                <span class="size-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold">
+                  {{ currentStepIdx + 1 }}
+                </span>
+                {{ faceSteps[currentStepIdx]?.label }}
+              </span>
+              <span class="text-slate-400 font-normal">
+                Langkah {{ Math.min(currentStepIdx + 1, 4) }} dari 4
+              </span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+              <div
+                class="h-full bg-indigo-500 transition-all duration-300 rounded-full"
+                :style="{ width: `${((currentStepIdx + (isAllSamplesCaptured ? 1 : 0)) / 4) * 100}%` }"
+              />
+            </div>
+          </div>
+
+          <!-- Kamera Feed dengan Circular Guide Ring -->
+          <div class="relative w-full aspect-square max-w-[340px] rounded-3xl overflow-hidden bg-slate-900 border-2 border-slate-800 flex items-center justify-center shadow-xl group">
+            <video
+              v-if="cameraStatus === 'active'"
+              ref="videoRef"
+              autoplay
+              playsinline
+              class="w-full h-full object-cover scale-x-[-1]"
+            />
+
+            <!-- Flash Shutter Effect -->
+            <div v-if="isFlashing" class="absolute inset-0 bg-white/80 transition-opacity animate-pulse z-20 pointer-events-none" />
+
+            <!-- Circular Guide Ring & Dynamic SVG Progress Ring (FaceID Style) -->
+            <div v-if="cameraStatus === 'active'" class="absolute inset-0 pointer-events-none flex items-center justify-center">
+              <svg class="absolute size-64 -rotate-90">
+                <circle
+                  cx="50%"
+                  cy="50%"
+                  r="120"
+                  fill="transparent"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  class="text-emerald-500/20"
+                />
+                <circle
+                  cx="50%"
+                  cy="50%"
+                  r="120"
+                  fill="transparent"
+                  stroke="currentColor"
+                  stroke-width="5"
+                  stroke-linecap="round"
+                  class="text-emerald-400 transition-all duration-200"
+                  :style="{
+                    strokeDasharray: 753.98,
+                    strokeDashoffset: 753.98 - (753.98 * detectProgress) / 100
+                  }"
+                />
+              </svg>
+
+              <div class="size-60 rounded-full border-2 border-dashed border-emerald-400/80 animate-pulse flex flex-col items-center justify-center bg-emerald-500/5 shadow-[0_0_30px_rgba(52,211,153,0.25)]">
+                <!-- Visual Direction Icons -->
+                <ArrowLeft v-if="faceSteps[currentStepIdx]?.key === 'left'" class="size-10 text-emerald-400 animate-bounce" />
+                <ArrowRight v-else-if="faceSteps[currentStepIdx]?.key === 'right'" class="size-10 text-emerald-400 animate-bounce" />
+                <Smile v-else-if="faceSteps[currentStepIdx]?.key === 'smile'" class="size-10 text-emerald-400 animate-pulse" />
+                <UserCheck v-else class="size-10 text-emerald-400/70" />
+              </div>
+            </div>
+
+            <!-- Hint Overlay dengan Dynamic Feedback Status -->
+            <div
+              v-if="cameraStatus === 'active'"
+              class="absolute bottom-3 inset-x-3 backdrop-blur-md rounded-xl p-2.5 text-center text-xs text-white border shadow-lg transition-all duration-200"
+              :class="isPoseMatched 
+                ? 'bg-emerald-950/85 border-emerald-500/40 shadow-emerald-500/10' 
+                : 'bg-amber-950/85 border-amber-500/40 shadow-amber-500/10'"
+            >
+              <p class="font-bold flex items-center justify-center gap-1.5" :class="isPoseMatched ? 'text-emerald-400' : 'text-amber-300'">
+                <Sparkles v-if="isPoseMatched" class="size-3.5 animate-spin shrink-0" />
+                <AlertCircle v-else class="size-3.5 text-amber-400 shrink-0" />
+                <span>{{ autoDetectHint }}</span>
+                <ArrowLeft v-if="faceSteps[currentStepIdx]?.key === 'left'" class="size-3.5 shrink-0" />
+                <ArrowRight v-else-if="faceSteps[currentStepIdx]?.key === 'right'" class="size-3.5 shrink-0" />
+                <Smile v-else-if="faceSteps[currentStepIdx]?.key === 'smile'" class="size-3.5 shrink-0" />
+                <Target v-else class="size-3.5 shrink-0" />
+              </p>
+              <p class="text-[11px] text-slate-300 mt-0.5">
+                {{ faceSteps[currentStepIdx]?.hint }}
+              </p>
+            </div>
+
             <div v-if="cameraStatus === 'loading'" class="flex flex-col items-center gap-2 text-white text-xs">
               <span class="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></span>
               <span>Menyalakan kamera...</span>
@@ -674,15 +1028,193 @@ const tableActions = computed(() => [
             </div>
           </div>
 
-          <!-- Canvas hidden -->
+          <!-- Canvas hidden untuk capture -->
           <canvas ref="canvasRef" class="hidden" width="480" height="480" />
+
+          <!-- 4 Thumbnail Previews -->
+          <div class="grid grid-cols-4 gap-2 w-full pt-1">
+            <div
+              v-for="(step, idx) in faceSteps"
+              :key="step.key"
+              class="flex flex-col items-center gap-1 p-1.5 rounded-xl border transition-all text-center"
+              :class="capturedPreviews[step.key]
+                ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                : idx === currentStepIdx
+                ? 'border-indigo-500 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold'
+                : 'border-slate-200 dark:border-slate-800 text-slate-400'"
+            >
+              <div class="relative size-12 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center border">
+                <img
+                  v-if="capturedPreviews[step.key]"
+                  :src="capturedPreviews[step.key]"
+                  class="w-full h-full object-cover scale-x-[-1]"
+                />
+                <span v-else class="text-xs font-bold">{{ idx + 1 }}</span>
+
+                <div v-if="capturedPreviews[step.key]" class="absolute top-0.5 right-0.5 bg-emerald-500 text-white rounded-full p-0.5">
+                  <CheckCircle2 class="size-3" />
+                </div>
+              </div>
+              <span class="text-[10px] font-medium leading-tight truncate w-full">
+                {{ step.label }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter class="flex items-center justify-between gap-2 border-t pt-3">
+          <div class="flex gap-1.5">
+            <Button variant="ghost" size="sm" class="text-xs gap-1 text-slate-500" @click="closeFaceRegistration">
+              Batal
+            </Button>
+            <Button
+              v-if="capturedPreviews.front"
+              variant="outline"
+              size="sm"
+              class="text-xs gap-1"
+              @click="resetFaceRegistration"
+            >
+              <RotateCcw class="size-3.5" />
+              Ulangi
+            </Button>
+          </div>
+
+          <div class="flex gap-2">
+            <Button v-if="cameraStatus !== 'active'" size="sm" @click="startCamera">
+              Nyalakan Kamera
+            </Button>
+
+            <!-- Manual Fallback Button -->
+            <Button
+              v-else-if="!isAllSamplesCaptured"
+              size="sm"
+              variant="outline"
+              class="text-xs gap-1.5 text-slate-700 dark:text-slate-200"
+              @click="triggerFlashEffect(); captureCurrentSample()"
+            >
+              <Camera class="size-3.5" />
+              Ambil Manual
+            </Button>
+
+            <Button
+              v-else
+              size="sm"
+              class="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
+              :disabled="isRegistering"
+              @click="submitMultiAngleRegistration"
+            >
+              <Sparkles class="size-4" />
+              {{ isRegistering ? 'Menyimpan 4 Sampel...' : 'Simpan 4 Sampel Biometrik' }}
+            </Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <!-- ── Modal Show Detail Biometrik Siswa ── -->
+    <Dialog :open="isShowModalOpen" @update:open="val => !val && closeDetailModal()">
+      <DialogContent class="sm:max-w-[480px]">
+        <DialogHeader>
+          <DialogTitle class="flex items-center gap-2 text-base font-bold">
+            <Eye class="size-5 text-indigo-500" />
+            Detail Biometrik & Perangkat Siswa
+          </DialogTitle>
+          <DialogDescription class="text-xs">
+            Informasi registrasi biometrik wajah dan kartu RFID siswa.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div v-if="detailStudent" class="space-y-4 py-2">
+          <!-- Student Card -->
+          <div class="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border">
+            <div class="size-12 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-700 flex items-center justify-center shrink-0 border">
+              <img v-if="detailStudent.foto" :src="getPhotoUrl(detailStudent.foto)" :alt="detailStudent.nama" class="size-full object-cover" />
+              <span v-else class="font-bold text-sm text-indigo-600 dark:text-indigo-400">
+                {{ getInitials(detailStudent.nama) }}
+              </span>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm text-slate-900 dark:text-white">{{ detailStudent.nama }}</h4>
+              <p class="text-xs text-slate-500">NISN: <code class="font-mono">{{ detailStudent.nisn || '-' }}</code> • Kelas {{ detailStudent.kelas || '-' }}</p>
+            </div>
+          </div>
+
+          <!-- Status Grid -->
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div class="p-3 rounded-xl border bg-slate-50/50 dark:bg-slate-900/40 space-y-1">
+              <span class="text-slate-400 font-medium">Status Biometrik Wajah</span>
+              <div class="flex items-center gap-1.5 pt-0.5">
+                <Badge :variant="detailStudent.is_face_registered ? 'default' : 'secondary'" class="text-[11px] gap-1">
+                  <ShieldCheck v-if="detailStudent.is_face_registered" class="size-3" />
+                  {{ detailStudent.is_face_registered ? 'Terdaftar (4 Sudut AI)' : 'Belum Terdaftar' }}
+                </Badge>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl border bg-slate-50/50 dark:bg-slate-900/40 space-y-1">
+              <span class="text-slate-400 font-medium">Kartu RFID (UID)</span>
+              <div class="flex items-center gap-1.5 pt-0.5 font-mono">
+                <Badge v-if="detailStudent.rfid_uid" class="bg-indigo-500/10 text-indigo-600 text-[11px] gap-1">
+                  <CreditCard class="size-3" />
+                  {{ detailStudent.rfid_uid }}
+                </Badge>
+                <span v-else class="text-slate-400 italic">Belum Terhubung</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" size="sm" @click="closeDetailModal">Tutup</Button>
+          <Button size="sm" class="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white" @click="closeDetailModal(); openFaceRegistration(detailStudent)">
+            <Camera class="size-4" />
+            Daftarkan Wajah
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <!-- ── Modal Edit Data RFID Siswa ── -->
+    <Dialog :open="isEditModalOpen" @update:open="val => !val && closeEditModal()">
+      <DialogContent class="sm:max-w-[440px]">
+        <DialogHeader>
+          <DialogTitle class="flex items-center gap-2 text-base font-bold">
+            <Pencil class="size-5 text-blue-500" />
+            Edit Data RFID & Biometrik Siswa
+          </DialogTitle>
+          <DialogDescription class="text-xs">
+            Hubungkan kartu fisik RFID / ubah identitas perangkat siswa.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div v-if="editStudent" class="space-y-4 py-2">
+          <!-- Student Info Header -->
+          <div class="text-xs p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-between">
+            <span class="font-semibold text-slate-800 dark:text-slate-200">{{ editStudent.nama }}</span>
+            <span class="text-slate-500 font-mono">Kelas {{ editStudent.kelas || '-' }}</span>
+          </div>
+
+          <!-- RFID UID Form Input -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <CreditCard class="size-3.5 text-indigo-500" />
+              Nomor Seri UID Kartu RFID
+            </label>
+            <Input
+              v-model="rfidCardUid"
+              placeholder="Contoh: 1049283711"
+              class="font-mono text-xs"
+            />
+            <p class="text-[11px] text-slate-400">
+              Tempelkan kartu ke pemindai RFID USB untuk membaca nomor UID secara otomatis.
+            </p>
+          </div>
         </div>
 
         <DialogFooter class="flex gap-2 justify-end">
-          <Button variant="outline" @click="closeFaceRegistration">Batal</Button>
-          <Button v-if="cameraStatus !== 'active'" @click="startCamera">Nyalakan Kamera</Button>
-          <Button v-else :disabled="isRegistering" @click="captureAndRegister">
-            {{ isRegistering ? 'Mendaftarkan...' : 'Ambil Foto & Registrasi' }}
+          <Button variant="outline" size="sm" @click="closeEditModal">Batal</Button>
+          <Button size="sm" class="bg-blue-600 hover:bg-blue-700 text-white gap-1.5" @click="saveEditModal">
+            Simpan Perubahan
           </Button>
         </DialogFooter>
       </DialogContent>

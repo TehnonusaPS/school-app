@@ -34,18 +34,18 @@ const formLangganan = () => {
 // Stats & KPI
 const kpiData = ref([
   {
-    label: 'TOTAL MRR',
+    label: 'TOTAL NOMINAL SUBSCRIBE',
     value: 'Rp 0',
-    trend: 'Bulan ini',
+    trend: 'Akumulasi nilai paket aktif',
     trendDirection: 'up',
     icon: Banknote,
     illustration: 'bag',
     variant: 'emerald'
   },
   {
-    label: 'TENANT AKTIF',
+    label: 'TOTAL SUBSCRIBE',
     value: '0 Institusi',
-    trend: 'Aktif di platform',
+    trend: 'Institusi aktif berlangganan',
     trendDirection: 'up',
     icon: Building2,
     illustration: 'globe',
@@ -93,7 +93,7 @@ const loadData = async () => {
     const dashRes = await financeService.getDashboard()
     if (dashRes.status === 'success' && dashRes.data) {
       const stats = dashRes.data.stats
-      kpiData.value[0].value = formatCurrency(stats.monthly_recurring_revenue)
+      kpiData.value[0].value = formatCurrency(stats.total_nominal_subscribe)
       kpiData.value[1].value = `${stats.active_subscriptions_count} Institusi`
       kpiData.value[2].value = `${stats.pending_verifications_count} Pembayaran`
       kpiData.value[3].value = formatCurrency(stats.total_revenue)
@@ -264,6 +264,7 @@ const getAvatarClass = (avatar) => {
         :progress="stat.progress"
         :variant="stat.variant"
         :illustration="stat.illustration"
+        valueClass="text-base sm:text-xl md:text-2xl"
       />
     </div>
     

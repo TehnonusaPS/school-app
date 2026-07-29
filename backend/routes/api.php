@@ -141,6 +141,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Subscriptions
         Route::get('/subscriptions', [FinanceController::class, 'getSubscriptions']);
+        Route::get('/subscriptions/{subscription}', [FinanceController::class, 'subscriptionsShow']);
+        Route::put('/subscriptions/{subscription}', [FinanceController::class, 'subscriptionsUpdate']);
         Route::delete('/subscriptions/{subscription}', [FinanceController::class, 'subscriptionsDestroy']);
 
         // Payments / Invoicing

@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'vue-sonner'
 import PageHeader from '@/components/page-header/PageHeader.vue'
-import { getLocalTimeZone, today } from '@internationalized/date'
+import { getLocalTimeZone, today, CalendarDate } from '@internationalized/date'
 import { formatDate } from '@/utils/formatDate'
 import { glassFade } from '@/config/motion'
 import {
@@ -44,6 +44,7 @@ const route = useRoute()
 const isEditMode = computed(() => !!route.query.id)
 
 const activeDate = ref(today(getLocalTimeZone()))
+const dueDate = ref(today(getLocalTimeZone()).add({ years: 1 }))
 const plans = ref([])
 const foundations = ref([])
 const selectedPlan = ref(null)
@@ -64,17 +65,51 @@ const form = ref({
   telepon: ''
 })
 
-const dueDate = computed(() => {
-  if (!selectedPlan.value) return activeDate.value.add({ years: 1 })
+const calculateDueDate = () => {
+  if (isEditMode.value) return // Don't auto-calculate if editing, keep the one from database
+  if (!selectedPlan.value) {
+    dueDate.value = activeDate.value.add({ years: 1 })
+    return
+  }
   const cycle = selectedPlan.value.billing_cycle
   if (cycle === 'monthly') {
-    return activeDate.value.add({ months: 1 })
+    dueDate.value = activeDate.value.add({ months: 1 })
   } else if (cycle === 'yearly') {
-    return activeDate.value.add({ years: 1 })
+    dueDate.value = activeDate.value.add({ years: 1 })
   } else if (cycle === 'lifetime') {
-    return activeDate.value.add({ years: 100 })
+    dueDate.value = activeDate.value.add({ years: 100 })
+  } else {
+    dueDate.value = activeDate.value.add({ years: 1 })
   }
-  return activeDate.value.add({ years: 1 })
+}
+
+watch([selectedPlan, activeDate], () => {
+  calculateDueDate()
+})
+
+// Binds for editable HTML date pickers in edit mode
+const startsAtStr = computed({
+  get() {
+    return activeDate.value.toString()
+  },
+  set(val) {
+    const parts = val.split('-')
+    if (parts.length === 3) {
+      activeDate.value = new CalendarDate(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]))
+    }
+  }
+})
+
+const endsAtStr = computed({
+  get() {
+    return dueDate.value.toString()
+  },
+  set(val) {
+    const parts = val.split('-')
+    if (parts.length === 3) {
+      dueDate.value = new CalendarDate(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]))
+    }
+  }
 })
 
 // Load options from backend
@@ -88,6 +123,30 @@ onMounted(async () => {
     const foundationsRes = await financeService.getFoundations()
     if (foundationsRes.status === 'success') {
       foundations.value = foundationsRes.data
+    }
+
+    if (isEditMode.value) {
+      const subRes = await financeService.getSubscription(route.query.id)
+      if (subRes.status === 'success' && subRes.data) {
+        const sub = subRes.data
+        form.value.foundation_id = sub.foundation_id
+        form.value.subscription_plan_id = sub.subscription_plan_id
+        form.value.status = sub.status // 'active', 'expired', 'trial', 'cancelled'
+        form.value.catatan = sub.notes || ''
+
+        if (sub.starts_at) {
+          const parts = sub.starts_at.split('-')
+          if (parts.length === 3) {
+            activeDate.value = new CalendarDate(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]))
+          }
+        }
+        if (sub.ends_at) {
+          const parts = sub.ends_at.split('-')
+          if (parts.length === 3) {
+            dueDate.value = new CalendarDate(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]))
+          }
+        }
+      }
     }
   } catch (error) {
     toast.error('Gagal mengambil data dari server.')
@@ -139,13 +198,19 @@ const packageBadgeStyle = (pkg) => {
 }
 
 const statusBadgeStyle = (status) => {
-  switch (status) {
+  if (!status) return 'bg-slate-500/10 text-slate-400 border border-slate-500/20 text-[10px] px-2 py-0.5'
+  switch (status.toLowerCase()) {
     case 'aktif':
+    case 'active':
       return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-2 py-0.5'
     case 'trialing':
+    case 'trial':
       return 'bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] px-2 py-0.5'
     case 'overdue':
+    case 'expired':
       return 'bg-red-500/10 text-red-400 border border-red-500/20 text-[10px] px-2 py-0.5'
+    case 'cancelled':
+      return 'bg-orange-500/10 text-orange-400 border border-orange-500/20 text-[10px] px-2 py-0.5'
     default:
       return 'bg-slate-500/10 text-slate-400 border border-slate-500/20 text-[10px] px-2 py-0.5'
   }
@@ -195,30 +260,42 @@ const handleSubmit = async () => {
   isSubmitting.value = true
 
   try {
-    // 1. Create manual pending invoice/payment
-    const invRes = await financeService.createInvoice({
-      foundation_id: form.value.foundation_id,
-      subscription_plan_id: form.value.subscription_plan_id,
-      notes: form.value.catatan || 'Manual subscription activation invoice'
-    })
-
-    if (invRes.status === 'success' && invRes.data) {
-      const paymentId = invRes.data.id
-
-      // 2. If status set to 'aktif', immediately verify payment as 'paid' to activate subscription
-      if (form.value.status === 'aktif') {
-        await financeService.verifyPayment(paymentId, {
-          status: 'paid',
-          notes: 'Auto-approved and activated by Administrator.'
-        })
-        toast.success('Pendaftaran Langganan Baru Berhasil & Diaktifkan!')
-      } else {
-        toast.success('Invoice Tagihan Langganan Berhasil Dibuat (Pending)!')
-      }
-
+    if (isEditMode.value) {
+      await financeService.updateSubscription(route.query.id, {
+        subscription_plan_id: form.value.subscription_plan_id,
+        status: form.value.status,
+        starts_at: activeDate.value.toString(),
+        ends_at: dueDate.value.toString(),
+        notes: form.value.catatan
+      })
+      toast.success('Detail Langganan Berhasil Diperbarui!')
       router.push('/keuangan/subscription')
     } else {
-      throw new Error(invRes.message || 'Gagal membuat tagihan.')
+      // 1. Create manual pending invoice/payment
+      const invRes = await financeService.createInvoice({
+        foundation_id: form.value.foundation_id,
+        subscription_plan_id: form.value.subscription_plan_id,
+        notes: form.value.catatan || 'Manual subscription activation invoice'
+      })
+
+      if (invRes.status === 'success' && invRes.data) {
+        const paymentId = invRes.data.id
+
+        // 2. If status set to 'aktif', immediately verify payment as 'paid' to activate subscription
+        if (form.value.status === 'aktif') {
+          await financeService.verifyPayment(paymentId, {
+            status: 'paid',
+            notes: 'Auto-approved and activated by Administrator.'
+          })
+          toast.success('Pendaftaran Langganan Baru Berhasil & Diaktifkan!')
+        } else {
+          toast.success('Invoice Tagihan Langganan Berhasil Dibuat (Pending)!')
+        }
+
+        router.push('/keuangan/subscription')
+      } else {
+        throw new Error(invRes.message || 'Gagal membuat tagihan.')
+      }
     }
   } catch (error) {
     toast.error('Gagal menyimpan langganan', {
@@ -269,7 +346,7 @@ const handleSubmit = async () => {
             <Field>
               <FieldLabel>Nama Institusi / Sekolah <span class="text-destructive">*</span></FieldLabel>
               <FieldContent>
-                <Select v-model="form.foundation_id" required>
+                <Select v-model="form.foundation_id" required :disabled="isEditMode">
                   <SelectTrigger class="h-11 bg-background/50 border-border">
                     <SelectValue placeholder="Pilih Institusi / Yayasan" />
                   </SelectTrigger>
@@ -320,17 +397,25 @@ const handleSubmit = async () => {
               </FieldContent>
             </Field>
             
-            <!-- Status Awal -->
+            <!-- Status Awal / Status Langganan -->
             <Field>
-              <FieldLabel>Status Awal</FieldLabel>
+              <FieldLabel>Status {{ isEditMode ? 'Langganan' : 'Awal' }}</FieldLabel>
               <FieldContent>
                 <Select v-model="form.status">
                   <SelectTrigger class="h-11 bg-background/50 border-border">
-                    <SelectValue placeholder="Pilih Status" />
+                    <SelectValue :placeholder="isEditMode ? 'Pilih Status' : 'Pilih Status Awal'" />
                   </SelectTrigger>
                   <SelectContent class="bg-card border-border">
-                    <SelectItem value="aktif">Aktif Langsung (Paid)</SelectItem>
-                    <SelectItem value="pending">Menunggu Pembayaran (Pending)</SelectItem>
+                    <template v-if="isEditMode">
+                      <SelectItem value="active">Aktif (Active)</SelectItem>
+                      <SelectItem value="trial">Uji Coba (Trial)</SelectItem>
+                      <SelectItem value="expired">Kedaluwarsa (Expired)</SelectItem>
+                      <SelectItem value="cancelled">Dibatalkan (Cancelled)</SelectItem>
+                    </template>
+                    <template v-else>
+                      <SelectItem value="aktif">Aktif Langsung (Paid)</SelectItem>
+                      <SelectItem value="pending">Menunggu Pembayaran (Pending)</SelectItem>
+                    </template>
                   </SelectContent>
                 </Select>
               </FieldContent>
@@ -361,13 +446,20 @@ const handleSubmit = async () => {
           <!-- Tanggal Aktivasi & Jatuh Tempo -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Field>
-              <FieldLabel>Tanggal Aktivasi (Hari Ini)</FieldLabel>
+              <FieldLabel>Tanggal Aktivasi</FieldLabel>
               <FieldContent>
                 <InputGroup>
                   <InputGroupText>
                     <Calendar class="w-4 h-4 text-muted-foreground" />
                   </InputGroupText>
+                  <input
+                    v-if="isEditMode"
+                    v-model="startsAtStr"
+                    type="date"
+                    class="flex h-11 w-full rounded-lg border border-border bg-background/50 px-3 py-2 text-sm focus-visible:outline-none focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+                  />
                   <InputGroupInput
+                    v-else
                     :model-value="formatDate(activeDate)"
                     disabled
                     class="bg-muted/60 text-muted-foreground cursor-not-allowed"
@@ -377,13 +469,20 @@ const handleSubmit = async () => {
             </Field>
             
             <Field>
-              <FieldLabel>Tanggal Jatuh Tempo (Kalkulasi Paket)</FieldLabel>
+              <FieldLabel>Tanggal Jatuh Tempo</FieldLabel>
               <FieldContent>
                 <InputGroup>
                   <InputGroupText>
                     <Calendar class="w-4 h-4 text-muted-foreground" />
                   </InputGroupText>
+                  <input
+                    v-if="isEditMode"
+                    v-model="endsAtStr"
+                    type="date"
+                    class="flex h-11 w-full rounded-lg border border-border bg-background/50 px-3 py-2 text-sm focus-visible:outline-none focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+                  />
                   <InputGroupInput
+                    v-else
                     :model-value="formatDate(dueDate)"
                     disabled
                     class="bg-muted/60 text-muted-foreground cursor-not-allowed"
@@ -490,7 +589,7 @@ const handleSubmit = async () => {
             <div class="flex justify-between items-start gap-4">
               <div class="space-y-1.5 flex-1 min-w-0 pr-2">
                 <span class="text-[9px] tracking-widest font-black uppercase text-primary-foreground/70">KARTU ANGGOTA LISENSI</span>
-                <h3 class="text-xl font-extrabold tracking-tight leading-tight truncate">
+                <h3 class="text-lg font-bold tracking-tight leading-tight truncate">
                   {{ form.namaInstitusi || 'Nama Institusi / Sekolah' }}
                 </h3>
                 <div class="inline-flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded text-[10px] font-mono border border-white/15">
@@ -515,7 +614,7 @@ const handleSubmit = async () => {
               </div>
               <div class="text-right">
                 <p class="text-[9px] uppercase tracking-wider text-primary-foreground/75 font-semibold">Tarif Paket</p>
-                <p class="text-xl font-black mt-0.5 tracking-tight">
+                <p class="text-lg font-bold mt-0.5 tracking-tight">
                   {{ formatCurrency(form.nilaiKontrak || 0) }}
                 </p>
               </div>

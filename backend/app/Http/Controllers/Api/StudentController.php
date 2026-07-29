@@ -224,6 +224,9 @@ class StudentController extends Controller
                 'alamat'         => $profile ? $profile->address : '',
                 'tahunMasuk'     => $profile && $profile->enrollment_date ? $profile->enrollment_date->format('Y') : '',
                 'status'         => $profile ? $this->mapStatusToFe($profile->status) : 'Aktif',
+                'payment_status' => \App\Models\StudentBill::where('student_id', $student->id)
+                                    ->whereIn('status', ['unpaid', 'partial'])
+                                    ->exists() ? 'Belum Lunas' : 'Lunas',
                 'namaWali'       => $parent && $parent->user ? $parent->user->name : '',
                 'hubungan_siswa' => $parent ? $this->mapRelationshipToFe($parent->relationship) : '',
                 'kelamin_wali'   => $parent ? $this->mapGenderToFe($parent->gender) : '',

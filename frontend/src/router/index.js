@@ -108,12 +108,24 @@ const router = createRouter({
 })
 
 /* 🔥 INI DIA PROTEKSI ROLE */
-router.beforeEach((to, from) => {
+router.beforeEach(async (to, from) => {
   const auth = useAuthStore()
 
-  // ❌ belum login
-  if (to.meta.requiresAuth && !auth.user) {
-    return '/login'
+  if (to.meta.requiresAuth) {
+    // ❌ belum login sama sekali
+    if (!auth.token) {
+      return '/login'
+    }
+
+    // Jika ada token tapi data user belum ter-load (misal habis direfresh)
+    if (!auth.user) {
+      await auth.initUser()
+      // Jika setelah initUser data user masih kosong (token tidak valid/expired)
+      if (!auth.user) {
+        auth.logout()
+        return '/login'
+      }
+    }
   }
 
   // ❌ role tidak sesuai

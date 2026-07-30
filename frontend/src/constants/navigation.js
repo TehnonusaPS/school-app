@@ -7,7 +7,8 @@ import {
   MessageSquare,
   FileBarChart,
   MoreHorizontal,
-  Palette
+  Palette,
+  LayoutTemplate
 } from 'lucide-vue-next'
 
 export const navMain = [
@@ -392,5 +393,12 @@ export const navMain = [
     url: '/components',
     icon: Palette,
     roles: ['superadmin']
+  },
+  {
+    title: 'Website Builder',
+    url: '/landing-editor',
+    icon: LayoutTemplate,
+    roles: ['admin_yayasan', 'admin_sekolah', 'kepala_sekolah'],
+    requiresLandingPageEnabled: true
   }
 ]

@@ -11,13 +11,13 @@ export const mockStudents = [
   { id: 10, nama: 'Dimas', nis: '024342404', gender: 'L' }
 ]
 
-export const kelasList = ['2 D', '1 A', '2 A', '3 C', '4 B', '6 F']
+export const kelasList = ['2-D', '2-E', '1-A', '2-A', '3-C', '4-B', '6-F']
 export const tahunList = ['2026/2027', '2025/2026', '2024/2025']
 
 export const waliKelasAssignments = {
-  '2026/2027': '2 D',
-  '2025/2026': '1 A',
-  '2024/2025': '2 A'
+  '2026/2027': '2-D',
+  '2025/2026': '1-A',
+  '2024/2025': '2-A'
 }
 
 export const academicMonths = [

@@ -39,7 +39,7 @@ const handleImageChange = (file) => {
       <div class="space-y-6">
         <!-- Foto Siswa -->
         <FormSection title="Foto Profil" description="Upload foto profil siswa disini" :icon="Image">
-            <ImageUpload :preview="imagePreview" @change="handleImageChange" note="Format: JPG atau PNG. Maksimal 2MB. Dimensi rasio 1:1"/>
+            <ImageUpload :preview="imagePreview" @change="handleImageChange" note="Format: JPG atau PNG. Maksimal 10MB. Dimensi rasio 1:1" allow-camera/>
         </FormSection>
 
         <!-- Informasi Kontak -->

@@ -42,6 +42,7 @@ const imagePreview = ref('')
 
 const handleImage = (file) => {
   imagePreview.value = URL.createObjectURL(file)
+  form.value.foto = file
 }
 
 const showSuccessModal = ref(false)

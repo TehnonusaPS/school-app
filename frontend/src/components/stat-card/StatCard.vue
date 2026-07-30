@@ -9,6 +9,7 @@ import { useAuthStore } from '@/stores/authStore'
 const props = defineProps({
   label: { type: String, required: true },
   value: { type: [String, Number], required: true },
+  valueClass: { type: String, default: '' },
   sub: { type: String, default: '' },
   trend: { type: [String, Number], default: '' },
   trendDirection: {
@@ -140,7 +141,7 @@ const illustrationUrl = computed(() => {
     </CardHeader>
 
     <CardContent class="!px-3.5 pt-0 pb-2 sm:!px-4 sm:pb-0 relative z-10 mt-[-3px] sm:mt-0">
-      <div class="text-lg sm:text-3xl font-bold tracking-tight drop-shadow-sm">
+      <div :class="[valueClass || 'text-lg sm:text-3xl', 'font-bold tracking-tight drop-shadow-sm']">
         <RollingNumber
           :value="value"
           :delay="computedDelay"

@@ -10,13 +10,13 @@ return new class extends Migration
     {
         Schema::create('student_payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('student_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignUuid('student_id')->constrained('users')->cascadeOnDelete();
             $table->string('payment_method'); // cash, bca, mandiri, gopay, dana, ovo, card
             $table->decimal('amount', 15, 2);
             $table->string('reference_number')->unique();
             $table->enum('status', ['pending', 'success', 'failed'])->default('pending');
             $table->dateTime('payment_date')->useCurrent();
-            $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('verified_by')->nullable()->constrained('users')->nullOnDelete();
             $table->text('notes')->nullable();
             $table->timestamps();
         });

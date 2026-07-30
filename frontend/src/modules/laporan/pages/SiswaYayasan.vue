@@ -2,6 +2,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { Users, Download, Printer, UserPlus, UserMinus, TrendingUp, Search, ChevronUp, ChevronDown } from 'lucide-vue-next'
 import { Skeleton } from '@/components/ui/skeleton'
+import StatCardGrid from '@/components/stat-card/StatCardGrid.vue'
+import StatCard from '@/components/stat-card/StatCard.vue'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -10,13 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Separator } from '@/components/ui/separator'
-
-const mockData = [
-  { id: 1, sekolah: 'SDN Tunas Bangsa', jenjang: 'SD', total: 412, laki: 210, perempuan: 202, baru: 95, keluar: 12, naik: 88, tinggal: 7 },
-  { id: 2, sekolah: 'SMPN Harapan Ilmu', jenjang: 'SMP', total: 356, laki: 182, perempuan: 174, baru: 88, keluar: 8, naik: 80, tinggal: 8 },
-  { id: 3, sekolah: 'SMAN Bina Prestasi', jenjang: 'SMA', total: 487, laki: 245, perempuan: 242, baru: 110, keluar: 15, naik: 100, tinggal: 10 },
-  { id: 4, sekolah: 'SMK Teknologi Maju', jenjang: 'SMK', total: 298, laki: 195, perempuan: 103, baru: 72, keluar: 10, naik: 65, tinggal: 7 },
-]
+import { getFoundationStudents } from '@/services/api/reports'
 
 const isLoading = ref(true)
 const data = ref([])
@@ -26,7 +22,16 @@ const selectedTahun = ref('2025/2026')
 const sortField = ref('sekolah')
 const sortDir = ref('asc')
 
-onMounted(() => { setTimeout(() => { data.value = mockData; isLoading.value = false }, 500) })
+onMounted(async () => {
+  try {
+    const res = await getFoundationStudents()
+    data.value = res || []
+  } catch (error) {
+    console.error('Failed to fetch students data:', error)
+  } finally {
+    isLoading.value = false
+  }
+})
 
 const totalSiswa = computed(() => data.value.reduce((s, k) => s + k.total, 0))
 const totalBaru = computed(() => data.value.reduce((s, k) => s + k.baru, 0))
@@ -103,32 +108,41 @@ const jenjangColor = { SD: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 
       </div>
     </div>
 
-    <div class="grid gap-4 grid-cols-2 lg:grid-cols-4">
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Siswa</span><div class="p-1.5 bg-primary/10 rounded-lg"><Users class="size-4 text-primary" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-14" />
-        <div v-else class="text-3xl font-bold text-primary">{{ totalSiswa }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Seluruh unit</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Siswa Baru</span><div class="p-1.5 bg-green-50 dark:bg-green-950/40 rounded-lg"><UserPlus class="size-4 text-green-600" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-12" />
-        <div v-else class="text-3xl font-bold text-green-600 dark:text-green-400">{{ totalBaru }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Tahun ini</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Siswa Keluar</span><div class="p-1.5 bg-red-50 dark:bg-red-950/40 rounded-lg"><UserMinus class="size-4 text-red-600" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-12" />
-        <div v-else class="text-3xl font-bold text-red-600 dark:text-red-400">{{ totalKeluar }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Tahun ini</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Unit Sekolah</span><div class="p-1.5 bg-muted rounded-lg"><TrendingUp class="size-4 text-muted-foreground" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-10" />
-        <div v-else class="text-3xl font-bold">{{ data.length }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Aktif</p>
-      </Card>
-    </div>
+    <StatCardGrid cols="4">
+      <StatCard
+        label="Total Siswa"
+        :value="totalSiswa"
+        sub="Seluruh unit"
+        :icon="Users"
+        variant="primary"
+        :delay="100"
+      />
+      <StatCard
+        label="Siswa Baru"
+        :value="totalBaru"
+        sub="Tahun ini"
+        :icon="UserPlus"
+        variant="emerald"
+        :delay="200"
+      />
+      <StatCard
+        label="Siswa Keluar"
+        :value="totalKeluar"
+        sub="Tahun ini"
+        :icon="UserMinus"
+        variant="destructive"
+        :delay="300"
+      />
+      <StatCard
+        label="Unit Sekolah"
+        :value="data.length"
+        sub="Aktif"
+        :icon="TrendingUp"
+        variant="default"
+        color="slate"
+        :delay="400"
+      />
+    </StatCardGrid>
 
     <Card class="overflow-hidden">
       <div class="overflow-x-auto">

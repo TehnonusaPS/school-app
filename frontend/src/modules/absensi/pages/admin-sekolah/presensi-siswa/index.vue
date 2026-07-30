@@ -8,6 +8,7 @@ import {
   Fingerprint,
   Radio,
   CheckCircle,
+  AlertCircle,
   UserCheck,
   Clock,
   CalendarDays,
@@ -24,15 +25,24 @@ import { Badge } from '@/components/ui/badge'
 import { getStudents, getLogs, postScan } from '@/services/api/absensi'
 import { glassSlide, glassFade } from '@/config/motion'
 import { useAuthStore } from '@/stores/authStore'
+import { toast } from 'vue-sonner'
 
 const router = useRouter()
 const auth = useAuthStore()
 
 // ─── State ──────────────────────────────────────────────
-const scanType = ref('Otomatis') // 'Otomatis' | 'Masuk' | 'Keluar'
+const scanType = ref('Masuk') // 'Masuk' only (user request)
 const absensiData = ref([])
 const scanResults = ref([])
 const cooldowns = ref({}) // Format: { [studentId]: timestamp }
+
+// ─── Face Tracking State ───────────────────────────────
+const videoWidth = ref(640)
+const videoHeight = ref(480)
+const isTrackerLoaded = ref(false)
+const lastDetectedFace = ref(null)
+const isCooldownActive = ref(false)
+const activeScanError = ref(null)
 
 // ─── Fullscreen State ────────────────────────────────────
 const isFullscreen = ref(false)
@@ -59,6 +69,7 @@ let scanTimeout = null
 
 // ─── Camera State ───────────────────────────────────────
 const videoRef = ref(null)
+const overlayCanvasRef = ref(null)
 const mediaStream = ref(null)
 const cameraStatus = ref('idle') // idle | loading | active | error
 const cameraError = ref('')
@@ -87,15 +98,160 @@ async function fetchLogsOnly() {
   }
 }
 
-// ─── Initials Helper ────────────────────────────────────
-function getInitials(nama) {
-  if (!nama) return ''
-  const parts = nama.split(' ')
-  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
-  return parts[0].substring(0, 2).toUpperCase()
+// ─── Face Tracking Helper & Functions ───────────────────
+const loadScript = (src) => {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) {
+      resolve()
+      return
+    }
+    const script = document.createElement('script')
+    script.src = src
+    script.onload = () => resolve()
+    script.onerror = () => reject(new Error(`Failed to load script: ${src}`))
+    document.head.appendChild(script)
+  })
+}
+
+let detectionInterval = null
+
+function initFaceTracking() {
+  if (!videoRef.value || !overlayCanvasRef.value || !window.faceapi) return
+  
+  stopFaceTracking()
+  
+  const videoEl = videoRef.value
+  const canvasEl = overlayCanvasRef.value
+  const faceapi = window.faceapi
+
+  const displaySize = {
+    width: videoEl.clientWidth || videoEl.videoWidth || 640,
+    height: videoEl.clientHeight || videoEl.videoHeight || 480
+  }
+  
+  faceapi.matchDimensions(canvasEl, displaySize)
+
+  detectionInterval = setInterval(async () => {
+    if (cameraStatus.value !== 'active') return
+    
+    // Auto-adjust size on browser/kiosk resize
+    const currentSize = {
+      width: videoEl.clientWidth || videoEl.videoWidth || 640,
+      height: videoEl.clientHeight || videoEl.videoHeight || 480
+    }
+    if (canvasEl.width !== currentSize.width || canvasEl.height !== currentSize.height) {
+      faceapi.matchDimensions(canvasEl, currentSize)
+    }
+
+    try {
+      const detections = await faceapi.detectAllFaces(
+        videoEl,
+        new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 })
+      )
+      
+      if (detections && detections.length > 0) {
+        lastDetectedFace.value = detections[0]
+      } else {
+        lastDetectedFace.value = null
+      }
+      
+      const resizedDetections = faceapi.resizeResults(detections, currentSize)
+      const ctx = canvasEl.getContext('2d')
+      ctx.clearRect(0, 0, canvasEl.width, canvasEl.height)
+
+      resizedDetections.forEach((detection) => {
+        const { x, y, width, height } = detection.box
+        
+        let labelText = 'Mendeteksi...'
+        let boxColor = '#34d399' // Emerald green
+
+        if (isProcessingScan.value) {
+          labelText = 'Memproses...'
+          boxColor = '#f59e0b' // Warning yellow
+        } else if (activeScannedSiswa.value) {
+          labelText = activeScannedSiswa.value.nama
+          boxColor = '#10b981' // Success green
+        }
+
+        // Draw the glowing bounding box
+        ctx.strokeStyle = boxColor
+        ctx.lineWidth = 4
+        
+        // Glow effect
+        ctx.shadowColor = boxColor
+        ctx.shadowBlur = 10
+        ctx.strokeRect(x, y, width, height)
+        ctx.shadowBlur = 0 // reset shadow
+
+        // Draw label text (un-mirrored so it's readable)
+        ctx.save()
+        ctx.translate(x + width / 2, y - 10)
+        ctx.scale(-1, 1)
+
+        ctx.font = 'bold 12px sans-serif'
+        ctx.textAlign = 'center'
+        
+        const textWidth = ctx.measureText(labelText).width
+        const paddingX = 8
+        const paddingY = 4
+
+        // Draw label background
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)'
+        ctx.beginPath()
+        const rectX = -textWidth / 2 - paddingX
+        const rectY = -12 - paddingY
+        const rectW = textWidth + paddingX * 2
+        const rectH = 16 + paddingY
+        const radius = 4
+        
+        if (ctx.roundRect) {
+          ctx.roundRect(rectX, rectY, rectW, rectH, radius)
+        } else {
+          ctx.rect(rectX, rectY, rectW, rectH)
+        }
+        ctx.fill()
+
+        // Border around text label
+        ctx.strokeStyle = 'rgba(52, 211, 153, 0.2)'
+        ctx.lineWidth = 1
+        ctx.stroke()
+
+        // Write text
+        ctx.fillStyle = boxColor
+        ctx.fillText(labelText, 0, 0)
+
+        ctx.restore()
+      })
+    } catch (err) {
+      console.error('Error running faceapi detection:', err)
+    }
+  }, 150)
+}
+
+function stopFaceTracking() {
+  if (detectionInterval) {
+    clearInterval(detectionInterval)
+    detectionInterval = null
+  }
+  lastDetectedFace.value = null
+  if (overlayCanvasRef.value) {
+    const ctx = overlayCanvasRef.value.getContext('2d')
+    ctx.clearRect(0, 0, overlayCanvasRef.value.width, overlayCanvasRef.value.height)
+  }
+}
+
+const onVideoPlay = () => {
+  if (videoRef.value) {
+    videoWidth.value = videoRef.value.videoWidth || 640
+    videoHeight.value = videoRef.value.videoHeight || 480
+    initFaceTracking()
+  }
 }
 
 // ─── Camera Handlers ─────────────────────────────────────
+const isProcessingScan = ref(false)
+let realFaceScanInterval = null
+
 async function startCamera() {
   cameraStatus.value = 'loading'
   cameraError.value = ''
@@ -114,7 +270,7 @@ async function startCamera() {
       videoRef.value.play()
     }
 
-    startFaceScanSimulation()
+    startRealFaceScanner()
 
   } catch (err) {
     mediaStream.value = null
@@ -130,7 +286,8 @@ async function startCamera() {
 }
 
 function stopCamera() {
-  stopFaceScanSimulation()
+  stopRealFaceScanner()
+  stopFaceTracking()
   if (mediaStream.value) {
     mediaStream.value.getTracks().forEach(track => track.stop())
     mediaStream.value = null
@@ -139,111 +296,226 @@ function stopCamera() {
   cameraStatus.value = 'idle'
 }
 
-// ─── Face Scan Simulation ───────────────────────────────
-let faceScanInterval = null
-
-function startFaceScanSimulation() {
-  if (faceScanInterval) clearInterval(faceScanInterval)
-  faceScanInterval = setInterval(() => {
-    if (cameraStatus.value !== 'active') return
+// ─── Real Face Scan Capture Loop ────────────────────────
+function startRealFaceScanner() {
+  if (realFaceScanInterval) clearInterval(realFaceScanInterval)
+  realFaceScanInterval = setInterval(async () => {
+    if (cameraStatus.value !== 'active' || isProcessingScan.value || activeScannedSiswa.value || isCooldownActive.value || !lastDetectedFace.value) return
     
-    // Cari siswa yang belum absen atau belum checkout
-    let pool = []
-    if (scanType.value === 'Otomatis') {
-      pool = absensiData.value.filter(s => s.status === 'belum_absen' || (s.status !== 'belum_absen' && !s.jamKeluar))
-    } else if (scanType.value === 'Masuk') {
-      pool = absensiData.value.filter(s => s.status === 'belum_absen')
-    } else if (scanType.value === 'Keluar') {
-      pool = absensiData.value.filter(s => s.status !== 'belum_absen' && !s.jamKeluar)
-    }
-    
-    if (pool.length === 0) return
-    
-    // Ambil acak siswa dari pool yang tidak dalam cooldown aktif
-    const availablePool = pool.filter(s => {
-      const lastScan = cooldowns.value[s.id] || 0
-      return Date.now() - lastScan > 5000
-    })
-    
-    if (availablePool.length === 0) return
-    const randomSiswa = availablePool[Math.floor(Math.random() * availablePool.length)]
-    
-    executeSuccessfulScan(randomSiswa.id, 'kamera')
-  }, 10000) // Simulasikan scan wajah otomatis setiap 10 detik
+    await performRealFaceScan()
+  }, 1000)
 }
 
-function stopFaceScanSimulation() {
-  if (faceScanInterval) {
-    clearInterval(faceScanInterval)
-    faceScanInterval = null
+function stopRealFaceScanner() {
+  if (realFaceScanInterval) {
+    clearInterval(realFaceScanInterval)
+    realFaceScanInterval = null
+  }
+}
+
+async function performRealFaceScan() {
+  if (!videoRef.value || !lastDetectedFace.value) return
+  isProcessingScan.value = true
+
+  try {
+    const video = videoRef.value
+    const face = lastDetectedFace.value.box
+
+    // Add 35% padding to match the reference student photo format
+    const paddingX = face.width * 0.35
+    const paddingY = face.height * 0.35
+
+    let cropX = face.x - paddingX
+    let cropY = face.y - paddingY
+    let cropW = face.width + paddingX * 2
+    let cropH = face.height + paddingY * 2
+
+    // Bound coordinates to original video resolution
+    cropX = Math.max(0, cropX)
+    cropY = Math.max(0, cropY)
+    cropW = Math.min(video.videoWidth - cropX, cropW)
+    cropH = Math.min(video.videoHeight - cropY, cropH)
+
+    const canvas = document.createElement('canvas')
+    canvas.width = 300
+    canvas.height = 300
+    const context = canvas.getContext('2d')
+
+    // Perform exact face-only crop
+    context.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, 300, 300)
+
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85))
+    const formData = new FormData()
+    formData.append('image', blob, 'kiosk_scan.jpg')
+
+    const newLog = await postScan(formData)
+    handleScanSuccess(newLog, 'kamera')
+
+  } catch (err) {
+    const msg = err.response?.data?.message || 'Gagal memproses absensi.'
+    handleScanError(msg, 'kamera')
+    if (err.response?.status !== 400) {
+      console.warn("Scan error:", err)
+    }
+  } finally {
+    isProcessingScan.value = false
   }
 }
 
 // ─── Scan Logic ──────────────────────────────────────────
-function triggerSimulatedScan(siswaId, source) {
-  executeSuccessfulScan(siswaId, source)
+async function triggerSimulatedScan(siswaId, source) {
+  const studentObj = absensiData.value.find(s => s.id === siswaId)
+  try {
+    const newLog = await postScan({
+      student_id: siswaId,
+      verification_method: source
+    })
+    handleScanSuccess(newLog, source)
+  } catch (err) {
+    const msg = err.response?.data?.message || 'Gagal memproses absensi simulasi.'
+    handleScanError(msg, source, studentObj)
+  }
 }
 
-function executeSuccessfulScan(siswaId, source) {
-  const student = absensiData.value.find(s => s.id === siswaId)
-  if (!student) return
+async function triggerQuickScan(source) {
+  let studentObj = null
+  let studentId = null
 
-  // 1. Cooldown Check (5 detik untuk mencegah double-scan)
-  const now = Date.now()
-  if (cooldowns.value[siswaId] && now - cooldowns.value[siswaId] < 5000) {
-    console.log(`Scan diabaikan untuk ${student.nama} karena batas cooldown 5s.`)
-    return
+  if (absensiData.value && absensiData.value.length > 0) {
+    studentObj = absensiData.value[0]
+    studentId = studentObj.id
+  } else if (scanResults.value && scanResults.value.length > 0) {
+    const firstLog = scanResults.value[0]
+    studentObj = {
+      nama: firstLog.nama,
+      kelas: firstLog.kelas,
+      nisn: firstLog.nisn || '1234567890',
+      id: firstLog.student_profile_id || firstLog.id
+    }
+    studentId = studentObj.id
   }
-  cooldowns.value[siswaId] = now
 
-  let actualScanType = scanType.value
-  if (actualScanType === 'Otomatis') {
-    actualScanType = student.status === 'belum_absen' ? 'Masuk' : 'Keluar'
+  if (studentId) {
+    try {
+      const newLog = await postScan({
+        student_id: studentId,
+        verification_method: source
+      })
+      handleScanSuccess(newLog, source)
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Gagal memproses absensi.'
+      handleScanError(msg, source, studentObj)
+    }
+  } else {
+    const mockLog = {
+      id: Date.now(),
+      nama: 'Ilham Saputra',
+      kelas: '2-D',
+      nisn: '1234567890',
+      tipe: 'Masuk',
+      waktu: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      inisial: 'IS'
+    }
+    handleScanSuccess(mockLog, source)
+  }
+}
+
+function getInitials(nama) {
+  if (!nama) return ''
+  const words = nama.trim().split(/\s+/)
+  if (words.length === 1) return words[0].substring(0, 2).toUpperCase()
+  return (words[0][0] + words[1][0]).toUpperCase()
+}
+
+function handleScanError(msg, source, studentObj = null) {
+  if (scanTimeout) {
+    clearTimeout(scanTimeout)
+    scanTimeout = null
   }
 
-  // Panggil mock API absensi
-  postScan(siswaId, actualScanType)
-    .then(newLog => {
-      // 2. Interrupt Logic: Hapus timeout lama jika ada scan masuk baru
-      if (scanTimeout) {
-        clearTimeout(scanTimeout)
-        scanTimeout = null
-      }
+  const sourceLabels = {
+    kamera: 'SCAN WAJAH (AI)',
+    rfid: 'KARTU RFID',
+    fingerprint: 'SIDIK JARI'
+  }
+  const sourceLabel = sourceLabels[source] || 'SISTEM'
 
-      // 3. Tentukan Source Label untuk UI Kiosk
-      const sourceLabels = {
-        kamera: 'VERIFIKASI: SCAN WAJAH (AI)',
-        rfid: 'VERIFIKASI: KARTU RFID',
-        fingerprint: 'VERIFIKASI: SIDIK JARI'
-      }
+  // Check if the student has already checked in/out for today
+  if (msg.toLowerCase().includes('sudah') || msg.toLowerCase().includes('absen')) {
+    activeScannedSiswa.value = {
+      nama: studentObj ? studentObj.nama : 'Siswa Terverifikasi',
+      isAlreadyScanned: true,
+      customMessage: msg,
+      kelas: studentObj ? studentObj.kelas : '-',
+      nisn: studentObj ? studentObj.nisn : '-',
+      jamMasuk: '-',
+      verificationSource: `VERIFIKASI: ${sourceLabel}`
+    }
+    
+    scanSuccessMsg.value = 'SUDAH ABSENSI'
+    
+    // Auto-clear success card after 3 seconds
+    scanTimeout = setTimeout(() => {
+      activeScannedSiswa.value = null
+    }, 3000)
+  } else {
+    // Display error overlay card (unrecognized, etc.)
+    activeScanError.value = {
+      message: source === 'kamera' ? 'GAGAL ABSENSI' : `GAGAL ABSENSI (${sourceLabel})`,
+      detail: msg
+    }
 
-      activeScannedSiswa.value = {
-        nama: newLog.nama,
-        kelas: newLog.kelas,
-        nisn: newLog.nisn,
-        jamMasuk: actualScanType === 'Masuk' ? newLog.waktu : (student.jamMasuk || '-'),
-        jamKeluar: actualScanType === 'Keluar' ? newLog.waktu : null,
-        verificationSource: sourceLabels[source] || 'VERIFIKASI SISTEM'
-      }
+    // Enable cooldown so we don't spam requests while showing the error card
+    isCooldownActive.value = true
+    setTimeout(() => {
+      activeScanError.value = null
+      isCooldownActive.value = false
+    }, 3000)
+  }
+}
 
-      scanSuccessMsg.value = `ABSENSI ${actualScanType} BERHASIL!`
-      
-      // Tambahkan ke log list di samping
-      scanResults.value.unshift(newLog)
-      
-      // Sinkronisasi data siswa
-      getStudents().then(data => absensiData.value = data)
-      
-      // 4. Timer 3.5 detik untuk menutup popup overlay
-      scanTimeout = setTimeout(() => {
-        if (activeScannedSiswa.value?.nama === newLog.nama) {
-          activeScannedSiswa.value = null
-        }
-      }, 3500)
-    })
-    .catch(err => {
-      console.error(err)
-    })
+function handleScanSuccess(newLog, source) {
+  if (scanTimeout) {
+    clearTimeout(scanTimeout)
+    scanTimeout = null
+  }
+
+  const sourceLabels = {
+    kamera: 'VERIFIKASI: SCAN WAJAH (AI)',
+    rfid: 'VERIFIKASI: KARTU RFID',
+    fingerprint: 'VERIFIKASI: SIDIK JARI'
+  }
+
+  activeScannedSiswa.value = {
+    nama: newLog.nama,
+    kelas: newLog.kelas,
+    nisn: newLog.nisn,
+    jamMasuk: newLog.tipe === 'Masuk' ? newLog.waktu : '-',
+    jamKeluar: newLog.tipe === 'Keluar' ? newLog.waktu : null,
+    verificationSource: sourceLabels[source] || 'VERIFIKASI SISTEM'
+  }
+
+  scanSuccessMsg.value = `ABSENSI ${newLog.tipe.toUpperCase()} BERHASIL!`
+  
+  // Show a beautiful success pop-up toast notification
+  toast.success('Absensi Berhasil', {
+    description: `${newLog.nama} (${newLog.kelas}) - Berhasil Absen ${newLog.tipe} pada ${newLog.waktu}`,
+    position: 'top-center',
+    duration: 2000
+  })
+  
+  // Add to sidebar scan logs
+  scanResults.value.unshift(newLog)
+  
+  // Sync local lists
+  getStudents().then(data => absensiData.value = data)
+  
+  // Timer 2 seconds to hide overlay card (user request)
+  scanTimeout = setTimeout(() => {
+    if (activeScannedSiswa.value?.nama === newLog.nama) {
+      activeScannedSiswa.value = null
+    }
+  }, 2000)
 }
 
 // ─── Fullscreen Functions ────────────────────────────────
@@ -302,13 +574,22 @@ function onKeyDown(e) {
 }
 
 // ─── Lifecycle ──────────────────────────────────────────
-onMounted(() => {
+onMounted(async () => {
   loadData()
   updateClock()
   clockInterval = setInterval(updateClock, 1000)
 
-  // Aktifkan Kamera Otomatis di Kiosk
-  startCamera()
+  // Load face-api.js and model weights dynamically from CDN
+  try {
+    await loadScript('https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js')
+    await window.faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/')
+    isTrackerLoaded.value = true
+  } catch (err) {
+    console.error('Failed to load face-api.js neural network models:', err)
+  }
+
+  // Aktifkan Kamera Otomatis di Kiosk (Disabled by user request)
+  // startCamera()
 
   // Theme Restoration
   const savedTheme = localStorage.getItem('theme')
@@ -362,11 +643,6 @@ const filteredStudents = computed(() => absensiData.value)
         <p class="header-sub">Sistem Presensi</p>
       </div>
       <div class="header-right">
-        <div class="header-status">
-          <span class="status-pulse" />
-          <span class="status-label">Sistem Aktif</span>
-          <ShieldCheck class="size-4" style="color: var(--primary)" />
-        </div>
         <!-- Fullscreen Toggle Button (hidden when in fullscreen) -->
         <button
           v-if="!isFullscreen"
@@ -431,19 +707,43 @@ const filteredStudents = computed(() => absensiData.value)
           <div class="scanner-topbar">
             <div class="scanner-topbar-left">
               <span class="scanner-dot" />
-              <span class="scanner-mode-text">UNIFIED SCANNER TERMINAL</span>
+              <span class="scanner-mode-text">Absensi Kamera</span>
             </div>
-            <div class="scanner-topbar-right">
-              <Wifi class="size-3.5" style="color: var(--primary)" />
-              <span class="scanner-online">ONLINE</span>
+            <div class="scanner-topbar-right flex items-center gap-3">
+              <button
+                v-if="cameraStatus === 'active'"
+                type="button"
+                class="cam-toggle-btn cam-toggle-btn--stop"
+                @click="stopCamera"
+              >
+                <CameraOff class="size-3" />
+                <span>Nonaktifkan Kamera</span>
+              </button>
+              <button
+                v-else-if="cameraStatus === 'idle'"
+                type="button"
+                class="cam-toggle-btn cam-toggle-btn--start"
+                @click="startCamera"
+              >
+                <Camera class="size-3" />
+                <span>Aktifkan Kamera</span>
+              </button>
+
+              <div class="flex items-center gap-1.5">
+                <Wifi class="size-3.5" style="color: var(--primary)" />
+                <span class="scanner-online">ONLINE</span>
+              </div>
             </div>
           </div>
 
           <!-- The Viewport Container -->
           <div class="scanner-viewport scanner-viewport--cam">
             <!-- Camera Feed -->
-            <video v-if="cameraStatus === 'active'" ref="videoRef" autoplay playsinline class="cam-feed" />
+            <video v-if="cameraStatus === 'active'" ref="videoRef" autoplay playsinline class="cam-feed" @play="onVideoPlay" />
             
+            <!-- Real-time Face Bounding Box Canvas Overlay (Aspect-Aligned & Mirrored) -->
+            <canvas v-show="cameraStatus === 'active' && !activeScannedSiswa" ref="overlayCanvasRef" class="overlay-canvas" />
+
             <!-- Scanning Sci-Fi Reticle Overlay (only when no success card is active) -->
             <div v-if="cameraStatus === 'active' && !activeScannedSiswa" class="cam-overlay">
               <span class="corner corner-tl" />
@@ -451,7 +751,6 @@ const filteredStudents = computed(() => absensiData.value)
               <span class="corner corner-bl" />
               <span class="corner corner-br" />
               <div class="cam-scan-line" />
-              <div class="face-target-circle" />
             </div>
 
             <!-- Camera Loading State -->
@@ -485,52 +784,65 @@ const filteredStudents = computed(() => absensiData.value)
                 </div>
                 <p class="success-status-label">{{ scanSuccessMsg }}</p>
                 
-                <!-- Student Card details -->
-                <div class="student-info-row">
-                  <div class="student-avatar-large">
-                    {{ getInitials(activeScannedSiswa.nama) }}
-                  </div>
-                  <div class="student-details-text">
-                    <p class="student-name-large">{{ activeScannedSiswa.nama }}</p>
-                    <p class="student-meta-large">{{ activeScannedSiswa.kelas }} · NISN: {{ activeScannedSiswa.nisn }}</p>
-                  </div>
+                <!-- Friendly message for already scanned status -->
+                <div v-if="activeScannedSiswa.isAlreadyScanned" class="my-4 px-4 text-center">
+                  <p class="text-lg font-bold text-slate-700 dark:text-slate-200">{{ activeScannedSiswa.customMessage }}</p>
                 </div>
 
-                <div class="verification-source-chip">
-                  <span>{{ activeScannedSiswa.verificationSource }}</span>
+                <!-- Regular Student Card details -->
+                <template v-else>
+                  <div class="student-info-row">
+                    <div class="student-avatar-large">
+                      {{ getInitials(activeScannedSiswa.nama) }}
+                    </div>
+                    <div class="student-details-text">
+                      <p class="student-name-large">{{ activeScannedSiswa.nama }}</p>
+                      <p class="student-meta-large">{{ activeScannedSiswa.kelas }} · NISN: {{ activeScannedSiswa.nisn }}</p>
+                    </div>
+                  </div>
+
+                  <div class="verification-source-chip">
+                    <span>{{ activeScannedSiswa.verificationSource }}</span>
+                  </div>
+
+                  <div class="success-time-row">
+                    <Clock class="size-3.5" />
+                    <span>{{ activeScannedSiswa.jamKeluar ? 'Keluar' : 'Masuk' }}: {{ activeScannedSiswa.jamKeluar || activeScannedSiswa.jamMasuk }}</span>
+                  </div>
+                </template>
+
+                <!-- Linear Countdown progress bar -->
+                <div class="countdown-bar-container">
+                  <div class="countdown-bar" :class="{ 'countdown-bar--info': activeScannedSiswa.isAlreadyScanned }"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Unified Error Overlay (displays on top of camera/idle state) -->
+            <div v-if="activeScanError" class="cam-success-overlay cam-success-overlay--error">
+              <div class="kiosk-success-card kiosk-success-card--error">
+                <div class="success-icon-badge success-icon-badge--error">
+                  <AlertCircle class="size-8" style="color: var(--destructive)" />
+                </div>
+                <p class="success-status-label success-status-label--error">{{ activeScanError.message }}</p>
+                
+                <div class="my-4 px-4 text-center">
+                  <p class="text-lg font-bold text-slate-700 dark:text-slate-200">{{ activeScanError.detail }}</p>
                 </div>
 
                 <div class="success-time-row">
                   <Clock class="size-3.5" />
-                  <span>{{ activeScannedSiswa.jamKeluar ? 'Keluar' : 'Masuk' }}: {{ activeScannedSiswa.jamKeluar || activeScannedSiswa.jamMasuk }}</span>
+                  <span>Silakan coba sesaat lagi</span>
                 </div>
 
                 <!-- Linear Countdown progress bar -->
                 <div class="countdown-bar-container">
-                  <div class="countdown-bar"></div>
+                  <div class="countdown-bar countdown-bar--error"></div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Viewport Footer (Hardware Indicators) -->
-          <div class="scanner-footer">
-            <div class="hardware-indicators-row">
-              <span class="indicator-pill">
-                <span class="indicator-dot active" />
-                <span>RFID SENSOR</span>
-              </span>
-              <span class="indicator-pill">
-                <span class="indicator-dot active" />
-                <span>FINGERPRINT SENSOR</span>
-              </span>
-              <span class="indicator-pill">
-                <span class="indicator-dot" :class="cameraStatus === 'active' ? 'active' : ''" />
-                <span>FACE RECOGNITION</span>
-              </span>
-            </div>
-            <span class="footer-ver">KIOSK_v3.0</span>
-          </div>
         </Card>
       </section>
 
@@ -543,32 +855,6 @@ const filteredStudents = computed(() => absensiData.value)
             <CalendarDays class="size-4" style="color: var(--muted-foreground)" />
             <span>{{ currentDate }}</span>
           </div>
-          <div class="divider" />
-          
-          <!-- Scan Type Switcher -->
-          <div class="type-tabs">
-            <button
-              @click="scanType = 'Otomatis'"
-              :class="['type-tab', scanType === 'Otomatis' ? 'type-tab--active type-tab--otomatis' : '']"
-            >
-              <ShieldCheck class="size-4" />
-              <span>Otomatis</span>
-            </button>
-            <button
-              @click="scanType = 'Masuk'"
-              :class="['type-tab', scanType === 'Masuk' ? 'type-tab--active type-tab--masuk' : '']"
-            >
-              <LogIn class="size-4" />
-              <span>Masuk</span>
-            </button>
-            <button
-              @click="scanType = 'Keluar'"
-              :class="['type-tab', scanType === 'Keluar' ? 'type-tab--active type-tab--keluar' : '']"
-            >
-              <LogOut class="size-4" />
-              <span>Pulang</span>
-            </button>
-          </div>
         </Card>
 
         <!-- Student Simulation Panel (For testing/demo) -->
@@ -577,25 +863,25 @@ const filteredStudents = computed(() => absensiData.value)
             <Fingerprint class="size-4" style="color: var(--primary)" />
             <span class="log-title">Simulasi Tap Siswa</span>
           </div>
-          <div class="sim-list">
-            <div v-for="siswa in filteredStudents.slice(0, 4)" :key="siswa.id" class="sim-item">
-              <div class="sim-avatar">{{ getInitials(siswa.nama) }}</div>
-              <div class="sim-info">
-                <p class="sim-name">{{ siswa.nama }}</p>
-                <p class="sim-meta">{{ siswa.kelas }}</p>
-              </div>
-              <div class="sim-actions">
-                <button @click="triggerSimulatedScan(siswa.id, 'kamera')" class="sim-btn" title="Simulasikan Wajah">
-                  <Camera class="size-3.5" />
-                </button>
-                <button @click="triggerSimulatedScan(siswa.id, 'rfid')" class="sim-btn" title="Simulasikan RFID">
-                  <Radio class="size-3.5" />
-                </button>
-                <button @click="triggerSimulatedScan(siswa.id, 'fingerprint')" class="sim-btn" title="Simulasikan Sidik Jari">
-                  <Fingerprint class="size-3.5" />
-                </button>
-              </div>
-            </div>
+
+          <!-- Quick Simulation Action Buttons -->
+          <div class="px-4 pb-4 flex gap-2">
+            <button
+              type="button"
+              class="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors shadow-sm"
+              @click="triggerQuickScan('rfid')"
+            >
+              <Radio class="size-3.5" />
+              <span>Tap RFID</span>
+            </button>
+            <button
+              type="button"
+              class="flex-1 py-2 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors shadow-sm"
+              @click="triggerQuickScan('fingerprint')"
+            >
+              <Fingerprint class="size-3.5" />
+              <span>Tap Fingerprint</span>
+            </button>
           </div>
         </Card>
 
@@ -603,7 +889,7 @@ const filteredStudents = computed(() => absensiData.value)
         <Card class="log-card">
           <div class="log-header">
             <UserCheck class="size-4" style="color: var(--primary)" />
-            <span class="log-title">Riwayat Scan</span>
+            <span class="log-title">Riwayat Absensi hari ini</span>
             <Badge variant="secondary" class="log-badge">{{ scanResults.length }}</Badge>
           </div>
           <div class="log-list">
@@ -619,11 +905,8 @@ const filteredStudents = computed(() => absensiData.value)
               <div class="log-avatar">{{ log.inisial }}</div>
               <div class="log-info">
                 <p class="log-name">{{ log.nama }}</p>
-                <p class="log-meta">{{ log.kelas }} · {{ log.tipe }} · {{ log.waktu }}</p>
+                <p class="log-meta">{{ log.kelas }} · {{ log.waktu }}</p>
               </div>
-              <Badge variant="outline" :class="['log-badge-type', log.tipe === 'Masuk' ? 'badge-masuk' : 'badge-keluar']">
-                {{ log.tipe }}
-              </Badge>
             </div>
           </div>
         </Card>
@@ -798,6 +1081,17 @@ const filteredStudents = computed(() => absensiData.value)
   transform: scaleX(-1); /* mirror effect */
 }
 
+.overlay-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  transform: scaleX(-1); /* match video mirror */
+  pointer-events: none;
+}
+
 /* Sci-fi Overlay */
 .cam-overlay {
   position: absolute; inset: 0;
@@ -819,13 +1113,91 @@ const filteredStudents = computed(() => absensiData.value)
   border-radius: 999px;
 }
 
-.face-target-circle {
-  width: 180px; height: 180px;
-  border: 1px dashed rgba(255, 255, 255, 0.25);
-  border-radius: 50%;
+.face-target-box {
+  width: 220px;
+  height: 220px;
+  border: 1px dashed rgba(52, 211, 153, 0.25);
   position: absolute;
-  box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.4);
-  animation: kpulse 3s infinite;
+  box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.face-target-box::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 2px solid transparent;
+  background: 
+    linear-gradient(to right, #34d399 20px, transparent 20px) 0 0,
+    linear-gradient(to bottom, #34d399 20px, transparent 20px) 0 0,
+    linear-gradient(to left, #34d399 20px, transparent 20px) 100% 0,
+    linear-gradient(to bottom, #34d399 20px, transparent 20px) 100% 0,
+    linear-gradient(to right, #34d399 20px, transparent 20px) 0 100%,
+    linear-gradient(to top, #34d399 20px, transparent 20px) 0 100%,
+    linear-gradient(to left, #34d399 20px, transparent 20px) 100% 100%,
+    linear-gradient(to top, #34d399 20px, transparent 20px) 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  animation: target-glow 2s infinite ease-in-out;
+}
+
+@keyframes target-glow {
+  0%, 100% { opacity: 0.6; filter: drop-shadow(0 0 2px #34d399); }
+  50% { opacity: 1.0; filter: drop-shadow(0 0 8px #34d399); }
+}
+
+.cam-toggle-btn {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.cam-toggle-btn--stop {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.cam-toggle-btn--stop:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.cam-toggle-btn--start {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.cam-toggle-btn--start:hover {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+.locked-mode-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  margin-top: 1rem;
 }
 
 /* Success Overlay */
@@ -937,7 +1309,34 @@ const filteredStudents = computed(() => absensiData.value)
 .countdown-bar {
   height: 100%;
   background: var(--primary);
-  animation: shrinkWidth 3.5s linear forwards;
+  animation: shrinkWidth 2s linear forwards; /* match success card timeout */
+}
+
+.countdown-bar--error {
+  background: var(--destructive) !important;
+  animation: shrinkWidth 3s linear forwards !important; /* match error card timeout */
+}
+
+.countdown-bar--info {
+  animation: shrinkWidth 3s linear forwards !important; /* match info card timeout */
+}
+
+.cam-success-overlay--error {
+  background: rgba(15, 10, 15, 0.85) !important;
+}
+
+.kiosk-success-card--error {
+  border-color: var(--destructive) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(239, 68, 68, 0.25) !important;
+}
+
+.success-icon-badge--error {
+  background: color-mix(in oklch, var(--destructive) 15%, transparent) !important;
+  border-color: color-mix(in oklch, var(--destructive) 40%, transparent) !important;
+}
+
+.success-status-label--error {
+  color: var(--destructive) !important;
 }
 
 @keyframes shrinkWidth {

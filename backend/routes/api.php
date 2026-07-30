@@ -141,6 +141,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Subscriptions
         Route::get('/subscriptions', [FinanceController::class, 'getSubscriptions']);
+        Route::get('/subscriptions/{subscription}', [FinanceController::class, 'subscriptionsShow']);
+        Route::put('/subscriptions/{subscription}', [FinanceController::class, 'subscriptionsUpdate']);
         Route::delete('/subscriptions/{subscription}', [FinanceController::class, 'subscriptionsDestroy']);
 
         // Payments / Invoicing
@@ -219,6 +221,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/spp/tariffs/{id}', [\App\Http\Controllers\Api\SppController::class, 'deleteTariff']);
     });
 
+    // Student Attendance & Face Registration
+    Route::get('/absensi/siswa', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'index']);
+    Route::get('/absensi/siswa/logs', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'logs']);
+    Route::post('/absensi/siswa/scan', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'scan']);
+    Route::post('/absensi/siswa/{id}/register-face', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'registerFace']);
+    Route::get('/absensi/siswa/monthly-grid', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'getMonthlyGrid']);
+    Route::post('/absensi/siswa/monthly-grid/update', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'updateMonthlyCell']);
+    Route::post('/absensi/siswa/{id}/status', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'changeStatus']);
+
     // Staff Attendance & Leaves
     Route::post('/absensi/clock-in', [\App\Http\Controllers\Api\StaffAttendanceController::class, 'clockIn']);
     Route::get('/absensi/history', [\App\Http\Controllers\Api\StaffAttendanceController::class, 'myHistory']);
@@ -232,5 +243,31 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/absensi/leaves', [\App\Http\Controllers\Api\AdminAttendanceController::class, 'getPendingLeaves']);
         Route::post('/admin/absensi/leaves/{id}/action', [\App\Http\Controllers\Api\AdminAttendanceController::class, 'approveRejectLeave']);
     });
+
+    // ─── Report Routes ──────────────────────────────────────────────────
+    // School-level reports
+    Route::middleware('role:admin_sekolah,kepala_sekolah,tata_usaha,guru,wali_kelas,orang_tua')
+        ->prefix('reports/school')
+        ->group(function () {
+            Route::get('/attendance', [\App\Http\Controllers\Api\Reports\ReportSchoolController::class, 'attendance']);
+            Route::get('/academic', [\App\Http\Controllers\Api\Reports\ReportSchoolController::class, 'academic']);
+            Route::get('/finance', [\App\Http\Controllers\Api\Reports\ReportSchoolController::class, 'finance']);
+            Route::get('/grades', [\App\Http\Controllers\Api\Reports\ReportSchoolController::class, 'grades']);
+            Route::get('/student-development', [\App\Http\Controllers\Api\Reports\ReportSchoolController::class, 'studentDevelopment']);
+            Route::get('/accountability', [\App\Http\Controllers\Api\Reports\ReportSchoolController::class, 'accountability']);
+            Route::get('/staff', [\App\Http\Controllers\Api\Reports\ReportSchoolController::class, 'staff']);
+        });
+
+    // Foundation-level reports
+    Route::middleware('role:superadmin,admin_yayasan')
+        ->prefix('reports/foundation')
+        ->group(function () {
+            Route::get('/consolidation', [\App\Http\Controllers\Api\Reports\ReportFoundationController::class, 'consolidation']);
+            Route::get('/academic', [\App\Http\Controllers\Api\Reports\ReportFoundationController::class, 'academic']);
+            Route::get('/infrastructure', [\App\Http\Controllers\Api\Reports\ReportFoundationController::class, 'infrastructure']);
+            Route::get('/finance', [\App\Http\Controllers\Api\Reports\ReportFoundationController::class, 'finance']);
+            Route::get('/hr', [\App\Http\Controllers\Api\Reports\ReportFoundationController::class, 'hr']);
+            Route::get('/students', [\App\Http\Controllers\Api\Reports\ReportFoundationController::class, 'students']);
+        });
 });
 

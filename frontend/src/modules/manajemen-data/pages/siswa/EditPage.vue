@@ -37,8 +37,10 @@ onMounted(async () => {
         tahun_masuk: res.data.tahun_masuk || ''
       }
       if (res.data.foto) {
-        const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api').replace(/\/api$/, '')
-        imagePreview.value = res.data.foto.startsWith('http') ? res.data.foto : `${baseUrl}/storage/${res.data.foto}`
+        const photo = res.data.foto
+        imagePreview.value = photo.startsWith('http')
+          ? photo
+          : `http://127.0.0.1:8000/${photo.startsWith('/') ? photo.slice(1) : photo}`
       }
     } catch (err) {
       toast.error('Gagal memuat data detail siswa')
@@ -62,6 +64,7 @@ const imagePreview = ref('')
 const handleImage = (file) => {
   form.value.foto = file
   imagePreview.value = URL.createObjectURL(file)
+  form.value.foto = file
 }
 
 const handleSubmit = async () => {

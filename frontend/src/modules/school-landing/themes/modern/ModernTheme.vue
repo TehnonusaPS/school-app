@@ -26,12 +26,14 @@ const props = defineProps({
     <ModernNavbar
       :branding="branding"
       :data="data"
+      :sections="sections"
     />
     <ModernHero
       :hero="hero"
       :branding="branding"
     />
     <ModernAbout
+      v-if="about?.title || about?.description || about?.vision || (about?.mission && about.mission.length) || about?.image"
       :about="about"
       :branding="branding"
     />

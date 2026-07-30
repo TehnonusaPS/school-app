@@ -39,31 +39,29 @@ function scrollTo(id) {
     class="relative min-h-screen flex items-center overflow-hidden"
   >
     <!-- Background Carousel -->
-    <div class="absolute inset-0 z-0">
-      <TransitionGroup
-        enter-active-class="transition-opacity duration-1000"
-        enter-from-class="opacity-0"
-        enter-to-class="opacity-100"
-        leave-active-class="transition-opacity duration-1000 absolute inset-0"
-        leave-from-class="opacity-100"
-        leave-to-class="opacity-0"
+    <div class="absolute inset-0 z-0 overflow-hidden">
+      <div 
+        class="flex w-full h-full transition-transform duration-700 ease-in-out"
+        :style="{ transform: `translateX(-${currentSlide * 100}%)` }"
       >
         <div
           v-for="(img, i) in images"
-          v-show="i === currentSlide"
           :key="i"
-          class="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          class="w-full h-full flex-shrink-0 bg-cover bg-center bg-no-repeat"
           :style="{ backgroundImage: `url(${img.url})` }"
-        />
-      </TransitionGroup>
+        ></div>
+      </div>
+      
       <div
         v-if="!images.length"
-        class="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/20 to-accent"
+        class="absolute inset-0 bg-gradient-to-br"
+        style="background-image: linear-gradient(to bottom right, color-mix(in srgb, var(--lp-primary) 10%, transparent), color-mix(in srgb, var(--lp-primary) 20%, transparent), var(--lp-accent));"
       ></div>
 
       <!-- Islamic arch overlay -->
       <div
-        class="absolute inset-0 bg-gradient-to-t from-primary/10 via-primary/20 to-primary/5 z-[1]"
+        class="absolute inset-0 z-[1]"
+        style="background-image: linear-gradient(to top, color-mix(in srgb, var(--lp-primary) 10%, transparent), color-mix(in srgb, var(--lp-primary) 20%, transparent), color-mix(in srgb, var(--lp-primary) 5%, transparent));"
       ></div>
 
       <!-- Geometric pattern overlay -->
@@ -74,8 +72,9 @@ function scrollTo(id) {
         class="absolute inset-0 z-[3] opacity-20"
         style="
           background:
-            radial-gradient(circle at 80% 30%, #d9770644 0%, transparent 40%),
-            radial-gradient(circle at 20% 70%, #d9770633 0%, transparent 40%);
+            radial-gradient(circle at 80% 30%, var(--lp-secondary) 0%, transparent 40%),
+            radial-gradient(circle at 20% 70%, var(--lp-secondary) 0%, transparent 40%);
+          opacity: 0.2;
         "
       ></div>
     </div>
@@ -89,7 +88,8 @@ function scrollTo(id) {
       >
         <path
           d="M0,120 L0,80 Q360,0 720,80 Q1080,0 1440,80 L1440,120 Z"
-          fill="#fefcf3"
+          class="fill-cream-50"
+          style="fill: var(--bg-cream, #fefcf3);"
         />
       </svg>
     </div>
@@ -99,9 +99,10 @@ function scrollTo(id) {
       <div class="max-w-3xl">
         <!-- Bismillah badge -->
         <div
-          class="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-secondary/20 bg-secondary backdrop-blur-sm text-secondary text-sm font-medium mb-8"
+          class="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-white/20 backdrop-blur-sm text-white text-sm font-medium mb-8"
+          :style="{ backgroundColor: 'var(--lp-secondary)' }"
         >
-          ﷽
+          <span>﷽</span> <span v-if="hero.badgeText" class="ml-1 border-l border-white/30 pl-2">{{ hero.badgeText }}</span>
         </div>
 
         <h1
@@ -112,7 +113,8 @@ function scrollTo(id) {
 
         <p
           v-if="hero.subtitle"
-          class="text-xl md:text-2xl text-secondary font-medium mb-4"
+          class="text-xl md:text-2xl font-medium mb-4"
+          :style="{ color: 'var(--lp-secondary)' }"
         >
           {{ hero.subtitle }}
         </p>
@@ -125,13 +127,13 @@ function scrollTo(id) {
         </p>
 
         <div class="flex flex-wrap gap-4">
-          <button
-            @click="scrollTo('registration_cta')"
+          <a
+            :href="hero.ctaLink || '#contact'"
             class="group flex items-center gap-2 px-8 py-4 rounded-2xl bg-secondary text-primary font-bold text-sm hover:bg-secondary shadow-lg shadow-amber-500/20 transition-all hover:-translate-y-1"
           >
             {{ hero.ctaText || 'Daftar Sekarang' }}
             <ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </button>
+          </a>
           <button
             @click="scrollTo('about')"
             class="px-8 py-4 rounded-2xl text-white border-2 border-secondary/20 font-semibold text-sm hover:bg-white/5 transition-all hover:-translate-y-1"
@@ -146,13 +148,13 @@ function scrollTo(id) {
     <template v-if="images.length > 1">
       <button
         @click="prevSlide"
-        class="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-secondary hover:bg-secondary backdrop-blur-sm flex items-center justify-center text-secondary transition-all"
+        class="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-secondary hover:bg-white backdrop-blur-sm flex items-center justify-center text-primary transition-all shadow-md"
       >
         <ChevronLeft class="w-6 h-6" />
       </button>
       <button
         @click="nextSlide"
-        class="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-secondary hover:bg-secondary backdrop-blur-sm flex items-center justify-center text-secondary transition-all"
+        class="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-secondary hover:bg-white backdrop-blur-sm flex items-center justify-center text-primary transition-all shadow-md"
       >
         <ChevronRight class="w-6 h-6" />
       </button>

@@ -34,15 +34,26 @@ function parseValue(val) {
 
 <template>
   <section
+    :id="section.type"
     ref="el"
     class="py-20 relative overflow-hidden"
     :style="{
       background: `linear-gradient(135deg, ${branding.primaryColor}, ${branding.accentColor})`
     }"
   >
+    <!-- Dark Premium Background -->
+    <div class="absolute inset-0 bg-slate-900 z-0"></div>
+    <div
+      class="absolute inset-0 z-0 opacity-30"
+      :style="{
+        background: `radial-gradient(circle at 20% 80%, ${branding.primaryColor}, transparent 50%),
+                     radial-gradient(circle at 80% 20%, ${branding.accentColor}, transparent 50%)`
+      }"
+    ></div>
+
     <!-- Pattern overlay -->
     <div
-      class="absolute inset-0 opacity-10"
+      class="absolute inset-0 z-0 opacity-5"
       style="
         background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0);
         background-size: 40px 40px;
@@ -50,31 +61,33 @@ function parseValue(val) {
     ></div>
 
     <div class="max-w-7xl mx-auto px-6 relative z-10">
-      <h2
-        v-if="section.title"
-        class="heading-font text-3xl md:text-4xl font-bold text-white text-center mb-4"
-      >
-        {{ section.title }}
-      </h2>
-      <p
-        v-if="section.subtitle"
-        class="text-white/70 text-center mb-12 max-w-2xl mx-auto"
-      >
-        {{ section.subtitle }}
-      </p>
+      <div class="mb-16 text-center">
+        <h2
+          v-if="section.title"
+          class="heading-font text-3xl md:text-4xl font-bold text-white mb-4"
+        >
+          {{ section.title }}
+        </h2>
+        <p
+          v-if="section.subtitle"
+          class="text-white/70 max-w-2xl mx-auto font-medium"
+        >
+          {{ section.subtitle }}
+        </p>
+      </div>
 
       <div
-        class="grid grid-cols-2 lg:grid-cols-4 gap-8"
+        class="flex flex-wrap justify-center gap-6"
         :class="isVisible ? 'opacity-100' : 'opacity-0'"
         style="transition: opacity 0.6s ease"
       >
         <div
           v-for="(item, i) in section.items"
           :key="item.id"
-          class="text-center group"
+          class="w-full sm:w-[calc(50%-1rem)] lg:w-[calc(25%-1rem)] max-w-[280px] text-center group bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-[2rem] hover:bg-white/10 transition-all duration-300 hover:-translate-y-1 shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
           :style="{ transitionDelay: `${i * 100}ms` }"
         >
-          <div class="text-4xl md:text-5xl font-extrabold text-white mb-2">
+          <div class="text-4xl md:text-5xl font-extrabold text-white mb-3 drop-shadow-lg">
             <template v-if="parseValue(item.value).hasNumber">
               <CounterAnimation
                 v-if="isVisible"
@@ -86,7 +99,7 @@ function parseValue(val) {
               {{ item.value }}
             </template>
           </div>
-          <div class="text-white/80 text-sm font-medium">
+          <div class="text-white/80 text-sm font-bold tracking-wider uppercase">
             {{ item.title }}
           </div>
         </div>

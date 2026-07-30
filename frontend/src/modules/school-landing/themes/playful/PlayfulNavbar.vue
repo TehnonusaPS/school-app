@@ -1,16 +1,31 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Menu, X } from 'lucide-vue-next'
-const props = defineProps({ branding: Object, data: Object })
+const props = defineProps({
+  branding: Object,
+  data: Object,
+  sections: { type: Array, default: () => [] }
+})
 const isScrolled = ref(false)
 const isMobileOpen = ref(false)
-const navLinks = [
-  { id: 'about', label: '🏠 Tentang' },
-  { id: 'features', label: '⭐ Keunggulan' },
-  { id: 'programs', label: '📚 Program' },
-  { id: 'gallery', label: '📸 Galeri' },
-  { id: 'contact', label: '📞 Kontak' }
-]
+const navLinks = computed(() => {
+  const links = [{ id: 'about', label: 'Tentang' }]
+  const sectionMap = {
+    features: 'Keunggulan',
+    stats: 'Statistik',
+    programs: 'Program',
+    gallery: 'Galeri',
+    testimonials: 'Testimoni',
+    faq: 'FAQ'
+  }
+  for (const s of props.sections) {
+    if (s.is_visible !== false && s.items?.length > 0 && sectionMap[s.type]) {
+      links.push({ id: s.type, label: sectionMap[s.type] })
+    }
+  }
+  links.push({ id: 'contact', label: 'Kontak' })
+  return links
+})
 function scrollTo(id) {
   isMobileOpen.value = false
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -58,7 +73,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
             {{ data?.meta_title || (branding?.entityName || 'Instansi') }}
           </div>
           <div :class="['text-xs font-medium', isScrolled ? 'text-secondary' : 'text-accent']">
-            {{ data?.hero_subtitle || '✨ Belajar sambil bermain!' }}
+            {{ data?.hero_subtitle || 'Pendidikan Berkualitas' }}
           </div>
         </div>
       </a>
@@ -80,12 +95,12 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
       </div>
 
       <div class="hidden lg:block">
-        <button
-          @click="scrollTo('registration_cta')"
-          class="px-6 py-2.5 rounded-2xl text-sm font-extrabold text-white shadow-lg bg-gradient-to-r from-primary via-secondary to-accent/50 hover:shadow-xl transition-all hover:-translate-y-0.5 hover:scale-105"
+        <a
+          :href="data?.hero_cta_link || '#contact'"
+          class="inline-block px-6 py-2.5 rounded-2xl text-sm font-bold text-white shadow-lg bg-primary hover:bg-primary/90 hover:shadow-xl transition-all hover:-translate-y-0.5 hover:scale-105"
         >
-          🎉 Daftar Yuk!
-        </button>
+          {{ data?.hero_cta_text || 'Daftar Yuk!' }}
+        </a>
       </div>
 
       <button
@@ -124,12 +139,13 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
           >
             {{ link.label }}
           </button>
-          <button
-            @click="scrollTo('registration_cta')"
-            class="mt-3 py-3 rounded-2xl text-white font-extrabold text-center bg-gradient-to-r from-primary via-secondary to-accent/50"
+          <a
+            :href="data?.hero_cta_link || '#contact'"
+            @click="isMobileOpen = false"
+            class="block mt-3 py-3 rounded-2xl text-white font-bold text-center bg-primary hover:bg-primary/90 transition-colors"
           >
-            🎉 Daftar Yuk!
-          </button>
+            {{ data?.hero_cta_text || 'Daftar Yuk!' }}
+          </a>
         </div>
       </div>
     </Transition>

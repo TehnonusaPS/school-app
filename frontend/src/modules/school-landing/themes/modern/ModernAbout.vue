@@ -28,15 +28,21 @@ onMounted(() => {
   <section
     id="about"
     ref="el"
-    class="py-24 lg:py-32 bg-gray-50 relative overflow-hidden"
+    class="py-24 lg:py-32 bg-slate-900 relative overflow-hidden"
   >
-    <!-- Background decoration -->
-    <div
-      class="absolute top-0 right-0 w-96 h-96 rounded-full opacity-5 blur-3xl"
-      :style="{ background: branding.primaryColor }"
-    ></div>
+    <!-- Premium Mesh Background -->
+    <div class="absolute inset-0 z-0 pointer-events-none">
+      <div
+        class="absolute top-[-10%] left-[-10%] w-3/4 h-3/4 rounded-full opacity-30 blur-[120px]"
+        :style="{ background: branding.primaryColor }"
+      ></div>
+      <div
+        class="absolute bottom-[-10%] right-[-10%] w-3/4 h-3/4 rounded-full opacity-20 blur-[120px]"
+        :style="{ background: branding.accentColor }"
+      ></div>
+    </div>
 
-    <div class="max-w-7xl mx-auto px-6">
+    <div class="max-w-7xl mx-auto px-6 relative z-10">
       <!-- Section Header -->
       <div
         :class="[
@@ -50,10 +56,10 @@ onMounted(() => {
         >
           Tentang Kami
         </span>
-        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 drop-shadow-md">
           {{ about.title || ('Tentang ' + (branding?.entityName || 'Instansi')) }}
         </h2>
-        <p class="text-lg text-gray-500 leading-relaxed">
+        <p class="text-lg text-white/70 leading-relaxed">
           {{
             about.description ||
             'Kami berkomitmen memberikan pendidikan terbaik untuk generasi masa depan.'
@@ -61,15 +67,15 @@ onMounted(() => {
         </p>
       </div>
 
-      <div class="grid lg:grid-cols-2 gap-16 items-center">
+      <div class="grid lg:grid-cols-2 gap-16 items-stretch">
         <!-- Image -->
         <div
           :class="[
-            'transition-all duration-700 delay-200',
+            'transition-all duration-700 delay-200 h-full',
             isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
           ]"
         >
-          <div class="relative">
+          <div class="relative h-full">
             <div
               class="absolute -inset-4 rounded-3xl opacity-20 blur-2xl"
               :style="{
@@ -80,11 +86,11 @@ onMounted(() => {
               v-if="about.image"
               :src="about.image"
               alt="Tentang Sekolah"
-              class="relative rounded-3xl w-full aspect-[4/3] object-cover shadow-2xl"
+              class="relative rounded-3xl w-full h-full min-h-[400px] object-cover shadow-2xl"
             />
             <div
               v-else
-              class="relative rounded-3xl w-full aspect-[4/3] flex items-center justify-center shadow-2xl"
+              class="relative rounded-3xl w-full h-full min-h-[400px] flex items-center justify-center shadow-2xl"
               :style="{
                 background: `linear-gradient(135deg, ${branding.primaryColor}20, ${branding.accentColor}20)`
               }"
@@ -104,7 +110,7 @@ onMounted(() => {
           <!-- Vision -->
           <div
             v-if="about.vision"
-            class="bg-white rounded-2xl p-8 shadow-lg shadow-gray-100/50 border border-gray-100"
+            class="bg-white/5 backdrop-blur-xl rounded-[2rem] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-white/10 hover:bg-white/10 transition-colors"
           >
             <div class="flex items-start gap-4">
               <div
@@ -116,8 +122,8 @@ onMounted(() => {
                 <Eye class="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2">Visi</h3>
-                <p class="text-gray-600 leading-relaxed">{{ about.vision }}</p>
+                <h3 class="text-xl font-bold text-white mb-2">Visi</h3>
+                <p class="text-white/70 leading-relaxed">{{ about.vision }}</p>
               </div>
             </div>
           </div>
@@ -125,7 +131,7 @@ onMounted(() => {
           <!-- Mission -->
           <div
             v-if="about.mission?.length"
-            class="bg-white rounded-2xl p-8 shadow-lg shadow-gray-100/50 border border-gray-100"
+            class="bg-white/5 backdrop-blur-xl rounded-[2rem] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-white/10 hover:bg-white/10 transition-colors"
           >
             <div class="flex items-start gap-4">
               <div
@@ -137,7 +143,7 @@ onMounted(() => {
                 <Target class="w-6 h-6 text-white" />
               </div>
               <div class="flex-1">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Misi</h3>
+                <h3 class="text-xl font-bold text-white mb-4">Misi</h3>
                 <ul class="space-y-3">
                   <li
                     v-for="(item, i) in about.mission"
@@ -148,7 +154,7 @@ onMounted(() => {
                       class="w-5 h-5 flex-shrink-0 mt-0.5"
                       :style="{ color: branding.primaryColor }"
                     />
-                    <span class="text-gray-600">{{ item }}</span>
+                    <span class="text-white/70">{{ item }}</span>
                   </li>
                 </ul>
               </div>

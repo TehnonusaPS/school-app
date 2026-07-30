@@ -48,23 +48,18 @@ function scrollTo(id) {
     class="relative min-h-screen flex items-center overflow-hidden"
   >
     <!-- Background Carousel -->
-    <div class="absolute inset-0 z-0">
-      <TransitionGroup
-        enter-active-class="transition-opacity duration-1000 ease-in-out"
-        enter-from-class="opacity-0"
-        enter-to-class="opacity-100"
-        leave-active-class="transition-opacity duration-1000 ease-in-out absolute inset-0"
-        leave-from-class="opacity-100"
-        leave-to-class="opacity-0"
+    <div class="absolute inset-0 z-0 overflow-hidden">
+      <div 
+        class="flex w-full h-full transition-transform duration-700 ease-in-out"
+        :style="{ transform: `translateX(-${currentSlide * 100}%)` }"
       >
         <div
           v-for="(img, i) in images"
-          v-show="i === currentSlide"
           :key="i"
-          class="absolute inset-0 bg-cover bg-center bg-no-repeat scale-110"
+          class="w-full h-full flex-shrink-0 bg-cover bg-center bg-no-repeat"
           :style="{ backgroundImage: `url(${img.url})` }"
         ></div>
-      </TransitionGroup>
+      </div>
 
       <!-- Fallback gradient if no images -->
       <div
@@ -103,14 +98,14 @@ function scrollTo(id) {
     </div>
 
     <!-- Content -->
-    <div class="relative z-10 max-w-7xl mx-auto px-6 py-32 lg:py-40">
+    <div class="relative z-10 w-full max-w-7xl mx-auto px-6 pt-24 pb-12">
       <div class="max-w-3xl">
         <!-- Badge -->
         <div
-          class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm text-white text-sm font-medium mb-8 animate-fade-in"
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-md text-white text-sm font-bold mb-8 animate-fade-in"
         >
           <span
-            class="w-2 h-2 rounded-full animate-pulse"
+            class="w-2.5 h-2.5 rounded-full animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]"
             :style="{ background: branding.secondaryColor }"
           ></span>
           Pendaftaran Siswa Baru Dibuka
@@ -118,7 +113,7 @@ function scrollTo(id) {
 
         <!-- Title -->
         <h1
-          class="heading-font text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-white leading-[1.1] mb-6"
+          class="heading-font text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-white leading-[1.1] mb-6 drop-shadow-lg"
         >
           {{ hero.title || ('Selamat Datang di ' + (branding?.entityName || 'Instansi')) }}
         </h1>
@@ -126,12 +121,12 @@ function scrollTo(id) {
         <!-- Subtitle -->
         <p
           v-if="hero.subtitle"
-          class="text-xl md:text-2xl text-white/90 font-medium mb-4"
+          class="text-xl md:text-2xl text-white font-bold mb-4 drop-shadow-md"
         >
           {{ hero.subtitle }}
         </p>
 
-        <p class="text-lg md:text-xl text-white/70 mb-10 leading-relaxed max-w-2xl">
+        <p class="text-lg md:text-xl text-white/90 mb-10 leading-relaxed max-w-2xl font-medium drop-shadow-sm">
           {{ hero.description || 'Membangun generasi unggul, berkarakter, dan berprestasi.' }}
         </p>
 
@@ -139,7 +134,7 @@ function scrollTo(id) {
         <div class="flex flex-wrap gap-4">
           <button
             @click="scrollTo('registration_cta')"
-            class="group flex items-center gap-2 px-8 py-4 rounded-2xl text-white font-bold text-sm hover:shadow-2xl transition-all hover:-translate-y-1 shadow-lg"
+            class="group flex items-center gap-2 px-8 py-4 rounded-[1.25rem] text-white font-bold text-sm hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] transition-all hover:-translate-y-1 shadow-xl"
             :style="{
               background: `linear-gradient(135deg, ${branding.primaryColor}, ${branding.accentColor})`
             }"
@@ -149,7 +144,7 @@ function scrollTo(id) {
           </button>
           <button
             @click="scrollTo('about')"
-            class="px-8 py-4 rounded-2xl text-white border-2 border-white/30 font-semibold text-sm hover:bg-white/10 backdrop-blur-sm transition-all hover:-translate-y-1"
+            class="px-8 py-4 rounded-[1.25rem] text-white bg-white/10 border-2 border-white/30 font-bold text-sm hover:bg-white/20 backdrop-blur-md transition-all hover:-translate-y-1 shadow-lg"
           >
             Tentang Kami
           </button>

@@ -10,6 +10,7 @@ export function useLandingPage(slug) {
   const entityName = computed(() => data.value?.type === 'Yayasan' ? 'Yayasan Kami' : 'Sekolah Kami')
   
   const heroData = computed(() => ({
+    badgeText: data.value?.hero_badge_text || '',
     title: data.value?.hero_title || '',
     subtitle: data.value?.hero_subtitle || '',
     description: data.value?.hero_description || '',

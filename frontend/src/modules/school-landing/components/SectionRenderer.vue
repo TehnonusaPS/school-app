@@ -55,11 +55,26 @@ const SectionComponent = computed(() => {
   const map = themeComponentMap[props.theme] || themeComponentMap.modern
   return map[props.section.type] || null
 })
+
+const shouldRender = computed(() => {
+  // If explicitly marked as hidden
+  if (props.section.is_visible === false) return false;
+
+  // If it's a section type that relies on items, hide it if the items array is empty
+  const typesRequiringItems = ['stats', 'features', 'programs', 'facilities', 'gallery', 'testimonials', 'achievements', 'teachers', 'faq'];
+  if (typesRequiringItems.includes(props.section.type)) {
+    if (!props.section.items || props.section.items.length === 0) {
+      return false;
+    }
+  }
+
+  return true;
+})
 </script>
 
 <template>
   <component
-    v-if="SectionComponent"
+    v-if="SectionComponent && shouldRender"
     :is="SectionComponent"
     :section="section"
     :branding="branding"

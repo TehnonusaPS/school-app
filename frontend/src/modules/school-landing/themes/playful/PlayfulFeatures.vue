@@ -45,8 +45,8 @@ const bgColors = [
         ]"
       >
         <span
-          class="inline-block px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest mb-4 bg-accent/10 text-accent"
-          >⭐ Keunggulan</span
+          class="inline-block px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-4 bg-primary/10 text-primary"
+          >Keunggulan</span
         >
         <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-6">
           {{ section.title || 'Keunggulan Kami' }}
@@ -58,7 +58,7 @@ const bgColors = [
           v-for="(item, i) in section.items"
           :key="item.id"
           :class="[
-            'group bg-white rounded-3xl p-8 border-3 border-gray-100 hover:border-primary/20 hover:shadow-2xl hover:shadow-purple-100/50 transition-all duration-500 hover:-translate-y-3 fun-wiggle',
+            'group bg-white rounded-[2rem] p-8 shadow-xl shadow-gray-200/50 border border-gray-100 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-3',
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           ]"
           :style="{ transitionDelay: `${i * 80}ms` }"
@@ -74,11 +74,10 @@ const bgColors = [
               :is="getIcon(item.icon)"
               class="w-8 h-8 text-white"
             />
-            <span
+            <LucideIcons.Sparkles
               v-else
-              class="text-2xl"
-              >{{ item.icon || '✨' }}</span
-            >
+              class="w-8 h-8 text-white"
+            />
           </div>
           <h3 class="text-lg font-extrabold text-gray-800 mb-3">{{ item.title }}</h3>
           <p class="text-gray-500 text-sm leading-relaxed">{{ item.description }}</p>

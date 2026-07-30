@@ -36,8 +36,7 @@ const props = defineProps({ branding: Object, contact: Object, social: Object, d
               />
             </div>
             <div
-              v-else
-              class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary via-secondary to-accent/50 flex items-center justify-center font-extrabold text-xl text-white border-3 border-accent/20"
+              class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center font-bold text-xl text-white border-2 border-white/20"
             >
               {{ (data?.meta_title || 'S')[0] }}
             </div>
@@ -52,8 +51,8 @@ const props = defineProps({ branding: Object, contact: Object, social: Object, d
         </div>
 
         <div>
-          <h4 class="font-extrabold text-sm uppercase tracking-widest text-accent mb-6">
-            📞 Kontak
+          <h4 class="font-extrabold text-sm uppercase tracking-widest text-white/50 mb-6">
+            Kontak
           </h4>
           <div class="space-y-4 text-sm">
             <a
@@ -78,8 +77,8 @@ const props = defineProps({ branding: Object, contact: Object, social: Object, d
         </div>
 
         <div>
-          <h4 class="font-extrabold text-sm uppercase tracking-widest text-accent mb-6">
-            🌐 Ikuti Kami
+          <h4 class="font-extrabold text-sm uppercase tracking-widest text-white/50 mb-6">
+            Sosial Media
           </h4>
           <div class="flex gap-3">
             <a
@@ -100,7 +99,6 @@ const props = defineProps({ branding: Object, contact: Object, social: Object, d
               v-if="social.youtube"
               :href="social.youtube"
               target="_blank"
-              class="w-10 h-10 rounded-xl bg-white/10 hover:bg-red-500/30 flex items-center justify-center transition-colors fun-wiggle"
               ><Youtube class="w-5 h-5"
             /></a>
           </div>
@@ -123,8 +121,8 @@ const props = defineProps({ branding: Object, contact: Object, social: Object, d
         <div
           class="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500"
         >
-          <p>&copy; {{ new Date().getFullYear() }} {{ data?.meta_title || (branding?.entityName || 'Instansi') }} ✨</p>
-          <p>Powered by <span class="text-accent font-extrabold">App School Tehnonusa</span></p>
+          <p>&copy; {{ new Date().getFullYear() }} {{ data?.meta_title || (branding?.entityName || 'Instansi') }}. All rights reserved.</p>
+          <p>Powered by <span class="text-white/80 font-bold">App School Tehnonusa</span></p>
         </div>
       </div>
     </div>

@@ -28,7 +28,7 @@ onMounted(() => {
   <section
     id="programs"
     ref="el"
-    class="py-24 lg:py-32 bg-gray-50 relative overflow-hidden"
+    class="py-24 lg:py-32 bg-slate-900 relative overflow-hidden"
   >
     <div
       class="absolute bottom-0 left-0 w-80 h-80 rounded-full opacity-5 blur-3xl"
@@ -49,12 +49,12 @@ onMounted(() => {
         >
           Program
         </span>
-        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+        <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 drop-shadow-md">
           {{ section.title || 'Program Unggulan' }}
         </h2>
         <p
           v-if="section.subtitle"
-          class="text-lg text-gray-500 leading-relaxed"
+          class="text-lg text-white/70 leading-relaxed"
         >
           {{ section.subtitle }}
         </p>
@@ -90,12 +90,10 @@ onMounted(() => {
             </div>
           </div>
           <!-- Overlay content -->
-          <div
-            class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-8"
-          >
+          <div class="absolute inset-x-4 bottom-4 p-6 bg-black/40 backdrop-blur-xl border border-white/20 rounded-2xl group-hover:bg-black/50 transition-colors">
             <div>
               <h3 class="text-xl font-bold text-white mb-2">{{ item.title }}</h3>
-              <p class="text-white/70 text-sm leading-relaxed line-clamp-2">
+              <p class="text-white/80 text-sm leading-relaxed line-clamp-2">
                 {{ item.description }}
               </p>
             </div>

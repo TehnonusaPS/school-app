@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { TrendingUp } from 'lucide-vue-next'
 import CounterAnimation from '../../components/CounterAnimation.vue'
 const props = defineProps({ section: Object, branding: Object })
 const el = ref(null)
@@ -23,17 +24,18 @@ function parseValue(val) {
   const suffix = strVal.replace(/[\d,. ]/g, '')
   return { hasNumber, num: isNaN(num) ? 0 : num, suffix }
 }
-const emojis = ['🎓', '👨‍🏫', '🏆', '📚', '⭐', '🎯', '🌟', '🎨']
+
 </script>
 
 <template>
   <section
+    :id="section.type"
     ref="el"
     class="py-20 bg-gradient-to-r from-primary via-secondary to-accent/50 relative overflow-hidden"
   >
     <div class="absolute inset-0 pointer-events-none">
-      <div class="absolute top-5 left-[10%] text-4xl opacity-20 fun-bounce">⭐</div>
-      <div class="absolute bottom-5 right-[15%] text-4xl opacity-20 fun-bounce-2">🎈</div>
+      <div class="absolute top-5 left-[10%] w-32 h-32 rounded-full bg-white/20 blur-[50px]"></div>
+      <div class="absolute bottom-5 right-[15%] w-48 h-48 rounded-full bg-white/20 blur-[60px]"></div>
     </div>
     <div class="max-w-7xl mx-auto px-6 relative z-10">
       <h2
@@ -43,16 +45,20 @@ const emojis = ['🎓', '👨‍🏫', '🏆', '📚', '⭐', '🎯', '🌟', '�
         {{ section.title }}
       </h2>
       <div
-        class="grid grid-cols-2 lg:grid-cols-4 gap-8"
+        class="flex flex-wrap justify-center gap-8"
         :class="isVisible ? 'opacity-100' : 'opacity-0'"
         style="transition: opacity 0.6s"
       >
         <div
           v-for="(item, i) in section.items"
           :key="item.id"
-          class="text-center bg-white/15 backdrop-blur-sm rounded-3xl p-6 border border-white/20 fun-wiggle"
+          class="w-full sm:w-[calc(50%-1rem)] lg:w-[calc(25%-1rem)] max-w-[280px] text-center bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20 hover:bg-white/20 transition-all hover:-translate-y-2"
         >
-          <div class="text-3xl mb-3">{{ emojis[i % emojis.length] }}</div>
+          <div class="flex justify-center mb-4">
+            <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
+              <TrendingUp class="w-6 h-6 text-white" />
+            </div>
+          </div>
           <div class="text-3xl md:text-4xl font-extrabold text-white mb-2">
             <template v-if="parseValue(item.value).hasNumber">
               <CounterAnimation

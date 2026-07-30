@@ -77,7 +77,7 @@ function openLightbox(i) {
                 <span class="text-4xl">🖼️</span>
               </div>
               <div
-                class="absolute inset-0 bg-primary group-hover:bg-primary transition-colors flex items-center justify-center"
+                class="absolute inset-0 bg-primary/0 group-hover:bg-primary/40 transition-colors flex items-center justify-center"
               >
                 <div
                   class="w-12 h-12 rounded-full bg-secondary flex items-center justify-center opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all"

@@ -27,6 +27,7 @@ function parseValue(val) {
 
 <template>
   <section
+    :id="section.type"
     ref="el"
     class="py-20 bg-primary relative overflow-hidden"
   >
@@ -40,14 +41,14 @@ function parseValue(val) {
       </h2>
       <div class="arabesque-divider max-w-xs mx-auto my-8"></div>
       <div
-        class="grid grid-cols-2 lg:grid-cols-4 gap-8"
+        class="flex flex-wrap justify-center gap-8"
         :class="isVisible ? 'opacity-100' : 'opacity-0'"
         style="transition: opacity 0.6s ease"
       >
         <div
           v-for="(item, i) in section.items"
           :key="item.id"
-          class="text-center"
+          class="w-full sm:w-[calc(50%-1rem)] lg:w-[calc(25%-1rem)] max-w-[280px] text-center"
           :style="{ transitionDelay: `${i * 100}ms` }"
         >
           <div class="text-4xl md:text-5xl font-extrabold text-secondary mb-2">

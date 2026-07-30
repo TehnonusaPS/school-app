@@ -24,6 +24,7 @@ onMounted(() => {
 
 <template>
   <section
+    :id="section.type"
     ref="el"
     class="py-24 lg:py-32 bg-[#fefcf3] relative"
   >

@@ -24,6 +24,7 @@ onMounted(() => {
 
 <template>
   <section
+    :id="section.type"
     ref="el"
     class="py-24 lg:py-32 bg-white relative"
   >
@@ -35,8 +36,8 @@ onMounted(() => {
         ]"
       >
         <span
-          class="inline-block px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest mb-4 bg-orange-100 text-orange-600"
-          >❓ FAQ</span
+          class="inline-block px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-4 bg-primary/10 text-primary"
+          >FAQ</span
         >
         <h2 class="heading-font text-3xl md:text-4xl font-bold text-primary">
           {{ section.title || 'Pertanyaan Umum' }}

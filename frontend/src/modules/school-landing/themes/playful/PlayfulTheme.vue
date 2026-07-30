@@ -21,12 +21,14 @@ const props = defineProps({
     <PlayfulNavbar
       :branding="branding"
       :data="data"
+      :sections="sections"
     />
     <PlayfulHero
       :hero="hero"
       :branding="branding"
     />
     <PlayfulAbout
+      v-if="about?.title || about?.description || about?.vision || (about?.mission && about.mission.length) || about?.image"
       :about="about"
       :branding="branding"
     />

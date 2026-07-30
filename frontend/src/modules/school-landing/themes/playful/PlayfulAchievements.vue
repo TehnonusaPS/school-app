@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { Award } from 'lucide-vue-next'
 const props = defineProps({ section: Object, branding: Object })
 const el = ref(null)
 const isVisible = ref(false)
@@ -15,7 +16,6 @@ onMounted(() => {
   )
   if (el.value) obs.observe(el.value)
 })
-const medals = ['🥇', '🥈', '🥉', '🏅', '🎖️', '🏆']
 </script>
 
 <template>
@@ -31,8 +31,8 @@ const medals = ['🥇', '🥈', '🥉', '🏅', '🎖️', '🏆']
         ]"
       >
         <span
-          class="inline-block px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest mb-4 bg-accent/10 text-accent"
-          >🏆 Prestasi</span
+          class="inline-block px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-4 bg-primary/10 text-primary"
+          >Prestasi</span
         >
         <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-primary">
           {{ section.title || 'Prestasi' }}
@@ -50,9 +50,9 @@ const medals = ['🥇', '🥈', '🥉', '🏅', '🎖️', '🏆']
           :style="{ transitionDelay: `${i * 100}ms` }"
         >
           <div
-            class="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-orange-400 flex items-center justify-center flex-shrink-0 shadow-lg text-3xl"
+            class="w-16 h-16 rounded-2xl bg-secondary flex items-center justify-center flex-shrink-0 shadow-lg shadow-secondary/30"
           >
-            {{ medals[i % medals.length] }}
+            <Award class="w-8 h-8 text-white" />
           </div>
           <div class="flex-1 bg-primary/5 rounded-2xl p-6 border-2 border-primary/20">
             <div class="flex items-start justify-between gap-4">

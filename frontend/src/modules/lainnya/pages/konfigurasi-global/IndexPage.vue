@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import api from '@/services/api'
 import { useRouter } from 'vue-router'
@@ -66,7 +66,7 @@ import { toast } from 'vue-sonner'
 const auth = useAuthStore()
 const router = useRouter()
 
-const activeTab = ref('sekolah') // 'sekolah' atau 'yayasan'
+const activeTab = ref(localStorage.getItem('konfigurasi_active_tab') || 'yayasan') // 'yayasan' atau 'sekolah'
 const isModalOpen = ref(false)
 const selectedItemForEdit = ref(null)
 
@@ -97,11 +97,13 @@ const themeOptions = [
 const form = ref({
   theme: 'modern',
   slug: '',
+  logo: '',
   meta_title: '',
   meta_description: '',
   primary_color: '#7c3aed',
   secondary_color: '#f59e0b',
   accent_color: '#06b6d4',
+  hero_badge_text: '',
   hero_title: '',
   hero_subtitle: '',
   hero_description: '',
@@ -204,14 +206,24 @@ const sectionItemForm = ref({
   value: ''
 })
 
+const isUploading = ref(false)
+
 // Methods untuk upload hero (prototipe frontend)
 const uploadFile = async (file) => {
-  const formData = new FormData()
-  formData.append('image', file)
-  const res = await api.post('/landing-page/upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  })
-  return res.data.url
+  if (file.size > 2 * 1024 * 1024) {
+    throw new Error('Ukuran file maksimal 2MB')
+  }
+  isUploading.value = true
+  try {
+    const formData = new FormData()
+    formData.append('image', file)
+    const res = await api.post('/landing-page/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    return res.data.url
+  } finally {
+    isUploading.value = false
+  }
 }
 
 async function onHeroImageUpload(e) {
@@ -223,12 +235,23 @@ async function onHeroImageUpload(e) {
     form.value.hero_images.push({ url: uploadedUrl, caption: '' })
     toast.success('Gambar berhasil diupload dan ditambahkan ke carousel!')
   } catch (err) {
-    toast.error('Gagal mengunggah gambar.')
+    toast.error(err.message || 'Gagal mengunggah gambar.')
   }
 }
 
 function removeHeroImage(index) {
   form.value.hero_images.splice(index, 1)
+}
+
+async function onLogoUpload(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  try {
+    form.value.logo = await uploadFile(file)
+    toast.success('Logo instansi berhasil diupload!')
+  } catch (err) {
+    toast.error(err.message || 'Gagal mengunggah logo.')
+  }
 }
 
 async function onAboutImageUpload(e) {
@@ -238,7 +261,7 @@ async function onAboutImageUpload(e) {
     form.value.about_image = await uploadFile(file)
     toast.success('Foto profil berhasil diupload!')
   } catch (err) {
-    toast.error('Gagal mengunggah foto profil.')
+    toast.error(err.message || 'Gagal mengunggah foto profil.')
   }
 }
 
@@ -249,13 +272,13 @@ async function onSectionItemImageUpload(e) {
     sectionItemForm.value.image = await uploadFile(file)
     toast.success('Gambar item berhasil diupload!')
   } catch (err) {
-    toast.error('Gagal mengunggah gambar item.')
+    toast.error(err.message || 'Gagal mengunggah gambar item.')
   }
 }
 
 // Helper dummy item data generator
 const createSchoolSections = () => [
-  { id: 1, type: 'stats', title: 'Sekolah Kami Dalam Angka', is_visible: true, sort_order: 1, items: [
+  { id: 1, type: 'stats', title: 'Pencapaian & Dedikasi Kami', is_visible: true, sort_order: 1, items: [
     { id: 11, title: 'Siswa Aktif', value: '850+' },
     { id: 12, title: 'Guru Profesional', value: '45' },
     { id: 13, title: 'Kelas / Rombel', value: '24' },
@@ -466,6 +489,10 @@ onMounted(() => {
   fetchConfigData()
 })
 
+watch(activeTab, (newVal) => {
+  localStorage.setItem('konfigurasi_active_tab', newVal)
+})
+
 const filterValues = ref({})
 const page = ref(1)
 const perPage = ref(5)
@@ -480,22 +507,23 @@ const columns = [
 ]
 
 const filters = [{ key: 'search', type: 'search', placeholder: 'Cari nama...' }]
-const actions = [
-  {
-    label: 'Filter',
-    icon: Filter,
-    variant: 'outline',
-    class: 'border-white/10 text-foreground bg-white/5 hover:bg-white/10'
-  }
-]
+const actions = []
 
-const currentItems = computed(() => {
-  return activeTab.value === 'sekolah' ? schoolMappings.value : foundationMappings.value
+const filteredItems = computed(() => {
+  let items = activeTab.value === 'sekolah' ? schoolMappings.value : foundationMappings.value
+  
+  // Fitur Pencarian Berdasarkan Nama
+  const query = filterValues.value?.search?.toLowerCase()
+  if (query) {
+    items = items.filter(item => item.name.toLowerCase().includes(query))
+  }
+  
+  return items
 })
 
 const paginatedItems = computed(() => {
   const start = (page.value - 1) * perPage.value
-  return currentItems.value.slice(start, start + perPage.value)
+  return filteredItems.value.slice(start, start + perPage.value)
 })
 
 const showAccessDialog = ref(false)
@@ -565,6 +593,7 @@ const openModalEditor = item => {
   form.value = {
     theme: defaultTheme,
     slug: item.slug || '',
+    logo: item.logo || '',
     legal_number: item.legal_number || '',
     slogan: item.slogan || (item.type === 'Yayasan' ? 'Membangun Generasi Emas dan Berakhlak' : 'Sekolah Masa Depan Anda'),
     meta_title: item.meta_title || item.name,
@@ -572,6 +601,7 @@ const openModalEditor = item => {
     primary_color: item.primary_color || (defaultTheme === 'islami' ? '#047857' : defaultTheme === 'playful' ? '#ec4899' : '#1e40af'),
     secondary_color: item.secondary_color || (defaultTheme === 'islami' ? '#fbbf24' : defaultTheme === 'playful' ? '#fcd34d' : '#f59e0b'),
     accent_color: item.accent_color || (defaultTheme === 'islami' ? '#14b8a6' : defaultTheme === 'playful' ? '#06b6d4' : '#0ea5e9'),
+    hero_badge_text: item.hero_badge_text || '',
     hero_title: item.hero_title || ('Selamat Datang di ' + item.name),
     hero_subtitle: item.hero_subtitle || 'Pendidikan Berkualitas untuk Masa Depan',
     hero_description: item.hero_description || 'Kami berkomitmen memberikan pendidikan terbaik dengan fasilitas modern dan pengajar profesional.',
@@ -617,6 +647,7 @@ const saveModalData = async () => {
     Object.assign(item, {
       theme: form.value.theme,
       slug: form.value.slug,
+      logo: form.value.logo,
       legal_number: form.value.legal_number,
       slogan: form.value.slogan,
       meta_title: form.value.meta_title,
@@ -624,6 +655,7 @@ const saveModalData = async () => {
       primary_color: form.value.primary_color,
       secondary_color: form.value.secondary_color,
       accent_color: form.value.accent_color,
+      hero_badge_text: form.value.hero_badge_text,
       hero_title: form.value.hero_title,
       hero_subtitle: form.value.hero_subtitle,
       hero_description: form.value.hero_description,
@@ -745,21 +777,6 @@ const closeSectionItemEditor = () => {
     <div class="flex gap-2 p-1.5 bg-white/5 border border-white/10 rounded-2xl max-w-sm">
       <button
         @click="
-          activeTab = 'sekolah';
-          page = 1;
-        "
-        class="flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all"
-        :class="
-          activeTab === 'sekolah'
-            ? 'bg-primary text-white shadow-md'
-            : 'text-gray-400 hover:text-white'
-        "
-      >
-        <School class="w-4 h-4" />
-        Pemetaan Sekolah
-      </button>
-      <button
-        @click="
           activeTab = 'yayasan';
           page = 1;
         "
@@ -773,6 +790,21 @@ const closeSectionItemEditor = () => {
         <Building class="w-4 h-4" />
         Pemetaan Yayasan
       </button>
+      <button
+        @click="
+          activeTab = 'sekolah';
+          page = 1;
+        "
+        class="flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all"
+        :class="
+          activeTab === 'sekolah'
+            ? 'bg-primary text-white shadow-md'
+            : 'text-gray-400 hover:text-white'
+        "
+      >
+        <School class="w-4 h-4" />
+        Pemetaan Sekolah
+      </button>
     </div>
 
     <!-- Mapping Section -->
@@ -785,9 +817,9 @@ const closeSectionItemEditor = () => {
         v-model:filterValues="filterValues"
         :page="page"
         :per-page="perPage"
-        :total="currentItems.length"
+        :total="filteredItems.length"
         :from="(page - 1) * perPage + 1"
-        :to="Math.min(page * perPage, currentItems.length)"
+        :to="Math.min(page * perPage, filteredItems.length)"
         @update:page="page = $event"
         @update:perPage="perPage = $event"
       >
@@ -872,7 +904,7 @@ const closeSectionItemEditor = () => {
             >
               Kelola Data
             </Button>
-            <a :href="`http://localhost:5173/s/${item.slug}`" target="_blank" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-primary transition-colors" title="Lihat Web Landing Page">
+            <a :href="`/s/${item.slug}`" target="_blank" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-primary transition-colors" title="Lihat Web Landing Page">
               <ExternalLink class="w-4 h-4" />
             </a>
           </div>
@@ -1015,7 +1047,7 @@ const closeSectionItemEditor = () => {
               <div class="space-y-4">
                 <Label class="text-xs text-muted-foreground block">Alamat Halaman (Slug URL)</Label>
                 <div
-                  class="flex rounded-xl shadow-sm border border-border/50 overflow-hidden bg-background/50"
+                  class="flex rounded-xl shadow-sm border border-border/50 overflow-hidden bg-background/50 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all"
                 >
                   <span
                     class="bg-muted/50 text-muted-foreground px-3 py-2 text-xs flex items-center border-r border-border/50 font-bold"
@@ -1024,11 +1056,12 @@ const closeSectionItemEditor = () => {
                   <Input
                     type="text"
                     v-model="form.slug"
-                    readonly
-                    class="flex-1 rounded-none border-0 text-xs focus-visible:ring-0 bg-transparent text-muted-foreground cursor-not-allowed"
+                    maxlength="50"
+                    class="flex-1 rounded-none border-0 text-xs focus-visible:ring-0 bg-transparent"
                     placeholder="contoh: sdit-nur-iman"
                   />
                 </div>
+                <p class="text-[10px] text-muted-foreground mt-1">Kosongkan untuk membuat slug otomatis dari nama profil.</p>
               </div>
 
               <!-- Palet Warna Harmonis -->
@@ -1127,6 +1160,35 @@ const closeSectionItemEditor = () => {
 
               <div class="space-y-4">
                 <div>
+                  <Label class="text-xs text-muted-foreground mb-1.5 block">Logo Instansi</Label>
+                  <div class="flex items-center gap-4">
+                    <div
+                      class="w-16 h-16 shrink-0 rounded-xl flex items-center justify-center overflow-hidden transition-all"
+                      :class="form.logo ? 'shadow-md border border-border/50 bg-white dark:bg-gray-800' : 'border-2 border-dashed border-border bg-muted/30'"
+                    >
+                      <img
+                        v-if="form.logo"
+                        :src="form.logo"
+                        alt="Logo"
+                        class="w-full h-full object-cover"
+                      />
+                      <Image v-else class="w-6 h-6 text-muted-foreground" />
+                    </div>
+                    <div class="flex-1">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        @change="onLogoUpload"
+                        class="text-xs max-w-sm rounded-xl cursor-pointer"
+                      />
+                      <p class="text-[10px] text-muted-foreground font-medium">
+                        Format PNG/JPG transparan direkomendasikan. Maks 2MB.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
                   <Label class="text-xs text-muted-foreground mb-1.5 block">Meta Title SEO <span class="text-[10px] text-blue-500 font-normal">(Otomatis dari Profil)</span></Label>
                   <Input
                     type="text"
@@ -1140,6 +1202,7 @@ const closeSectionItemEditor = () => {
                   <Textarea
                     v-model="form.meta_description"
                     rows="2"
+                    maxlength="160"
                     class="rounded-xl text-xs"
                     :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'Contoh: Lembaga penaung institusi pendidikan terbaik yang berfokus pada pengembangan umat.' : 'Contoh: Sekolah menengah atas terbaik se-DKI Jakarta yang berfokus pada karakter.'"
                   ></Textarea>
@@ -1162,6 +1225,7 @@ const closeSectionItemEditor = () => {
                   <Input
                     type="text"
                     v-model="form.slogan"
+                    maxlength="100"
                     class="rounded-xl text-xs"
                     :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'Contoh: Membangun Generasi Rabbani' : 'Contoh: Cerdas, Kreatif, Berkarakter'"
                   />
@@ -1214,14 +1278,24 @@ const closeSectionItemEditor = () => {
                   </label>
                 </div>
                 <p class="text-[10px] text-muted-foreground mt-2">
-                  Rekomendasi ukuran: 1920x1080px (Landscape). Upload lebih dari 1 untuk carousel.
+                  Rekomendasi ukuran: 1920x1080px (Landscape). Maks 2MB per gambar. Upload lebih dari 1 untuk carousel.
                 </p>
               </div>
               <div>
+                <Label class="text-xs text-muted-foreground mb-1.5 block">Teks Badge / Label Atas (Opsional)</Label>
+                <Input
+                  type="text"
+                  v-model="form.hero_badge_text"
+                  maxlength="50"
+                  class="rounded-xl text-xs mb-4"
+                  :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'Contoh: Pendaftaran Donatur Baru' : 'Contoh: Pendaftaran Siswa Baru Dibuka'"
+                />
+                <p class="text-[10px] text-muted-foreground -mt-2 mb-2">Kosongkan jika tidak ada event/pendaftaran yang sedang dibuka.</p>
                 <Label class="text-xs text-muted-foreground mb-1.5 block">Headline Utama</Label>
                 <Input
                   type="text"
                   v-model="form.hero_title"
+                  maxlength="100"
                   class="rounded-xl text-xs"
                   :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'Contoh: Membangun Generasi Emas' : 'Contoh: Sekolah Masa Depan Anda'"
                 />
@@ -1231,6 +1305,7 @@ const closeSectionItemEditor = () => {
                 <Input
                   type="text"
                   v-model="form.hero_subtitle"
+                  maxlength="150"
                   class="rounded-xl text-xs"
                   :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'Contoh: Berkhidmat Membangun Peradaban' : 'Contoh: Terakreditasi A dan Berkarakter'"
                 />
@@ -1240,6 +1315,7 @@ const closeSectionItemEditor = () => {
                 <Textarea
                   v-model="form.hero_description"
                   rows="3"
+                  maxlength="300"
                   class="rounded-xl text-xs"
                   :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'Contoh: Yayasan kami bergerak di bidang pendidikan, sosial, dan keagamaan dengan mengedepankan pembentukan karakter dan kemanfaatan umat...' : 'Contoh: Mari bergabung dengan ekosistem belajar yang modern, inovatif, dan berpusat pada minat bakat siswa...'"
                 ></Textarea>
@@ -1250,6 +1326,7 @@ const closeSectionItemEditor = () => {
                   <Input
                     type="text"
                     v-model="form.hero_cta_text"
+                    maxlength="30"
                     class="rounded-xl text-xs"
                     :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'misal: Profil Yayasan / Donasi' : 'misal: Daftar Sekarang'"
                   />
@@ -1259,6 +1336,7 @@ const closeSectionItemEditor = () => {
                   ><Input
                     type="text"
                     v-model="form.hero_cta_link"
+                    maxlength="255"
                     class="rounded-xl text-xs"
                     placeholder="misal: #registration_cta"
                   />
@@ -1288,20 +1366,21 @@ const closeSectionItemEditor = () => {
                 <div class="md:col-span-2 flex flex-col space-y-3">
                   <div>
                     <Label class="text-xs text-muted-foreground mb-1.5 block uppercase font-bold">Judul Profil Tentang Kami</Label>
-                    <Input type="text" v-model="form.about_title" class="rounded-xl text-xs" :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'Contoh: Sejarah Yayasan Pendidikan Nusantara' : 'Contoh: Profil Singkat SMA Nusantara'" />
+                    <Input type="text" v-model="form.about_title" maxlength="100" class="rounded-xl text-xs" :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'Contoh: Sejarah Yayasan Pendidikan Nusantara' : 'Contoh: Profil Singkat SMA Nusantara'" />
                   </div>
                   <div class="flex-1 flex flex-col">
                     <Label class="text-xs text-muted-foreground mb-1.5 block uppercase font-bold">Deskripsi Tentang {{ selectedItemForEdit?.type || 'Instansi' }}</Label>
-                    <Textarea v-model="form.about_description" class="rounded-xl text-xs flex-1 min-h-[110px] resize-none" placeholder="Tuliskan latar belakang, sejarah, atau filosofi instansi di sini..."></Textarea>
+                    <Textarea v-model="form.about_description" maxlength="1000" class="rounded-xl text-xs flex-1 min-h-[110px] resize-none" placeholder="Tuliskan latar belakang, sejarah, atau filosofi instansi di sini..."></Textarea>
                   </div>
                 </div>
               </div>
 
               <div>
-                <Label class="text-xs text-muted-foreground mb-1.5 block">Visi Instansi</Label
-                ><Textarea
+                <Label class="text-xs text-muted-foreground mb-1.5 block">Visi Instansi</Label>
+                <Textarea
                   v-model="form.about_vision"
                   rows="2"
+                  maxlength="500"
                   class="rounded-xl text-xs"
                   placeholder="Contoh: Mewujudkan generasi muda yang beriman, bertakwa, berakhlak mulia..."
                 ></Textarea>
@@ -1320,6 +1399,7 @@ const closeSectionItemEditor = () => {
                   <Input
                     type="text"
                     v-model="form.about_mission[index]"
+                    maxlength="255"
                     class="flex-1 rounded-xl text-xs"
                   />
                   <Button
@@ -1334,6 +1414,7 @@ const closeSectionItemEditor = () => {
                   <input
                     type="text"
                     v-model="newMissionItem"
+                    maxlength="255"
                     class="flex-1 px-3 py-2 text-xs bg-background/30 border border-border/50 rounded-xl text-foreground focus:outline-none"
                     placeholder="Tambah misi..."
                     @keydown.enter.prevent="addMission"
@@ -1415,6 +1496,7 @@ const closeSectionItemEditor = () => {
                     <Input
                       type="text"
                       v-model="sectionItemForm.title"
+                      maxlength="100"
                       class="w-full h-10 px-3 border border-gray-200 dark:border-white/10 bg-white/50 dark:bg-background/30 rounded-xl text-xs text-foreground focus-visible:ring-1 focus-visible:border-primary/50"
                       placeholder="Masukkan nama atau judul item"
                     />
@@ -1425,6 +1507,7 @@ const closeSectionItemEditor = () => {
                     <Input
                       type="text"
                       v-model="sectionItemForm.link"
+                      maxlength="255"
                       class="w-full h-10 px-3 border border-gray-200 dark:border-white/10 bg-white/50 dark:bg-background/30 rounded-xl text-xs text-foreground focus-visible:ring-1 focus-visible:border-primary/50"
                       placeholder="https://..."
                     />
@@ -1437,6 +1520,7 @@ const closeSectionItemEditor = () => {
                     <Input
                       type="text"
                       v-model="sectionItemForm.value"
+                      maxlength="50"
                       class="w-full h-10 px-3 border border-gray-200 dark:border-white/10 bg-white/50 dark:bg-background/30 rounded-xl text-xs text-foreground focus-visible:ring-1 focus-visible:border-primary/50"
                       :placeholder="activeSectionType === 'stats' ? 'misal: 100+' : 'misal: Wali Murid'"
                     />
@@ -1447,6 +1531,7 @@ const closeSectionItemEditor = () => {
                     <Input
                       type="text"
                       v-model="sectionItemForm.icon"
+                      maxlength="50"
                       class="w-full h-10 px-3 border border-gray-200 dark:border-white/10 bg-white/50 dark:bg-background/30 rounded-xl text-xs text-foreground focus-visible:ring-1 focus-visible:border-primary/50"
                       placeholder="misal: star, award, book"
                     />
@@ -1459,6 +1544,7 @@ const closeSectionItemEditor = () => {
                     <Textarea
                       v-model="sectionItemForm.description"
                       rows="2"
+                      maxlength="300"
                       class="w-full px-3 py-2 border border-gray-200 dark:border-white/10 bg-white/50 dark:bg-background/30 rounded-xl text-xs text-foreground focus-visible:ring-1 focus-visible:border-primary/50"
                       :placeholder="activeSectionType === 'faq' ? 'Tuliskan jawaban pertanyaan...' : 'Tuliskan deskripsi ringkas...'"
                     ></Textarea>
@@ -1566,6 +1652,7 @@ const closeSectionItemEditor = () => {
                   <Input
                     type="email"
                     v-model="form.contact_email"
+                    maxlength="255"
                     class="rounded-xl text-xs"
                     :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'Contoh: info@yayasan.com' : 'Contoh: info@sekolah.com'"
                   />
@@ -1575,6 +1662,7 @@ const closeSectionItemEditor = () => {
                   <Input
                     type="text"
                     v-model="form.contact_phone"
+                    maxlength="20"
                     class="rounded-xl text-xs"
                     placeholder="Contoh: 021-1234567"
                   />
@@ -1584,6 +1672,7 @@ const closeSectionItemEditor = () => {
                   <Textarea
                     v-model="form.contact_address"
                     rows="2"
+                    maxlength="500"
                     class="rounded-xl text-xs"
                     :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'Masukkan alamat lengkap yayasan di sini...' : 'Masukkan alamat lengkap sekolah di sini...'"
                   ></Textarea>
@@ -1591,9 +1680,11 @@ const closeSectionItemEditor = () => {
                 <div class="md:col-span-2">
                   <Label class="text-xs text-muted-foreground mb-1.5 block"
                     >Google Maps Embed URL</Label
-                  ><Textarea
+                  >
+                  <Textarea
                     v-model="form.contact_maps_embed"
                     rows="2"
+                    maxlength="1000"
                     class="rounded-xl text-xs"
                     placeholder="Salin tag <iframe src='...'> dari Google Maps"
                   ></Textarea>
@@ -1606,6 +1697,7 @@ const closeSectionItemEditor = () => {
                   <Input
                     type="text"
                     v-model="form.social_instagram"
+                    maxlength="255"
                     class="rounded-xl text-xs"
                     :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'https://instagram.com/yayasan' : 'https://instagram.com/sekolah'"
                   />
@@ -1615,6 +1707,7 @@ const closeSectionItemEditor = () => {
                   <Input
                     type="text"
                     v-model="form.social_facebook"
+                    maxlength="255"
                     class="rounded-xl text-xs"
                     :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'https://facebook.com/yayasan' : 'https://facebook.com/sekolah'"
                   />
@@ -1624,6 +1717,7 @@ const closeSectionItemEditor = () => {
                   <Input
                     type="text"
                     v-model="form.social_tiktok"
+                    maxlength="255"
                     class="rounded-xl text-xs"
                     :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'https://tiktok.com/@yayasan' : 'https://tiktok.com/@sekolah'"
                   />
@@ -1633,6 +1727,7 @@ const closeSectionItemEditor = () => {
                   <Input
                     type="text"
                     v-model="form.social_youtube"
+                    maxlength="255"
                     class="rounded-xl text-xs"
                     :placeholder="selectedItemForEdit?.type === 'Yayasan' ? 'https://youtube.com/c/yayasan' : 'https://youtube.com/c/sekolah'"
                   />

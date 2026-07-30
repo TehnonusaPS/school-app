@@ -24,8 +24,9 @@ onMounted(() => {
     ref="el"
     class="py-24 lg:py-32 bg-primary/5 relative overflow-hidden"
   >
-    <div class="absolute top-10 right-10 text-8xl opacity-5 fun-bounce">🌟</div>
-    <div class="absolute bottom-10 left-10 text-8xl opacity-5 fun-bounce-2">📚</div>
+    <!-- Soft glowing blobs instead of emojis -->
+    <div class="absolute top-0 right-0 w-[40rem] h-[40rem] rounded-full bg-accent/10 blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-0 left-0 w-[40rem] h-[40rem] rounded-full bg-secondary/10 blur-[120px] pointer-events-none"></div>
 
     <div class="max-w-7xl mx-auto px-6 relative z-10">
       <div
@@ -35,8 +36,8 @@ onMounted(() => {
         ]"
       >
         <span
-          class="inline-block px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest mb-4 bg-primary/50 text-primary"
-          >🏫 Tentang Kami</span
+          class="inline-block px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-4 bg-white text-primary shadow-sm border border-primary/10"
+          >Tentang Kami</span
         >
         <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-6">
           {{ about.title || ('Tentang ' + (branding?.entityName || 'Instansi')) }}
@@ -44,31 +45,31 @@ onMounted(() => {
         <p class="text-lg text-gray-500 leading-relaxed">{{ about.description }}</p>
       </div>
 
-      <div class="grid lg:grid-cols-2 gap-16 items-center">
+      <div class="grid lg:grid-cols-2 gap-16 items-stretch">
         <div
           :class="[
-            'transition-all duration-700 delay-200',
+            'transition-all duration-700 delay-200 h-full',
             isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
           ]"
         >
-          <div class="relative">
+          <div class="relative h-full">
             <div
               class="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-primary via-secondary to-accent/50 blur-xl"
             ></div>
             <div
-              class="relative rounded-[2rem] overflow-hidden border-4 border-accent/20 shadow-2xl shadow-purple-200/30"
+              class="relative rounded-[2rem] overflow-hidden border-4 border-accent/20 shadow-2xl shadow-purple-200/30 h-full"
             >
               <img
                 v-if="about.image"
                 :src="about.image"
                 alt="Tentang"
-                class="w-full aspect-[4/3] object-cover"
+                class="w-full h-full min-h-[400px] object-cover hover:scale-105 transition-transform duration-700"
               />
               <div
                 v-else
-                class="w-full aspect-[4/3] bg-gradient-to-br from-primary via-secondary to-accent/50 flex items-center justify-center"
+                class="w-full h-full min-h-[400px] bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center text-primary/30"
               >
-                <span class="text-8xl">🏫</span>
+                <Target class="w-20 h-20" />
               </div>
             </div>
           </div>
@@ -86,9 +87,9 @@ onMounted(() => {
           >
             <div class="flex items-start gap-4">
               <div
-                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-secondary/50 flex items-center justify-center flex-shrink-0 text-2xl"
+                class="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center flex-shrink-0 text-white shadow-md shadow-primary/30"
               >
-                👁️
+                <Eye class="w-7 h-7" />
               </div>
               <div>
                 <h3 class="text-xl font-bold text-primary mb-2">Visi</h3>
@@ -103,9 +104,9 @@ onMounted(() => {
           >
             <div class="flex items-start gap-4">
               <div
-                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent to-orange-500 flex items-center justify-center flex-shrink-0 text-2xl"
+                class="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center flex-shrink-0 text-white shadow-md shadow-secondary/30"
               >
-                🎯
+                <Target class="w-7 h-7" />
               </div>
               <div class="flex-1">
                 <h3 class="text-xl font-bold text-primary mb-4">Misi</h3>
@@ -115,8 +116,8 @@ onMounted(() => {
                     :key="i"
                     class="flex items-start gap-3"
                   >
-                    <span class="text-lg mt-0.5">✅</span>
-                    <span class="text-gray-600">{{ item }}</span>
+                    <CheckCircle class="w-5 h-5 text-secondary flex-shrink-0 mt-0.5" />
+                    <span class="text-gray-600 font-medium">{{ item }}</span>
                   </li>
                 </ul>
               </div>

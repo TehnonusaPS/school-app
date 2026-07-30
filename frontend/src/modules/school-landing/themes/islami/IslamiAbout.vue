@@ -44,30 +44,30 @@ onMounted(() => {
       <!-- Arabesque divider -->
       <div class="arabesque-divider max-w-xs mx-auto my-12"></div>
 
-      <div class="grid lg:grid-cols-2 gap-16 items-center">
+      <div class="grid lg:grid-cols-2 gap-16 items-stretch">
         <div
           :class="[
-            'transition-all duration-700 delay-200',
+            'transition-all duration-700 delay-200 h-full',
             isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
           ]"
         >
-          <div class="relative">
+          <div class="relative h-full">
             <div
               class="absolute -inset-3 rounded-3xl bg-gradient-to-br from-primary/10 to-secondary/5 blur-xl"
             ></div>
             <!-- Ornamental border frame -->
             <div
-              class="relative rounded-3xl overflow-hidden border-4 border-secondary/20 shadow-2xl"
+              class="relative rounded-3xl overflow-hidden border-4 border-secondary/20 shadow-2xl h-full"
             >
               <img
                 v-if="about.image"
                 :src="about.image"
                 alt="Tentang"
-                class="w-full aspect-[4/3] object-cover"
+                class="w-full h-full min-h-[400px] object-cover"
               />
               <div
                 v-else
-                class="w-full aspect-[4/3] bg-gradient-to-br from-primary/10 to-secondary/5 flex items-center justify-center"
+                class="w-full h-full min-h-[400px] bg-gradient-to-br from-primary/10 to-secondary/5 flex items-center justify-center"
               >
                 <span class="text-6xl">🕌</span>
               </div>

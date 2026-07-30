@@ -1,22 +1,34 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Menu, X } from 'lucide-vue-next'
 
 const props = defineProps({
   branding: Object,
-  data: Object
+  data: Object,
+  sections: { type: Array, default: () => [] }
 })
 
 const isScrolled = ref(false)
 const isMobileOpen = ref(false)
 
-const navLinks = [
-  { id: 'about', label: 'Tentang' },
-  { id: 'features', label: 'Keunggulan' },
-  { id: 'programs', label: 'Program' },
-  { id: 'gallery', label: 'Galeri' },
-  { id: 'contact', label: 'Kontak' }
-]
+const navLinks = computed(() => {
+  const links = [{ id: 'about', label: 'Tentang' }]
+  const sectionMap = {
+    features: 'Keunggulan',
+    stats: 'Statistik',
+    programs: 'Program',
+    gallery: 'Galeri',
+    testimonials: 'Testimoni',
+    faq: 'FAQ'
+  }
+  for (const s of props.sections) {
+    if (s.is_visible !== false && s.items?.length > 0 && sectionMap[s.type]) {
+      links.push({ id: s.type, label: sectionMap[s.type] })
+    }
+  }
+  links.push({ id: 'contact', label: 'Kontak' })
+  return links
+})
 
 function scrollTo(id) {
   isMobileOpen.value = false
@@ -101,15 +113,15 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 
       <!-- CTA -->
       <div class="hidden lg:block">
-        <button
-          @click="scrollTo('registration_cta')"
-          class="px-6 py-2.5 rounded-xl text-sm font-semibold text-white shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
+        <a
+          :href="data?.hero_cta_link || '#contact'"
+          class="inline-block px-6 py-2.5 rounded-xl text-sm font-semibold text-white shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
           :style="{
             background: `linear-gradient(135deg, ${branding.primaryColor}, ${branding.accentColor})`
           }"
         >
-          Daftar Sekarang
-        </button>
+          {{ data?.hero_cta_text || 'Daftar Sekarang' }}
+        </a>
       </div>
 
       <!-- Mobile Toggle -->
@@ -151,15 +163,16 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
           >
             {{ link.label }}
           </button>
-          <button
-            @click="scrollTo('registration_cta')"
-            class="mt-3 py-3 rounded-xl text-white font-semibold text-center"
+          <a
+            :href="data?.hero_cta_link || '#contact'"
+            @click="isMobileOpen = false"
+            class="block mt-3 py-3 rounded-xl text-white font-semibold text-center"
             :style="{
               background: `linear-gradient(135deg, ${branding.primaryColor}, ${branding.accentColor})`
             }"
           >
-            Daftar Sekarang
-          </button>
+            {{ data?.hero_cta_text || 'Daftar Sekarang' }}
+          </a>
         </div>
       </div>
     </Transition>

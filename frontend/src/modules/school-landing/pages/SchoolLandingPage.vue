@@ -42,12 +42,39 @@ watch(
   { immediate: true }
 )
 
-// Set page title
+// Set page title & meta tags
 watch(
   () => data.value,
   pageData => {
     if (pageData?.meta_title) {
       document.title = pageData.meta_title
+    }
+    // Inject meta description for SEO
+    if (pageData?.meta_description) {
+      let metaDesc = document.querySelector('meta[name="description"]')
+      if (!metaDesc) {
+        metaDesc = document.createElement('meta')
+        metaDesc.setAttribute('name', 'description')
+        document.head.appendChild(metaDesc)
+      }
+      metaDesc.setAttribute('content', pageData.meta_description)
+    }
+    // Inject Open Graph tags for social media sharing
+    const ogTags = {
+      'og:title': pageData?.meta_title || '',
+      'og:description': pageData?.meta_description || '',
+      'og:type': 'website',
+      'og:image': pageData?.hero_images?.[0]?.url || pageData?.about_image || ''
+    }
+    for (const [property, content] of Object.entries(ogTags)) {
+      if (!content) continue
+      let tag = document.querySelector(`meta[property="${property}"]`)
+      if (!tag) {
+        tag = document.createElement('meta')
+        tag.setAttribute('property', property)
+        document.head.appendChild(tag)
+      }
+      tag.setAttribute('content', content)
     }
   },
   { immediate: true }

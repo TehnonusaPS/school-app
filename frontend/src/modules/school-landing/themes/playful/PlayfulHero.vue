@@ -32,48 +32,41 @@ function scrollTo(id) {
     class="relative min-h-screen flex items-center overflow-hidden"
   >
     <!-- Background -->
-    <div class="absolute inset-0 z-0">
-      <TransitionGroup
-        enter-active-class="transition-opacity duration-1000"
-        enter-from-class="opacity-0"
-        enter-to-class="opacity-100"
-        leave-active-class="transition-opacity duration-1000 absolute inset-0"
-        leave-from-class="opacity-100"
-        leave-to-class="opacity-0"
+    <div class="absolute inset-0 z-0 overflow-hidden">
+      <div 
+        class="flex w-full h-full transition-transform duration-700 ease-in-out"
+        :style="{ transform: `translateX(-${currentSlide * 100}%)` }"
       >
         <div
           v-for="(img, i) in images"
-          v-show="i === currentSlide"
           :key="i"
-          class="absolute inset-0 bg-cover bg-center"
+          class="w-full h-full flex-shrink-0 bg-cover bg-center"
           :style="{ backgroundImage: `url(${img.url})` }"
-        />
-      </TransitionGroup>
+        ></div>
+      </div>
       <div
         v-if="!images.length"
-        class="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-accent/50"
+        class="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-accent/50 z-[1]"
       ></div>
       <div
-        class="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-transparent z-[1]"
+        v-else
+        class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/10 z-[1]"
       ></div>
     </div>
 
-    <!-- Fun floating shapes -->
+    <!-- Soft glowing blobs instead of emojis -->
     <div class="absolute inset-0 z-[2] pointer-events-none overflow-hidden">
       <div
-        class="absolute top-20 right-10 w-32 h-32 rounded-full bg-accent blur-2xl fun-bounce"
+        class="absolute top-20 right-[10%] w-[30rem] h-[30rem] rounded-full bg-accent/10 mix-blend-screen blur-[100px] animate-pulse"
       ></div>
       <div
-        class="absolute bottom-40 left-10 w-24 h-24 rounded-full bg-secondary blur-2xl fun-bounce-2"
+        class="absolute bottom-10 left-[5%] w-[25rem] h-[25rem] rounded-full bg-secondary/10 mix-blend-screen blur-[100px] animate-pulse"
+        style="animation-delay: 2s"
       ></div>
-      <div class="absolute top-1/3 right-1/4 text-6xl fun-bounce opacity-20">⭐</div>
-      <div class="absolute bottom-1/3 left-20 text-5xl fun-bounce-2 opacity-20">🎈</div>
       <div
-        class="absolute top-1/2 right-10 text-4xl fun-bounce opacity-15"
-        style="animation-delay: 1s"
-      >
-        🌈
-      </div>
+        class="absolute top-1/2 left-1/3 w-[20rem] h-[20rem] rounded-full bg-primary/10 mix-blend-screen blur-[100px] animate-pulse"
+        style="animation-delay: 4s"
+      ></div>
     </div>
 
     <!-- Wavy bottom -->
@@ -94,41 +87,43 @@ function scrollTo(id) {
     <div class="relative z-10 max-w-7xl mx-auto px-6 py-32 lg:py-40">
       <div class="max-w-3xl">
         <div
-          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/20 backdrop-blur-sm text-white text-sm font-bold mb-8 border border-white/20"
+          v-if="hero.badgeText"
+          class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white/10 backdrop-blur-md text-white text-sm font-bold mb-8 border border-white/20 shadow-xl"
         >
-          🎒 Pendaftaran Siswa Baru Dibuka!
+          <span class="w-2.5 h-2.5 rounded-full bg-secondary animate-pulse"></span>
+          {{ hero.badgeText }}
         </div>
 
         <h1
-          class="heading-font text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-[1.1] mb-6"
+          class="heading-font text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold text-white leading-[1.1] mb-6 tracking-tight line-clamp-3 break-words drop-shadow-sm"
         >
-          {{ hero.title || ('Selamat Datang di ' + (branding?.entityName || 'Instansi') + '!') }} 🎉
+          {{ hero.title || ('Selamat Datang di ' + (branding?.entityName || 'Instansi')) }}
         </h1>
 
         <p
           v-if="hero.subtitle"
-          class="text-xl md:text-2xl text-accent font-bold mb-4"
+          class="text-xl md:text-2xl text-secondary font-bold mb-6 line-clamp-2 break-words drop-shadow-sm"
         >
           {{ hero.subtitle }}
         </p>
 
-        <p class="text-lg text-white/80 mb-10 leading-relaxed max-w-2xl">
-          {{ hero.description || 'Tempat belajar yang seru, kreatif, dan penuh petualangan!' }}
+        <p class="text-lg md:text-xl text-white/90 mb-10 leading-relaxed max-w-2xl font-medium line-clamp-4 break-words">
+          {{ hero.description || 'Pendidikan berkualitas dengan lingkungan belajar yang kreatif, menyenangkan, dan inovatif.' }}
         </p>
 
         <div class="flex flex-wrap gap-4">
-          <button
-            @click="scrollTo('registration_cta')"
-            class="group flex items-center gap-2 px-8 py-4 rounded-2xl bg-accent text-primary font-extrabold text-sm shadow-lg shadow-yellow-400/30 hover:bg-accent/10 transition-all hover:-translate-y-1 hover:scale-105"
+          <a
+            :href="hero.ctaLink || '#contact'"
+            class="group flex items-center gap-3 px-8 py-4 rounded-[1.25rem] bg-white text-primary font-extrabold text-sm shadow-xl shadow-black/10 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:scale-105"
           >
-            {{ hero.ctaText || '🎉 Daftar Sekarang!' }}
+            <span class="truncate">{{ hero.ctaText || 'Daftar Sekarang' }}</span>
             <ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </button>
+          </a>
           <button
             @click="scrollTo('about')"
-            class="px-8 py-4 rounded-2xl text-white border-3 border-white/30 font-bold text-sm hover:bg-white/10 transition-all hover:-translate-y-1"
+            class="px-8 py-4 rounded-[1.25rem] text-white bg-white/10 backdrop-blur-md border border-white/20 font-bold text-sm hover:bg-white/20 transition-all duration-300 hover:-translate-y-1 shadow-lg"
           >
-            📖 Tentang Kami
+            Tentang Kami
           </button>
         </div>
       </div>

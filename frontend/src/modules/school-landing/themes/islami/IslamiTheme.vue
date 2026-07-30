@@ -26,12 +26,14 @@ const props = defineProps({
     <IslamiNavbar
       :branding="branding"
       :data="data"
+      :sections="sections"
     />
     <IslamiHero
       :hero="hero"
       :branding="branding"
     />
     <IslamiAbout
+      v-if="about?.title || about?.description || about?.vision || (about?.mission && about.mission.length) || about?.image"
       :about="about"
       :branding="branding"
     />

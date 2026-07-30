@@ -71,7 +71,7 @@ const dummyData = {
     {
       id: 1,
       type: 'stats',
-      title: 'Sekolah Kami Dalam Angka',
+      title: 'Pencapaian & Dedikasi Kami',
       is_visible: true,
       sort_order: 1,
       items: [

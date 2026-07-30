@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { BookOpen } from 'lucide-vue-next'
 const props = defineProps({ section: Object, branding: Object })
 const el = ref(null)
 const isVisible = ref(false)
@@ -23,7 +24,7 @@ onMounted(() => {
     ref="el"
     class="py-24 lg:py-32 bg-primary/5 relative overflow-hidden"
   >
-    <div class="absolute top-20 right-10 text-8xl opacity-5 fun-bounce">📚</div>
+    <div class="absolute top-0 left-0 w-[40rem] h-[40rem] rounded-full bg-primary/10 blur-[120px] pointer-events-none"></div>
     <div class="max-w-7xl mx-auto px-6 relative z-10">
       <div
         :class="[
@@ -32,8 +33,8 @@ onMounted(() => {
         ]"
       >
         <span
-          class="inline-block px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest mb-4 bg-secondary/10 text-secondary"
-          >📚 Program</span
+          class="inline-block px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-4 bg-primary/10 text-primary"
+          >Program</span
         >
         <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-6">
           {{ section.title || 'Program Unggulan' }}
@@ -45,7 +46,7 @@ onMounted(() => {
           v-for="(item, i) in section.items"
           :key="item.id"
           :class="[
-            'group rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl border-3 border-white hover:border-accent/20 transition-all duration-500 hover:-translate-y-2 fun-wiggle',
+            'group bg-white rounded-[2rem] overflow-hidden shadow-xl shadow-gray-200/50 hover:shadow-2xl hover:shadow-primary/10 border border-gray-100 hover:border-primary/20 transition-all duration-500 hover:-translate-y-2',
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           ]"
           :style="{ transitionDelay: `${i * 100}ms` }"
@@ -57,12 +58,12 @@ onMounted(() => {
               :alt="item.title"
               class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
             />
-            <div
-              v-else
-              class="w-full h-full bg-gradient-to-br from-primary via-secondary to-accent/50 flex items-center justify-center"
-            >
-              <span class="text-6xl">{{ item.icon || '📖' }}</span>
-            </div>
+              <div
+                v-else
+                class="w-full h-full bg-primary/5 flex items-center justify-center text-primary/30"
+              >
+                <BookOpen class="w-16 h-16" />
+              </div>
           </div>
           <div class="bg-white p-6">
             <h3 class="text-lg font-extrabold text-primary mb-2">{{ item.title }}</h3>

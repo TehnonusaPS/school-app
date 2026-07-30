@@ -13,7 +13,7 @@ class LandingPageConfigController extends Controller
     public function uploadImage(Request $request)
     {
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         if ($request->file('image')) {
@@ -127,7 +127,9 @@ class LandingPageConfigController extends Controller
             $foundation->phone = $configArr['contact_phone'] ?? $foundation->phone;
             $foundation->address = $configArr['contact_address'] ?? $foundation->address;
 
-            $configArr['slug'] = \Illuminate\Support\Str::slug($foundation->name);
+            $configArr['slug'] = !empty($configArr['slug']) 
+                ? \Illuminate\Support\Str::slug($configArr['slug']) 
+                : \Illuminate\Support\Str::slug($foundation->name);
             $foundation->landing_page_config = json_encode($configArr);
         }
 
@@ -172,7 +174,9 @@ class LandingPageConfigController extends Controller
             $school->instagram = $configArr['social_instagram'] ?? $school->instagram;
             $school->facebook = $configArr['social_facebook'] ?? $school->facebook;
 
-            $configArr['slug'] = \Illuminate\Support\Str::slug($school->name);
+            $configArr['slug'] = !empty($configArr['slug'])
+                ? \Illuminate\Support\Str::slug($configArr['slug'])
+                : \Illuminate\Support\Str::slug($school->name);
             $school->landing_page_config = json_encode($configArr);
         }
 

@@ -30,8 +30,8 @@ onMounted(() => {
         ]"
       >
         <span
-          class="inline-block px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest mb-4 bg-primary/50 text-primary"
-          >👨‍🏫 Guru</span
+          class="inline-block px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-4 bg-primary/10 text-primary"
+          >Guru</span
         >
         <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-primary">
           {{ section.title || 'Tenaga Pendidik' }}
@@ -43,7 +43,7 @@ onMounted(() => {
           v-for="(item, i) in section.items"
           :key="item.id"
           :class="[
-            'text-center transition-all duration-500 fun-wiggle',
+            'text-center transition-all duration-500',
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           ]"
           :style="{ transitionDelay: `${i * 80}ms` }"
@@ -59,7 +59,7 @@ onMounted(() => {
             />
             <div
               v-else
-              class="w-full h-full bg-gradient-to-br from-primary via-secondary to-accent/50 flex items-center justify-center text-white text-4xl font-extrabold"
+              class="w-full h-full bg-primary/10 flex items-center justify-center text-primary/50 text-4xl font-bold"
             >
               {{ (item.title || 'T')[0] }}
             </div>

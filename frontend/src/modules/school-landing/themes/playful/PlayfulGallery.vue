@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { Image as ImageIcon, Search } from 'lucide-vue-next'
 import ImageLightbox from '../../components/ImageLightbox.vue'
 const props = defineProps({ section: Object, branding: Object })
 const el = ref(null)
@@ -40,8 +41,8 @@ function openLightbox(i) {
         ]"
       >
         <span
-          class="inline-block px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest mb-4 bg-cyan-100 text-cyan-600"
-          >📸 Galeri</span
+          class="inline-block px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-4 bg-primary/10 text-primary"
+          >Galeri</span
         >
         <h2 class="heading-font text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-6">
           {{ section.title || 'Galeri Kegiatan' }}
@@ -53,14 +54,14 @@ function openLightbox(i) {
           v-for="(item, i) in section.items"
           :key="item.id"
           :class="[
-            'group cursor-pointer transition-all duration-500 fun-wiggle',
+            'group cursor-pointer transition-all duration-500',
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           ]"
           :style="{ transitionDelay: `${i * 60}ms` }"
           @click="openLightbox(i)"
         >
           <div
-            class="rounded-3xl overflow-hidden border-3 border-gray-100 hover:border-accent/20 shadow-lg hover:shadow-xl transition-all"
+            class="rounded-[2rem] overflow-hidden bg-white shadow-xl shadow-gray-200/50 border border-gray-100 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/10 transition-all hover:-translate-y-2"
           >
             <div class="relative overflow-hidden aspect-[4/3]">
               <img
@@ -71,17 +72,17 @@ function openLightbox(i) {
               />
               <div
                 v-else
-                class="w-full h-full bg-gradient-to-br from-primary to-secondary/50 flex items-center justify-center"
+                class="w-full h-full bg-primary/5 flex items-center justify-center text-primary/30"
               >
-                <span class="text-5xl">🖼️</span>
+                <ImageIcon class="w-12 h-12" />
               </div>
               <div
-                class="absolute inset-0 bg-primary group-hover:bg-primary transition-colors flex items-center justify-center"
+                class="absolute inset-0 bg-primary/50 opacity-0 group-hover:opacity-100 transition-colors flex items-center justify-center backdrop-blur-sm"
               >
                 <div
-                  class="w-14 h-14 rounded-full bg-accent flex items-center justify-center opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-100 transition-all text-2xl"
+                  class="w-14 h-14 rounded-full bg-white flex items-center justify-center scale-50 group-hover:scale-100 transition-transform duration-300 shadow-xl"
                 >
-                  🔍
+                  <Search class="w-6 h-6 text-primary" />
                 </div>
               </div>
             </div>

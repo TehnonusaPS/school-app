@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { Quote } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -10,6 +10,7 @@ const props = defineProps({
 const el = ref(null)
 const isVisible = ref(false)
 const activeIndex = ref(0)
+let autoSlideInterval = null
 
 onMounted(() => {
   const observer = new IntersectionObserver(
@@ -25,15 +26,20 @@ onMounted(() => {
 
   // Auto-slide
   if (props.section.items?.length > 1) {
-    setInterval(() => {
+    autoSlideInterval = setInterval(() => {
       activeIndex.value = (activeIndex.value + 1) % props.section.items.length
     }, 5000)
   }
+})
+
+onUnmounted(() => {
+  if (autoSlideInterval) clearInterval(autoSlideInterval)
 })
 </script>
 
 <template>
   <section
+    :id="section.type"
     ref="el"
     class="py-24 lg:py-32 bg-gray-50 relative overflow-hidden"
   >

@@ -221,6 +221,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/spp/tariffs/{id}', [\App\Http\Controllers\Api\SppController::class, 'deleteTariff']);
     });
 
+    // Student Attendance & Face Registration
+    Route::get('/absensi/siswa', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'index']);
+    Route::get('/absensi/siswa/logs', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'logs']);
+    Route::post('/absensi/siswa/scan', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'scan']);
+    Route::post('/absensi/siswa/{id}/register-face', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'registerFace']);
+    Route::get('/absensi/siswa/monthly-grid', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'getMonthlyGrid']);
+    Route::post('/absensi/siswa/monthly-grid/update', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'updateMonthlyCell']);
+    Route::post('/absensi/siswa/{id}/status', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'changeStatus']);
+
     // Staff Attendance & Leaves
     Route::post('/absensi/clock-in', [\App\Http\Controllers\Api\StaffAttendanceController::class, 'clockIn']);
     Route::get('/absensi/history', [\App\Http\Controllers\Api\StaffAttendanceController::class, 'myHistory']);

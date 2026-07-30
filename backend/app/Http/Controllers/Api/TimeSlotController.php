@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\TimeSlot;
+use App\Models\Schedule;
 use App\Http\Traits\HasSchoolScope;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -30,11 +31,21 @@ class TimeSlotController extends Controller
             $query->where('school_id', $schoolId);
         }
 
-        $slots = $query->orderBy('slot_number')->get();
+        $slots = $query->orderBy('slot_number')->get()->map(function ($slot) {
+            return [
+                'id'          => $slot->id,
+                'school_id'   => $slot->school_id,
+                'slot_number' => (int) $slot->slot_number,
+                'start_time'  => $slot->start_time,
+                'end_time'    => $slot->end_time,
+                'is_break'    => (bool) $slot->is_break,
+                'label'       => $slot->label,
+            ];
+        });
 
         return response()->json([
             'status' => 'success',
-            'data' => $slots
+            'data'   => $slots
         ]);
     }
 
@@ -50,19 +61,19 @@ class TimeSlotController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'slots' => 'required|array',
+            'slots'               => 'required|array',
             'slots.*.slot_number' => 'required|integer',
-            'slots.*.start_time' => 'required|string',
-            'slots.*.end_time' => 'required|string',
-            'slots.*.is_break' => 'required|boolean',
-            'slots.*.label' => 'nullable|string|max:100',
+            'slots.*.start_time'  => 'required|string',
+            'slots.*.end_time'    => 'required|string',
+            'slots.*.is_break'    => 'required',
+            'slots.*.label'       => 'nullable|string|max:100',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'Validation error.',
-                'errors' => $validator->errors()
+                'errors'  => $validator->errors()
             ], 422);
         }
 
@@ -80,31 +91,50 @@ class TimeSlotController extends Controller
 
             $upserted = [];
             foreach ($slotsData as $slot) {
-                $upserted[] = TimeSlot::updateOrCreate(
+                $isBreak = filter_var($slot['is_break'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+                $timeSlotModel = TimeSlot::updateOrCreate(
                     [
-                        'school_id' => $schoolId,
+                        'school_id'   => $schoolId,
                         'slot_number' => $slot['slot_number']
                     ],
                     [
                         'start_time' => $slot['start_time'],
-                        'end_time' => $slot['end_time'],
-                        'is_break' => $slot['is_break'],
-                        'label' => $slot['label'] ?? null
+                        'end_time'   => $slot['end_time'],
+                        'is_break'   => $isBreak,
+                        'label'      => $slot['label'] ?? null
                     ]
                 );
+
+                if ($isBreak) {
+                    // Remove any schedule assigned to this slot if converted to break
+                    Schedule::where('school_id', $schoolId)
+                        ->where('time_slot_id', $timeSlotModel->id)
+                        ->delete();
+                }
+
+                $upserted[] = [
+                    'id'          => $timeSlotModel->id,
+                    'school_id'   => $timeSlotModel->school_id,
+                    'slot_number' => (int) $timeSlotModel->slot_number,
+                    'start_time'  => $timeSlotModel->start_time,
+                    'end_time'    => $timeSlotModel->end_time,
+                    'is_break'    => (bool) $timeSlotModel->is_break,
+                    'label'       => $timeSlotModel->label,
+                ];
             }
 
             DB::commit();
 
             return response()->json([
-                'status' => 'success',
+                'status'  => 'success',
                 'message' => 'Time slots updated successfully.',
-                'data' => $upserted
+                'data'    => $upserted
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'Failed to save time slots: ' . $e->getMessage()
             ], 500);
         }
@@ -128,7 +158,7 @@ class TimeSlotController extends Controller
 
         if ($slot->schedules()->exists()) {
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'Cannot delete time slot because it is already used in a schedule.'
             ], 400);
         }
@@ -136,7 +166,7 @@ class TimeSlotController extends Controller
         $slot->delete();
 
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'Time slot deleted successfully.'
         ]);
     }

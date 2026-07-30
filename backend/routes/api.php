@@ -11,6 +11,8 @@ use App\Http\Controllers\Api\TeacherController;
 use App\Http\Controllers\Api\ExtracurricularController;
 use App\Http\Controllers\Api\SubjectController;
 use App\Http\Controllers\Api\AcademicYearController;
+use App\Http\Controllers\Api\AcademicCalendarController;
+use App\Http\Controllers\Api\CurriculumController;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
@@ -159,7 +161,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('/classrooms', ClassroomController::class);
         Route::apiResource('/teachers', TeacherController::class);
         Route::apiResource('/extracurriculars', ExtracurricularController::class);
+        Route::patch('/subjects/{id}/toggle-status', [SubjectController::class, 'toggleStatus']);
         Route::apiResource('/subjects', SubjectController::class);
+        Route::apiResource('/curriculums', CurriculumController::class);
         Route::apiResource('/academic-years', AcademicYearController::class);
 
         // Time slots routes
@@ -218,5 +222,36 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/spp/tariffs/{id}', [\App\Http\Controllers\Api\SppController::class, 'updateTariff']);
         Route::delete('/spp/tariffs/{id}', [\App\Http\Controllers\Api\SppController::class, 'deleteTariff']);
     });
+
+    // Kalender Akademik - Admin Sekolah & Kepala Sekolah (CRUD + Approval)
+    Route::middleware('role:admin_sekolah,kepala_sekolah')
+        ->prefix('academic-calendar')
+        ->group(function () {
+            Route::post('/setup-dates', [AcademicCalendarController::class, 'setupYearDates']);
+            Route::get('/events', [AcademicCalendarController::class, 'index']);
+            Route::post('/events', [AcademicCalendarController::class, 'store']);
+            Route::post('/events/batch', [AcademicCalendarController::class, 'batchStore']);
+            Route::put('/events/{id}', [AcademicCalendarController::class, 'update']);
+            Route::delete('/events/{id}', [AcademicCalendarController::class, 'destroy']);
+            Route::get('/status', [AcademicCalendarController::class, 'calendarStatus']);
+            Route::post('/submit', [AcademicCalendarController::class, 'submit']);
+            Route::post('/approve', [AcademicCalendarController::class, 'approve']);
+            Route::post('/reject', [AcademicCalendarController::class, 'reject']);
+            Route::post('/reset', [AcademicCalendarController::class, 'reset']);
+        });
+
+    // Kalender Akademik - Read-Only (Guru, Wali Kelas, Siswa, Orang Tua)
+    Route::middleware('role:guru,wali_kelas,siswa,orang_tua')
+        ->prefix('academic-calendar')
+        ->group(function () {
+            Route::get('/public-events', [AcademicCalendarController::class, 'publicEvents']);
+        });
+
+    // Orang Tua - Jadwal Pelajaran Anak & Kalender
+    Route::middleware('role:orang_tua')
+        ->prefix('orang-tua')
+        ->group(function () {
+            Route::get('/schedule', [AcademicCalendarController::class, 'parentSchedule']);
+        });
 });
 

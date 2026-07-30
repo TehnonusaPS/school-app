@@ -66,8 +66,9 @@ onMounted(() => {
 })
 
 const filteredClassrooms = computed(() => {
-  if (!selectedTahun.value) return []
-  return allClassrooms.value.filter(c => String(c.academic_year_id) === String(selectedTahun.value))
+  if (!allClassrooms.value || !allClassrooms.value.length) return []
+  if (!selectedTahun.value) return allClassrooms.value
+  return allClassrooms.value.filter(c => !c.academic_year_id || String(c.academic_year_id) === String(selectedTahun.value))
 })
 
 watch(filteredClassrooms, (newClasses) => {

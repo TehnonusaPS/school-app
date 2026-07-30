@@ -72,7 +72,7 @@ const props = defineProps({
   font-family: 'Amiri', serif;
 }
 
-.islami-theme .bg-cream-50 {
+.bg-cream-50, .islami-theme.bg-cream-50 {
   background-color: #fefcf3;
 }
 

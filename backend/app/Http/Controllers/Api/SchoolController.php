@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\HasCurriculumMappingTrait;
 use App\Models\School;
+use App\Models\Foundation;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -11,6 +13,7 @@ use Illuminate\Support\Facades\Validator;
 
 class SchoolController extends Controller
 {
+    use HasCurriculumMappingTrait;
     /**
      * Display a listing of the resource.
      */
@@ -186,6 +189,7 @@ class SchoolController extends Controller
             'accreditation'        => 'nullable|string|max:10',
             'accreditation_date'   => 'nullable|date',
             'accreditation_number' => 'nullable|string|max:255',
+            'curriculum_id'        => 'nullable|exists:curriculums,id',
             'logo'                 => 'nullable|image|max:2048',
         ];
 
@@ -211,6 +215,14 @@ class SchoolController extends Controller
             $data['foundation_id'] = $user->foundation_id;
         }
 
+        // Inherit curriculum_id from Foundation if not explicitly provided
+        if (empty($data['curriculum_id']) && !empty($data['foundation_id'])) {
+            $foundation = Foundation::find($data['foundation_id']);
+            if ($foundation && $foundation->curriculum_id) {
+                $data['curriculum_id'] = $foundation->curriculum_id;
+            }
+        }
+
         if ($request->hasFile('logo')) {
             $path = $request->file('logo')->store('logos', 'public');
             $data['logo'] = asset('storage/' . $path);
@@ -220,10 +232,13 @@ class SchoolController extends Controller
 
         $school = School::create($data);
 
+        // Auto sync mandatory subjects from curriculum
+        $this->syncSchoolSubjectsFromCurriculum($school);
+
         return response()->json([
             'status'  => 'success',
             'message' => 'School created successfully.',
-            'data'    => $school,
+            'data'    => $school->load('curriculum'),
         ], 201);
     }
 

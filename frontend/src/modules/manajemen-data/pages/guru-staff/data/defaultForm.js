@@ -1,5 +1,6 @@
 // State Form
 export const defaultForm = {
+  foto: null,
   nama_depan: '',
   nama_belakang: '',
   nik: '',
@@ -20,5 +21,6 @@ export const defaultForm = {
   unit_kerja: '',
   status_aktif: '',
   emailLogin: '',
-  noHpLogin: ''
+  noHpLogin: '',
+  join_date: ''
 }

@@ -78,7 +78,15 @@ const fetchSchools = async () => {
       params.status = filterValues.value.status.toLowerCase()
     }
     const res = await getSchools(params)
+    const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api').replace(/\/api$/, '')
+    const getLogoUrl = (path) => {
+      if (!path) return null
+      if (path.startsWith('http')) return path
+      return `${baseUrl}/storage/${path}`
+    }
+
     tableItems.value = res.data.data.map(item => ({
+      ...item,
       id: item.id,
       nama: item.name,
       npsn: item.npsn,
@@ -101,12 +109,11 @@ const fetchSchools = async () => {
       tanggal_akreditasi: item.accreditation_date ? item.accreditation_date.split('T')[0] : '-',
       no_akreditasi: item.accreditation_number,
       status: item.status.charAt(0).toUpperCase() + item.status.slice(1),
-      foto: item.logo || 'https://picsum.photos/200',
-      logo: item.logo || 'https://picsum.photos/200',
+      foto: getLogoUrl(item.logo),
+      logo: getLogoUrl(item.logo),
       emailLogin: item.users && item.users[0] ? item.users[0].email : '-',
       noHpLogin: item.users && item.users[0] ? item.users[0].phone : '-',
-      jmlSiswa: item.students_count || 0,
-      ...item
+      jmlSiswa: item.students_count || 0
     }))
     total.value = res.data.total
     from.value = res.data.from || 1

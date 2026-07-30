@@ -36,6 +36,10 @@ onMounted(async () => {
         tanggal_lahir: res.data.tanggal_lahir || '',
         tahun_masuk: res.data.tahun_masuk || ''
       }
+      if (res.data.foto) {
+        const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api').replace(/\/api$/, '')
+        imagePreview.value = res.data.foto.startsWith('http') ? res.data.foto : `${baseUrl}/storage/${res.data.foto}`
+      }
     } catch (err) {
       toast.error('Gagal memuat data detail siswa')
     }
@@ -56,16 +60,28 @@ const isLoading = ref(false)
 const imagePreview = ref('')
 
 const handleImage = (file) => {
+  form.value.foto = file
   imagePreview.value = URL.createObjectURL(file)
 }
 
 const handleSubmit = async () => {
   isLoading.value = true
 
-  const payload = {
+  let payload = {
     ...form.value,
     tanggal_lahir: form.value.tanggal_lahir || null,
     tahun_masuk: form.value.tahun_masuk || null
+  }
+
+  if (form.value.foto instanceof File) {
+    const formData = new FormData()
+    Object.keys(payload).forEach(key => {
+      if (payload[key] !== null && payload[key] !== undefined && key !== 'foto') {
+        formData.append(key, payload[key])
+      }
+    })
+    formData.append('foto', form.value.foto)
+    payload = formData
   }
 
   try {

@@ -68,7 +68,8 @@ export const guruStaffSheetSections = [
       { label: 'Jabatan', key: 'jabatan' },
       { label: 'Status Kepegawaian', key: 'status_kepegawaian' },
       { label: 'Unit Kerja', key: 'unit_kerja' },
-      { label: 'Status Aktif', key: 'status_aktif' }
+      { label: 'Status Aktif', key: 'status_aktif' },
+      { label: 'Tanggal Masuk', key: 'join_date' }
     ]
   },
 

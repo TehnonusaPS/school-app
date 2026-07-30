@@ -75,15 +75,6 @@ const handleSubmit = async () => {
   if (!form.value.no_hp) {
     errors.phone = 'No. Telp harus diisi'
   }
-  if (!form.value.website) {
-    errors.website = 'Website harus diisi'
-  }
-  if (!form.value.instagram) {
-    errors.instagram = 'Instagram harus diisi'
-  }
-  if (!form.value.facebook) {
-    errors.facebook = 'Facebook harus diisi'
-  }
   if (!form.value.nama) {
     errors.name = 'Nama sekolah harus diisi'
   }

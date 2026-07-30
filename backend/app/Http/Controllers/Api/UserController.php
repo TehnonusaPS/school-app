@@ -120,12 +120,15 @@ class UserController extends Controller
         $active = (clone $statsQuery)->where('is_active', true)->count();
         $inactive = (clone $statsQuery)->where('is_active', false)->count();
 
+        $perPage = (int) $request->input('per_page', 15);
+        $page    = (int) $request->input('page', 1);
+
         return response()->json([
             'status' => 'success',
-            'data'   => $query->latest()->paginate(15),
+            'data'   => $query->latest()->paginate($perPage, ['*'], 'page', $page),
             'stats'  => [
-                'total' => $total,
-                'active' => $active,
+                'total'    => $total,
+                'active'   => $active,
                 'inactive' => $inactive,
             ]
         ]);

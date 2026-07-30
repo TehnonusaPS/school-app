@@ -107,6 +107,9 @@ class TeacherController extends Controller
                 return 'tata_usaha';
             case 'guru':
             case 'j004':
+            case 'admin sekolah':
+            case 'j006':
+                return 'admin_sekolah';
             default:
                 return 'guru';
         }
@@ -124,6 +127,7 @@ class TeacherController extends Controller
             case 'J003': return 'Kepala Sekolah';
             case 'J004': return 'Guru';
             case 'J005': return 'Staff Sekolah';
+            case 'J006': return 'Admin Sekolah';
             default: return $position;
         }
     }
@@ -196,7 +200,7 @@ class TeacherController extends Controller
             });
         }
 
-        $teachers = $query->latest()->get();
+        $teachers = $query->latest('updated_at')->get();
 
         $formatted = $teachers->map(function ($item) {
             $u = $item->user;
@@ -241,6 +245,7 @@ class TeacherController extends Controller
                 'emailLogin'         => $u->email,
                 'noHpLogin'          => $u->phone,
                 'masaKerja'          => $masaKerja,
+                'join_date'          => $item->join_date ? $item->join_date->format('Y-m-d') : null,
             ];
         })->filter()->values();
 
@@ -315,6 +320,8 @@ class TeacherController extends Controller
             'jabatan'            => 'nullable|string',
             'status_kepegawaian' => 'nullable|string',
             'status_aktif'       => 'nullable|string',
+            'join_date'          => 'nullable|date',
+            'foto'               => 'nullable|image|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -341,6 +348,12 @@ class TeacherController extends Controller
         try {
             $fullName = trim($request->input('nama_depan') . ' ' . ($request->input('nama_belakang') ?: ''));
             
+            // Handle Photo Upload
+            $photoPath = null;
+            if ($request->hasFile('foto')) {
+                $photoPath = $request->file('foto')->store('photos/teachers', 'public');
+            }
+
             $newUser = User::create([
                 'name'          => $fullName,
                 'email'         => $request->input('emailLogin'),
@@ -350,6 +363,7 @@ class TeacherController extends Controller
                 'foundation_id' => $tenant['foundation_id'],
                 'phone'         => $request->input('noHpLogin') ?: $request->input('no_hp'),
                 'is_active'     => in_array(strtolower($request->input('status_aktif', 'aktif')), ['aktif', 'active', 'true', '1']),
+                'photo'         => $photoPath,
             ]);
 
             TeacherProfile::create([
@@ -367,7 +381,7 @@ class TeacherController extends Controller
                 'address'           => $request->input('alamat'),
                 'position'          => $request->input('jabatan'),
                 'employment_status' => $request->input('status_kepegawaian'),
-                'join_date'         => now(),
+                'join_date'         => $request->input('join_date') ?: now(),
             ]);
 
             DB::commit();
@@ -464,6 +478,7 @@ class TeacherController extends Controller
                 'emailLogin'         => $u->email,
                 'noHpLogin'          => $u->phone,
                 'masaKerja'          => $masaKerja,
+                'join_date'          => $teacher->join_date ? $teacher->join_date->format('Y-m-d') : null,
             ],
         ]);
     }
@@ -523,6 +538,8 @@ class TeacherController extends Controller
             'jabatan'            => 'nullable|string',
             'status_kepegawaian' => 'nullable|string',
             'status_aktif'       => 'nullable|string',
+            'join_date'          => 'nullable|date',
+            'foto'               => 'nullable|image|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -574,6 +591,13 @@ class TeacherController extends Controller
                 $u->foundation_id = $tenant['foundation_id'];
             }
 
+            // Handle Photo Upload
+            if ($request->hasFile('foto')) {
+                $u->photo = $request->file('foto')->store('photos/teachers', 'public');
+            } elseif ($request->has('foto') && $request->foto === null) {
+                $u->photo = null;
+            }
+
             $u->save();
 
             // Update Teacher Profile fields
@@ -591,6 +615,7 @@ class TeacherController extends Controller
             if ($request->has('alamat')) $profileData['address'] = $request->input('alamat');
             if ($request->has('jabatan')) $profileData['position'] = $request->input('jabatan');
             if ($request->has('status_kepegawaian')) $profileData['employment_status'] = $request->input('status_kepegawaian');
+            if ($request->has('join_date')) $profileData['join_date'] = $request->input('join_date');
 
             $teacher->update($profileData);
 

@@ -63,7 +63,8 @@ const loadTeacher = async () => {
       'Staff Yayasan': 'J002',
       'Kepala Sekolah': 'J003',
       'Guru': 'J004',
-      'Staff Sekolah': 'J005'
+      'Staff Sekolah': 'J005',
+      'Admin Sekolah': 'J006'
     }
     const kepMap = {
       'Tetap': 'SK01',
@@ -93,10 +94,14 @@ const loadTeacher = async () => {
       unit_kerja: data.unit_id || '',
       status_aktif: data.status_aktif === 'Aktif' ? 'Aktif' : 'Nonaktif',
       emailLogin: data.emailLogin || '',
-      noHpLogin: data.noHpLogin || ''
+      noHpLogin: data.noHpLogin || '',
+      join_date: data.join_date || ''
     }
 
-    imagePreview.value = data.foto || ''
+    if (data.foto) {
+      const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api').replace(/\/api$/, '')
+      imagePreview.value = data.foto.startsWith('http') ? data.foto : `${baseUrl}/storage/${data.foto}`
+    }
   } catch (err) {
     toast.error('Gagal memuat data guru/staff')
   } finally {
@@ -110,16 +115,105 @@ onMounted(async () => {
 })
 
 const handleImage = (file) => {
+  form.value.foto = file
   imagePreview.value = URL.createObjectURL(file)
 }
+
+const formErrors = ref({})
 
 const handleSubmit = async () => {
   const id = route.query.id
   if (!id) return
 
+  formErrors.value = {}
+
+  // Client-side Validation: All fields must be filled
+  const errors = {}
+  if (!form.value.nama_depan) {
+    errors.first_name = 'Nama depan harus diisi'
+  }
+  if (!form.value.nik) {
+    errors.nik = 'NIK harus diisi'
+  }
+  if (!form.value.nip_nuptk) {
+    errors.nip_nuptk = 'NIP/NUPTK harus diisi'
+  }
+  if (!form.value.tempat_lahir) {
+    errors.tempat_lahir = 'Tempat lahir harus diisi'
+  }
+  if (!form.value.tanggal_lahir) {
+    errors.tanggal_lahir = 'Tanggal lahir harus diisi'
+  }
+  if (!form.value.jenis_kelamin) {
+    errors.jenis_kelamin = 'Jenis kelamin harus diisi'
+  }
+  if (!form.value.agama) {
+    errors.agama = 'Agama harus diisi'
+  }
+  if (!form.value.status_pernikahan) {
+    errors.status_pernikahan = 'Status pernikahan harus diisi'
+  }
+  if (!form.value.pendidikan_terakhir) {
+    errors.pendidikan_terakhir = 'Pendidikan terakhir harus diisi'
+  }
+  if (!form.value.email) {
+    errors.email = 'E-mail sekolah harus diisi'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+    errors.email = 'Format e-mail tidak valid'
+  }
+  if (!form.value.no_hp) {
+    errors.phone = 'No. Telp harus diisi'
+  }
+  if (!form.value.alamat) {
+    errors.address = 'Alamat lengkap harus diisi'
+  }
+  if (!form.value.unit_kerja) {
+    errors.unit_kerja = 'Unit kerja harus diisi'
+  }
+  if (!form.value.status_aktif) {
+    errors.status_aktif = 'Status aktif harus diisi'
+  }
+  if (!form.value.join_date) {
+    errors.join_date = 'Tanggal bergabung harus diisi'
+  }
+  if (!form.value.status_kepegawaian) {
+    errors.status_kepegawaian = 'Status kepegawaian harus diisi'
+  }
+  if (!form.value.jabatan) {
+    errors.jabatan = 'Jabatan harus diisi'
+  }
+  if (!form.value.emailLogin) {
+    errors.emailLogin = 'E-mail login administrator harus diisi'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.emailLogin)) {
+    errors.emailLogin = 'Format e-mail login tidak valid'
+  }
+  if (!form.value.noHpLogin) {
+    errors.noHpLogin = 'No. HP login administrator harus diisi'
+  }
+
+  if (Object.keys(errors).length > 0) {
+    formErrors.value = errors
+    toast.error('Gagal Menyimpan', {
+      description: 'Harap lengkapi semua data formulir sebelum menyimpan.'
+    })
+    return
+  }
+
   isLoading.value = true
   try {
-    const submitData = { ...form.value }
+    let submitData = { ...form.value }
+    
+    if (form.value.foto instanceof File) {
+      const formData = new FormData()
+      Object.keys(submitData).forEach(key => {
+        if (submitData[key] !== null && submitData[key] !== undefined && key !== 'foto') {
+          formData.append(key, submitData[key])
+        }
+      })
+      formData.append('foto', form.value.foto)
+      submitData = formData
+    }
+
     const res = await updateTeacher(id, submitData)
     if (res.status === 'success') {
       toast.success('Berhasil diperbarui', {
@@ -130,8 +224,29 @@ const handleSubmit = async () => {
       toast.error(res.message || 'Gagal memperbarui data')
     }
   } catch (err) {
-    const errorMsg = err.response?.data?.message || 'Terjadi kesalahan sistem'
-    toast.error(errorMsg)
+    const responseData = err.response?.data
+
+    if (responseData?.errors) {
+      const backendErrors = {}
+
+      Object.entries(responseData.errors).forEach(([field, messages]) => {
+        backendErrors[field] = Array.isArray(messages)
+          ? messages[0]
+          : messages
+      })
+
+      formErrors.value = backendErrors
+
+      toast.error('Gagal Menyimpan', {
+        description: 'Periksa kembali data pada formulir.'
+      })
+
+      return
+    }
+
+    toast.error(responseData?.message || 'Terjadi kesalahan sistem')
+    // const errorMsg = err.response?.data?.message || 'Terjadi kesalahan sistem'
+    // toast.error(errorMsg)
   } finally {
     isLoading.value = false
   }
@@ -169,6 +284,7 @@ const customActions = computed(() => [
       :unit-kerja-options="unitOptions"
       :status-options="statusOptions"
       @image-change="handleImage"
+      :errors="formErrors"
     />
   </div>
 </template>

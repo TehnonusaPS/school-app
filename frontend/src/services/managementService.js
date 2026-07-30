@@ -147,6 +147,11 @@ export async function getTeacher(id) {
 }
 
 export async function updateTeacher(id, data) {
+  if (data instanceof FormData) {
+    data.append('_method', 'PUT')
+    const response = await api.post(`/management/teachers/${id}`, data)
+    return response.data
+  }
   const response = await api.put(`/management/teachers/${id}`, data)
   return response.data
 }

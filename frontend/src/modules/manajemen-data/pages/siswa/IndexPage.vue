@@ -84,7 +84,17 @@ const fetchSiswa = async () => {
       params.kelasId = filterValues.value.kelasId
     }
     const res = await fetchAllSiswa(params)
-    tableItems.value = res.data
+    const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api').replace(/\/api$/, '')
+    const getPhotoUrl = (path) => {
+      if (!path) return null
+      if (path.startsWith('http')) return path
+      return `${baseUrl}/storage/${path}`
+    }
+
+    tableItems.value = res.data.map(item => ({
+      ...item,
+      foto: getPhotoUrl(item.foto)
+    }))
 
     if (res.stats) {
       stats.value[0].value = String(res.stats.total)

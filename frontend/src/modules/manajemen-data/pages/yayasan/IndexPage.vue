@@ -84,6 +84,13 @@ const fetchFoundations = async () => {
       params.status = filterValues.value.status.toLowerCase()
     }
     const res = await getFoundations(params)
+    const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api').replace(/\/api$/, '')
+    const getLogoUrl = (path) => {
+      if (!path) return null
+      if (path.startsWith('http')) return path
+      return `${baseUrl}/storage/${path}`
+    }
+
     tableItems.value = res.data.data.map(item => ({
       id: item.id,
       nama: item.name,
@@ -97,8 +104,8 @@ const fetchFoundations = async () => {
       tanggal_akta: item.deed_date ? item.deed_date.split('T')[0] : '-',
       no_sk: item.decree_number,
       tanggal_sk: item.decree_date ? item.decree_date.split('T')[0] : '-',
-      logo: item.logo || 'https://picsum.photos/200',
-      foto: item.logo || 'https://picsum.photos/200',
+      logo: getLogoUrl(item.logo),
+      foto: getLogoUrl(item.logo),
       status: item.status.charAt(0).toUpperCase() + item.status.slice(1),
       emailLogin: item.users && item.users[0] ? item.users[0].email : '-',
       noHpLogin: item.users && item.users[0] ? item.users[0].phone : '-',
@@ -214,7 +221,7 @@ const handleViewDetail = id => {
     title-key="nama"
     description-key="no_akta"
     description-prefix="No. Akta: "
-    avatar-key="logo"
+    avatar-key="foto"
     badge-key="status"
     :sections="yayasanSheetSections"
   />

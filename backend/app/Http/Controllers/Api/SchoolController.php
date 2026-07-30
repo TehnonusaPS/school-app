@@ -221,7 +221,7 @@ class SchoolController extends Controller
 
         if ($request->hasFile('logo')) {
             $path = $request->file('logo')->store('logos', 'public');
-            $data['logo'] = asset('storage/' . $path);
+            $data['logo'] = $path;
         } else {
             unset($data['logo']);
         }
@@ -347,7 +347,7 @@ class SchoolController extends Controller
 
         if ($request->hasFile('logo')) {
             $path = $request->file('logo')->store('logos', 'public');
-            $data['logo'] = asset('storage/' . $path);
+            $data['logo'] = $path;
         } else {
             unset($data['logo']);
         }

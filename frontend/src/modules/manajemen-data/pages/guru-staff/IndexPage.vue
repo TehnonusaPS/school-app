@@ -65,6 +65,13 @@ const fetchTeachers = async () => {
   try {
     const params = {}
     const res = await getTeachers(params)
+    const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api').replace(/\/api$/, '')
+    const getPhotoUrl = (path) => {
+      if (!path) return null
+      if (path.startsWith('http')) return path
+      return `${baseUrl}/storage/${path}`
+    }
+
     tableItems.value = res.data.map(item => ({
       ...item,
       id: item.id,
@@ -75,7 +82,8 @@ const fetchTeachers = async () => {
       jabatan: item.jabatan,
       masaKerja: item.masaKerja,
       statusKepegawaian: item.status_kepegawaian,
-      status: item.status_aktif
+      status: item.status_aktif,
+      foto: getPhotoUrl(item.foto)
     }))
 
     if (res.stats) {
@@ -119,7 +127,7 @@ const filteredItems = computed(() => {
       item.nama.toLowerCase().includes(searchVal)
 
     const statusVal = filterValues.value.status
-    const statusMatch = !statusVal || statusVal === 'all' || item.status === statusVal
+    const statusMatch = !statusVal || statusVal === 'all' || item.statusKepegawaian?.toLowerCase() === statusVal.toLowerCase()
 
     return searchMatch && statusMatch
   })
@@ -139,11 +147,12 @@ const handleViewDetail = id => {
   if (item) {
     selectedItemForDetail.value = item
     isDetailSheetOpen.value = true
+    console.log('test', selectedItemForDetail.value)
   }
 }
 
 </script>
-
+ 
 <template>
   <div class="space-y-6 w-full mx-auto px-0">
     <PageHeader

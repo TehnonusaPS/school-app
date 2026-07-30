@@ -7,7 +7,7 @@ import { useAuthStore } from '@/stores/authStore'
 import SekolahForm from './components/SekolahForm.vue'
 import { defaultForm } from './data/defaultForm'
 import { toast } from 'vue-sonner'
-import { Save } from 'lucide-vue-next'
+import { Save } from 'lucide-vue-next' 
 import { getSchool, updateSchool, getFoundations } from '@/services/managementService'
 
 const auth = useAuthStore()
@@ -67,7 +67,10 @@ onMounted(async () => {
       emailLogin: school.users && school.users[0] ? school.users[0].email : '',
       noHpLogin: school.users && school.users[0] ? school.users[0].phone : ''
     }
-    imagePreview.value = school.logo || ''
+    if (school.logo) {
+      const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api').replace(/\/api$/, '')
+      imagePreview.value = school.logo.startsWith('http') ? school.logo : `${baseUrl}/storage/${school.logo}`
+    }
   } catch (err) {
     toast.error('Gagal mengambil data sekolah')
     router.push('/manajemen-data/sekolah')
@@ -90,15 +93,6 @@ const handleSubmit = async () => {
   }
   if (!form.value.no_hp) {
     errors.phone = 'No. Telp harus diisi'
-  }
-  if (!form.value.website) {
-    errors.website = 'Website harus diisi'
-  }
-  if (!form.value.instagram) {
-    errors.instagram = 'Instagram harus diisi'
-  }
-  if (!form.value.facebook) {
-    errors.facebook = 'Facebook harus diisi'
   }
   if (!form.value.nama) {
     errors.name = 'Nama sekolah harus diisi'

@@ -51,7 +51,10 @@ onMounted(async () => {
       emailLogin: foundation.users && foundation.users[0] ? foundation.users[0].email : '',
       noHpLogin: foundation.users && foundation.users[0] ? foundation.users[0].phone : ''
     }
-    imagePreview.value = foundation.logo || ''
+    if (foundation.logo) {
+      const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api').replace(/\/api$/, '')
+      imagePreview.value = foundation.logo.startsWith('http') ? foundation.logo : `${baseUrl}/storage/${foundation.logo}`
+    }
   } catch (err) {
     toast.error('Gagal mengambil data yayasan')
     router.push('/manajemen-data/yayasan')
@@ -74,9 +77,6 @@ const handleSubmit = async () => {
   }
   if (!form.value.no_hp) {
     errors.phone = 'No. Telp harus diisi'
-  }
-  if (!form.value.website) {
-    errors.website = 'Website harus diisi'
   }
   if (!form.value.nama) {
     errors.name = 'Nama yayasan harus diisi'

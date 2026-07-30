@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
-import { Camera, UploadCloud } from 'lucide-vue-next'
+import { Camera, UploadCloud, Eye, EyeOff } from 'lucide-vue-next'
 
 const props = defineProps({
   open: {
@@ -75,6 +75,7 @@ const isOpen = computed({
 
 const localForm = ref({})
 const fileInput = ref(null)
+const passwordVisible = ref({})
 
 watch(
   () => props.open,
@@ -304,9 +305,30 @@ const handleSubmit = () => {
                           }"
                         />
                       </div>
+                      <div
+                        v-else-if="field.type === 'password'"
+                        class="relative"
+                      >
+                        <Input
+                          v-model="localForm[field.key]"
+                          :type="passwordVisible[field.key] ? 'text' : 'password'"
+                          :disabled="disabled || field.disabled"
+                          class="h-8 bg-background border-input focus-visible:ring-1 focus-visible:ring-ring text-sm pr-8"
+                          :placeholder="field.placeholder || ('Masukkan ' + field.label)"
+                        />
+                        <button
+                          type="button"
+                          class="absolute inset-y-0 right-2 flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                          @click="passwordVisible[field.key] = !passwordVisible[field.key]"
+                        >
+                          <EyeOff v-if="passwordVisible[field.key]" class="size-3.5" />
+                          <Eye v-else class="size-3.5" />
+                        </button>
+                      </div>
                       <Input
                         v-else
                         v-model="localForm[field.key]"
+                        :type="field.type || 'text'"
                         :disabled="disabled || field.disabled"
                         class="h-8 bg-background border-input focus-visible:ring-1 focus-visible:ring-ring text-sm"
                         :placeholder="field.placeholder || ('Masukkan ' + field.label)"

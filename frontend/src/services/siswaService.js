@@ -16,6 +16,11 @@ export async function getSiswaDetail(id) {
 }
 
 export async function updateSiswa(id, data) {
+  if (data instanceof FormData) {
+    data.append('_method', 'PUT')
+    const response = await api.post(`/management/students/${id}`, data)
+    return response.data
+  }
   const response = await api.put(`/management/students/${id}`, data)
   return response.data
 }

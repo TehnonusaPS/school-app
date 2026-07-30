@@ -49,9 +49,6 @@ const handleSubmit = async () => {
   if (!form.value.no_hp) {
     errors.phone = 'No. Telp harus diisi'
   }
-  if (!form.value.website) {
-    errors.website = 'Website harus diisi'
-  }
   if (!form.value.nama) {
     errors.name = 'Nama yayasan harus diisi'
   }

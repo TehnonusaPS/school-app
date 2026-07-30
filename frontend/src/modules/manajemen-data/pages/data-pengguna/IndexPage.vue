@@ -5,17 +5,9 @@ import DataTableCard from '@/components/data-table/DataTableCard.vue'
 import PageHeader from '@/components/page-header/PageHeader.vue'
 import StatCard from '@/components/stat-card/StatCard.vue'
 import DataSheet from '@/components/data-sheet/DataSheet.vue'
+import FormSheet from '@/components/data-sheet/FormSheet.vue'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { usePagination } from '@/composables/usePagination'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
 import {
   Dialog,
   DialogContent,
@@ -24,7 +16,6 @@ import {
   DialogDescription,
   DialogFooter
 } from '@/components/ui/dialog'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import {
   Users,
   Plus,
@@ -254,7 +245,79 @@ function validateForm() {
   return Object.keys(errors).length === 0
 }
 
+// --- Form Sections for FormSheet ---
+const formSections = computed(() => {
+  const fields = [
+    { label: 'Nama Lengkap', key: 'nama', placeholder: 'Masukkan nama lengkap...' },
+    { label: 'Email', key: 'email', placeholder: 'Masukkan alamat email...' },
+  ]
+
+  if (!isEditMode.value) {
+    fields.push({ label: 'Password', key: 'password', type: 'password', placeholder: 'Masukkan password...' })
+  }
+
+  fields.push(
+    {
+      label: 'Peran', key: 'role', type: 'select',
+      options: roleOptions.value.map(r => ({ label: r.label, value: r.name })),
+      placeholder: 'Pilih Peran...'
+    },
+    {
+      label: 'Status', key: 'status', type: 'select',
+      options: [{ label: 'Aktif', value: 'aktif' }, { label: 'Nonaktif', value: 'nonaktif' }],
+      placeholder: 'Pilih Status...'
+    },
+    {
+      label: 'Yayasan', key: 'yayasan', type: 'select',
+      options: yayasanOptions.value,
+      placeholder: 'Pilih Yayasan...',
+      disabled: formItem.value.role === 'superadmin' || !formItem.value.role
+    },
+    {
+      label: 'Sekolah', key: 'sekolah', type: 'select',
+      options: filteredSekolahOptions.value,
+      placeholder: 'Pilih Sekolah...',
+      disabled: formItem.value.role === 'superadmin' || formItem.value.role === 'admin_yayasan' || !formItem.value.role || formItem.value.yayasan === '-' || !formItem.value.yayasan
+    }
+  )
+
+  return [{ id: 'info', title: 'Informasi Pengguna', fields }]
+})
+
+function handleFormChange(updatedForm) {
+  // When role changes, cascade reset yayasan/sekolah
+  if (updatedForm.role !== undefined && updatedForm.role !== formItem.value.role) {
+    let newYayasan = formItem.value.yayasan
+    let newSekolah = formItem.value.sekolah
+
+    if (updatedForm.role === 'superadmin') {
+      newYayasan = '-'
+      newSekolah = '-'
+    } else if (updatedForm.role === 'admin_yayasan') {
+      newSekolah = '-'
+    }
+
+    formItem.value.role = updatedForm.role
+    formItem.value.yayasan = newYayasan
+    formItem.value.sekolah = newSekolah
+  }
+  // When yayasan changes, reset sekolah
+  else if (updatedForm.yayasan !== undefined && updatedForm.yayasan !== formItem.value.yayasan) {
+    formItem.value.yayasan = updatedForm.yayasan
+    formItem.value.sekolah = '-'
+  } else {
+    // Sync all other field changes from FormSheet localForm to formItem
+    const keys = ['nama', 'email', 'password', 'status', 'sekolah']
+    keys.forEach(key => {
+      if (updatedForm[key] !== undefined && updatedForm[key] !== formItem.value[key]) {
+        formItem.value[key] = updatedForm[key]
+      }
+    })
+  }
+}
+
 async function handleSave() {
+  // formItem is kept in sync by handleFormChange — use it directly
   formErrors.value = {}
   if (!validateForm()) {
     toast.error('Gagal Menyimpan', { description: 'Harap lengkapi semua field yang wajib diisi.' })
@@ -528,151 +591,19 @@ async function confirmDelete() {
       :sections="detailSections"
     />
 
-    <!-- Form Sheet (Create / Edit) -->
-    <Sheet v-model:open="isFormSheetOpen">
-      <SheetContent :show-close-button="false" class="sm:max-w-[500px] flex flex-col h-full gap-2">
-        <SheetHeader class="border-b border-border pb-3 text-left">
-          <SheetTitle class="text-base font-bold text-foreground">
-            {{ isEditMode ? 'Edit Pengguna' : 'Tambah Pengguna' }}
-          </SheetTitle>
-          <SheetDescription class="text-xs text-muted-foreground">
-            {{ isEditMode ? 'Perbarui informasi akun pengguna.' : 'Tambahkan akun pengguna baru ke dalam sistem.' }}
-          </SheetDescription>
-        </SheetHeader>
-
-        <div class="flex-1 overflow-y-auto py-6 pr-1 space-y-5 no-scrollbar">
-          <!-- Nama -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-muted-foreground">Nama Lengkap <span class="text-rose-500">*</span></label>
-            <Input
-              v-model="formItem.nama"
-              placeholder="Masukkan nama lengkap..."
-              class="h-10 rounded-xl"
-              :class="formErrors.nama ? 'border-rose-500' : ''"
-            />
-            <p v-if="formErrors.nama" class="text-[10px] text-rose-500">{{ formErrors.nama }}</p>
-          </div>
-
-          <!-- Email -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-muted-foreground">Email <span class="text-rose-500">*</span></label>
-            <Input
-              v-model="formItem.email"
-              type="email"
-              placeholder="Masukkan alamat email..."
-              class="h-10 rounded-xl"
-              :class="formErrors.email ? 'border-rose-500' : ''"
-            />
-            <p v-if="formErrors.email" class="text-[10px] text-rose-500">{{ formErrors.email }}</p>
-          </div>
-
-          <!-- Password (Only on Create Mode) -->
-          <div v-if="!isEditMode" class="space-y-1.5">
-            <label class="text-xs font-semibold text-muted-foreground">Password <span class="text-rose-500">*</span></label>
-            <Input
-              v-model="formItem.password"
-              type="password"
-              placeholder="Masukkan password..."
-              class="h-10 rounded-xl"
-              :class="formErrors.password ? 'border-rose-500' : ''"
-            />
-            <p v-if="formErrors.password" class="text-[10px] text-rose-500">{{ formErrors.password }}</p>
-          </div>
-
-          <!-- Peran & Status -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="space-y-1.5">
-              <label class="text-xs font-semibold text-muted-foreground">Peran <span class="text-rose-500">*</span></label>
-              <Select v-model="formItem.role">
-                <SelectTrigger class="h-10 rounded-xl" :class="formErrors.role ? 'border-rose-500' : ''">
-                  <SelectValue placeholder="Pilih Peran..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem
-                    v-for="opt in roleOptions"
-                    :key="opt.name"
-                    :value="opt.name"
-                  >
-                    {{ opt.label }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <p v-if="formErrors.role" class="text-[10px] text-rose-500">{{ formErrors.role }}</p>
-            </div>
-
-            <div class="space-y-1.5">
-              <label class="text-xs font-semibold text-muted-foreground">Status <span class="text-rose-500">*</span></label>
-              <Select v-model="formItem.status">
-                <SelectTrigger class="h-10 rounded-xl" :class="formErrors.status ? 'border-rose-500' : ''">
-                  <SelectValue placeholder="Pilih Status..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="aktif">Aktif</SelectItem>
-                  <SelectItem value="nonaktif">Nonaktif</SelectItem>
-                </SelectContent>
-              </Select>
-              <p v-if="formErrors.status" class="text-[10px] text-rose-500">{{ formErrors.status }}</p>
-            </div>
-          </div>
-
-          <!-- Yayasan -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-muted-foreground">Yayasan</label>
-            <Select v-model="formItem.yayasan" @update:modelValue="formItem.sekolah = '-'">
-              <SelectTrigger class="h-10 rounded-xl">
-                <SelectValue placeholder="Pilih Yayasan..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="opt in yayasanOptions"
-                  :key="opt.value"
-                  :value="opt.value"
-                >
-                  {{ opt.label }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <!-- Sekolah -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-muted-foreground">Sekolah</label>
-            <Select v-model="formItem.sekolah">
-              <SelectTrigger class="h-10 rounded-xl">
-                <SelectValue placeholder="Pilih Sekolah..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="opt in filteredSekolahOptions"
-                  :key="opt.value"
-                  :value="opt.value"
-                >
-                  {{ opt.label }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div class="border-t border-border pt-4 flex items-center justify-end gap-2 shrink-0">
-          <Button
-            type="button"
-            variant="ghost"
-            class="text-xs font-bold rounded-xl cursor-pointer"
-            @click="isFormSheetOpen = false"
-          >
-            Batal
-          </Button>
-          <Button
-            type="button"
-            class="text-xs font-bold rounded-xl cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 shadow-none border-none"
-            @click="handleSave"
-          >
-            {{ isEditMode ? 'Simpan Perubahan' : 'Simpan' }}
-          </Button>
-        </div>
-      </SheetContent>
-    </Sheet>
+    <!-- Form Sheet (Create / Edit) using FormSheet component -->
+    <FormSheet
+      v-model:open="isFormSheetOpen"
+      :item="formItem"
+      :title="isEditMode ? 'Edit Pengguna' : 'Tambah Pengguna'"
+      :description="isEditMode ? 'Perbarui informasi akun pengguna.' : 'Tambahkan akun pengguna baru ke dalam sistem.'"
+      :avatar-key="false"
+      :submit-label="isEditMode ? 'Simpan Perubahan' : 'Simpan'"
+      :sections="formSections"
+      @submit="handleSave"
+      @cancel="isFormSheetOpen = false"
+      @change="handleFormChange"
+    />
 
     <!-- Delete Confirm Dialog -->
     <Dialog v-model:open="isDeleteConfirmOpen">

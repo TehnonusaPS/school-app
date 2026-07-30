@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('major')->nullable();                // e.g. "MIPA", "IPS"
             $table->string('room')->nullable();                 // e.g. "R. 101"
             $table->string('status')->default('active');        // e.g. "active", "full", "no_teacher"
-            $table->foreignId('homeroom_teacher_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('homeroom_teacher_id')->nullable()->constrained('users')->nullOnDelete();
             $table->integer('capacity')->nullable();
             $table->timestamps();
         });

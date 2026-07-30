@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import {
   FileBarChart,
   Download,
@@ -12,68 +12,53 @@ import {
   Medal,
   Activity,
   HeartPulse,
+  Star,
 } from 'lucide-vue-next'
 import { Skeleton } from '@/components/ui/skeleton'
+import StatCardGrid from '@/components/stat-card/StatCardGrid.vue'
+import StatCard from '@/components/stat-card/StatCard.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-
-const mockSiswaList = [
-  { id: '1', nama: 'Ahmad Fadil', nisn: '0051234567', kelas: 'XI IPA 1' },
-  { id: '2', nama: 'Bunga Citra', nisn: '0069876543', kelas: 'XI IPA 1' },
-  { id: '3', nama: 'Elsa Novita', nisn: '0055566778', kelas: 'XI IPA 2' },
-]
-
-const mockData = {
-  '1': {
-    akademik: [
-      { bulan: 'Jul', nilai: 82 }, { bulan: 'Agu', nilai: 85 }, { bulan: 'Sep', nilai: 84 },
-      { bulan: 'Okt', nilai: 88 }, { bulan: 'Nov', nilai: 89 }, { bulan: 'Des', nilai: 90 },
-    ],
-    kehadiran: { hadir: 95, izin: 3, sakit: 2, alpa: 0 },
-    sikap: { spiritual: 'Sangat Baik', sosial: 'Baik', catatan: 'Anak yang rajin dan aktif bertanya di kelas.' },
-    prestasi: ['Juara 3 Cerdas Cermat Sekolah'],
-  },
-  '2': {
-    akademik: [
-      { bulan: 'Jul', nilai: 88 }, { bulan: 'Agu', nilai: 89 }, { bulan: 'Sep', nilai: 92 },
-      { bulan: 'Okt', nilai: 91 }, { bulan: 'Nov', nilai: 94 }, { bulan: 'Des', nilai: 95 },
-    ],
-    kehadiran: { hadir: 100, izin: 0, sakit: 0, alpa: 0 },
-    sikap: { spiritual: 'Sangat Baik', sosial: 'Sangat Baik', catatan: 'Selalu disiplin dan menjadi teladan bagi temannya.' },
-    prestasi: ['Juara 1 Olimpiade Matematika Kota', 'Ketua OSIS'],
-  },
-  '3': {
-    akademik: [
-      { bulan: 'Jul', nilai: 78 }, { bulan: 'Agu', nilai: 75 }, { bulan: 'Sep', nilai: 76 },
-      { bulan: 'Okt', nilai: 79 }, { bulan: 'Nov', nilai: 82 }, { bulan: 'Des', nilai: 85 },
-    ],
-    kehadiran: { hadir: 90, izin: 5, sakit: 3, alpa: 2 },
-    sikap: { spiritual: 'Baik', sosial: 'Cukup', catatan: 'Perlu peningkatan fokus belajar, namun menunjukkan progres positif bulan terakhir.' },
-    prestasi: [],
-  }
-}
+import { getSchoolStudentDevelopment } from '@/services/api/reports'
 
 const isLoading = ref(false)
 const selectedSiswa = ref('1')
 const dataDetail = ref(null)
+const siswaList = ref([])
+const allData = ref({})
 
 onMounted(() => {
   loadData()
 })
 
-function loadData() {
+async function loadData() {
   isLoading.value = true
-  setTimeout(() => {
-    dataDetail.value = mockData[selectedSiswa.value]
+  try {
+    const res = await getSchoolStudentDevelopment()
+    siswaList.value = res.siswaList || []
+    allData.value = res.data || {}
+    if (siswaList.value.length > 0) {
+      selectedSiswa.value = siswaList.value[0].id
+      dataDetail.value = allData.value[selectedSiswa.value]
+    }
+  } catch (error) {
+    console.error('Failed to fetch student development data:', error)
+  } finally {
     isLoading.value = false
-  }, 400)
+  }
 }
 
-const currentSiswa = computed(() => mockSiswaList.find(s => s.id === selectedSiswa.value))
+watch(selectedSiswa, (newVal) => {
+  if (allData.value && allData.value[newVal]) {
+    dataDetail.value = allData.value[newVal]
+  }
+})
+
+const currentSiswa = computed(() => siswaList.value.find(s => s.id === selectedSiswa.value))
 
 const avgNilai = computed(() => {
   if (!dataDetail.value) return 0
@@ -110,12 +95,12 @@ const getTrend = computed(() => {
           <div class="p-2 bg-primary/10 rounded-full shrink-0"><UserCircle2 class="size-6 text-primary" /></div>
           <div class="flex-1 min-w-[200px]">
             <Label class="text-xs text-muted-foreground mb-1 block">Pilih Siswa</Label>
-            <Select v-model="selectedSiswa" @update:model-value="loadData">
-              <SelectTrigger class="w-full sm:w-[250px] bg-background">
-                <SelectValue />
-              </SelectTrigger>
+            <Select v-model="selectedSiswa">
+              <SelectTrigger class="w-[240px]"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem v-for="s in mockSiswaList" :key="s.id" :value="s.id">{{ s.nama }} ({{ s.kelas }})</SelectItem>
+                <SelectItem v-for="s in siswaList" :key="s.id" :value="s.id">
+                  {{ s.nama }} - {{ s.kelas }}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -141,27 +126,39 @@ const getTrend = computed(() => {
       </div>
 
       <!-- Stats Kunci -->
-      <div class="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        <Card class="p-4 hover:shadow-md transition-shadow">
-          <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Rata-rata Nilai</span><div class="p-1.5 bg-primary/10 rounded-lg"><GraduationCap class="size-4 text-primary" /></div></div>
-          <div class="text-3xl font-bold text-primary">{{ avgNilai }}</div>
-          <p class="text-xs text-muted-foreground mt-1">Semester 1</p>
-        </Card>
-        <Card class="p-4 hover:shadow-md transition-shadow">
-          <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Kehadiran</span><div class="p-1.5 bg-green-50 dark:bg-green-950/40 rounded-lg"><Calendar class="size-4 text-green-600" /></div></div>
-          <div class="text-3xl font-bold text-green-600 dark:text-green-400">{{ dataDetail.kehadiran.hadir }}%</div>
-          <p class="text-xs text-muted-foreground mt-1">Total kehadiran</p>
-        </Card>
-        <Card class="p-4 hover:shadow-md transition-shadow">
-          <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Sikap Sosial</span><div class="p-1.5 bg-blue-50 dark:bg-blue-950/40 rounded-lg"><HeartPulse class="size-4 text-blue-600" /></div></div>
-          <div class="text-xl font-bold text-blue-600 dark:text-blue-400 mt-2">{{ dataDetail.sikap.sosial }}</div>
-        </Card>
-        <Card class="p-4 hover:shadow-md transition-shadow">
-          <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Prestasi</span><div class="p-1.5 bg-yellow-50 dark:bg-yellow-950/40 rounded-lg"><Medal class="size-4 text-yellow-600" /></div></div>
-          <div class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">{{ dataDetail.prestasi.length }}</div>
-          <p class="text-xs text-muted-foreground mt-1">Sertifikat/Penghargaan</p>
-        </Card>
-      </div>
+      <StatCardGrid cols="4">
+        <StatCard
+          label="Rata-rata Nilai"
+          :value="avgNilai"
+          sub="Semester 1"
+          :icon="GraduationCap"
+          variant="primary"
+          :delay="100"
+        />
+        <StatCard
+          label="Kehadiran"
+          :value="dataDetail.kehadiran.hadir + '%'"
+          sub="Total kehadiran"
+          :icon="Calendar"
+          variant="emerald"
+          :delay="200"
+        />
+        <StatCard
+          label="Sikap Sosial"
+          :value="dataDetail.sikap.sosial"
+          :icon="HeartPulse"
+          variant="blue"
+          :delay="300"
+        />
+        <StatCard
+          label="Prestasi"
+          :value="dataDetail.prestasi.length"
+          sub="Sertifikat/Penghargaan"
+          :icon="Medal"
+          variant="amber"
+          :delay="400"
+        />
+      </StatCardGrid>
 
       <div class="grid gap-6 lg:grid-cols-3">
         <!-- Grafik Nilai Dummy -->

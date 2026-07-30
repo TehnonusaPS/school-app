@@ -61,6 +61,8 @@ onMounted(async () => {
       no_sk: foundation.decree_number,
       tanggal_sk: foundation.decree_date ? foundation.decree_date.split('T')[0] : '',
       curriculum_id: foundation.curriculum_id ? String(foundation.curriculum_id) : ''
+      emailLogin: foundation.users && foundation.users[0] ? foundation.users[0].email : '',
+      noHpLogin: foundation.users && foundation.users[0] ? foundation.users[0].phone : ''
     }
     imagePreview.value = foundation.logo || ''
   } catch (err) {
@@ -90,6 +92,65 @@ const handleSubmit = async () => {
   isConfirmOpen.value = false
   isLoading.value = true
   formErrors.value = {}
+
+  // Client-side Validation: All fields must be filled
+  const errors = {}
+  if (!form.value.email) {
+    errors.email = 'E-mail yayasan harus diisi'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+    errors.email = 'Format e-mail tidak valid'
+  }
+  if (!form.value.no_hp) {
+    errors.phone = 'No. Telp harus diisi'
+  }
+  if (!form.value.website) {
+    errors.website = 'Website harus diisi'
+  }
+  if (!form.value.nama) {
+    errors.name = 'Nama yayasan harus diisi'
+  }
+  if (!form.value.kode) {
+    errors.code = 'Kode yayasan harus diisi'
+  }
+  if (!form.value.tanggal_berdiri) {
+    errors.established_date = 'Tanggal berdiri harus diisi'
+  }
+  if (!form.value.status) {
+    errors.status = 'Status harus dipilih'
+  }
+  if (!form.value.no_akta) {
+    errors.deed_number = 'No. Akta Pendirian harus diisi'
+  }
+  if (!form.value.tanggal_akta) {
+    errors.deed_date = 'Tanggal akta pendirian harus diisi'
+  }
+  if (!form.value.no_sk) {
+    errors.decree_number = 'No. SK Kemenkumham harus diisi'
+  }
+  if (!form.value.tanggal_sk) {
+    errors.decree_date = 'Tanggal SK Kemenkumham harus diisi'
+  }
+  if (!form.value.alamat) {
+    errors.address = 'Alamat lengkap harus diisi'
+  }
+  if (!form.value.emailLogin) {
+    errors.emailLogin = 'E-mail login administrator harus diisi'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.emailLogin)) {
+    errors.emailLogin = 'Format e-mail login tidak valid'
+  }
+  if (!form.value.noHpLogin) {
+    errors.noHpLogin = 'No. HP login administrator harus diisi'
+  }
+
+  if (Object.keys(errors).length > 0) {
+    formErrors.value = errors
+    toast.error('Gagal Menyimpan', {
+      description: 'Harap lengkapi semua data formulir sebelum menyimpan.'
+    })
+    return
+  }
+
+  isLoading.value = true
   try {
     const formData = new FormData()
     formData.append('code', form.value.kode || '')
@@ -105,6 +166,8 @@ const handleSubmit = async () => {
     if (form.value.no_sk) formData.append('decree_number', form.value.no_sk)
     if (form.value.tanggal_sk) formData.append('decree_date', form.value.tanggal_sk)
     if (form.value.curriculum_id) formData.append('curriculum_id', form.value.curriculum_id)
+    if (form.value.emailLogin) formData.append('emailLogin', form.value.emailLogin)
+    if (form.value.noHpLogin) formData.append('noHpLogin', form.value.noHpLogin)
     if (logoFile.value) {
       formData.append('logo', logoFile.value)
     }
@@ -118,8 +181,17 @@ const handleSubmit = async () => {
     if (err.response?.status === 422 && err.response?.data?.errors) {
       const serverErrors = err.response.data.errors
       const localErrors = {}
+      const isUserValidationError = err.response.data.message?.toLowerCase().includes('administrator')
       Object.keys(serverErrors).forEach(key => {
-        localErrors[key] = serverErrors[key][0]
+        if (isUserValidationError) {
+          if (key === 'email') localErrors.emailLogin = serverErrors[key][0]
+          else if (key === 'phone') localErrors.noHpLogin = serverErrors[key][0]
+          else localErrors[key] = serverErrors[key][0]
+        } else {
+          if (key === 'email') localErrors.email = serverErrors[key][0]
+          else if (key === 'phone') localErrors.phone = serverErrors[key][0]
+          else localErrors[key] = serverErrors[key][0]
+        }
       })
       formErrors.value = localErrors
       toast.error('Gagal', { description: 'Terdapat kesalahan validasi pada data yayasan.' })

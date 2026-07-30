@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('foundation_id')->constrained()->cascadeOnDelete();
             $table->foreignId('school_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('student_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignUuid('student_id')->constrained('users')->cascadeOnDelete();
             $table->date('tanggal_dibuat');
             $table->string('jenis_surat'); // 'Surat Pelanggaran' / 'Surat Tunggakan'
             $table->string('nama');

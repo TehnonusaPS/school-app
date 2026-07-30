@@ -23,7 +23,11 @@ class SchoolController extends Controller
 
         if ($user->isSuperAdmin()) {
             $query = School::select('schools.*')
-                ->with('foundation:id,name,code')
+                ->with(['foundation:id,name,code', 'users' => function ($q) {
+                    $q->whereIn('role_id', function ($sq) {
+                        $sq->select('id')->from('roles')->where('name', 'admin_sekolah');
+                    });
+                }])
                 ->addSelect(['students_count' => User::selectRaw('count(*)')
                     ->whereColumn('users.school_id', 'schools.id')
                     ->whereIn('users.role_id', function ($sq) {
@@ -71,7 +75,11 @@ class SchoolController extends Controller
 
         if ($user->hasRole('admin_yayasan')) {
             $query = School::select('schools.*')
-                ->with('foundation:id,name,code')
+                ->with(['foundation:id,name,code', 'users' => function ($q) {
+                    $q->whereIn('role_id', function ($sq) {
+                        $sq->select('id')->from('roles')->where('name', 'admin_sekolah');
+                    });
+                }])
                 ->where('foundation_id', $user->foundation_id)
                 ->addSelect(['students_count' => User::selectRaw('count(*)')
                     ->whereColumn('users.school_id', 'schools.id')
@@ -257,21 +265,16 @@ class SchoolController extends Controller
             ], 404);
         }
 
-        if ($user->isSuperAdmin()) {
-            return response()->json([
-                'status' => 'success',
-                'data'   => $school,
-            ]);
-        }
+        if ($user->isSuperAdmin() || 
+            ($user->hasRole('admin_yayasan') && $user->foundation_id == $school->foundation_id) ||
+            ($user->hasRole('admin_sekolah') && $user->school_id == $school->id)) {
+            
+            $school->load(['users' => function ($q) {
+                $q->whereIn('role_id', function ($sq) {
+                    $sq->select('id')->from('roles')->where('name', 'admin_sekolah');
+                });
+            }]);
 
-        if ($user->hasRole('admin_yayasan') && $user->foundation_id == $school->foundation_id) {
-            return response()->json([
-                'status' => 'success',
-                'data'   => $school,
-            ]);
-        }
-
-        if ($user->hasRole('admin_sekolah') && $user->school_id == $school->id) {
             return response()->json([
                 'status' => 'success',
                 'data'   => $school,
@@ -365,6 +368,49 @@ class SchoolController extends Controller
         }
 
         $school->update($data);
+
+        // Update administrator user details if provided in request
+        $adminUser = User::where('school_id', $school->id)
+            ->whereIn('role_id', function ($sq) {
+                $sq->select('id')->from('roles')->where('name', 'admin_sekolah');
+            })->first();
+
+        if ($adminUser) {
+            $userUpdateData = [];
+            if ($request->has('emailLogin') && $request->filled('emailLogin')) {
+                $userUpdateData['email'] = $request->input('emailLogin');
+            }
+            if ($request->has('noHpLogin') && $request->filled('noHpLogin')) {
+                $userUpdateData['phone'] = $request->input('noHpLogin');
+            }
+            if ($request->has('name') && $request->filled('name')) {
+                $userUpdateData['name'] = 'Admin ' . $request->input('name');
+            }
+
+            if (!empty($userUpdateData)) {
+                // Validate email and phone if they are being updated
+                $userRules = [];
+                if (isset($userUpdateData['email'])) {
+                    $userRules['email'] = 'required|email|unique:users,email,' . $adminUser->id;
+                }
+                if (isset($userUpdateData['phone'])) {
+                    $userRules['phone'] = 'required|string|max:50|unique:users,phone,' . $adminUser->id;
+                }
+
+                if (!empty($userRules)) {
+                    $userValidator = Validator::make($userUpdateData, $userRules);
+                    if ($userValidator->fails()) {
+                        return response()->json([
+                            'status'  => 'error',
+                            'message' => 'Validation error on administrator account.',
+                            'errors'  => $userValidator->errors(),
+                        ], 422);
+                    }
+                }
+
+                $adminUser->update($userUpdateData);
+            }
+        }
 
         return response()->json([
             'status'  => 'success',

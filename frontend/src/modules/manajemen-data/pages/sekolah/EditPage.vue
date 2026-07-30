@@ -78,6 +78,8 @@ onMounted(async () => {
       tanggal_akreditasi: school.accreditation_date ? school.accreditation_date.split('T')[0] : '',
       no_akreditasi: school.accreditation_number,
       curriculum_id: school.curriculum_id ? String(school.curriculum_id) : ''
+      emailLogin: school.users && school.users[0] ? school.users[0].email : '',
+      noHpLogin: school.users && school.users[0] ? school.users[0].phone : ''
     }
     imagePreview.value = school.logo || ''
   } catch (err) {
@@ -107,6 +109,86 @@ const handleSubmit = async () => {
   isConfirmOpen.value = false
   isLoading.value = true
   formErrors.value = {}
+
+  // Client-side Validation: All fields must be filled
+  const errors = {}
+  if (!form.value.email) {
+    errors.email = 'E-mail sekolah harus diisi'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+    errors.email = 'Format e-mail tidak valid'
+  }
+  if (!form.value.no_hp) {
+    errors.phone = 'No. Telp harus diisi'
+  }
+  if (!form.value.website) {
+    errors.website = 'Website harus diisi'
+  }
+  if (!form.value.instagram) {
+    errors.instagram = 'Instagram harus diisi'
+  }
+  if (!form.value.facebook) {
+    errors.facebook = 'Facebook harus diisi'
+  }
+  if (!form.value.nama) {
+    errors.name = 'Nama sekolah harus diisi'
+  }
+  if (!form.value.npsn) {
+    errors.npsn = 'NPSN harus diisi'
+  }
+  if (isSuperAdmin.value && !form.value.yayasan) {
+    errors.foundation_id = 'Yayasan harus dipilih'
+  }
+  if (!form.value.jenjang) {
+    errors.level = 'Jenjang pendidikan harus dipilih'
+  }
+  if (!form.value.tanggal_berdiri) {
+    errors.established_date = 'Tanggal berdiri harus diisi'
+  }
+  if (!form.value.status) {
+    errors.status = 'Status harus dipilih'
+  }
+  if (!form.value.alamat) {
+    errors.address = 'Alamat lengkap harus diisi'
+  }
+  if (!form.value.no_sk) {
+    errors.decree_number = 'No. SK Pendirian harus diisi'
+  }
+  if (!form.value.tanggal_sk) {
+    errors.decree_date = 'Tanggal SK Pendirian harus diisi'
+  }
+  if (!form.value.no_izin) {
+    errors.permit_number = 'No. Izin Operasional harus diisi'
+  }
+  if (!form.value.tanggal_izin) {
+    errors.permit_date = 'Tanggal Izin Operasional harus diisi'
+  }
+  if (!form.value.akreditasi) {
+    errors.accreditation = 'Akreditasi harus dipilih'
+  }
+  if (!form.value.tanggal_akreditasi) {
+    errors.accreditation_date = 'Tanggal akreditasi harus diisi'
+  }
+  if (!form.value.no_akreditasi) {
+    errors.accreditation_number = 'No. SK Akreditasi harus diisi'
+  }
+  if (!form.value.emailLogin) {
+    errors.emailLogin = 'E-mail login administrator harus diisi'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.emailLogin)) {
+    errors.emailLogin = 'Format e-mail login tidak valid'
+  }
+  if (!form.value.noHpLogin) {
+    errors.noHpLogin = 'No. HP login administrator harus diisi'
+  }
+
+  if (Object.keys(errors).length > 0) {
+    formErrors.value = errors
+    toast.error('Gagal Menyimpan', {
+      description: 'Harap lengkapi semua data formulir sebelum menyimpan.'
+    })
+    return
+  }
+
+  isLoading.value = true
   try {
     const formData = new FormData()
     formData.append('foundation_id', form.value.yayasan)
@@ -129,6 +211,8 @@ const handleSubmit = async () => {
     if (form.value.tanggal_akreditasi) formData.append('accreditation_date', form.value.tanggal_akreditasi)
     if (form.value.no_akreditasi) formData.append('accreditation_number', form.value.no_akreditasi)
     if (form.value.curriculum_id) formData.append('curriculum_id', form.value.curriculum_id)
+    if (form.value.emailLogin) formData.append('emailLogin', form.value.emailLogin)
+    if (form.value.noHpLogin) formData.append('noHpLogin', form.value.noHpLogin)
     if (logoFile.value) {
       formData.append('logo', logoFile.value)
     }
@@ -142,8 +226,17 @@ const handleSubmit = async () => {
     if (err.response?.status === 422 && err.response?.data?.errors) {
       const serverErrors = err.response.data.errors
       const localErrors = {}
+      const isUserValidationError = err.response.data.message?.toLowerCase().includes('administrator')
       Object.keys(serverErrors).forEach(key => {
-        localErrors[key] = serverErrors[key][0]
+        if (isUserValidationError) {
+          if (key === 'email') localErrors.emailLogin = serverErrors[key][0]
+          else if (key === 'phone') localErrors.noHpLogin = serverErrors[key][0]
+          else localErrors[key] = serverErrors[key][0]
+        } else {
+          if (key === 'email') localErrors.email = serverErrors[key][0]
+          else if (key === 'phone') localErrors.phone = serverErrors[key][0]
+          else localErrors[key] = serverErrors[key][0]
+        }
       })
       formErrors.value = localErrors
       toast.error('Gagal', { description: 'Terdapat kesalahan validasi pada data sekolah.' })

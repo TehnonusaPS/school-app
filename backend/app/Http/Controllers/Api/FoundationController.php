@@ -22,6 +22,11 @@ class FoundationController extends Controller
             $query = Foundation::query()
                 ->with('curriculum')
                 ->withCount('schools')
+                ->with(['users' => function ($q) {
+                    $q->whereIn('role_id', function ($sq) {
+                        $sq->select('id')->from('roles')->where('name', 'admin_yayasan');
+                    });
+                }])
                 ->addSelect(['users_count' => User::selectRaw('count(*)')
                     ->where(function ($q) {
                         $q->whereColumn('users.foundation_id', 'foundations.id')
@@ -32,20 +37,22 @@ class FoundationController extends Controller
                 ]);
 
             // Search by name or code
-            if ($request->has('search')) {
+            if ($request->filled('search')) {
                 $search = $request->input('search');
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('code', 'like', "%{$search}%");
+                $likeOperator = \DB::connection()->getDriverName() === 'pgsql' ? 'ilike' : 'like';
+                $query->where(function ($q) use ($search, $likeOperator) {
+                    $q->where('name', $likeOperator, "%{$search}%")
+                      ->orWhere('code', $likeOperator, "%{$search}%");
                 });
             }
 
             // Filter by status
-            if ($request->has('status')) {
+            if ($request->filled('status') && $request->input('status') !== 'all') {
                 $query->where('status', $request->input('status'));
             }
 
-            $foundations = $query->latest()->paginate(15);
+            $perPage = $request->input('per_page', 15);
+            $foundations = $query->latest()->paginate($perPage);
 
             $statsQuery = Foundation::query();
             $total = (clone $statsQuery)->count();
@@ -138,7 +145,7 @@ class FoundationController extends Controller
         $data = $request->all();
         if ($request->hasFile('logo')) {
             $path = $request->file('logo')->store('logos', 'public');
-            $data['logo'] = asset('storage/' . $path);
+            $data['logo'] = $path;
         } else {
             unset($data['logo']);
         }
@@ -167,14 +174,16 @@ class FoundationController extends Controller
             ], 404);
         }
 
-        if ($user->isSuperAdmin()) {
-            return response()->json([
-                'status' => 'success',
-                'data'   => $foundation,
+        if ($user->isSuperAdmin() || ($user->hasRole('admin_yayasan') && $user->foundation_id == $foundation->id)) {
+            $foundation->load([
+                'users' => function ($q) {
+                    $q->whereIn('role_id', function ($sq) {
+                        $sq->select('id')->from('roles')->where('name', 'admin_yayasan');
+                    });
+                },
+                'activeSubscription.plan'
             ]);
-        }
 
-        if ($user->hasRole('admin_yayasan') && $user->foundation_id == $foundation->id) {
             return response()->json([
                 'status' => 'success',
                 'data'   => $foundation,
@@ -250,12 +259,55 @@ class FoundationController extends Controller
 
         if ($request->hasFile('logo')) {
             $path = $request->file('logo')->store('logos', 'public');
-            $data['logo'] = asset('storage/' . $path);
+            $data['logo'] = $path;
         } else {
             unset($data['logo']);
         }
 
         $foundation->update($data);
+
+        // Update administrator user details if provided in request
+        $adminUser = User::where('foundation_id', $foundation->id)
+            ->whereIn('role_id', function ($sq) {
+                $sq->select('id')->from('roles')->where('name', 'admin_yayasan');
+            })->first();
+
+        if ($adminUser) {
+            $userUpdateData = [];
+            if ($request->has('emailLogin') && $request->filled('emailLogin')) {
+                $userUpdateData['email'] = $request->input('emailLogin');
+            }
+            if ($request->has('noHpLogin') && $request->filled('noHpLogin')) {
+                $userUpdateData['phone'] = $request->input('noHpLogin');
+            }
+            if ($request->has('name') && $request->filled('name')) {
+                $userUpdateData['name'] = 'Admin ' . $request->input('name');
+            }
+
+            if (!empty($userUpdateData)) {
+                // Validate email and phone if they are being updated
+                $userRules = [];
+                if (isset($userUpdateData['email'])) {
+                    $userRules['email'] = 'required|email|unique:users,email,' . $adminUser->id;
+                }
+                if (isset($userUpdateData['phone'])) {
+                    $userRules['phone'] = 'required|string|max:50|unique:users,phone,' . $adminUser->id;
+                }
+
+                if (!empty($userRules)) {
+                    $userValidator = Validator::make($userUpdateData, $userRules);
+                    if ($userValidator->fails()) {
+                        return response()->json([
+                            'status'  => 'error',
+                            'message' => 'Validation error on administrator account.',
+                            'errors'  => $userValidator->errors(),
+                        ], 422);
+                    }
+                }
+
+                $adminUser->update($userUpdateData);
+            }
+        }
 
         return response()->json([
             'status'  => 'success',

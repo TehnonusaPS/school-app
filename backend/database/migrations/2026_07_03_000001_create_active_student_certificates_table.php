@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('foundation_id')->constrained('foundations')->cascadeOnDelete();
             $table->foreignId('school_id')->constrained('schools')->cascadeOnDelete();
-            $table->foreignId('student_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignUuid('student_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('academic_year_id')->constrained('academic_years')->cascadeOnDelete();
             $table->string('semester');
             $table->string('nama');

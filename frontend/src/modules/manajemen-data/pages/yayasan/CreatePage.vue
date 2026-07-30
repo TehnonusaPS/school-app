@@ -69,6 +69,67 @@ const handleSubmit = async () => {
   isLoading.value = true
   formErrors.value = {}
 
+  // Client-side Validation: All fields must be filled
+  const errors = {}
+  if (!logoFile.value) {
+    errors.logo = 'Logo yayasan harus diunggah'
+  }
+  if (!form.value.email) {
+    errors.email = 'E-mail yayasan harus diisi'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+    errors.email = 'Format e-mail tidak valid'
+  }
+  if (!form.value.no_hp) {
+    errors.phone = 'No. Telp harus diisi'
+  }
+  if (!form.value.website) {
+    errors.website = 'Website harus diisi'
+  }
+  if (!form.value.nama) {
+    errors.name = 'Nama yayasan harus diisi'
+  }
+  if (!form.value.kode) {
+    errors.code = 'Kode yayasan harus diisi'
+  }
+  if (!form.value.tanggal_berdiri) {
+    errors.established_date = 'Tanggal berdiri harus diisi'
+  }
+  if (!form.value.status) {
+    errors.status = 'Status harus dipilih'
+  }
+  if (!form.value.no_akta) {
+    errors.deed_number = 'No. Akta Pendirian harus diisi'
+  }
+  if (!form.value.tanggal_akta) {
+    errors.deed_date = 'Tanggal akta pendirian harus diisi'
+  }
+  if (!form.value.no_sk) {
+    errors.decree_number = 'No. SK Kemenkumham harus diisi'
+  }
+  if (!form.value.tanggal_sk) {
+    errors.decree_date = 'Tanggal SK Kemenkumham harus diisi'
+  }
+  if (!form.value.alamat) {
+    errors.address = 'Alamat lengkap harus diisi'
+  }
+  if (!form.value.emailLogin) {
+    errors.emailLogin = 'E-mail login administrator harus diisi'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.emailLogin)) {
+    errors.emailLogin = 'Format e-mail login tidak valid'
+  }
+  if (!form.value.noHpLogin) {
+    errors.noHpLogin = 'No. HP login administrator harus diisi'
+  }
+
+  if (Object.keys(errors).length > 0) {
+    formErrors.value = errors
+    toast.error('Gagal Menyimpan', {
+      description: 'Harap lengkapi semua data formulir sebelum menyimpan.'
+    })
+    return
+  }
+
+  isLoading.value = true
   let newFoundationId = null
   const loginEmail = form.value.emailLogin?.trim() || form.value.email?.trim()
   const loginPhone = form.value.noHpLogin?.trim() || form.value.no_hp?.trim()

@@ -60,7 +60,7 @@ onMounted(async () => {
       tanggal_akta: foundation.deed_date ? foundation.deed_date.split('T')[0] : '',
       no_sk: foundation.decree_number,
       tanggal_sk: foundation.decree_date ? foundation.decree_date.split('T')[0] : '',
-      curriculum_id: foundation.curriculum_id ? String(foundation.curriculum_id) : ''
+      curriculum_id: foundation.curriculum_id ? String(foundation.curriculum_id) : '',
       emailLogin: foundation.users && foundation.users[0] ? foundation.users[0].email : '',
       noHpLogin: foundation.users && foundation.users[0] ? foundation.users[0].phone : ''
     }
@@ -212,39 +212,20 @@ const goToList = () => {
 <template>
   <div class="space-y-6 p-1 pb-16">
     <!-- Header dengan Tombol Kembali -->
-    <PageHeader
-      back
-      title="Edit Data Yayasan"
-      description="Lengkapi formulir berikut untuk memperbarui data yayasan."
-    />
+    <PageHeader back title="Edit Data Yayasan"
+      description="Lengkapi formulir berikut untuk memperbarui data yayasan." />
 
-    <YayasanForm
-      v-model:form="form"
-      :image-preview="imagePreview"
-      :status-options="statusOptions"
-      :errors="formErrors"
-      @image-change="handleImage"
-    />
+    <YayasanForm v-model:form="form" :image-preview="imagePreview" :status-options="statusOptions" :errors="formErrors"
+      @image-change="handleImage" />
 
     <!-- Bottom Footer Actions (Tombol Batal & Simpan di Bawah) -->
     <div class="flex items-center justify-end gap-3 pt-6 border-t border-border dark:border-zinc-800">
-      <Button
-        type="button"
-        variant="outline"
-        @click="goToList"
-        :disabled="isLoading"
-        class="gap-1.5"
-      >
+      <Button type="button" variant="outline" @click="goToList" :disabled="isLoading" class="gap-1.5">
         <ArrowLeft class="h-4 w-4" />
         Batal
       </Button>
 
-      <Button
-        type="button"
-        @click="onClickSave"
-        :disabled="isLoading"
-        class="gap-1.5 px-6"
-      >
+      <Button type="button" @click="onClickSave" :disabled="isLoading" class="gap-1.5 px-6">
         <Save class="h-4 w-4" />
         {{ isLoading ? 'Menyimpan...' : 'Simpan Perubahan' }}
       </Button>

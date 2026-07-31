@@ -13,6 +13,7 @@ import { toast } from 'vue-sonner'
 const store = useLandingEditorStore()
 
 const form = ref({
+  hero_badge_text: '',
   hero_title: '',
   hero_subtitle: '',
   hero_description: '',
@@ -24,12 +25,13 @@ const form = ref({
 onMounted(async () => {
   await store.fetchLandingPage()
   if (store.landingPage) {
-    form.value.hero_title = store.landingPage.hero_title || ''
-    form.value.hero_subtitle = store.landingPage.hero_subtitle || ''
-    form.value.hero_description = store.landingPage.hero_description || ''
-    form.value.hero_cta_text = store.landingPage.hero_cta_text || ''
-    form.value.hero_cta_link = store.landingPage.hero_cta_link || ''
-    form.value.hero_images = store.landingPage.hero_images || []
+    form.value.hero_badge_text   = store.landingPage.hero_badge_text   || ''
+    form.value.hero_title        = store.landingPage.hero_title        || ''
+    form.value.hero_subtitle     = store.landingPage.hero_subtitle     || ''
+    form.value.hero_description  = store.landingPage.hero_description  || ''
+    form.value.hero_cta_text     = store.landingPage.hero_cta_text     || ''
+    form.value.hero_cta_link     = store.landingPage.hero_cta_link     || ''
+    form.value.hero_images       = store.landingPage.hero_images       || []
   }
 })
 
@@ -46,7 +48,7 @@ async function onImageUpload(e) {
   const file = e.target.files[0]
   if (!file) return
   try {
-    const res = await store.uploadImage(file, 'hero')
+    const res = await store.uploadImage(file)
     // Tambahkan ke list hero_images carousel
     form.value.hero_images.push({ url: res.url, caption: '' })
     toast.success('Gambar berhasil ditambahkan!')
@@ -69,6 +71,14 @@ function removeImage(index) {
       <div
         class="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"
       ></div>
+    </div>
+
+    <div
+      v-else-if="store.error"
+      class="flex flex-col items-center justify-center py-16 text-center gap-4"
+    >
+      <p class="text-destructive font-semibold">{{ store.error }}</p>
+      <button @click="store.fetchLandingPage()" class="text-sm text-primary underline">Coba lagi</button>
     </div>
 
     <form
@@ -123,6 +133,17 @@ function removeImage(index) {
       <div class="glass-mini rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-white/10 space-y-4">
         <h3 class="text-lg font-bold text-foreground">Konten Teks</h3>
         <div class="space-y-4">
+          <div>
+            <Label class="block text-xs font-bold text-gray-400 uppercase mb-2">
+              Teks Badge (Opsional)
+            </Label>
+            <Input
+              type="text"
+              v-model="form.hero_badge_text"
+              class="w-full h-11 px-4 border border-gray-200 dark:border-white/10 bg-white/50 dark:bg-background/30 rounded-xl text-foreground focus-visible:ring-1 focus-visible:border-primary/50"
+              placeholder="contoh: ✨ Sekolah Terbaik 2024 · Akreditasi A"
+            />
+          </div>
           <div>
             <Label class="block text-xs font-bold text-gray-400 uppercase mb-2"
               >Judul Utama (Headline)</Label

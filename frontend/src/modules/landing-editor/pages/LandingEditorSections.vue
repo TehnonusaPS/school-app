@@ -71,14 +71,8 @@ async function executeToggleVisibility() {
 
 async function saveSectionOrdering() {
   try {
-    const payload = localSections.value.map(s => ({
-      id: s.id,
-      is_visible: s.is_visible,
-      sort_order: s.sort_order,
-      title: s.title,
-      subtitle: s.subtitle
-    }))
-    await store.updateSectionOrders(payload)
+    // Kirim section secara lengkap termasuk items agar data tidak hilang di backend
+    await store.updateSectionOrders([...localSections.value])
     toast.success('Urutan dan visibilitas section berhasil diperbarui!')
   } catch (err) {
     toast.error(err.message)
@@ -95,6 +89,14 @@ async function saveSectionOrdering() {
       <div
         class="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"
       ></div>
+    </div>
+
+    <div
+      v-else-if="store.error"
+      class="flex flex-col items-center justify-center py-16 text-center gap-4"
+    >
+      <p class="text-destructive font-semibold">{{ store.error }}</p>
+      <button @click="store.fetchLandingPage()" class="text-sm text-primary underline">Coba lagi</button>
     </div>
 
     <div

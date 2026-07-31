@@ -135,7 +135,17 @@ class LandingPageConfigController extends Controller
 
         $foundation->save();
 
-        return response()->json(['message' => 'Konfigurasi landing page Yayasan berhasil disimpan.', 'data' => $foundation]);
+        return response()->json([
+            'message' => 'Konfigurasi landing page Yayasan berhasil disimpan.',
+            'data' => [
+                'id'                   => $foundation->id,
+                'landing_page_enabled' => (bool)$foundation->landing_page_enabled,
+                'landing_page_theme'   => $foundation->landing_page_theme,
+                'landing_page_config'  => $foundation->landing_page_config
+                    ? json_decode($foundation->landing_page_config)
+                    : null,
+            ]
+        ]);
     }
 
     public function getSchoolConfig($id)
@@ -182,6 +192,16 @@ class LandingPageConfigController extends Controller
 
         $school->save();
 
-        return response()->json(['message' => 'Konfigurasi landing page Sekolah berhasil disimpan.', 'data' => $school]);
+        return response()->json([
+            'message' => 'Konfigurasi landing page Sekolah berhasil disimpan.',
+            'data' => [
+                'id'                   => $school->id,
+                'landing_page_enabled' => (bool)$school->landing_page_enabled,
+                'landing_page_theme'   => $school->landing_page_theme,
+                'landing_page_config'  => $school->landing_page_config
+                    ? json_decode($school->landing_page_config)
+                    : null,
+            ]
+        ]);
     }
 }

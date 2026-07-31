@@ -46,7 +46,7 @@ async function onImageUpload(e) {
   const file = e.target.files[0]
   if (!file) return
   try {
-    const res = await store.uploadImage(file, 'about')
+    const res = await store.uploadImage(file)
     form.value.about_image = res.url
     toast.success('Foto profil berhasil diupload!')
   } catch (err) {
@@ -75,6 +75,14 @@ function removeMission(index) {
       <div
         class="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"
       ></div>
+    </div>
+
+    <div
+      v-else-if="store.error"
+      class="flex flex-col items-center justify-center py-16 text-center gap-4"
+    >
+      <p class="text-destructive font-semibold">{{ store.error }}</p>
+      <button @click="store.fetchLandingPage()" class="text-sm text-primary underline">Coba lagi</button>
     </div>
 
     <form

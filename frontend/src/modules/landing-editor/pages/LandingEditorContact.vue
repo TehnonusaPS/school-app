@@ -58,6 +58,14 @@ async function handleSave() {
       ></div>
     </div>
 
+    <div
+      v-else-if="store.error"
+      class="flex flex-col items-center justify-center py-16 text-center gap-4"
+    >
+      <p class="text-destructive font-semibold">{{ store.error }}</p>
+      <button @click="store.fetchLandingPage()" class="text-sm text-primary underline">Coba lagi</button>
+    </div>
+
     <form
       v-else
       @submit.prevent="handleSave"

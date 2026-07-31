@@ -2,252 +2,18 @@ import { defineStore } from 'pinia'
 import * as service from '@/services/landingPageService'
 import { useAuthStore } from '@/stores/authStore'
 
-// Data Dummy Premium untuk Sekolah/Yayasan
-const dummyData = {
-  id: 1,
-  theme: 'modern',
-  slug: 'sd-cerdas-bangsa',
-  is_published: true,
-  meta_title: 'SD Cerdas Bangsa — Sekolah Unggul & Berkarakter',
-  meta_description:
-    'Selamat datang di SD Cerdas Bangsa. Kami berkomitmen menyelenggarakan pendidikan terbaik untuk melahirkan generasi yang cerdas, kreatif, berakhlak mulia dan siap menyongsong masa depan.',
-
-  // Hero Carousel
-  hero_title: 'Mendidik Generasi Pemimpin Masa Depan',
-  hero_subtitle: '✨ SD Cerdas Bangsa Selaras & Berprestasi',
-  hero_description:
-    'Daftarkan putra/putri Anda sekarang dan berikan mereka lingkungan belajar terbaik yang menyenangkan, inovatif, dan berstandar internasional.',
-  hero_image: 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?q=80&w=1200',
-  hero_images: [
-    {
-      url: 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?q=80&w=1200',
-      caption: 'Gedung Sekolah Utama'
-    },
-    {
-      url: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=1200',
-      caption: 'Kegiatan Belajar Mengajar'
-    },
-    {
-      url: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=1200',
-      caption: 'Fasilitas Laboratorium Modern'
-    }
-  ],
-  hero_cta_text: '🎉 Daftar Sekarang!',
-  hero_cta_link: '#registration_cta',
-
-  // About Section
-  about_title: 'Selamat Datang di SD Cerdas Bangsa',
-  about_description:
-    'Berdiri sejak tahun 2012, SD Cerdas Bangsa telah menjadi rumah belajar bagi ribuan anak untuk bertumbuh secara akademis, sosial, dan spiritual. Dengan kurikulum merdeka yang dipadukan dengan pembelajaran aktif berbasis proyek, kami memastikan setiap anak menemukan potensi terbaik mereka.',
-  about_image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800',
-  about_vision:
-    'Menjadi lembaga pendidikan unggul yang menghasilkan generasi cerdas, berkarakter luhur, berbudaya lingkungan, dan berwawasan global.',
-  about_mission: [
-    'Menyelenggarakan pembelajaran aktif, inovatif, kreatif, dan menyenangkan.',
-    'Menanamkan nilai-nilai karakter luhur dan keagamaan dalam kehidupan sehari-hari.',
-    'Mengembangkan bakat dan minat siswa melalui program ekstrakurikuler yang variatif.',
-    'Menerapkan budaya ramah lingkungan dan peduli terhadap sesama.'
-  ],
-
-  // Colors
-  primary_color: '#7c3aed',
-  secondary_color: '#f59e0b',
-  accent_color: '#06b6d4',
-  logo: '',
-
-  // Contact & Socials
-  contact_email: 'info@cerdasbangsa.sch.id',
-  contact_phone: '+62 812-3456-7890',
-  contact_address: 'Jl. Pendidikan No. 45, Kebayoran Baru, Jakarta Selatan, 12110',
-  contact_maps_embed:
-    'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.2736417711413!2d106.79724127585258!3d-6.227606360984852!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f14be6d7d6f5%3A0x6e2df40fe930!2sJakarta%20Selatan!5e0!3m2!1sid!2sid!4v1700000000000!5m2!1sid!2sid',
-  social_instagram: 'https://instagram.com/cerdasbangsaschool',
-  social_facebook: 'https://facebook.com/cerdasbangsaschool',
-  social_youtube: 'https://youtube.com/c/cerdasbangsaschool',
-  social_tiktok: 'https://tiktok.com/@cerdasbangsa',
-
-  // Sections
-  sections: [
-    {
-      id: 1,
-      type: 'stats',
-      title: 'Pencapaian & Dedikasi Kami',
-      is_visible: true,
-      sort_order: 1,
-      items: [
-        { id: 11, title: 'Siswa Aktif', value: '850+' },
-        { id: 12, title: 'Guru Profesional', value: '45' },
-        { id: 13, title: 'Kelas / Rombel', value: '24' },
-        { id: 14, title: 'Akreditasi', value: 'A+' }
-      ]
-    },
-    {
-      id: 2,
-      type: 'features',
-      title: 'Mengapa Memilih Kami?',
-      is_visible: true,
-      sort_order: 2,
-      items: [
-        {
-          id: 21,
-          title: 'Guru Tersertifikasi',
-          description:
-            'Tenaga pendidik profesional lulusan universitas ternama yang ramah dan kompeten.',
-          icon: 'award'
-        },
-        {
-          id: 22,
-          title: 'Kurikulum Modern',
-          description:
-            'Kurikulum nasional yang diperkaya dengan program bilingual dan penguatan karakter.',
-          icon: 'book-open'
-        },
-        {
-          id: 23,
-          title: 'Fasilitas Premium',
-          description:
-            'Ruang kelas ber-AC, laboratorium sains, ruang IT komputer, dan lapangan olahraga indoor.',
-          icon: 'shield'
-        }
-      ]
-    },
-    {
-      id: 3,
-      type: 'programs',
-      title: 'Program Unggulan',
-      is_visible: true,
-      sort_order: 3,
-      items: [
-        {
-          id: 31,
-          title: 'Bilingual Class (English & Indonesia)',
-          description:
-            'Pengenalan bahasa Inggris aktif sejak dini untuk melatih rasa percaya diri anak.',
-          image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=600'
-        },
-        {
-          id: 32,
-          title: 'Coding & Robotics Kid Club',
-          description:
-            'Mengasah logika berpikir komputasional siswa melalui kelas merakit robot seru.',
-          image: 'https://images.unsplash.com/photo-1561557944-6e7860d1a7eb?q=80&w=600'
-        }
-      ]
-    },
-    {
-      id: 4,
-      type: 'gallery',
-      title: 'Galeri Kegiatan Belajar',
-      is_visible: true,
-      sort_order: 4,
-      items: [
-        {
-          id: 41,
-          title: 'Keseruan Belajar Outbound',
-          image: 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?q=80&w=600'
-        },
-        {
-          id: 42,
-          title: 'Pentas Seni Tahunan',
-          image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=600'
-        },
-        {
-          id: 43,
-          title: 'Kelas Eksperimen Sains',
-          image: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=600'
-        }
-      ]
-    },
-    {
-      id: 5,
-      type: 'testimonials',
-      title: 'Apa Kata Orang Tua Murid?',
-      is_visible: true,
-      sort_order: 5,
-      items: [
-        {
-          id: 51,
-          title: 'Bunda Larasati',
-          description:
-            'Sangat senang menyekolahkan anak di sini. Gurunya sangat peduli perkembangan emosional anak, bukan cuma nilai akademis saja.',
-          value: 'Wali Murid Kelas 3'
-        },
-        {
-          id: 52,
-          title: 'Bapak Hermawan',
-          description:
-            'Fasilitas IT dan Coding-nya luar biasa. Anak saya jadi punya hobi baru yang sangat produktif semenjak sekolah di sini.',
-          value: 'Wali Murid Kelas 5'
-        }
-      ]
-    },
-    {
-      id: 6,
-      type: 'faq',
-      title: 'Pertanyaan yang Sering Diajukan',
-      is_visible: true,
-      sort_order: 6,
-      items: [
-        {
-          id: 61,
-          title: 'Bagaimana cara melakukan pendaftaran?',
-          description:
-            'Anda dapat menekan tombol Daftar Sekarang di atas lalu mengisi formulir secara online, atau datang langsung ke ruang sekretariat pendaftaran.'
-        },
-        {
-          id: 62,
-          title: 'Apakah tersedia antar jemput sekolah?',
-          description:
-            'Ya, sekolah menyediakan armada antar jemput resmi untuk area jangkauan radius maksimal 10 KM dari lokasi sekolah.'
-        }
-      ]
-    }
-  ]
-}
-
-const dummyDataYayasan = {
-  id: 2,
-  theme: 'modern',
-  slug: 'yayasan-nusantara',
-  is_published: true,
-  meta_title: 'Yayasan Pendidikan Nusantara',
-  meta_description: 'Mewujudkan pendidikan berstandar tinggi di Indonesia.',
-  hero_title: 'Membangun Pendidikan Berkualitas',
-  hero_subtitle: 'Yayasan Pendidikan Nusantara',
-  hero_description: 'Kami berkomitmen menaungi sekolah-sekolah unggulan masa depan.',
-  hero_image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=1200',
-  hero_images: [
-    { url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=1200', caption: 'Gedung Yayasan' }
-  ],
-  hero_cta_text: 'Jelajahi Program',
-  hero_cta_link: '#',
-  about_title: 'Tentang Yayasan',
-  about_description: 'Berdiri sejak tahun 2005 dengan fokus utama pada pembiayaan dan manajemen kurikulum.',
-  about_image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800',
-  about_vision: 'Mewujudkan sistem pendidikan berdaya saing global.',
-  about_mission: ['Meningkatkan kualitas SDM pendidik.', 'Menyediakan fasilitas belajar modern.'],
-  primary_color: '#1e40af',
-  secondary_color: '#f59e0b',
-  accent_color: '#0ea5e9',
-  logo: '',
-  contact_email: 'info@nusantara.org',
-  contact_phone: '+62 21-555-1234',
-  contact_address: 'Gedung Nusantara Lt. 5, Jakarta',
-  contact_maps_embed: '',
-  social_instagram: '',
-  social_facebook: '',
-  social_youtube: '',
-  social_tiktok: '',
-  sections: [
-    { id: 1, type: 'stats', title: 'Jejaring Yayasan', is_visible: true, sort_order: 1, items: [{ id: 11, title: 'Sekolah Binaan', value: '12' }, { id: 12, title: 'Total Siswa', value: '4500+' }, { id: 13, title: 'Tahun Berdiri', value: '1995' }] },
-    { id: 2, type: 'features', title: 'Fokus Yayasan Kami', is_visible: true, sort_order: 2, items: [{ id: 21, title: 'Pendidikan Merata', description: 'Menyediakan akses yang adil.', icon: 'globe' }, { id: 22, title: 'Sertifikasi Guru', description: 'Pelatihan rutin.', icon: 'award' }] },
-    { id: 3, type: 'programs', title: 'Lembaga Pendidikan', is_visible: true, sort_order: 3, items: [{ id: 31, title: 'TK & SD Islam Terpadu', description: 'Membangun karakter.', image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=600' }] }
-  ]
-}
-
+/**
+ * Landing Editor Store
+ *
+ * Semua operasi menggunakan endpoint yang SAMA dengan Konfigurasi Global:
+ * - admin_yayasan  → /landing-page/foundations/{foundation_id}
+ * - admin_sekolah/kepala_sekolah → /landing-page/schools/{school_id}
+ *
+ * Tidak ada lagi dummy data fallback. Jika API gagal, tampilkan error yang jelas.
+ */
 export const useLandingEditorStore = defineStore('landingEditor', {
   state: () => ({
-    landingPage: null, // akan diisi oleh fetchLandingPage
+    landingPage: null,
     loading: false,
     saving: false,
     error: null,
@@ -255,145 +21,224 @@ export const useLandingEditorStore = defineStore('landingEditor', {
   }),
 
   actions: {
+    /**
+     * Fetch landing page config dari database sesuai entitas user yang sedang login.
+     */
     async fetchLandingPage() {
       this.loading = true
       this.error = null
       try {
-        const res = await service.getMyLandingPage()
-        if (res?.data) {
-          this.landingPage = res.data
+        const authStore = useAuthStore()
+        const res = await service.getMyEntityLandingPage(authStore.user)
+
+        // Backend mengembalikan { id, landing_page_enabled, landing_page_theme, landing_page_config }
+        // Kita "flatten" landing_page_config ke dalam state agar konsisten dengan format editor
+        if (res) {
+          const config = res.landing_page_config
+            ? (typeof res.landing_page_config === 'string'
+                ? JSON.parse(res.landing_page_config)
+                : res.landing_page_config)
+            : {}
+
+          this.landingPage = {
+            ...config,
+            id: res.id,
+            landing_page_enabled: res.landing_page_enabled,
+            theme: res.landing_page_theme || config.theme || 'modern',
+          }
         }
       } catch (err) {
-        console.warn('API error, using dummy data instead:', err)
-        const authStore = useAuthStore()
-        const isYayasan = authStore.user && String(authStore.user.role).toLowerCase().includes('yayasan')
-        
-        if (isYayasan) {
-          this.landingPage = JSON.parse(JSON.stringify(dummyDataYayasan))
-        } else {
-          this.landingPage = JSON.parse(JSON.stringify(dummyData))
-        }
+        this.error = err.message || 'Gagal memuat konfigurasi landing page.'
+        console.error('[LandingEditorStore] fetchLandingPage error:', err)
       } finally {
         this.loading = false
       }
     },
 
+    /**
+     * Simpan pengaturan ke database.
+     * Payload dikirim dalam format yang dipahami oleh updateFoundationConfig/updateSchoolConfig.
+     */
     async saveSettings(data) {
       this.saving = true
       try {
-        const res = await service.saveLandingPage(data)
-        this.landingPage = res.data
-        return res
-      } catch (err) {
-        // mode offline dummy
-        this.landingPage = { ...this.landingPage, ...data }
-        return { message: 'Pengaturan disimpan secara lokal (Offline mode)' }
-      } finally {
-        this.saving = false
-      }
-    },
+        const authStore = useAuthStore()
 
-    async uploadImage(file, type) {
-      this.saving = true
-      try {
-        const res = await service.uploadLandingImage(file, type)
-        await this.fetchLandingPage()
-        return res
-      } catch (err) {
-        // mode offline uploader simulation
-        const fakeUrl = URL.createObjectURL(file)
-        if (type === 'hero') {
-          this.landingPage.hero_image = fakeUrl
-        } else if (type === 'about') {
-          this.landingPage.about_image = fakeUrl
-        }
-        return { url: fakeUrl, message: 'Upload simulasi lokal berhasil!' }
-      } finally {
-        this.saving = false
-      }
-    },
-
-    async updateSectionOrders(sections) {
-      this.saving = true
-      try {
-        await service.updateSections(sections)
-        await this.fetchLandingPage()
-      } catch (err) {
-        // mode offline reordering
-        this.landingPage.sections = sections
-      } finally {
-        this.saving = false
-      }
-    },
-
-    async addItem(sectionId, itemData) {
-      this.saving = true
-      try {
-        await service.addSectionItem(sectionId, itemData)
-        await this.fetchLandingPage()
-      } catch (err) {
-        // mode offline add item
-        const section = this.landingPage.sections.find(s => s.id === sectionId)
-        if (section) {
-          const newItem = { id: Date.now(), ...itemData }
-          if (!section.items) section.items = []
-          section.items.push(newItem)
-        }
-      } finally {
-        this.saving = false
-      }
-    },
-
-    async updateItem(sectionId, itemId, itemData) {
-      this.saving = true
-      try {
-        await service.updateSectionItem(sectionId, itemId, itemData)
-        await this.fetchLandingPage()
-      } catch (err) {
-        // mode offline edit item
-        const section = this.landingPage.sections.find(s => s.id === sectionId)
-        if (section && section.items) {
-          const idx = section.items.findIndex(item => item.id === itemId)
-          if (idx !== -1) {
-            section.items[idx] = { ...section.items[idx], ...itemData }
+        // Payload harus match format yang diterima backend controller
+        const payload = {
+          landing_page_enabled: this.landingPage?.landing_page_enabled ?? false,
+          landing_page_theme: data.theme || this.landingPage?.theme || 'modern',
+          landing_page_config: {
+            ...(this.landingPage || {}), // existing config sebagai base
+            ...data,                     // data baru dari form menimpa base
           }
         }
-      } finally {
-        this.saving = false
-      }
-    },
 
-    async removeItem(sectionId, itemId) {
-      this.saving = true
-      try {
-        await service.deleteSectionItem(sectionId, itemId)
-        await this.fetchLandingPage()
-      } catch (err) {
-        // mode offline delete item
-        const section = this.landingPage.sections.find(s => s.id === sectionId)
-        if (section && section.items) {
-          section.items = section.items.filter(item => item.id !== itemId)
+        const res = await service.saveMyEntityLandingPage(authStore.user, payload)
+
+        // Refresh dari response backend agar state sinkron
+        if (res?.data) {
+          const config = res.data.landing_page_config
+            ? (typeof res.data.landing_page_config === 'string'
+                ? JSON.parse(res.data.landing_page_config)
+                : res.data.landing_page_config)
+            : {}
+
+          this.landingPage = {
+            ...config,
+            id: res.data.id,
+            landing_page_enabled: res.data.landing_page_enabled,
+            theme: res.data.landing_page_theme || config.theme || 'modern',
+          }
+        } else {
+          // Jika backend tidak mengembalikan data lengkap, update state secara optimistic
+          this.landingPage = { ...this.landingPage, ...data }
         }
-      } finally {
-        this.saving = false
-      }
-    },
 
-    async togglePublishStatus() {
-      this.saving = true
-      try {
-        const res = await store.togglePublishStatus()
-        this.landingPage.is_published = res.is_published
         return res
       } catch (err) {
-        this.landingPage.is_published = !this.landingPage.is_published
-        return {
-          is_published: this.landingPage.is_published,
-          message: `Status halaman diubah ke: ${this.landingPage.is_published ? 'Published' : 'Draft'} (Offline)`
-        }
+        const message = err.response?.data?.message || err.message || 'Gagal menyimpan perubahan.'
+        throw new Error(message)
       } finally {
         this.saving = false
       }
+    },
+
+    /**
+     * Upload gambar ke backend dan kembalikan URL-nya.
+     */
+    async uploadImage(file) {
+      this.saving = true
+      try {
+        const res = await service.uploadLandingImage(file)
+        return res
+      } catch (err) {
+        const message = err.response?.data?.error || err.message || 'Gagal mengupload gambar.'
+        throw new Error(message)
+      } finally {
+        this.saving = false
+      }
+    },
+
+    /**
+     * Toggle publish/draft status landing page.
+     * Menggunakan saveSettings untuk menyimpan perubahan is_published.
+     */
+    async togglePublishStatus() {
+      if (!this.landingPage) throw new Error('Data landing page belum dimuat.')
+
+      const newStatus = !this.landingPage.is_published
+      this.saving = true
+      try {
+        const authStore = useAuthStore()
+        const payload = {
+          landing_page_enabled: this.landingPage.landing_page_enabled ?? false,
+          landing_page_theme: this.landingPage.theme || 'modern',
+          landing_page_config: {
+            ...(this.landingPage || {}),
+            is_published: newStatus,
+          }
+        }
+
+        const res = await service.saveMyEntityLandingPage(authStore.user, payload)
+
+        // Update state lokal
+        this.landingPage = { ...this.landingPage, is_published: newStatus }
+
+        return {
+          is_published: newStatus,
+          message: newStatus
+            ? 'Landing page berhasil dipublikasikan!'
+            : 'Landing page dinonaktifkan (Draft).',
+          data: res?.data
+        }
+      } catch (err) {
+        const message = err.response?.data?.message || err.message || 'Gagal mengubah status publikasi.'
+        throw new Error(message)
+      } finally {
+        this.saving = false
+      }
+    },
+
+    /**
+     * Update urutan sections dan simpan ke backend.
+     */
+    async updateSectionOrders(sections) {
+      if (!this.landingPage) return
+      this.saving = true
+      try {
+        const authStore = useAuthStore()
+        const payload = {
+          landing_page_enabled: this.landingPage.landing_page_enabled ?? false,
+          landing_page_theme: this.landingPage.theme || 'modern',
+          landing_page_config: {
+            ...(this.landingPage || {}),
+            sections,
+          }
+        }
+
+        await service.saveMyEntityLandingPage(authStore.user, payload)
+        this.landingPage = { ...this.landingPage, sections }
+      } catch (err) {
+        const message = err.response?.data?.message || err.message || 'Gagal menyimpan urutan section.'
+        throw new Error(message)
+      } finally {
+        this.saving = false
+      }
+    },
+
+    /**
+     * Tambah item ke sebuah section dan simpan ke backend.
+     */
+    async addItem(sectionId, itemData) {
+      if (!this.landingPage) return
+      const section = this.landingPage.sections?.find(s => s.id === sectionId)
+      if (!section) throw new Error('Section tidak ditemukan.')
+
+      const newItem = { id: Date.now(), ...itemData }
+      const updatedSections = this.landingPage.sections.map(s =>
+        s.id === sectionId
+          ? { ...s, items: [...(s.items || []), newItem] }
+          : s
+      )
+
+      await this.updateSectionOrders(updatedSections)
+    },
+
+    /**
+     * Update sebuah item dalam section dan simpan ke backend.
+     */
+    async updateItem(sectionId, itemId, itemData) {
+      if (!this.landingPage) return
+
+      const updatedSections = this.landingPage.sections.map(s => {
+        if (s.id !== sectionId) return s
+        return {
+          ...s,
+          items: (s.items || []).map(item =>
+            item.id === itemId ? { ...item, ...itemData } : item
+          )
+        }
+      })
+
+      await this.updateSectionOrders(updatedSections)
+    },
+
+    /**
+     * Hapus sebuah item dari section dan simpan ke backend.
+     */
+    async removeItem(sectionId, itemId) {
+      if (!this.landingPage) return
+
+      const updatedSections = this.landingPage.sections.map(s => {
+        if (s.id !== sectionId) return s
+        return {
+          ...s,
+          items: (s.items || []).filter(item => item.id !== itemId)
+        }
+      })
+
+      await this.updateSectionOrders(updatedSections)
     }
   }
 })

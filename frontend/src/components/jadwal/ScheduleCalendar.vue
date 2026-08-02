@@ -19,7 +19,7 @@ const props = defineProps<{
   month: number; // 0-11
   year: number;
   selectedDate: Date;
-  getDateMarkers: (dateStr: string) => { isHoliday: boolean; isSunday: boolean; isExam: boolean; isAssignment: boolean; isLesson: boolean };
+  getDateMarkers: (dateStr: string) => { isHoliday: boolean; isSunday: boolean; isExam: boolean; isAssignment: boolean; isLesson: boolean, isActivity: boolean };
   getHolidayForDate: (dateStr: string) => any;
   getExamsForDate: (dateStr: string) => any[];
   getAssignmentsForDate: (dateStr: string) => any[];
@@ -107,6 +107,9 @@ const getCellClasses = (weekDate: any, monthValue: any) => {
                     :title="getExamsForDate(weekDate.toString())[0]?.nama" class="sched-micro-badge">Ujian</Badge>
                   <Badge v-if="getDateMarkers(weekDate.toString()).isAssignment" variant="green" showDot pulse
                     :title="getAssignmentsForDate(weekDate.toString())[0]?.nama" class="sched-micro-badge">Tugas</Badge>
+                  <Badge v-if="getDateMarkers(weekDate.toString()).isActivity" variant="outline" showDot pulse
+                    class="sched-micro-badge bg-amber-500/10 text-amber-600 dark:text-amber-400 border-none font-bold">
+                    Kegiatan</Badge>
                 </div>
               </CalendarCellTrigger>
             </CalendarCell>

@@ -1,486 +1,446 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
-  ChevronLeft,
-  ChevronRight,
   Calendar as CalendarIcon,
+  CalendarDays,
   ArrowRight,
+  Check,
+  X,
+  MessageSquare,
   CornerUpLeft,
-  Lock
+  AlertCircle
 } from 'lucide-vue-next'
-import PageHeader from '@/components/page-header/PageHeader.vue'
-
-// Import Mock Data
 import {
-  academicMonths,
-  eventTypes,
-  getEvents,
-  getYearStatuses
-} from '../../../data/mockKalender'
-import { glassFade } from '@/config/motion'
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog'
+import PageHeader from '@/components/page-header/PageHeader.vue'
+import FormTextArea from '@/components/forms/FormTextArea.vue'
+
+import CalendarGrid from '../../../components/calendar/CalendarGrid.vue'
+import { useCalendarGrid } from '../../../composables/useCalendarGrid'
+
+import {
+  fetchCalendarStatus,
+  fetchEvents,
+  approveCalendar,
+  rejectCalendar
+} from '@/services/academicCalendarService'
+import { fetchAllAcademicYears } from '@/services/academicYearService'
+import { eventTypes, getEventBadgeStyle, getEventTypeInfo } from '../../../data/calendarConstants'
 
 const route = useRoute()
 const router = useRouter()
 
-// --- State ---
+// State
 const events = ref([])
 const yearStatuses = ref({})
+const academicYears = ref([])
 const selectedTahun = ref('')
-const activeMonthIdx = ref(0)
-const selectedDateStr = ref('')
+const activeAcademicYearId = ref(null)
 const isLoading = ref(false)
+const selectedCategoryFilter = ref('all')
 
-onMounted(() => {
+// Catatan Per-Agenda Kepsek
+const agendaNotes = ref({})
+const expandedNoteId = ref(null)
+
+// Modals
+const isApproveConfirmOpen = ref(false)
+const isRejectDialogOpen = ref(false)
+const overallRejectReason = ref('')
+const rejectError = ref('')
+
+const {
+  activeMonthIdx,
+  selectedDateStr,
+  generateDynamicMonths,
+  currentMonthObj,
+  calendarDays,
+  prevMonth,
+  nextMonth
+} = useCalendarGrid(events)
+
+const filteredEventsList = computed(() => {
+  if (selectedCategoryFilter.value === 'all') return events.value
+  const categoryTypes = eventTypes.filter(t => t.category === selectedCategoryFilter.value).map(t => t.value)
+  return events.value.filter(e => categoryTypes.includes(e.type))
+})
+
+onMounted(async () => {
   isLoading.value = true
-  events.value = getEvents()
-  yearStatuses.value = getYearStatuses()
-  
-  // Parse Tahun Ajaran from param (e.g., "2025-2026" to "2025/2026")
-  const param = route.params.tahun
-  if (param) {
-    selectedTahun.value = param.replace('-', '/')
-  } else {
-    selectedTahun.value = '2025/2026'
+  try {
+    const yearResponse = await fetchAllAcademicYears()
+    academicYears.value = yearResponse.data || []
+
+    const statusResponse = await fetchCalendarStatus()
+    yearStatuses.value = statusResponse.data || {}
+
+    const param = route.params.tahun
+    selectedTahun.value = param ? param.replace('-', '/') : '2025/2026'
+
+    const yearObj = academicYears.value.find(ay => ay.name === selectedTahun.value)
+    if (yearObj) {
+      activeAcademicYearId.value = yearObj.id
+      const response = await fetchEvents(yearObj.id)
+      events.value = response.data || []
+    }
+
+    const startYear = parseInt(selectedTahun.value.split('/')[0]) || 2026
+    const endYear = startYear + 1
+    generateDynamicMonths(`${startYear}-07-05`, `${endYear}-06-20`)
+
+    selectedDateStr.value = `${startYear}-07-05`
+  } catch (err) {
+    console.error('Error loading calendar in kepsek show page:', err)
+  } finally {
+    isLoading.value = false
   }
-  
-  if (selectedTahun.value === '2025/2026') {
-    activeMonthIdx.value = 11
-    selectedDateStr.value = '2026-06-08'
-  } else {
-    const startYear = parseInt(selectedTahun.value.split('/')[0])
-    selectedDateStr.value = `${startYear}-07-01`
-  }
-  
-  isLoading.value = false
-})
-
-// --- Computed Date Calculations ---
-const currentCalendarYear = computed(() => {
-  if (!selectedTahun.value) return 2026
-  const startYear = parseInt(selectedTahun.value.split('/')[0])
-  const monthInfo = academicMonths[activeMonthIdx.value]
-  return startYear + monthInfo.yearOffset
-})
-
-const selectedMonthVal = computed(() => {
-  return academicMonths[activeMonthIdx.value].val
-})
-
-const currentMonthName = computed(() => {
-  return academicMonths[activeMonthIdx.value].name
-})
-
-const currentSemester = computed(() => {
-  return academicMonths[activeMonthIdx.value].semester
 })
 
 const currentYearStatus = computed(() => {
-  return yearStatuses.value[selectedTahun.value]?.status || 'draft'
+  return yearStatuses.value[selectedTahun.value]?.status || 'pending'
 })
 
-// Helper to check range overlap
-function isDateInBetween(dateStr, startStr, endStr) {
-  return dateStr >= startStr && dateStr <= endStr
-}
-
-// Calendar Grid Cells
-const calendarCells = computed(() => {
-  const year = currentCalendarYear.value
-  const monthVal = selectedMonthVal.value
-  const firstDayOffset = new Date(year, monthVal, 1).getDay()
-  const totalDays = new Date(year, monthVal + 1, 0).getDate()
-  
-  const cells = []
-  
-  // Padding cells
-  for (let i = 0; i < firstDayOffset; i++) {
-    cells.push({ isPadding: true })
-  }
-  
-  // Real days
-  for (let d = 1; d <= totalDays; d++) {
-    const dateStr = `${year}-${String(monthVal + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
-    const dateObj = new Date(year, monthVal, d)
-    const dayOfWeek = dateObj.getDay()
-    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
-    
-    // Filter events overlapping this date
-    const dayEvents = events.value.filter(e => isDateInBetween(dateStr, e.startDate, e.endDate))
-    
-    cells.push({
-      isPadding: false,
-      dateNum: d,
-      dateStr,
-      isWeekend,
-      dayOfWeek,
-      events: dayEvents
-    })
-  }
-  
-  return cells
-})
-
-// Month navigation
-const prevMonth = () => {
-  if (activeMonthIdx.value > 0) {
-    activeMonthIdx.value--
-  } else {
-    toast.info('Batas Awal Semester', {
-      description: 'Sudah mencapai batas awal semester ganjil pada tahun ajaran ini.'
-    })
-  }
-}
-
-const nextMonth = () => {
-  if (activeMonthIdx.value < 11) {
-    activeMonthIdx.value++
-  } else {
-    toast.info('Batas Akhir Semester', {
-      description: 'Sudah mencapai batas akhir semester genap pada tahun ajaran ini.'
-    })
-  }
-}
-
-// Events filter for side list
-const selectedDateEvents = computed(() => {
-  return events.value.filter(e => isDateInBetween(selectedDateStr.value, e.startDate, e.endDate))
-})
-
-const activeMonthEvents = computed(() => {
-  const year = currentCalendarYear.value
-  const monthVal = selectedMonthVal.value
-  const firstDayStr = `${year}-${String(monthVal + 1).padStart(2, '0')}-01`
-  const lastDay = new Date(year, monthVal + 1, 0).getDate()
-  const lastDayStr = `${year}-${String(monthVal + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
-  
-  return events.value
-    .filter(e => {
-      return e.startDate <= lastDayStr && e.endDate >= firstDayStr
-    })
-    .sort((a, b) => a.startDate.localeCompare(b.startDate))
-})
-
-// Formatted Date Title
-const formattedSelectedDate = computed(() => {
-  if (!selectedDateStr.value) return ''
-  const dObj = new Date(selectedDateStr.value)
-  const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
-  const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
-  return `${dayNames[dObj.getDay()]}, ${dObj.getDate()} ${monthNames[dObj.getMonth()]} ${dObj.getFullYear()}`
-})
-
-// --- Helper Labels & Styling ---
 function getEventTypeLabel(type) {
-  const t = eventTypes.find(opt => opt.value === type)
-  return t ? t.label : 'Kegiatan'
+  return getEventTypeInfo(type).label
 }
 
-function getEventTypeBadgeClass(type) {
-  if (type === 'libur_nasional' || type === 'tanggal_merah') {
-    return 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800'
+function toggleNote(eventId) {
+  expandedNoteId.value = expandedNoteId.value === eventId ? null : eventId
+}
+
+const countEventsWithNotes = computed(() => {
+  return Object.values(agendaNotes.value).filter(n => n && n.trim().length > 0).length
+})
+
+function openApproveConfirm() {
+  isApproveConfirmOpen.value = true
+}
+
+async function handleConfirmApprove() {
+  isApproveConfirmOpen.value = false
+  isLoading.value = true
+  try {
+    if (activeAcademicYearId.value) {
+      await approveCalendar(activeAcademicYearId.value)
+    }
+    toast.success('Kalender Disetujui', {
+      description: `Kalender Akademik Tahun Pelajaran ${selectedTahun.value} berhasil disetujui dan dikunci.`
+    })
+    router.push('/akademik/kepala-sekolah/kalender')
+  } catch (err) {
+    console.error('Error approving calendar:', err)
+    toast.error('Gagal Menyetujui', { description: 'Terjadi kesalahan saat menyetujui kalender.' })
+  } finally {
+    isLoading.value = false
   }
-  if (type === 'ujian') {
-    return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800'
+}
+
+function openRejectDialog() {
+  rejectError.value = ''
+  isRejectDialogOpen.value = true
+}
+
+async function handleConfirmReject() {
+  if (!overallRejectReason.value.trim() && countEventsWithNotes.value === 0) {
+    rejectError.value = 'Harap isi catatan alasan penolakan secara keseluruhan atau pada agenda spesifik.'
+    return
   }
-  return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
+
+  isRejectDialogOpen.value = false
+  isLoading.value = true
+  try {
+    let finalNote = overallRejectReason.value.trim()
+    if (countEventsWithNotes.value > 0) {
+      const perAgendaSummary = Object.entries(agendaNotes.value)
+        .filter(([_, note]) => note && note.trim())
+        .map(([id, note]) => {
+          const ev = events.value.find(e => String(e.id) === String(id))
+          return `- Agenda "${ev?.title || id}": ${note.trim()}`
+        })
+        .join('\n')
+
+      finalNote += (finalNote ? '\n\n' : '') + '[Catatan Per-Agenda]:\n' + perAgendaSummary
+    }
+
+    if (activeAcademicYearId.value) {
+      await rejectCalendar(activeAcademicYearId.value, finalNote)
+    }
+
+    toast.success('Kalender Ditolak', {
+      description: `Kalender Akademik Tahun Pelajaran ${selectedTahun.value} dikembalikan ke Admin Sekolah untuk perbaikan.`
+    })
+    router.push('/akademik/kepala-sekolah/kalender')
+  } catch (err) {
+    console.error('Error rejecting calendar:', err)
+    toast.error('Gagal Menolak', { description: 'Terjadi kesalahan saat menolak kalender.' })
+  } finally {
+    isLoading.value = false
+  }
 }
 
-function getYearStatusLabel(status) {
-  if (status === 'approved') return 'Disetujui'
-  if (status === 'pending') return 'Menunggu Persetujuan'
-  if (status === 'rejected') return 'Ditolak'
-  return 'Draft'
-}
-
-function getYearStatusBadgeClass(status) {
-  if (status === 'approved') return 'bg-emerald-500 text-white'
-  if (status === 'pending') return 'bg-orange-500 text-white animate-pulse'
-  if (status === 'rejected') return 'bg-rose-500 text-white'
-  return 'bg-secondary text-secondary-foreground'
-}
-
-const handleSelectCell = (cell) => {
-  if (cell.isPadding) return
-  selectedDateStr.value = cell.dateStr
-}
-
-const handleBack = () => {
+function handleBack() {
   router.push('/akademik/kepala-sekolah/kalender')
 }
 </script>
 
 <template>
-  <div
-    v-motion
-    :initial="glassFade.initial"
-    :visible-once="glassFade.visible"
-    class="space-y-6 text-left"
-  >
+  <div class="space-y-6 text-left p-1 pb-12">
+    <!-- Header Page -->
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <PageHeader
-        title="Detail Kalender Akademik"
-        description="Tinjau agenda kegiatan sekolah yang diajukan oleh Admin Sekolah."
+        title="Tinjauan Kalender Akademik"
+        description="Periksa draf agenda kegiatan sekolah sebelum memberikan persetujuan atau penolakan."
       />
-      <Button
-        variant="outline"
-        class="w-full sm:w-auto text-xs font-bold rounded-xl cursor-pointer flex items-center gap-2 h-10 shadow-xs"
-        @click="handleBack"
-      >
-        <CornerUpLeft class="h-4 w-4" />
-        Kembali ke Daftar
-      </Button>
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <Button variant="outline" class="w-full sm:w-auto text-xs font-bold rounded-xl cursor-pointer flex items-center gap-2 h-10 shadow-xs" @click="handleBack">
+          <CornerUpLeft class="h-4 w-4" />
+          Kembali ke Daftar
+        </Button>
+        <template v-if="currentYearStatus === 'pending'">
+          <Button variant="default" class="w-full sm:w-auto text-xs font-bold rounded-xl cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2 h-10 shadow-xs" :disabled="isLoading" @click="openApproveConfirm">
+            <Check class="h-4 w-4" />
+            Setujui Kalender
+          </Button>
+          <Button variant="destructive" class="w-full sm:w-auto text-xs font-bold rounded-xl cursor-pointer flex items-center gap-2 h-10 shadow-xs" :disabled="isLoading" @click="openRejectDialog">
+            <X class="h-4 w-4" />
+            Tolak & Minta Perbaikan
+          </Button>
+        </template>
+      </div>
     </div>
 
-    <!-- Info Box: Review Mode -->
-    <Card class="rounded-2xl border bg-card p-4 sm:p-6 flex items-center justify-between gap-4">
-      <div class="space-y-0.5">
-        <div class="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Tahun Pelajaran: <span class="text-foreground">{{ selectedTahun }}</span></div>
-        <div class="text-xs font-extrabold text-foreground mt-1">
-          Status Kalender: 
-          <Badge class="text-[8px] font-extrabold ml-1.5 uppercase px-2 py-0.5" :class="getYearStatusBadgeClass(currentYearStatus)">
-            {{ getYearStatusLabel(currentYearStatus) }}
-          </Badge>
+    <!-- Header Banner Status -->
+    <Card class="bg-card border border-border dark:border-zinc-800 shadow-xs">
+      <CardContent class="p-4 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="h-10 w-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-lg border border-primary/20">
+            <CalendarIcon class="h-5 w-5" />
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm font-bold text-foreground">Tahun Ajaran {{ selectedTahun }}</h3>
+              <Badge
+                :show-dot="true"
+                :pulse="true"
+                variant="outline"
+                class="text-[9px] uppercase font-bold"
+                :class="[
+                  currentYearStatus === 'approved' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30' : (
+                    currentYearStatus === 'pending' ? 'bg-orange-500/10 text-orange-600 border-orange-500/30' : 'bg-rose-500/10 text-rose-600 border-rose-500/30'
+                  )
+                ]"
+              >
+                {{ currentYearStatus === 'approved' ? 'Disetujui' : (currentYearStatus === 'pending' ? 'Menunggu Persetujuan Anda' : 'Ditolak') }}
+              </Badge>
+            </div>
+            <p class="text-xs text-muted-foreground mt-0.5">
+              Anda dapat memberikan catatan perbaikan pada tiap-tiap agenda di panel sebelah kanan sebelum mengambil keputusan.
+            </p>
+          </div>
         </div>
-      </div>
-      <div class="text-[11px] font-semibold text-muted-foreground bg-muted/40 p-2 border rounded-xl flex items-center gap-1.5">
-        <Lock class="h-3.5 w-3.5 text-muted-foreground" />
-        <span>Tampilan Tinjauan (Read-Only)</span>
-      </div>
+      </CardContent>
     </Card>
 
-    <!-- Header Controls: Tahun Ajaran & Bulan -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center bg-muted/30 p-4 rounded-2xl border border-border">
-      <!-- Tahun Ajaran -->
-      <div class="flex items-center gap-3">
-        <div class="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0 border border-primary/20">
-          <CalendarIcon class="h-5 w-5" />
-        </div>
-        <div class="flex flex-col gap-1 text-left">
-          <span class="text-[9px] uppercase font-bold tracking-wider text-muted-foreground">Tahun Pelajaran</span>
-          <span class="text-sm font-extrabold text-foreground">Tahun Ajaran {{ selectedTahun }}</span>
-        </div>
-      </div>
+    <!-- Main 2-Column Grid Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 text-left items-stretch">
+      <CalendarGrid
+        :calendar-days="calendarDays"
+        :selected-date-str="selectedDateStr"
+        :current-month-label="currentMonthObj.label"
+        :active-month-idx="activeMonthIdx"
+        :max-month-idx="13"
+        @select-cell="selectedDateStr = $event.dateStr"
+        @prev-month="prevMonth"
+        @next-month="nextMonth"
+      />
 
-      <!-- Bulan & Navigasi -->
-      <div class="flex items-center justify-between md:justify-end gap-4 w-full">
-        <div class="flex flex-col text-left md:text-right hidden sm:flex">
-          <span class="text-[9px] uppercase font-bold tracking-wider text-muted-foreground">Periode Aktif</span>
-          <span class="text-xs font-bold text-foreground">{{ currentMonthName }} {{ currentCalendarYear }} • Semester {{ currentSemester }}</span>
-        </div>
-        
-        <div class="flex items-center gap-2 bg-card border border-border p-1 rounded-xl shadow-xs">
-          <Button variant="ghost" size="icon" class="h-8 w-8 rounded-lg cursor-pointer" @click="prevMonth">
-            <ChevronLeft class="h-4 w-4" />
-          </Button>
-          <div class="px-3 text-xs font-bold min-w-[90px] text-center">
-            {{ currentMonthName }} {{ currentCalendarYear }}
+      <!-- Right Side Panel: Kepsek Interactive Review Sidebar -->
+      <Card class="rounded-2xl border border-border dark:border-zinc-800 bg-card shadow-sm text-left flex flex-col h-full max-h-[660px] overflow-hidden">
+        <CardHeader class="pb-3 bg-muted/20 dark:bg-zinc-900/40 border-b border-border/60 flex flex-row items-center justify-between shrink-0">
+          <div>
+            <CardTitle class="text-xs font-bold text-foreground">Daftar Agenda & Catatan Tinjauan</CardTitle>
+            <CardDescription class="text-[10px]">Total {{ events.length }} agenda &bull; {{ countEventsWithNotes }} catatan perbaikan</CardDescription>
           </div>
-          <Button variant="ghost" size="icon" class="h-8 w-8 rounded-lg cursor-pointer" @click="nextMonth">
-            <ChevronRight class="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-    </div>
+          <Badge :show-dot="true" :pulse="true" variant="outline" class="text-[9px] font-mono uppercase bg-orange-500/10 text-orange-600 border-orange-500/30">
+            Review
+          </Badge>
+        </CardHeader>
 
-    <!-- Main Container: Calendar & Side list -->
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_390px] gap-6">
-      
-      <!-- 1. CALENDAR BOX -->
-      <Card class="rounded-2xl border border-border bg-card shadow-xs overflow-hidden h-fit">
-        <div class="overflow-x-auto">
-          <!-- Calendar Days Header -->
-          <div class="grid grid-cols-7 gap-2 text-center font-bold text-[10px] uppercase tracking-wider text-muted-foreground py-3 border-b border-border/60 bg-muted/20 min-w-[650px]">
-            <div class="text-rose-500/80">Minggu</div>
-            <div>Senin</div>
-            <div>Selasa</div>
-            <div>Rabu</div>
-            <div>Kamis</div>
-            <div>Jumat</div>
-            <div class="text-rose-500/80">Sabtu</div>
-          </div>
-          
-          <!-- Calendar Grid Cells -->
-          <div class="grid grid-cols-7 gap-3 p-4 min-w-[650px]">
-            <div
-              v-for="(cell, idx) in calendarCells"
-              :key="`admin-cell-${idx}`"
-              @click="handleSelectCell(cell)"
-              class="relative aspect-square rounded-xl border flex flex-col justify-between p-2 transition-all cursor-pointer"
-              :class="[
-                cell.isPadding ? 'border-transparent bg-transparent pointer-events-none' : (
-                  cell.dateStr === selectedDateStr ? 'bg-primary/5 border-primary shadow-xs' : (
-                    cell.isWeekend ? 'bg-muted/40 border-border/30 opacity-80' : 'bg-card border-border/80 hover:shadow-xs hover:border-foreground/20'
-                  )
-                )
-              ]"
+        <CardContent class="p-3.5 flex-1 flex flex-col min-h-0 space-y-3 overflow-hidden">
+          <!-- Filter Category Chips -->
+          <div class="flex items-center gap-1 overflow-x-auto pb-1 shrink-0 no-scrollbar text-[10px]">
+            <button
+              type="button"
+              @click="selectedCategoryFilter = 'all'"
+              class="px-2.5 py-1 rounded-lg font-bold border transition-all cursor-pointer whitespace-nowrap"
+              :class="selectedCategoryFilter === 'all' ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted/40 text-muted-foreground hover:bg-muted'"
             >
-              <template v-if="!cell.isPadding">
-                <!-- Date Number -->
-                <div class="flex justify-between items-center">
-                  <span class="text-xs font-bold font-mono" :class="[
-                    cell.isWeekend ? 'text-rose-500/80' : 'text-foreground/80',
-                    cell.dateStr === selectedDateStr ? 'text-primary' : ''
-                  ]">
-                    {{ cell.dateNum }}
-                  </span>
-                </div>
+              Semua ({{ events.length }})
+            </button>
+            <button
+              type="button"
+              @click="selectedCategoryFilter = 'holiday'"
+              class="px-2.5 py-1 rounded-lg font-bold border transition-all cursor-pointer whitespace-nowrap"
+              :class="selectedCategoryFilter === 'holiday' ? 'bg-rose-500 text-white border-rose-500' : 'bg-rose-500/10 text-rose-600 border-rose-500/20 hover:bg-rose-500/20'"
+            >
+              Libur
+            </button>
+            <button
+              type="button"
+              @click="selectedCategoryFilter = 'exam'"
+              class="px-2.5 py-1 rounded-lg font-bold border transition-all cursor-pointer whitespace-nowrap"
+              :class="selectedCategoryFilter === 'exam' ? 'bg-blue-500 text-white border-blue-500' : 'bg-blue-500/10 text-blue-600 border-blue-500/20 hover:bg-blue-500/20'"
+            >
+              Ujian
+            </button>
+            <button
+              type="button"
+              @click="selectedCategoryFilter = 'academic'"
+              class="px-2.5 py-1 rounded-lg font-bold border transition-all cursor-pointer whitespace-nowrap"
+              :class="selectedCategoryFilter === 'academic' ? 'bg-cyan-500 text-white border-cyan-500' : 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20 hover:bg-cyan-500/20'"
+            >
+              Akademik
+            </button>
+            <button
+              type="button"
+              @click="selectedCategoryFilter = 'activity'"
+              class="px-2.5 py-1 rounded-lg font-bold border transition-all cursor-pointer whitespace-nowrap"
+              :class="selectedCategoryFilter === 'activity' ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20'"
+            >
+              Kegiatan
+            </button>
+          </div>
 
-                <!-- Events display inside cell -->
-                <div class="flex flex-col gap-1 mt-1 overflow-hidden">
-                  <template v-if="cell.events.length > 0">
-                    <div
-                      v-for="e in cell.events.slice(0, 2)"
-                      :key="e.id"
-                      class="text-[8px] font-bold px-1 py-0.5 rounded border truncate text-left"
-                      :class="getEventTypeBadgeClass(e.type)"
-                      :title="e.title"
-                    >
-                      {{ e.title }}
-                    </div>
-                    <span v-if="cell.events.length > 2" class="text-[8px] text-muted-foreground font-bold pl-1">
-                      +{{ cell.events.length - 2 }} lainnya
-                    </span>
-                  </template>
-                  
-                  <!-- Default Weekend Libur Label if no custom event -->
-                  <template v-else-if="cell.isWeekend">
-                    <span class="text-[9px] font-bold text-rose-500/35 uppercase text-center pb-1">
-                      Libur
-                    </span>
-                  </template>
-                </div>
-              </template>
+          <!-- Agenda List with Per-Agenda Kepsek Note Toggle -->
+          <div class="flex-1 overflow-y-auto space-y-2.5 pr-1 no-scrollbar min-h-0 max-h-[540px]">
+            <div
+              v-for="ev in filteredEventsList"
+              :key="ev.id"
+              class="p-3 rounded-xl border border-border/80 dark:border-zinc-800 bg-background dark:bg-zinc-950 space-y-2 text-left"
+            >
+              <div class="flex items-center justify-between gap-2">
+                <Badge :show-dot="true" :pulse="true" variant="outline" class="text-[9px] font-bold uppercase gap-1" :class="getEventBadgeStyle(ev.type)">
+                  {{ getEventTypeLabel(ev.type) }}
+                </Badge>
+                <button
+                  type="button"
+                  @click="toggleNote(ev.id)"
+                  class="text-xs font-semibold flex items-center gap-1 transition-colors px-2 py-0.5 rounded-lg border"
+                  :class="agendaNotes[ev.id] ? 'bg-amber-500/10 text-amber-600 border-amber-500/30' : 'bg-muted/40 text-muted-foreground border-transparent hover:bg-muted'"
+                >
+                  <MessageSquare class="h-3 w-3" />
+                  <span>{{ agendaNotes[ev.id] ? 'Catatan Ada' : '+ Catatan' }}</span>
+                </button>
+              </div>
+
+              <h5 class="text-xs font-bold text-foreground leading-snug">
+                {{ ev.title }}
+              </h5>
+
+              <div class="flex items-center gap-2 text-[10px] font-mono text-muted-foreground">
+                <span>{{ ev.startDate }}</span>
+                <ArrowRight class="h-3 w-3 opacity-60" />
+                <span>{{ ev.endDate }}</span>
+              </div>
+
+              <!-- Collapsible Note Field for Kepsek -->
+              <div v-if="expandedNoteId === ev.id || agendaNotes[ev.id]" class="pt-2 border-t border-border/40">
+                <FormTextArea
+                  v-model="agendaNotes[ev.id]"
+                  placeholder="Tuliskan saran/catatan khusus perbaikan agenda ini..."
+                  :rows="2"
+                />
+              </div>
+            </div>
+
+            <div v-if="filteredEventsList.length === 0" class="py-16 text-center space-y-2">
+              <CalendarDays class="h-8 w-8 text-muted-foreground/30 mx-auto" />
+              <div class="text-xs font-bold text-muted-foreground">Belum ada agenda terdaftar</div>
             </div>
           </div>
-        </div>
-
-        <!-- Legend info footer -->
-        <div class="px-6 py-4 border-t border-border bg-muted/10 flex flex-wrap items-center justify-center gap-6 text-[10px] font-bold text-muted-foreground/80">
-          <div class="flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-rose-500/20 border border-rose-500 text-rose-600 flex items-center justify-center text-[8px]"></span>
-            <span>Libur Nasional / Merah</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-amber-500/20 border border-amber-500 text-amber-600 flex items-center justify-center text-[8px]"></span>
-            <span>Ujian</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-emerald-500/20 border border-emerald-500 text-emerald-600 flex items-center justify-center text-[8px]"></span>
-            <span>Kegiatan Sekolah</span>
-          </div>
-        </div>
+        </CardContent>
       </Card>
-
-      <!-- 2. SIDE PANEL: AGENDA AT SELECTED DATE -->
-      <div class="space-y-6">
-        <!-- Selected Date list -->
-        <Card class="rounded-2xl border border-border bg-card shadow-xs overflow-hidden text-left">
-          <CardHeader class="pb-3 bg-muted/10 border-b">
-            <CardDescription class="text-[9px] font-bold uppercase tracking-wider text-primary">Agenda Tanggal Terpilih</CardDescription>
-            <CardTitle class="text-sm font-bold mt-1 text-foreground leading-tight">
-              {{ formattedSelectedDate }}
-            </CardTitle>
-          </CardHeader>
-          <CardContent class="p-4 space-y-4">
-            
-            <div v-if="selectedDateEvents.length > 0" class="space-y-3">
-              <div
-                v-for="event in selectedDateEvents"
-                :key="event.id"
-                class="p-3.5 rounded-xl border border-border bg-card space-y-2 relative"
-              >
-                <!-- Title & Type -->
-                <div class="flex items-start justify-between gap-2">
-                  <div class="space-y-1">
-                    <Badge variant="outline" class="text-[8px] uppercase tracking-wider" :class="getEventTypeBadgeClass(event.type)">
-                      {{ getEventTypeLabel(event.type) }}
-                    </Badge>
-                    <h4 class="text-xs font-bold text-foreground leading-snug">{{ event.title }}</h4>
-                  </div>
-                </div>
-
-                <!-- Range display -->
-                <div class="flex items-center gap-1 text-[9px] font-bold text-muted-foreground/80">
-                  <span class="font-mono bg-muted border px-1.5 py-0.5 rounded">{{ event.startDate }}</span>
-                  <ArrowRight class="h-3 w-3" />
-                  <span class="font-mono bg-muted border px-1.5 py-0.5 rounded">{{ event.endDate }}</span>
-                </div>
-
-                <!-- Description -->
-                <p v-if="event.description" class="text-[10px] text-muted-foreground line-clamp-3 leading-relaxed">
-                  {{ event.description }}
-                </p>
-              </div>
-            </div>
-
-            <!-- Empty selected date state -->
-            <div v-else class="py-6 text-center space-y-2">
-              <CalendarIcon class="h-8 w-8 text-muted-foreground/35 mx-auto" />
-              <div class="text-[11px] font-bold text-muted-foreground">Tidak ada agenda khusus</div>
-              <p class="text-[10px] text-muted-foreground/70">
-                Secara default, hari ini terhitung sebagai <span class="font-semibold text-foreground/80">{{ new Date(selectedDateStr).getDay() === 0 || new Date(selectedDateStr).getDay() === 6 ? 'Libur Akhir Pekan' : 'Hari Sekolah Efektif' }}</span>.
-              </p>
-            </div>
-
-          </CardContent>
-        </Card>
-
-        <!-- Summary list of the current month -->
-        <Card class="rounded-2xl border border-border bg-card shadow-xs overflow-hidden text-left">
-          <CardHeader class="pb-2 bg-muted/10 border-b">
-            <CardTitle class="text-xs font-bold text-foreground">Agenda Bulan {{ currentMonthName }}</CardTitle>
-            <CardDescription class="text-[9px]">Daftar seluruh agenda akademik bulan ini.</CardDescription>
-          </CardHeader>
-          <CardContent class="p-0">
-            <div class="max-h-[260px] overflow-y-auto divide-y divide-border/60">
-              <div
-                v-for="event in activeMonthEvents"
-                :key="event.id"
-                class="p-3 text-xs hover:bg-muted/20 transition-all flex items-center justify-between gap-3"
-              >
-                <div class="space-y-0.5 overflow-hidden">
-                  <div class="flex items-center gap-1.5">
-                    <span class="font-mono text-[9px] font-bold text-muted-foreground shrink-0 bg-muted px-1 rounded border">
-                      {{ event.startDate.split('-')[2] }} - {{ event.endDate.split('-')[2] }}
-                    </span>
-                    <span class="font-bold text-foreground truncate" :title="event.title">{{ event.title }}</span>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <Badge variant="outline" class="text-[7px] py-0 px-1 hover:bg-transparent" :class="getEventTypeBadgeClass(event.type)">
-                      {{ getEventTypeLabel(event.type) }}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Empty monthly state -->
-              <div v-if="activeMonthEvents.length === 0" class="p-6 text-center text-[10px] font-semibold text-muted-foreground">
-                Belum ada agenda bulan ini.
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
     </div>
 
+    <!-- MODAL CONFIRM APPROVE -->
+    <Dialog :open="isApproveConfirmOpen" @update:open="isApproveConfirmOpen = false">
+      <DialogContent class="sm:max-w-md bg-card dark:bg-zinc-900 border border-border">
+        <DialogHeader>
+          <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+              <Check class="h-5 w-5" />
+            </div>
+            <div>
+              <DialogTitle class="text-base font-bold text-foreground">Setujui Kalender Akademik</DialogTitle>
+              <DialogDescription class="text-xs text-muted-foreground">Tahun Ajaran {{ selectedTahun }}</DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <div class="py-2 text-xs text-foreground space-y-2">
+          <p>Apakah Anda yakin ingin menyetujui Kalender Akademik ini?</p>
+          <p class="text-muted-foreground">Setelah disetujui, status kalender akan resmi berlaku di sekolah.</p>
+        </div>
+
+        <DialogFooter class="gap-2 sm:gap-0">
+          <Button variant="outline" size="sm" @click="isApproveConfirmOpen = false">Batal</Button>
+          <Button size="sm" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold" :disabled="isLoading" @click="handleConfirmApprove">
+            Ya, Setujui Kalender
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <!-- MODAL CONFIRM REJECT -->
+    <Dialog :open="isRejectDialogOpen" @update:open="isRejectDialogOpen = false">
+      <DialogContent class="sm:max-w-md bg-card dark:bg-zinc-900 border border-border text-left">
+        <DialogHeader>
+          <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-full bg-rose-500/10 text-rose-600 flex items-center justify-center shrink-0">
+              <AlertCircle class="h-5 w-5" />
+            </div>
+            <div>
+              <DialogTitle class="text-base font-bold text-foreground">Tolak & Minta Perbaikan Kalender</DialogTitle>
+              <DialogDescription class="text-xs text-muted-foreground">Tahun Ajaran {{ selectedTahun }}</DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <div class="space-y-3 py-2 text-left">
+          <p class="text-xs text-foreground">
+            Berikan catatan umum alasan penolakan agar Admin Sekolah dapat melakukan perbaikan draf agenda kalender:
+          </p>
+
+          <FormTextArea
+            v-model="overallRejectReason"
+            placeholder="Contoh: Tanggal PTS Semester Ganjil perlu ditinjau ulang..."
+            :rows="3"
+            :error="rejectError"
+          />
+
+          <div v-if="countEventsWithNotes > 0" class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-xs">
+            <span class="font-bold">Terdeteksi {{ countEventsWithNotes }} catatan per-agenda.</span> Catatan per-agenda tersebut akan otomatis dilampirkan dalam laporan penolakan ke Admin Sekolah.
+          </div>
+        </div>
+
+        <DialogFooter class="gap-2 sm:gap-0">
+          <Button variant="outline" size="sm" @click="isRejectDialogOpen = false">Batal</Button>
+          <Button size="sm" class="bg-rose-600 hover:bg-rose-700 text-white font-bold" :disabled="isLoading" @click="handleConfirmReject">
+            Tolak Kalender
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>
-
-<style scoped>
-/* Scroller style */
-.max-h-\[260px\]::-webkit-scrollbar {
-  width: 4px;
-}
-.max-h-\[260px\]::-webkit-scrollbar-track {
-  background: transparent;
-}
-.max-h-\[260px\]::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
-}
-</style>

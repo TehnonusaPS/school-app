@@ -24,3 +24,8 @@ export async function deleteSubject(id) {
   const response = await api.delete(`/management/subjects/${id}`)
   return response.data
 }
+
+export async function toggleSubjectStatus(id) {
+  const response = await api.patch(`/management/subjects/${id}/toggle-status`)
+  return response.data
+}

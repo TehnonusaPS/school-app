@@ -9,6 +9,7 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
+import DatePicker from '@/components/date-picker/DatePicker.vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -120,12 +121,10 @@ const handleAction = action => {
             >
               {{ filter.label }}
             </span>
-            <Input
-              type="date"
+            <DatePicker
               :model-value="filterValues[filter.key]"
               @update:model-value="updateFilter(filter.key, $event)"
-              @click="$event.target.showPicker()"
-              class="h-8 w-[140px] px-2 bg-background cursor-pointer text-xs"
+              placeholder="Pilih tanggal"
             />
           </div>
         </template>

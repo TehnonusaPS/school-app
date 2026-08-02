@@ -1,21 +1,33 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import PageHeader from '@/components/page-header/PageHeader.vue'
 import { akreditasi, jenjangOptions, statusOptions } from './data/sekolah'
 import { useAuthStore } from '@/stores/authStore'
-import { computed, onMounted } from 'vue'
 import SuccessAccountDialog from '@/components/dialogs/SuccessAccountDialog.vue'
 import SekolahForm from './components/SekolahForm.vue'
 import { defaultForm } from './data/defaultForm'
-import { Save } from 'lucide-vue-next'
+import { Save, ArrowLeft, CheckCircle2, HelpCircle, School as SchoolIcon } from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog'
 import { toast } from 'vue-sonner'
 import { getFoundations, createSchool, getRoles, createUser } from '@/services/managementService'
+import { glassFade, glassSlide } from '@/config/motion'
 
 const auth = useAuthStore()
 const isSuperAdmin = computed(() => auth.user?.role === 'superadmin')
 
 const foundationOptions = ref([])
+const router = useRouter()
+const isLoading = ref(false)
+const isConfirmOpen = ref(false)
 
 onMounted(async () => {
   try {
@@ -29,11 +41,7 @@ onMounted(async () => {
   }
 })
 
-const form = ref({ ...defaultForm})
-
-const router = useRouter()
-const isLoading = ref(false)
-
+const form = ref({ ...defaultForm })
 const imagePreview = ref('')
 const logoFile = ref(null)
 
@@ -52,15 +60,37 @@ const generatedAccount = ref({
 
 const formErrors = ref({})
 
-const handleSubmit = async () => {
+// Trigger confirmation dialog before actual save
+function onClickSave() {
   formErrors.value = {}
 
-  let foundationId = null
-  if (isSuperAdmin.value) {
-    foundationId = form.value.yayasan
-  } else {
-    foundationId = auth.user?.foundation_id
+  let foundationId = isSuperAdmin.value ? form.value.yayasan : auth.user?.foundation_id
+
+  if (isSuperAdmin.value && !foundationId) {
+    formErrors.value.foundation_id = 'Pilihan yayasan wajib dipilih.'
   }
+  if (!form.value.nama?.trim()) formErrors.value.name = 'Nama sekolah wajib diisi.'
+  
+  const loginEmail = form.value.emailLogin?.trim() || form.value.email?.trim()
+  const loginPhone = form.value.noHpLogin?.trim() || form.value.no_hp?.trim()
+
+  if (!loginEmail) formErrors.value.emailLogin = 'Email login administrator wajib diisi.'
+  if (!loginPhone) formErrors.value.noHpLogin = 'No. HP login administrator wajib diisi.'
+
+  if (Object.keys(formErrors.value).length > 0) {
+    toast.error('Gagal Menyimpan', { description: 'Harap lengkapi semua isian wajib terlebih dahulu.' })
+    return
+  }
+
+  isConfirmOpen.value = true
+}
+
+const handleSubmit = async () => {
+  isConfirmOpen.value = false
+  isLoading.value = true
+  formErrors.value = {}
+
+  let foundationId = isSuperAdmin.value ? form.value.yayasan : auth.user?.foundation_id
 
   // Client-side Validation: All fields must be filled
   const errors = {}
@@ -151,6 +181,10 @@ const handleSubmit = async () => {
   isLoading.value = true
 
   let newSchoolId = null
+  const loginEmail = form.value.emailLogin?.trim() || form.value.email?.trim()
+  const loginPhone = form.value.noHpLogin?.trim() || form.value.no_hp?.trim()
+  const schoolEmail = form.value.email?.trim() || loginEmail
+  const schoolPhone = form.value.no_hp?.trim() || loginPhone
 
   // 1. Create the school using FormData
   try {
@@ -162,8 +196,8 @@ const handleSubmit = async () => {
     if (form.value.tanggal_berdiri) formData.append('established_date', form.value.tanggal_berdiri)
     formData.append('status', form.value.status ? form.value.status.toLowerCase() : 'active')
     if (form.value.alamat) formData.append('address', form.value.alamat)
-    if (form.value.email) formData.append('email', form.value.email)
-    if (form.value.no_hp) formData.append('phone', form.value.no_hp)
+    if (schoolEmail) formData.append('email', schoolEmail)
+    if (schoolPhone) formData.append('phone', schoolPhone)
     if (form.value.website) formData.append('website', form.value.website)
     if (form.value.instagram) formData.append('instagram', form.value.instagram)
     if (form.value.facebook) formData.append('facebook', form.value.facebook)
@@ -174,6 +208,7 @@ const handleSubmit = async () => {
     if (form.value.akreditasi) formData.append('accreditation', form.value.akreditasi)
     if (form.value.tanggal_akreditasi) formData.append('accreditation_date', form.value.tanggal_akreditasi)
     if (form.value.no_akreditasi) formData.append('accreditation_number', form.value.no_akreditasi)
+    if (form.value.curriculum_id) formData.append('curriculum_id', form.value.curriculum_id)
     if (logoFile.value) {
       formData.append('logo', logoFile.value)
     }
@@ -197,7 +232,7 @@ const handleSubmit = async () => {
     return
   }
 
-  // 2. Create school admin user
+  // 2. Create school admin user using loginEmail & loginPhone
   let adminSekolahRole = null
   try {
     const resRoles = await getRoles()
@@ -209,8 +244,8 @@ const handleSubmit = async () => {
   const generatedPassword = Math.random().toString(36).substring(2, 10) + 'A1!'
   const userData = {
     name: 'Admin ' + form.value.nama,
-    email: form.value.emailLogin,
-    phone: form.value.noHpLogin,
+    email: loginEmail,
+    phone: loginPhone,
     password: generatedPassword,
     role_id: adminSekolahRole ? adminSekolahRole.id : 4,
     foundation_id: foundationId,
@@ -222,8 +257,8 @@ const handleSubmit = async () => {
     await createUser(userData)
 
     generatedAccount.value = {
-      email: form.value.emailLogin,
-      phone: form.value.noHpLogin,
+      email: loginEmail,
+      phone: loginPhone,
       password: generatedPassword
     }
 
@@ -248,40 +283,114 @@ const handleSubmit = async () => {
 const goToList = () => {
   router.push('/manajemen-data/sekolah')
 }
-
-const customActions = computed(() => [
-  {
-    label: isLoading.value ? 'Menyimpan...' : 'Simpan',
-    icon: Save,
-    loading: isLoading.value,
-    click: handleSubmit
-  },
-])
 </script>
 
 <template>
-  <div class="space-y-6 p-1 pb-10">
+  <div
+    v-motion
+    :initial="glassFade.initial"
+    :visible-once="glassFade.visible"
+    class="space-y-6 p-1 pb-24 text-left"
+  >
     <!-- Header dengan Tombol Kembali -->
     <PageHeader
       back
-      title="Tambah Sekolah"
-      description="Lengkapi formulir berikut untuk menambahkan data sekolah baru"
-      :actions="customActions"
-    /> 
-
-    <!-- Form Sekolah -->
-    <SekolahForm
-      v-model:form="form"
-      :image-preview="imagePreview"
-      :foundation-options="foundationOptions"
-      :jenjang-options="jenjangOptions"
-      :status-options="statusOptions"
-      :akreditasi="akreditasi"
-      :errors="formErrors"
-      @image-change="handleImage"
+      title="Tambah Sekolah Baru"
+      description="Lengkapi formulir berikut untuk menambahkan data unit sekolah baru."
     />
+
+    <!-- Form Utama -->
+    <div
+      v-motion
+      :initial="glassSlide.initial"
+      :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 100 } }"
+    >
+      <SekolahForm
+        v-model:form="form"
+        :image-preview="imagePreview"
+        :foundation-options="foundationOptions"
+        :jenjang-options="jenjangOptions"
+        :status-options="statusOptions"
+        :akreditasi="akreditasi"
+        :errors="formErrors"
+        @image-change="handleImage"
+      />
+    </div>
+
+    <!-- Bottom Action Bar (Tombol Batal & Simpan di Bawah) -->
+    <div class="fixed bottom-0 left-0 right-0 z-20 backdrop-blur-md bg-background/80 dark:bg-zinc-900/80 border-t border-border dark:border-zinc-800 p-4 transition-all">
+      <div class="max-w-7xl mx-auto flex items-center justify-between gap-4 px-4 sm:px-6">
+        <div class="hidden sm:flex items-center gap-2 text-xs text-muted-foreground dark:text-zinc-400">
+          <SchoolIcon class="h-4 w-4 text-primary" />
+          <span>Mata pelajaran wajib akan otomatis disinkronkan sesuai kurikulum terpilih.</span>
+        </div>
+
+        <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            @click="goToList"
+            :disabled="isLoading"
+            class="gap-1.5"
+          >
+            <ArrowLeft class="h-4 w-4" />
+            Batal
+          </Button>
+
+          <Button
+            type="button"
+            @click="onClickSave"
+            :disabled="isLoading"
+            class="gap-1.5 px-6 shadow-sm"
+          >
+            <Save class="h-4 w-4" />
+            {{ isLoading ? 'Menyimpan...' : 'Simpan Data Sekolah' }}
+          </Button>
+        </div>
+      </div>
+    </div>
   </div>
 
+  <!-- Confirmation Dialog (Konfirmasi Sebelum Simpan) -->
+  <Dialog :open="isConfirmOpen" @update:open="isConfirmOpen = false">
+    <DialogContent class="sm:max-w-md bg-card dark:bg-zinc-900 border border-border dark:border-zinc-800">
+      <DialogHeader>
+        <div class="flex items-center gap-3">
+          <div class="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <HelpCircle class="h-5 w-5" />
+          </div>
+          <div>
+            <DialogTitle class="text-base font-semibold text-foreground dark:text-zinc-100">
+              Konfirmasi Simpan Data Sekolah
+            </DialogTitle>
+            <DialogDescription class="text-xs text-muted-foreground dark:text-zinc-400 mt-0.5">
+              Mohon periksa kembali isian formulir sebelum melanjutkan.
+            </DialogDescription>
+          </div>
+        </div>
+      </DialogHeader>
+
+      <div class="py-3 text-sm text-foreground dark:text-zinc-300 space-y-2">
+        <p>Apakah Anda yakin data <strong>{{ form.nama }}</strong> sudah sesuai?</p>
+        <div class="p-3 rounded-lg bg-accent/40 dark:bg-zinc-800/50 border border-border/50 dark:border-zinc-800 text-xs space-y-1">
+          <div><span class="text-muted-foreground">Email Administrator Sekolah:</span> <span class="font-semibold text-foreground dark:text-zinc-100">{{ form.email }}</span></div>
+          <div><span class="text-muted-foreground">No. HP Administrator:</span> <span class="font-semibold text-foreground dark:text-zinc-100">{{ form.no_hp }}</span></div>
+        </div>
+      </div>
+
+      <DialogFooter class="gap-2 sm:gap-0">
+        <Button variant="outline" type="button" @click="isConfirmOpen = false" :disabled="isLoading">
+          Kembali Periksa
+        </Button>
+        <Button type="button" :disabled="isLoading" @click="handleSubmit" class="gap-1.5">
+          <CheckCircle2 class="h-4 w-4" />
+          {{ isLoading ? 'Memproses...' : 'Ya, Simpan Sekarang' }}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+
+  <!-- Success Account Dialog -->
   <SuccessAccountDialog
     v-model:open="showSuccessModal"
     title="Sekolah Berhasil Ditambahkan"

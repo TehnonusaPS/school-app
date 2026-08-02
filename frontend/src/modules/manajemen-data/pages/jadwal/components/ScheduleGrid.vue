@@ -84,9 +84,11 @@ function getSubjectBadgeClass(subjectName) {
               class="hover:bg-muted/10 transition-colors"
             >
               <!-- Row header slot time range -->
-              <td class="p-3 border-r border-border/60 text-left">
-                <div class="font-bold text-xs text-foreground">{{ slot.label || `Jam ${slot.slot_number}` }}</div>
-                <div class="text-[10px] text-muted-foreground font-mono mt-0.5">
+              <td class="p-3 border-r border-border/60 text-left" :class="slot.is_break ? 'bg-amber-500/5 dark:bg-amber-950/20' : ''">
+                <div class="font-bold text-xs flex items-center gap-1.5" :class="slot.is_break ? 'text-amber-700 dark:text-amber-300' : 'text-foreground'">
+                  <span>{{ slot.label || `Jam ${slot.slot_number}` }}</span>
+                </div>
+                <div class="text-[10px] font-mono mt-0.5" :class="slot.is_break ? 'text-amber-600/80 dark:text-amber-400/80 font-bold' : 'text-muted-foreground'">
                   {{ slot.start_time.substring(0, 5) }} - {{ slot.end_time.substring(0, 5) }}
                 </div>
               </td>
@@ -95,9 +97,9 @@ function getSubjectBadgeClass(subjectName) {
               <template v-if="slot.is_break">
                 <td
                   :colspan="days.length"
-                  class="p-3 bg-muted/30 text-center font-bold text-[10px] tracking-widest text-muted-foreground uppercase border-r last:border-r-0"
+                  class="p-3 bg-amber-500/10 dark:bg-amber-950/30 text-center font-bold text-xs tracking-widest text-amber-700 dark:text-amber-300 uppercase border-r last:border-r-0 border-y border-amber-500/20"
                 >
-                  — {{ slot.label || 'ISTIRAHAT' }} —
+                  ☕ {{ slot.label || 'ISTIRAHAT' }} ({{ slot.start_time.substring(0, 5) }} - {{ slot.end_time.substring(0, 5) }})
                 </td>
               </template>
 

@@ -97,10 +97,13 @@ class LandingPageConfigController extends Controller
     {
         $foundation = Foundation::findOrFail($id);
         return response()->json([
-            'id' => $foundation->id,
+            'id'                   => $foundation->id,
+            'name'                 => $foundation->name,
+            'legal_number'         => $foundation->deed_number ?? '',
+            'logo'                 => $foundation->logo ?? '',
             'landing_page_enabled' => (bool)$foundation->landing_page_enabled,
-            'landing_page_theme' => $foundation->landing_page_theme,
-            'landing_page_config' => $foundation->landing_page_config ? json_decode($foundation->landing_page_config) : null
+            'landing_page_theme'   => $foundation->landing_page_theme,
+            'landing_page_config'  => $foundation->landing_page_config ? json_decode($foundation->landing_page_config) : null
         ]);
     }
 
@@ -152,10 +155,13 @@ class LandingPageConfigController extends Controller
     {
         $school = School::findOrFail($id);
         return response()->json([
-            'id' => $school->id,
+            'id'                   => $school->id,
+            'name'                 => $school->name,
+            'legal_number'         => $school->npsn ?? '',
+            'logo'                 => $school->logo ?? '',
             'landing_page_enabled' => (bool)$school->landing_page_enabled,
-            'landing_page_theme' => $school->landing_page_theme,
-            'landing_page_config' => $school->landing_page_config ? json_decode($school->landing_page_config) : null
+            'landing_page_theme'   => $school->landing_page_theme,
+            'landing_page_config'  => $school->landing_page_config ? json_decode($school->landing_page_config) : null
         ]);
     }
 

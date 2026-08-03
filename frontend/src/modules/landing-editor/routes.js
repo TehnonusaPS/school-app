@@ -56,6 +56,26 @@ export default [
     }
   },
   {
+    path: '/landing-editor/institutions',
+    name: 'LandingEditorInstitutions',
+    component: () => import('./pages/LandingEditorInstitutions.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin_yayasan'],
+      title: 'Landing Page — Lembaga Naungan'
+    }
+  },
+  {
+    path: '/landing-editor/donasi',
+    name: 'LandingEditorDonasi',
+    component: () => import('./pages/LandingEditorDonasi.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin_yayasan'],
+      title: 'Landing Page — Rekening Donasi'
+    }
+  },
+  {
     path: '/landing-editor/contact',
     name: 'LandingEditorContact',
     component: () => import('./pages/LandingEditorContact.vue'),

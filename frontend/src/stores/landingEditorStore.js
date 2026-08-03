@@ -43,8 +43,12 @@ export const useLandingEditorStore = defineStore('landingEditor', {
           this.landingPage = {
             ...config,
             id: res.id,
-            landing_page_enabled: res.landing_page_enabled,
-            theme: res.landing_page_theme || config.theme || 'modern',
+            // Data profil dari top-level (readonly di editor — sama dengan super admin)
+            meta_title:            res.name         || config.meta_title    || '',
+            legal_number:          res.legal_number || config.legal_number  || '',
+            logo:                  res.logo         || config.logo          || '',
+            landing_page_enabled:  res.landing_page_enabled,
+            theme:                 res.landing_page_theme || config.theme || 'modern',
           }
         }
       } catch (err) {

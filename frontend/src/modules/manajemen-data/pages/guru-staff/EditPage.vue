@@ -22,10 +22,6 @@ const form = ref({ ...defaultForm })
 const imagePreview = ref('')
 const formErrors = ref({})
 
-const loadTeacher = async () => {
-  const id = route.query.id
-  if (!id) return
-
 const mapAgamaToValue = (label) => {
   const map = {
     'Islam': 'A01',

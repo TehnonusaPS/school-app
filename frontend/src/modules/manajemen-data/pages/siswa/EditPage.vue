@@ -36,6 +36,12 @@ onMounted(async () => {
         tanggal_lahir: res.data.tanggal_lahir || '',
         tahun_masuk: res.data.tahun_masuk || ''
       }
+      if (res.data.foto) {
+        const photo = res.data.foto
+        imagePreview.value = photo.startsWith('http')
+          ? photo
+          : `http://127.0.0.1:8000/${photo.startsWith('/') ? photo.slice(1) : photo}`
+      }
     } catch (err) {
       toast.error('Gagal memuat data detail siswa')
     }
@@ -57,6 +63,7 @@ const imagePreview = ref('')
 
 const handleImage = (file) => {
   imagePreview.value = URL.createObjectURL(file)
+  form.value.foto = file
 }
 
 const handleSubmit = async () => {

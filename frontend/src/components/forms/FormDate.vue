@@ -5,14 +5,15 @@ import {
   FieldError,
   FieldLabel
 } from '@/components/ui/field'
-
-import { Input } from '@/components/ui/input'
+import DatePicker from '@/components/date-picker/DatePicker.vue'
 
 defineProps({
   label: String,
-  modelValue: String,
+  modelValue: [String, Object],
   error: String,
-  required: Boolean
+  required: Boolean,
+  placeholder: String,
+  disabled: Boolean
 })
 
 defineEmits(['update:modelValue'])
@@ -20,21 +21,18 @@ defineEmits(['update:modelValue'])
 
 <template>
   <Field :data-invalid="!!error">
-    <FieldLabel>
+    <FieldLabel v-if="label">
       {{ label }}
       <span v-if="required" class="text-destructive">*</span>
     </FieldLabel>
 
     <FieldContent>
-      <Input
-        type="date"
+      <DatePicker
         :model-value="modelValue"
         @update:model-value="$emit('update:modelValue', $event)"
-        @click="$event.target.showPicker()"
-        :class="[
-          'cursor-pointer',
-          { 'border-destructive': error }
-        ]"
+        :placeholder="placeholder || 'Pilih tanggal'"
+        :disabled="disabled"
+        :error="!!error"
       />
     </FieldContent>
 

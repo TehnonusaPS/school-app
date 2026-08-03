@@ -2,6 +2,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { BookOpen, Download, Printer, Award, TrendingUp, ChevronUp, ChevronDown } from 'lucide-vue-next'
 import { Skeleton } from '@/components/ui/skeleton'
+import StatCardGrid from '@/components/stat-card/StatCardGrid.vue'
+import StatCard from '@/components/stat-card/StatCard.vue'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -9,21 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-
-const mockData = [
-  { id: 1, sekolah: 'SDN Tunas Bangsa', jenjang: 'SD', siswa: 412, rataNilai: 82.3, kelulusan: 96, ekskul: 8, prestasi: 12 },
-  { id: 2, sekolah: 'SMPN Harapan Ilmu', jenjang: 'SMP', siswa: 356, rataNilai: 79.8, kelulusan: 94, ekskul: 11, prestasi: 8 },
-  { id: 3, sekolah: 'SMAN Bina Prestasi', jenjang: 'SMA', siswa: 487, rataNilai: 81.5, kelulusan: 97, ekskul: 15, prestasi: 21 },
-  { id: 4, sekolah: 'SMK Teknologi Maju', jenjang: 'SMK', siswa: 298, rataNilai: 77.9, kelulusan: 92, ekskul: 7, prestasi: 6 },
-]
-
-const mockPrestasi = [
-  { id: 1, nama: 'Olimpiade Matematika Nasional', sekolah: 'SMAN Bina Prestasi', tingkat: 'Nasional', hasil: 'Juara 1', tgl: 'Mar 2026' },
-  { id: 2, nama: 'Lomba Karya Ilmiah Remaja', sekolah: 'SMAN Bina Prestasi', tingkat: 'Provinsi', hasil: 'Juara 2', tgl: 'Feb 2026' },
-  { id: 3, nama: 'Futsal Pelajar Kota', sekolah: 'SMPN Harapan Ilmu', tingkat: 'Kota', hasil: 'Juara 1', tgl: 'Apr 2026' },
-  { id: 4, nama: 'Lomba Debat Bahasa Inggris', sekolah: 'SMAN Bina Prestasi', tingkat: 'Provinsi', hasil: 'Juara 3', tgl: 'Jan 2026' },
-  { id: 5, nama: 'Festival Seni Pelajar', sekolah: 'SDN Tunas Bangsa', tingkat: 'Kota', hasil: 'Juara 2', tgl: 'Mei 2026' },
-]
+import { getFoundationAcademic } from '@/services/api/reports'
 
 const isLoading = ref(true)
 const data = ref([])
@@ -31,7 +19,17 @@ const prestasiData = ref([])
 const selectedTahun = ref('2025/2026')
 const selectedSemester = ref('1')
 
-onMounted(() => { setTimeout(() => { data.value = mockData; prestasiData.value = mockPrestasi; isLoading.value = false }, 500) })
+onMounted(async () => {
+  try {
+    const res = await getFoundationAcademic()
+    data.value = res.akademik || []
+    prestasiData.value = res.prestasi || []
+  } catch (error) {
+    console.error('Failed to fetch academic data:', error)
+  } finally {
+    isLoading.value = false
+  }
+})
 
 const avgNilai = computed(() => data.value.length ? (data.value.reduce((s,k)=>s+k.rataNilai,0)/data.value.length).toFixed(1) : 0)
 const avgKelulusan = computed(() => data.value.length ? Math.round(data.value.reduce((s,k)=>s+k.kelulusan,0)/data.value.length) : 0)
@@ -68,32 +66,41 @@ const tingkatColor = { Nasional: 'bg-red-100 text-red-700 dark:bg-red-900/40 dar
       </div>
     </div>
 
-    <div class="grid gap-4 grid-cols-2 lg:grid-cols-4">
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Rata² Nilai</span><div class="p-1.5 bg-primary/10 rounded-lg"><TrendingUp class="size-4 text-primary" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-14" />
-        <div v-else class="text-3xl font-bold text-primary">{{ avgNilai }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Seluruh unit sekolah</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Kelulusan</span><div class="p-1.5 bg-green-50 dark:bg-green-950/40 rounded-lg"><Award class="size-4 text-green-600" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-14" />
-        <div v-else class="text-3xl font-bold text-green-600 dark:text-green-400">{{ avgKelulusan }}%</div>
-        <p class="text-xs text-muted-foreground mt-1">Rata-rata ketuntasan</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Ekskul</span><div class="p-1.5 bg-muted rounded-lg"><BookOpen class="size-4 text-muted-foreground" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-12" />
-        <div v-else class="text-3xl font-bold">{{ data.reduce((s,k)=>s+k.ekskul,0) }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Ekstrakurikuler aktif</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Prestasi</span><div class="p-1.5 bg-yellow-50 dark:bg-yellow-950/40 rounded-lg"><Award class="size-4 text-yellow-600" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-12" />
-        <div v-else class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">{{ totalPrestasi }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Penghargaan diraih</p>
-      </Card>
-    </div>
+    <StatCardGrid cols="4">
+      <StatCard
+        label="Rata² Nilai"
+        :value="avgNilai"
+        sub="Seluruh unit sekolah"
+        :icon="TrendingUp"
+        variant="primary"
+        :delay="100"
+      />
+      <StatCard
+        label="Kelulusan"
+        :value="avgKelulusan + '%'"
+        sub="Rata-rata ketuntasan"
+        :icon="Award"
+        variant="emerald"
+        :delay="200"
+      />
+      <StatCard
+        label="Total Ekskul"
+        :value="data.reduce((s,k)=>s+k.ekskul,0)"
+        sub="Ekstrakurikuler aktif"
+        :icon="BookOpen"
+        variant="default"
+        color="slate"
+        :delay="300"
+      />
+      <StatCard
+        label="Prestasi"
+        :value="totalPrestasi"
+        sub="Penghargaan diraih"
+        :icon="Award"
+        variant="amber"
+        :delay="400"
+      />
+    </StatCardGrid>
 
     <Tabs default-value="akademik">
       <TabsList>

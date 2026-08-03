@@ -1,5 +1,6 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { toast } from 'vue-sonner'
 import PageHeader from '@/components/page-header/PageHeader.vue'
 import {
   Select,
@@ -18,31 +19,107 @@ import {
 } from '@/components/ui/table'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import {
-  TAHUN_AJARAN_OPTIONS,
-  KELAS_OPTIONS,
-  classMetadata,
-  initialSiswaTahunAjaran
-} from './data/mockTahunAjaran'
 import StatCard from '@/components/stat-card/StatCard.vue'
 import { glassSlide, glassFade } from '@/config/motion'
 import { Calendar, GraduationCap, User, Users } from 'lucide-vue-next'
+import { fetchAllAcademicYears } from '@/services/academicYearService'
+import { getClassrooms } from '@/services/managementService'
+import { fetchAllSiswa } from '@/services/siswaService'
 
-const selectedTahun = ref('2025/2026')
-const selectedKelas = ref('V A')
+const academicYears = ref([])
+const allClassrooms = ref([])
+const selectedTahun = ref('')
+const selectedKelas = ref('')
+const students = ref([])
+const isLoading = ref(false)
 
-const classInfo = computed(() => {
-  const years = classMetadata[selectedTahun.value]
-  if (years && years[selectedKelas.value]) {
-    return years[selectedKelas.value]
+async function loadData() {
+  isLoading.value = true
+  try {
+    const [ayRes, classRes] = await Promise.all([
+      fetchAllAcademicYears(),
+      getClassrooms()
+    ])
+    
+    academicYears.value = ayRes.data
+    allClassrooms.value = classRes.data
+
+    // Set default selected tahun (active or first one)
+    const active = ayRes.data.find(ay => ay.is_active)
+    if (active) {
+      selectedTahun.value = String(active.id)
+    } else if (ayRes.data.length > 0) {
+      selectedTahun.value = String(ayRes.data[0].id)
+    }
+  } catch (err) {
+    toast.error('Gagal memuat data awal')
+  } finally {
+    isLoading.value = false
   }
-  return { waliKelas: '-', siswaCount: 0 }
+}
+
+onMounted(() => {
+  loadData()
 })
 
-const filteredStudents = computed(() => {
-  return initialSiswaTahunAjaran.filter(
-    s => s.tahunAjaran === selectedTahun.value && s.kelas === selectedKelas.value
-  )
+// Filter classrooms by selected academic year
+const filteredClassrooms = computed(() => {
+  if (!selectedTahun.value) return []
+  return allClassrooms.value.filter(c => String(c.academic_year_id) === String(selectedTahun.value))
+})
+
+// Watch selectedTahun to update selectedKelas
+watch(filteredClassrooms, (newClasses) => {
+  if (newClasses.length > 0) {
+    const exists = newClasses.some(c => String(c.id) === String(selectedKelas.value))
+    if (!exists) {
+      selectedKelas.value = String(newClasses[0].id)
+    }
+  } else {
+    selectedKelas.value = ''
+  }
+})
+
+// Fetch students when selectedKelas changes
+async function fetchStudents() {
+  if (!selectedKelas.value) {
+    students.value = []
+    return
+  }
+  try {
+    const res = await fetchAllSiswa({ kelasId: selectedKelas.value })
+    students.value = res.data.map(s => ({
+      id: s.id,
+      nama: s.nama,
+      nis: s.nis || '-',
+      nisn: s.nisn || '-',
+      gender: s.jenisKelamin === 'Perempuan' ? 'P' : 'L'
+    }))
+  } catch (err) {
+    toast.error('Gagal memuat data siswa')
+  }
+}
+
+watch(selectedKelas, () => {
+  fetchStudents()
+}, { immediate: true })
+
+const currentClassObj = computed(() => {
+  return allClassrooms.value.find(c => String(c.id) === String(selectedKelas.value))
+})
+
+const currentYearObj = computed(() => {
+  return academicYears.value.find(ay => String(ay.id) === String(selectedTahun.value))
+})
+
+const classInfo = computed(() => {
+  if (currentClassObj.value) {
+    return {
+      waliKelas: currentClassObj.value.homeroom_teacher || '-',
+      siswaCount: currentClassObj.value.students_count || 0
+    }
+  }
+  return { waliKelas: '-', siswaCount: 0 }
 })
 </script>
 
@@ -79,11 +156,11 @@ const filteredStudents = computed(() => {
               </SelectTrigger>
               <SelectContent class="rounded-xl">
                 <SelectItem
-                  v-for="opt in TAHUN_AJARAN_OPTIONS"
-                  :key="opt.value"
-                  :value="opt.value"
+                  v-for="ay in academicYears"
+                  :key="ay.id"
+                  :value="String(ay.id)"
                 >
-                  Tahun Ajaran {{ opt.label }}
+                  Tahun Ajaran {{ ay.name }} ({{ ay.semester === 'odd' ? 'Ganjil' : 'Genap' }})
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -100,11 +177,11 @@ const filteredStudents = computed(() => {
               </SelectTrigger>
               <SelectContent class="rounded-xl">
                 <SelectItem
-                  v-for="opt in KELAS_OPTIONS"
-                  :key="opt.value"
-                  :value="opt.value"
+                  v-for="cls in filteredClassrooms"
+                  :key="cls.id"
+                  :value="String(cls.id)"
                 >
-                  Kelas {{ opt.label }}
+                  Kelas {{ cls.name }}
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -122,14 +199,14 @@ const filteredStudents = computed(() => {
     >
       <StatCard
         label="TAHUN AJARAN"
-        :value="selectedTahun"
+        :value="currentYearObj ? currentYearObj.name : '-'"
         :icon="Calendar"
         illustration="globe"
         variant="primary"
       />
       <StatCard
         label="KELAS"
-        :value="selectedKelas"
+        :value="currentClassObj ? currentClassObj.name : '-'"
         :icon="GraduationCap"
         illustration="school_bell"
         variant="emerald"
@@ -143,7 +220,7 @@ const filteredStudents = computed(() => {
       />
       <StatCard
         label="JUMLAH SISWA"
-        :value="filteredStudents.length"
+        :value="students.length"
         sub="Siswa Aktif"
         :icon="Users"
         illustration="abc_board"
@@ -172,7 +249,7 @@ const filteredStudents = computed(() => {
             </TableHeader>
             <TableBody>
               <TableRow
-                v-for="(student, idx) in filteredStudents"
+                v-for="(student, idx) in students"
                 :key="student.id"
                 class="hover:bg-muted/30 transition-colors"
               >
@@ -198,7 +275,7 @@ const filteredStudents = computed(() => {
                   </Badge>
                 </TableCell>
               </TableRow>
-              <TableRow v-if="filteredStudents.length === 0">
+              <TableRow v-if="students.length === 0">
                 <TableCell colspan="5" class="h-24 text-center text-muted-foreground font-semibold">
                   Tidak ada data siswa untuk tahun ajaran dan kelas yang dipilih.
                 </TableCell>

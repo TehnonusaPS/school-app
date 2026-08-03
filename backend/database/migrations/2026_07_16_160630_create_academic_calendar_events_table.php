@@ -21,7 +21,7 @@ return new class extends Migration
             $table->date('end_date');
             $table->string('type'); // libur_nasional, tanggal_merah, ujian, kegiatan
             $table->text('description')->nullable();
-            $table->foreignUuid('created_by')->constrained('users')->onDelete('cascade');
+            $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->timestamps();
 
             $table->index(['school_id', 'academic_year_id', 'start_date']);

@@ -90,6 +90,7 @@ export function saveSubjects(subjects) {
 export const columns = [
   { key: 'kode', label: 'Kode Mapel' },
   { key: 'nama', label: 'Nama Mapel' },
+  { key: 'grades', label: 'Tingkat Kelas' },
   { key: 'deskripsi', label: 'Keterangan', truncate: true },
   { 
     key: 'status', 

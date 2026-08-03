@@ -20,6 +20,7 @@ class FoundationController extends Controller
 
         if ($user->isSuperAdmin()) {
             $query = Foundation::query()
+                ->with('curriculum')
                 ->withCount('schools')
                 ->with(['users' => function ($q) {
                     $q->whereIn('role_id', function ($sq) {
@@ -129,6 +130,7 @@ class FoundationController extends Controller
             'deed_date'        => 'nullable|date',
             'decree_number'    => 'nullable|string|max:255',
             'decree_date'      => 'nullable|date',
+            'curriculum_id'     => 'nullable|exists:curriculums,id',
             'logo'             => 'nullable|image|max:2048',
         ]);
 

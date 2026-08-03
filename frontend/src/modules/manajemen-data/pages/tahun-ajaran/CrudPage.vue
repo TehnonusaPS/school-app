@@ -37,9 +37,11 @@ import {
   XCircle
 } from 'lucide-vue-next'
 import {
-  getTahunAjaranList,
-  saveTahunAjaranList
-} from './data/mockTahunAjaran'
+  fetchAllAcademicYears,
+  createAcademicYear,
+  updateAcademicYear,
+  deleteAcademicYear
+} from '@/services/academicYearService'
 import { glassSlide, glassFade } from '@/config/motion'
 
 // --- State ---
@@ -49,9 +51,29 @@ const filterValues = ref({
   search: '',
   status: 'all'
 })
+const isLoading = ref(false)
+
+async function fetchData() {
+  isLoading.value = true
+  try {
+    const res = await fetchAllAcademicYears()
+    dbItems.value = res.data.map(item => ({
+      id: item.id,
+      tahun: item.name,
+      semester: item.semester,
+      tanggalMulai: item.start_date ? item.start_date.substring(0, 10) : '',
+      tanggalSelesai: item.end_date ? item.end_date.substring(0, 10) : '',
+      status: item.is_active ? 'aktif' : 'nonaktif'
+    }))
+  } catch (err) {
+    toast.error('Gagal mengambil data tahun ajaran')
+  } finally {
+    isLoading.value = false
+  }
+}
 
 onMounted(() => {
-  dbItems.value = getTahunAjaranList()
+  fetchData()
 })
 
 // --- Computed Stats ---
@@ -96,17 +118,12 @@ watch(filteredItems, () => {
 })
 
 // --- Header Actions ---
-const headerActions = computed(() => [
-  {
-    label: 'Tambah Tahun Ajaran',
-    icon: Plus,
-    click: handleCreate
-  }
-])
+const headerActions = computed(() => [])
 
 // --- Data Table Configurations ---
 const columns = [
   { key: 'tahun', label: 'Tahun Ajaran' },
+  { key: 'semester', label: 'Semester' },
   { key: 'tanggalMulai', label: 'Tanggal Mulai' },
   { key: 'tanggalSelesai', label: 'Tanggal Selesai' },
   {
@@ -142,23 +159,38 @@ const filters = [
 // --- Form Sheet ---
 const isFormSheetOpen = ref(false)
 const isEditMode = ref(false)
+const formMode = ref('full') // 'full' (Ganjil & Genap) or 'single'
 const formErrors = ref({})
 const formItem = ref({
   id: '',
   tahun: '',
+  semester: 'odd',
   tanggalMulai: '',
   tanggalSelesai: '',
+  // Dual semester date ranges
+  oddTanggalMulai: '',
+  oddTanggalSelesai: '',
+  evenTanggalMulai: '',
+  evenTanggalSelesai: '',
+  activeSemester: 'odd',
   status: 'nonaktif'
 })
 
 function handleCreate() {
   isEditMode.value = false
+  formMode.value = 'full'
   formErrors.value = {}
   formItem.value = {
     id: '',
     tahun: '',
+    semester: 'odd',
     tanggalMulai: '',
     tanggalSelesai: '',
+    oddTanggalMulai: '',
+    oddTanggalSelesai: '',
+    evenTanggalMulai: '',
+    evenTanggalSelesai: '',
+    activeSemester: 'odd',
     status: 'nonaktif'
   }
   isFormSheetOpen.value = true
@@ -166,12 +198,19 @@ function handleCreate() {
 
 function handleEdit(item) {
   isEditMode.value = true
+  formMode.value = 'single'
   formErrors.value = {}
   formItem.value = {
     id: item.id,
     tahun: item.tahun,
+    semester: item.semester,
     tanggalMulai: item.tanggalMulai,
     tanggalSelesai: item.tanggalSelesai,
+    oddTanggalMulai: '',
+    oddTanggalSelesai: '',
+    evenTanggalMulai: '',
+    evenTanggalSelesai: '',
+    activeSemester: 'odd',
     status: item.status
   }
   isFormSheetOpen.value = true
@@ -184,48 +223,84 @@ function validateForm() {
   } else if (!/^\d{4}\/\d{4}$/.test(formItem.value.tahun.trim())) {
     errors.tahun = 'Format harus YYYY/YYYY (contoh: 2025/2026).'
   }
-  if (!formItem.value.tanggalMulai) errors.tanggalMulai = 'Tanggal mulai wajib dipilih.'
-  if (!formItem.value.tanggalSelesai) errors.tanggalSelesai = 'Tanggal selesai wajib dipilih.'
-  if (formItem.value.tanggalMulai && formItem.value.tanggalSelesai) {
-    if (new Date(formItem.value.tanggalMulai) >= new Date(formItem.value.tanggalSelesai)) {
-      errors.tanggalSelesai = 'Tanggal selesai harus setelah tanggal mulai.'
+
+  if (!isEditMode.value && formMode.value === 'full') {
+    if (!formItem.value.oddTanggalMulai) errors.oddTanggalMulai = 'Tanggal mulai ganjil wajib diisi.'
+    if (!formItem.value.oddTanggalSelesai) errors.oddTanggalSelesai = 'Tanggal selesai ganjil wajib diisi.'
+    if (formItem.value.oddTanggalMulai && formItem.value.oddTanggalSelesai) {
+      if (new Date(formItem.value.oddTanggalMulai) >= new Date(formItem.value.oddTanggalSelesai)) {
+        errors.oddTanggalSelesai = 'Tanggal selesai ganjil harus setelah tanggal mulai ganjil.'
+      }
+    }
+
+    if (!formItem.value.evenTanggalMulai) errors.evenTanggalMulai = 'Tanggal mulai genap wajib diisi.'
+    if (!formItem.value.evenTanggalSelesai) errors.evenTanggalSelesai = 'Tanggal selesai genap wajib diisi.'
+    if (formItem.value.evenTanggalMulai && formItem.value.evenTanggalSelesai) {
+      if (new Date(formItem.value.evenTanggalMulai) >= new Date(formItem.value.evenTanggalSelesai)) {
+        errors.evenTanggalSelesai = 'Tanggal selesai genap harus setelah tanggal mulai genap.'
+      }
+    }
+  } else {
+    if (!formItem.value.semester) errors.semester = 'Semester wajib dipilih.'
+    if (!formItem.value.tanggalMulai) errors.tanggalMulai = 'Tanggal mulai wajib dipilih.'
+    if (!formItem.value.tanggalSelesai) errors.tanggalSelesai = 'Tanggal selesai wajib dipilih.'
+    if (formItem.value.tanggalMulai && formItem.value.tanggalSelesai) {
+      if (new Date(formItem.value.tanggalMulai) >= new Date(formItem.value.tanggalSelesai)) {
+        errors.tanggalSelesai = 'Tanggal selesai harus setelah tanggal mulai.'
+      }
     }
   }
+
   formErrors.value = errors
   return Object.keys(errors).length === 0
 }
 
-function handleSave() {
+async function handleSave() {
   if (!validateForm()) {
     toast.error('Gagal Menyimpan', { description: 'Harap periksa kembali isian formulir Anda.' })
     return
   }
 
-  const payload = {
-    tahun: formItem.value.tahun.trim(),
-    tanggalMulai: formItem.value.tanggalMulai,
-    tanggalSelesai: formItem.value.tanggalSelesai,
-    status: formItem.value.status
+  try {
+    if (isEditMode.value) {
+      const payload = {
+        name: formItem.value.tahun.trim(),
+        semester: formItem.value.semester,
+        start_date: formItem.value.tanggalMulai,
+        end_date: formItem.value.tanggalSelesai,
+        is_active: formItem.value.status === 'aktif'
+      }
+      await updateAcademicYear(formItem.value.id, payload)
+      toast.success('Berhasil Diperbarui', { description: `Tahun ajaran "${formItem.value.tahun}" telah diperbarui.` })
+    } else {
+      if (formMode.value === 'full') {
+        const payload = {
+          name: formItem.value.tahun.trim(),
+          odd_start_date: formItem.value.oddTanggalMulai,
+          odd_end_date: formItem.value.oddTanggalSelesai,
+          even_start_date: formItem.value.evenTanggalMulai,
+          even_end_date: formItem.value.evenTanggalSelesai,
+          active_semester: formItem.value.activeSemester
+        }
+        await createAcademicYear(payload)
+        toast.success('Berhasil Ditambahkan', { description: `Tahun ajaran "${formItem.value.tahun}" (Ganjil & Genap) telah ditambahkan.` })
+      } else {
+        const payload = {
+          name: formItem.value.tahun.trim(),
+          semester: formItem.value.semester,
+          start_date: formItem.value.tanggalMulai,
+          end_date: formItem.value.tanggalSelesai,
+          is_active: formItem.value.status === 'aktif'
+        }
+        await createAcademicYear(payload)
+        toast.success('Berhasil Ditambahkan', { description: `Tahun ajaran "${formItem.value.tahun}" telah ditambahkan.` })
+      }
+    }
+    fetchData()
+    isFormSheetOpen.value = false
+  } catch (err) {
+    toast.error('Gagal menyimpan tahun ajaran')
   }
-
-  let updatedList = []
-  let activeIdToSet = null
-  if (isEditMode.value) {
-    updatedList = dbItems.value.map(item =>
-      String(item.id) === String(formItem.value.id) ? { ...item, ...payload } : item
-    )
-    if (payload.status === 'aktif') activeIdToSet = formItem.value.id
-    toast.success('Berhasil Diperbarui', { description: `Tahun ajaran "${payload.tahun}" telah diperbarui.` })
-  } else {
-    const newItem = { id: String(Date.now()), ...payload }
-    updatedList = [newItem, ...dbItems.value]
-    if (payload.status === 'aktif') activeIdToSet = newItem.id
-    toast.success('Berhasil Ditambahkan', { description: `Tahun ajaran "${payload.tahun}" telah ditambahkan.` })
-  }
-
-  // Jika item yang disimpan berstatus aktif, handler saveTahunAjaranList otomatis menonaktifkan yang lain
-  dbItems.value = saveTahunAjaranList(updatedList, activeIdToSet)
-  isFormSheetOpen.value = false
 }
 
 // --- Detail Sheet ---
@@ -257,6 +332,7 @@ const detailSections = computed(() => {
       title: 'Detail Informasi',
       fields: [
         { label: 'Tahun Ajaran', value: t.tahun },
+        { label: 'Semester', value: t.semester === 'odd' ? 'Ganjil' : 'Genap' },
         { label: 'Tanggal Mulai', value: formatDate(t.tanggalMulai) },
         { label: 'Tanggal Selesai', value: formatDate(t.tanggalSelesai) },
         { label: 'Status', value: getStatusLabel(t.status) }
@@ -266,18 +342,23 @@ const detailSections = computed(() => {
 })
 
 // --- Aktivasi Status (Toggle) ---
-function handleToggleStatus(item) {
-  // Hanya bisa mengaktifkan. Jika dinonaktifkan langsung, sistem harus tetap memiliki minimal 1 yang aktif.
-  // Oleh karena itu, jika klik nonaktifkan, tidak terjadi apa-apa / peringatkan. Jika klik aktifkan, maka yang lain dinonaktifkan.
+async function handleToggleStatus(item) {
   if (item.status === 'aktif') {
     toast.warning('Aksi Dibatalkan', { description: 'Harus ada minimal satu tahun ajaran yang aktif pada sistem.' })
     return
   }
   
-  dbItems.value = saveTahunAjaranList(dbItems.value, item.id)
-  toast.success('Tahun Ajaran Diaktifkan', {
-    description: `Tahun ajaran "${item.tahun}" kini aktif. Tahun ajaran lainnya telah dinonaktifkan.`
-  })
+  try {
+    await updateAcademicYear(item.id, {
+      is_active: true
+    })
+    toast.success('Tahun Ajaran Diaktifkan', {
+      description: `Tahun ajaran "${item.tahun}" kini aktif. Tahun ajaran lainnya telah dinonaktifkan.`
+    })
+    fetchData()
+  } catch (err) {
+    toast.error('Gagal mengaktifkan tahun ajaran')
+  }
 }
 
 // --- Delete ---
@@ -293,13 +374,17 @@ function openDeleteConfirm(item) {
   isDeleteConfirmOpen.value = true
 }
 
-function confirmDelete() {
+async function confirmDelete() {
   if (!selectedItemToDelete.value) return
-  const updated = dbItems.value.filter(t => t.id !== selectedItemToDelete.value.id)
-  dbItems.value = saveTahunAjaranList(updated)
-  isDeleteConfirmOpen.value = false
-  toast.success('Berhasil Dihapus', { description: `Tahun ajaran "${selectedItemToDelete.value.tahun}" telah dihapus.` })
-  selectedItemToDelete.value = null
+  try {
+    await deleteAcademicYear(selectedItemToDelete.value.id)
+    isDeleteConfirmOpen.value = false
+    toast.success('Berhasil Dihapus', { description: `Tahun ajaran "${selectedItemToDelete.value.tahun}" telah dihapus.` })
+    selectedItemToDelete.value = null
+    fetchData()
+  } catch (err) {
+    toast.error('Gagal menghapus tahun ajaran')
+  }
 }
 </script>
 
@@ -312,10 +397,21 @@ function confirmDelete() {
   >
     <!-- Header -->
     <PageHeader
-      title="Manajemen Tahun Ajaran"
-      description="Kelola daftar periode tahun akademik sekolah, durasi kalender, dan aktivasi semester aktif"
+      title="Daftar Tahun Ajaran"
+      description="Lihat daftar periode tahun akademik dan pilih tahun ajaran mana yang aktif."
       :actions="headerActions"
     />
+
+    <!-- Informative Banner -->
+    <div class="p-4 rounded-xl bg-primary/5 dark:bg-primary/10 border border-primary/20 flex items-start gap-3 text-sm">
+      <Calendar class="h-5 w-5 text-primary shrink-0 mt-0.5" />
+      <div>
+        <h4 class="font-semibold text-foreground dark:text-zinc-100">Penyusunan & Pembuatan Tahun Ajaran Baru</h4>
+        <p class="text-xs text-muted-foreground dark:text-zinc-400 mt-0.5">
+          Tahun Ajaran baru secara otomatis dibuat saat menyusun <strong>Kalender Akademik Baru</strong>. Pada halaman ini, Anda hanya perlu menentukan Tahun Ajaran yang berstatus <strong>Aktif</strong> atau <strong>Nonaktif</strong>.
+        </p>
+      </div>
+    </div>
 
     <!-- Stat Cards -->
     <div
@@ -366,6 +462,12 @@ function confirmDelete() {
         @update:page="currentPage = $event"
       >
         <!-- Format Date Cells -->
+        <template #cell-semester="{ value }">
+          <span class="text-sm font-medium text-foreground">
+            {{ value === 'odd' ? 'Ganjil' : 'Genap' }}
+          </span>
+        </template>
+
         <template #cell-tanggalMulai="{ value }">
           <span class="text-sm font-medium text-foreground">
             {{ formatDate(value) }}
@@ -398,21 +500,11 @@ function confirmDelete() {
               <span class="text-[9px] font-semibold leading-none">Detail</span>
             </button>
 
-            <!-- Edit -->
-            <button
-              class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-foreground transition-colors"
-              title="Edit"
-              @click="handleEdit(item)"
-            >
-              <Pencil class="size-4 transition-transform group-hover/btn:scale-110" />
-              <span class="text-[9px] font-semibold leading-none">Edit</span>
-            </button>
-
             <!-- Toggle Status (Aktivasi) -->
             <button
               class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none transition-colors"
               :class="item.status === 'aktif' ? 'text-emerald-500 hover:text-emerald-600' : 'text-muted-foreground hover:text-foreground'"
-              :title="item.status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan'"
+              :title="item.status === 'aktif' ? 'Status Aktif' : 'Klik untuk mengaktifkan'"
               @click="handleToggleStatus(item)"
             >
               <component
@@ -420,18 +512,8 @@ function confirmDelete() {
                 class="size-4 transition-transform group-hover/btn:scale-110"
               />
               <span class="text-[9px] font-semibold leading-none">
-                {{ item.status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }}
+                {{ item.status === 'aktif' ? 'Aktif' : 'Aktifkan' }}
               </span>
-            </button>
-
-            <!-- Hapus (Netral / Tanpa Warna) -->
-            <button
-              class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-foreground transition-colors"
-              title="Hapus"
-              @click="openDeleteConfirm(item)"
-            >
-              <Trash2 class="size-4 transition-transform group-hover/btn:scale-110" />
-              <span class="text-[9px] font-semibold leading-none">Hapus</span>
             </button>
           </div>
         </template>
@@ -460,7 +542,7 @@ function confirmDelete() {
           </SheetDescription>
         </SheetHeader>
 
-        <div class="flex-1 overflow-y-auto py-6 pr-1 space-y-5 no-scrollbar">
+        <div class="flex-1 overflow-y-auto py-6 pr-1 space-y-5 no-scrollbar text-left">
           <!-- Tahun Ajaran -->
           <div class="space-y-1.5">
             <label class="text-xs font-semibold text-muted-foreground">Tahun Ajaran <span class="text-rose-500">*</span></label>
@@ -473,47 +555,143 @@ function confirmDelete() {
             <p v-if="formErrors.tahun" class="text-[10px] text-rose-500">{{ formErrors.tahun }}</p>
           </div>
 
-          <!-- Durasi Tanggal -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="space-y-1.5">
-              <label class="text-xs font-semibold text-muted-foreground">Tanggal Mulai <span class="text-rose-500">*</span></label>
-              <Input
-                type="date"
-                v-model="formItem.tanggalMulai"
-                class="h-10 rounded-xl"
-                :class="formErrors.tanggalMulai ? 'border-rose-500' : ''"
-              />
-              <p v-if="formErrors.tanggalMulai" class="text-[10px] text-rose-500">{{ formErrors.tanggalMulai }}</p>
+          <!-- Dual Semester Form (Create Mode) -->
+          <template v-if="!isEditMode && formMode === 'full'">
+            <!-- Semester Ganjil Section -->
+            <div class="p-3.5 rounded-2xl border border-border bg-muted/20 space-y-3">
+              <span class="text-xs font-bold text-foreground flex items-center gap-1.5">
+                <span class="h-2 w-2 rounded-full bg-primary inline-block"></span>
+                Semester Ganjil
+              </span>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="space-y-1">
+                  <label class="text-[11px] font-semibold text-muted-foreground">Tanggal Mulai <span class="text-rose-500">*</span></label>
+                  <Input
+                    type="date"
+                    v-model="formItem.oddTanggalMulai"
+                    class="h-9 text-xs rounded-xl"
+                    :class="formErrors.oddTanggalMulai ? 'border-rose-500' : ''"
+                  />
+                  <p v-if="formErrors.oddTanggalMulai" class="text-[9px] text-rose-500">{{ formErrors.oddTanggalMulai }}</p>
+                </div>
+                <div class="space-y-1">
+                  <label class="text-[11px] font-semibold text-muted-foreground">Tanggal Selesai <span class="text-rose-500">*</span></label>
+                  <Input
+                    type="date"
+                    v-model="formItem.oddTanggalSelesai"
+                    class="h-9 text-xs rounded-xl"
+                    :class="formErrors.oddTanggalSelesai ? 'border-rose-500' : ''"
+                  />
+                  <p v-if="formErrors.oddTanggalSelesai" class="text-[9px] text-rose-500">{{ formErrors.oddTanggalSelesai }}</p>
+                </div>
+              </div>
             </div>
 
-            <div class="space-y-1.5">
-              <label class="text-xs font-semibold text-muted-foreground">Tanggal Selesai <span class="text-rose-500">*</span></label>
-              <Input
-                type="date"
-                v-model="formItem.tanggalSelesai"
-                class="h-10 rounded-xl"
-                :class="formErrors.tanggalSelesai ? 'border-rose-500' : ''"
-              />
-              <p v-if="formErrors.tanggalSelesai" class="text-[10px] text-rose-500">{{ formErrors.tanggalSelesai }}</p>
+            <!-- Semester Genap Section -->
+            <div class="p-3.5 rounded-2xl border border-border bg-muted/20 space-y-3">
+              <span class="text-xs font-bold text-foreground flex items-center gap-1.5">
+                <span class="h-2 w-2 rounded-full bg-emerald-500 inline-block"></span>
+                Semester Genap
+              </span>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="space-y-1">
+                  <label class="text-[11px] font-semibold text-muted-foreground">Tanggal Mulai <span class="text-rose-500">*</span></label>
+                  <Input
+                    type="date"
+                    v-model="formItem.evenTanggalMulai"
+                    class="h-9 text-xs rounded-xl"
+                    :class="formErrors.evenTanggalMulai ? 'border-rose-500' : ''"
+                  />
+                  <p v-if="formErrors.evenTanggalMulai" class="text-[9px] text-rose-500">{{ formErrors.evenTanggalMulai }}</p>
+                </div>
+                <div class="space-y-1">
+                  <label class="text-[11px] font-semibold text-muted-foreground">Tanggal Selesai <span class="text-rose-500">*</span></label>
+                  <Input
+                    type="date"
+                    v-model="formItem.evenTanggalSelesai"
+                    class="h-9 text-xs rounded-xl"
+                    :class="formErrors.evenTanggalSelesai ? 'border-rose-500' : ''"
+                  />
+                  <p v-if="formErrors.evenTanggalSelesai" class="text-[9px] text-rose-500">{{ formErrors.evenTanggalSelesai }}</p>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <!-- Status -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-muted-foreground">Status <span class="text-rose-500">*</span></label>
-            <Select v-model="formItem.status" :disabled="isEditMode && formItem.status === 'aktif'">
-              <SelectTrigger class="h-10 rounded-xl">
-                <SelectValue placeholder="Pilih Status..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="aktif">Aktif</SelectItem>
-                <SelectItem value="nonaktif">Nonaktif</SelectItem>
-              </SelectContent>
-            </Select>
-            <p v-if="isEditMode && formItem.status === 'aktif'" class="text-[10px] text-muted-foreground italic">
-              Status aktif hanya dapat dialihkan dari luar melalui tombol aktivasi di baris tabel.
-            </p>
-          </div>
+            <!-- Active Semester Selector -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-muted-foreground">Semester Aktif Pertama <span class="text-rose-500">*</span></label>
+              <Select v-model="formItem.activeSemester">
+                <SelectTrigger class="h-10 rounded-xl">
+                  <SelectValue placeholder="Pilih Semester Aktif..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="odd">Semester Ganjil (Aktif)</SelectItem>
+                  <SelectItem value="even">Semester Genap (Aktif)</SelectItem>
+                  <SelectItem value="none">Nonaktifkan Keduanya</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </template>
+
+          <!-- Single Semester Form (Edit Mode) -->
+          <template v-else>
+            <!-- Semester -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-muted-foreground">Semester <span class="text-rose-500">*</span></label>
+              <Select v-model="formItem.semester">
+                <SelectTrigger class="h-10 rounded-xl">
+                  <SelectValue placeholder="Pilih Semester..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="odd">Ganjil (Odd)</SelectItem>
+                  <SelectItem value="even">Genap (Even)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p v-if="formErrors.semester" class="text-[10px] text-rose-500">{{ formErrors.semester }}</p>
+            </div>
+
+            <!-- Durasi Tanggal -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-muted-foreground">Tanggal Mulai <span class="text-rose-500">*</span></label>
+                <Input
+                  type="date"
+                  v-model="formItem.tanggalMulai"
+                  class="h-10 rounded-xl"
+                  :class="formErrors.tanggalMulai ? 'border-rose-500' : ''"
+                />
+                <p v-if="formErrors.tanggalMulai" class="text-[10px] text-rose-500">{{ formErrors.tanggalMulai }}</p>
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-muted-foreground">Tanggal Selesai <span class="text-rose-500">*</span></label>
+                <Input
+                  type="date"
+                  v-model="formItem.tanggalSelesai"
+                  class="h-10 rounded-xl"
+                  :class="formErrors.tanggalSelesai ? 'border-rose-500' : ''"
+                />
+                <p v-if="formErrors.tanggalSelesai" class="text-[10px] text-rose-500">{{ formErrors.tanggalSelesai }}</p>
+              </div>
+            </div>
+
+            <!-- Status -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-muted-foreground">Status <span class="text-rose-500">*</span></label>
+              <Select v-model="formItem.status" :disabled="isEditMode && formItem.status === 'aktif'">
+                <SelectTrigger class="h-10 rounded-xl">
+                  <SelectValue placeholder="Pilih Status..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="aktif">Aktif</SelectItem>
+                  <SelectItem value="nonaktif">Nonaktif</SelectItem>
+                </SelectContent>
+              </Select>
+              <p v-if="isEditMode && formItem.status === 'aktif'" class="text-[10px] text-muted-foreground italic">
+                Status aktif hanya dapat dialihkan dari luar melalui tombol aktivasi di baris tabel.
+              </p>
+            </div>
+          </template>
         </div>
 
         <div class="border-t border-border pt-4 flex items-center justify-end gap-2 shrink-0">

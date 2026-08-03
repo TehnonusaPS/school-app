@@ -112,23 +112,8 @@ export async function getClassrooms(params) {
   return response.data
 }
 
-export async function createClassroom(data) {
-  const response = await api.post('/management/classrooms', data)
-  return response.data
-}
-
-export async function updateClassroom(id, data) {
-  const response = await api.put(`/management/classrooms/${id}`, data)
-  return response.data
-}
-
-export async function deleteClassroom(id) {
-  const response = await api.delete(`/management/classrooms/${id}`)
-  return response.data
-}
-
 // ─────────────────────────────────────────────────────────────────────────
-//  Guru & Staff (Teachers) API
+//  Guru & Staff (Teachers & Staff) API
 // ─────────────────────────────────────────────────────────────────────────
 
 export async function getTeachers(params) {
@@ -155,3 +140,4 @@ export async function deleteTeacher(id) {
   const response = await api.delete(`/management/teachers/${id}`)
   return response.data
 }
+

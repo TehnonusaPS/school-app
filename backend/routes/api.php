@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\TeacherController;
 use App\Http\Controllers\Api\ExtracurricularController;
 use App\Http\Controllers\Api\SubjectController;
 use App\Http\Controllers\Api\AcademicYearController;
+
 use App\Http\Controllers\Api\AcademicCalendarController;
 use App\Http\Controllers\Api\CurriculumController;
 use Illuminate\Support\Facades\Broadcast;
@@ -154,7 +155,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Management Data Routes (Yayasan, Sekolah & Pengguna)
-    Route::middleware('role:superadmin,admin_yayasan,admin_sekolah,tata_usaha,kepala_sekolah')->prefix('management')->group(function () {
+    Route::middleware('role:superadmin,admin_yayasan,admin_sekolah,kepala_sekolah,tata_usaha,wali_kelas')->prefix('management')->group(function () {
         Route::get('/roles', [UserController::class, 'getRoles']);
         Route::apiResource('/foundations', FoundationController::class);
         Route::apiResource('/schools', SchoolController::class);

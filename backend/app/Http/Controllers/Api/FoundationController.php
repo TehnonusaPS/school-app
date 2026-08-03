@@ -19,22 +19,7 @@ class FoundationController extends Controller
         $user = $request->user();
 
         if ($user->isSuperAdmin()) {
-            $query = Foundation::query()
-                ->with('curriculum')
-                ->withCount('schools')
-                ->with(['users' => function ($q) {
-                    $q->whereIn('role_id', function ($sq) {
-                        $sq->select('id')->from('roles')->where('name', 'admin_yayasan');
-                    });
-                }])
-                ->addSelect(['users_count' => User::selectRaw('count(*)')
-                    ->where(function ($q) {
-                        $q->whereColumn('users.foundation_id', 'foundations.id')
-                          ->orWhereIn('users.school_id', function ($sq) {
-                              $sq->select('id')->from('schools')->whereColumn('schools.foundation_id', 'foundations.id');
-                          });
-                    })
-                ]);
+            $query = Foundation::withCount('schools');
 
             // Search by name or code
             if ($request->filled('search')) {
@@ -51,14 +36,15 @@ class FoundationController extends Controller
                 $query->where('status', $request->input('status'));
             }
 
-            $perPage = $request->input('per_page', 15);
-            $foundations = $query->latest()->paginate($perPage);
+            $foundations = $query->latest()->paginate($request->input('per_page', 15));
 
-            $statsQuery = Foundation::query();
-            $total = (clone $statsQuery)->count();
-            $active = (clone $statsQuery)->where('status', 'active')->count();
-            $trial = (clone $statsQuery)->where('status', 'trial')->count();
-            $inactive = (clone $statsQuery)->where('status', 'inactive')->count();
+            $foundations->getCollection()->transform(function ($f) {
+                $schoolIds = $f->schools()->pluck('id');
+                $f->users_count = \App\Models\User::where('foundation_id', $f->id)
+                    ->orWhereIn('school_id', $schoolIds)
+                    ->count();
+                return $f;
+            });
 
             return response()->json([
                 'status' => 'success',
@@ -73,7 +59,7 @@ class FoundationController extends Controller
         }
 
         if ($user->hasRole('admin_yayasan')) {
-            $foundation = Foundation::find($user->foundation_id);
+            $foundation = Foundation::withCount('schools')->find($user->foundation_id);
             if (!$foundation) {
                 return response()->json([
                     'status'  => 'error',
@@ -81,12 +67,12 @@ class FoundationController extends Controller
                 ], 404);
             }
 
-            $stats = [
-                'total' => 1,
-                'active' => $foundation->status === 'active' ? 1 : 0,
-                'trial' => $foundation->status === 'trial' ? 1 : 0,
-                'inactive' => $foundation->status === 'inactive' ? 1 : 0,
-            ];
+            $schoolIds = $foundation->schools()->pluck('id');
+            $usersCount = \App\Models\User::where('foundation_id', $foundation->id)
+                ->orWhereIn('school_id', $schoolIds)
+                ->count();
+
+            $foundation->users_count = $usersCount;
 
             return response()->json([
                 'status' => 'success',

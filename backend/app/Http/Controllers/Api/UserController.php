@@ -122,12 +122,7 @@ class UserController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data'   => $query->latest()->paginate(15),
-            'stats'  => [
-                'total' => $total,
-                'active' => $active,
-                'inactive' => $inactive,
-            ]
+            'data'   => $query->latest()->paginate($request->input('per_page', 15)),
         ]);
     }
 

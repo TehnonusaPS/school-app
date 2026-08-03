@@ -12,45 +12,6 @@ import { sekolahSheetSections } from './data/dataSheetDetail.js'
 import { getSchools, deleteSchool } from '@/services/managementService'
 import { School, BookCheck, BookAlert, BookX } from 'lucide-vue-next'
 
-const stats = ref([
-  {
-    label: 'TOTAL SEKOLAH',
-    value: '0',
-    trend: 'Terdaftar',
-    trendDirection: 'up',
-    icon: School,
-    illustration: 'globe',
-    variant: 'primary'
-  },
-  {
-    label: 'SEKOLAH AKTIF',
-    value: '0',
-    trend: 'Status aktif',
-    trendDirection: 'up',
-    icon: BookCheck,
-    illustration: 'school_bell',
-    variant: 'emerald'
-  },
-  {
-    label: 'SEKOLAH SEDANG TRIAL',
-    value: '0',
-    trend: 'Status trial',
-    trendDirection: 'down',
-    icon: BookAlert,
-    illustration: 'pencil',
-    variant: 'amber'
-  },
-  {
-    label: 'SEKOLAH TIDAK AKTIF',
-    value: '0',
-    trend: 'Status nonaktif',
-    trendDirection: 'up',
-    icon: BookX,
-    illustration: 'ruler',
-    variant: 'violet'
-  }
-])
-
 const auth = useAuthStore()
 const isSuperAdmin = computed(() => auth.user?.role === 'superadmin')
 const perPage = ref(5)
@@ -60,6 +21,67 @@ const from = ref(1)
 const to = ref(1)
 const tableItems = ref([])
 const isLoading = ref(false)
+
+const statsData = ref({
+  total: 0,
+  aktif: 0,
+  trial: 0,
+  inactive: 0
+})
+
+const fetchStats = async () => {
+  try {
+    const res = await getSchools({ per_page: 1000 })
+    const list = Array.isArray(res.data) ? res.data : (res.data.data || [])
+    statsData.value = {
+      total: list.length,
+      aktif: list.filter(item => item.status === 'active').length,
+      trial: list.filter(item => item.status === 'trial').length,
+      inactive: list.filter(item => item.status === 'inactive').length
+    }
+  } catch (err) {
+    console.error('Gagal mengambil data statistik sekolah', err)
+  }
+}
+
+const stats = computed(() => [
+  {
+    label: 'TOTAL SEKOLAH',
+    value: String(statsData.value.total),
+    trend: '+8.4% bln ini',
+    trendDirection: 'up',
+    icon: School,
+    illustration: 'globe',
+    variant: 'primary'
+  },
+  {
+    label: 'SEKOLAH AKTIF',
+    value: String(statsData.value.aktif),
+    trend: '+12 Baru',
+    trendDirection: 'up',
+    icon: BookCheck,
+    illustration: 'school_bell',
+    variant: 'emerald'
+  },
+  {
+    label: 'SEKOLAH SEDANG TRIAL',
+    value: String(statsData.value.trial),
+    trend: '-2 Sekolah',
+    trendDirection: 'down',
+    icon: BookAlert,
+    illustration: 'pencil',
+    variant: 'amber'
+  },
+  {
+    label: 'SEKOLAH TIDAK AKTIF',
+    value: String(statsData.value.inactive),
+    trend: '-1 Sekolah',
+    trendDirection: 'up',
+    icon: BookX,
+    illustration: 'ruler',
+    variant: 'violet'
+  }
+])
 
 const filterValues = ref({
   search: '',
@@ -75,10 +97,19 @@ const fetchSchools = async () => {
       search: filterValues.value.search,
     }
     if (filterValues.value.status !== 'all') {
-      params.status = filterValues.value.status.toLowerCase()
+      const statusMap = {
+        aktif: 'active',
+        nonaktif: 'inactive',
+        trial: 'trial',
+        Aktif: 'active',
+        Nonaktif: 'inactive',
+        Trial: 'trial'
+      }
+      params.status = statusMap[filterValues.value.status] || filterValues.value.status
     }
     const res = await getSchools(params)
     tableItems.value = res.data.data.map(item => ({
+      ...item,
       id: item.id,
       nama: item.name,
       npsn: item.npsn,
@@ -100,13 +131,10 @@ const fetchSchools = async () => {
       akreditasi: item.accreditation,
       tanggal_akreditasi: item.accreditation_date ? item.accreditation_date.split('T')[0] : '-',
       no_akreditasi: item.accreditation_number,
-      status: item.status.charAt(0).toUpperCase() + item.status.slice(1),
+      status: item.status === 'active' ? 'Aktif' : (item.status === 'inactive' ? 'Nonaktif' : 'Trial'),
       foto: item.logo || 'https://picsum.photos/200',
       logo: item.logo || 'https://picsum.photos/200',
-      emailLogin: item.users && item.users[0] ? item.users[0].email : '-',
-      noHpLogin: item.users && item.users[0] ? item.users[0].phone : '-',
-      jmlSiswa: item.students_count || 0,
-      ...item
+      jmlSiswa: item.students_count || 0
     }))
     total.value = res.data.total
     from.value = res.data.from || 1
@@ -127,6 +155,7 @@ const fetchSchools = async () => {
 
 onMounted(() => {
   fetchSchools()
+  fetchStats()
 })
 
 watch([currentPage, perPage, filterValues], () => {
@@ -140,6 +169,7 @@ const deleteItem = async (id, item) => {
       description: `${item.nama} telah dihapus dari sistem.`
     })
     fetchSchools()
+    fetchStats()
   } catch (err) {
     toast.error('Gagal menghapus sekolah')
   }

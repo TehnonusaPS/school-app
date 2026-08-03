@@ -350,11 +350,6 @@ export const navMain = [
         title: 'Kepegawaian',
         url: '/laporan/kepegawaian',
         roles: ['kepala_sekolah', 'admin_sekolah']
-      },
-      {
-        title: 'LPJ',
-        url: '/laporan/pertanggung-jawaban',
-        roles: ['kepala_sekolah']
       }
     ]
   },

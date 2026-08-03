@@ -91,6 +91,9 @@ export const useLandingEditorStore = defineStore('landingEditor', {
           this.landingPage = {
             ...config,
             id: res.data.id,
+            meta_title: res.data.name || config.meta_title || this.landingPage.meta_title || '',
+            legal_number: res.data.legal_number || config.legal_number || this.landingPage.legal_number || '',
+            logo: res.data.logo || config.logo || this.landingPage.logo || '',
             landing_page_enabled: res.data.landing_page_enabled,
             theme: res.data.landing_page_theme || config.theme || 'modern',
           }

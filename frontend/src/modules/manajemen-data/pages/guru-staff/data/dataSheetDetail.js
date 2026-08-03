@@ -17,8 +17,7 @@ export const rawGuruStaffItem = {
 
   email: 'ahmad.fauzi@sekolah.sch.id',
   no_hp: '081234567890',
-  alamat:
-    'Jl. Sukajadi No. 100, Kel. Sukagalih, Kec. Sukajadi, Kota Bandung',
+  alamat: 'Jl. Sukajadi No. 100, Kel. Sukagalih, Kec. Sukajadi, Kota Bandung',
 
   jabatan: 'Guru Matematika',
   status_kepegawaian: 'Guru Tetap',

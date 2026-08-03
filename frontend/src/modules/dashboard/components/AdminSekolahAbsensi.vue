@@ -9,10 +9,13 @@ const props = defineProps({
 })
 
 const statusVariant = (s: string) =>
-  s === 'Hadir'     ? 'default'   :
-  s === 'Terlambat' ? 'secondary' :
-  s === 'Izin'      ? 'outline'   :
-  'destructive'
+  s === 'Hadir'
+    ? 'default'
+    : s === 'Terlambat'
+      ? 'secondary'
+      : s === 'Izin'
+        ? 'outline'
+        : 'destructive'
 </script>
 
 <template>
@@ -62,7 +65,10 @@ const statusVariant = (s: string) =>
             <td class="py-3 text-muted-foreground text-sm">{{ a.kelas }}</td>
             <td class="py-3 text-center font-mono text-xs text-muted-foreground">{{ a.jam }}</td>
             <td class="pr-6 py-3 text-right">
-              <Badge :variant="statusVariant(a.status)" class="text-xs">
+              <Badge
+                :variant="statusVariant(a.status)"
+                class="text-xs"
+              >
                 {{ a.status }}
               </Badge>
             </td>

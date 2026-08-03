@@ -32,13 +32,11 @@ export const ShowcaseItem = defineComponent({
             {
               variant: 'outline',
               size: 'xs',
-              class: 'text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-1 border-border/50 bg-background/50',
+              class:
+                'text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-1 border-border/50 bg-background/50',
               onClick: replayAnimation
             },
-            () => [
-              h(RotateCcw, { class: 'h-2.5 w-2.5' }),
-              'Play Animasi'
-            ]
+            () => [h(RotateCcw, { class: 'h-2.5 w-2.5' }), 'Play Animasi']
           )
         ]),
         h(
@@ -101,6 +99,6 @@ body {
 }
 
 .showcase-section-title::before {
-  content: counter(showcase-section-counter) ". ";
+  content: counter(showcase-section-counter) '. ';
 }
 </style>

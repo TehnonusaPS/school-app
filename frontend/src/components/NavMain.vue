@@ -5,11 +5,7 @@ import { computed, ref } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { navItemSlide } from '@/config/motion'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import {
-  HoverCard,
-  HoverCardTrigger,
-  HoverCardContent
-} from '@/components/ui/hover-card'
+import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card'
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -30,7 +26,7 @@ const props = defineProps({
 
 const route = useRoute()
 const auth = useAuthStore()
-const getNavDelay = (index) => (auth.isJustLoggedIn ? 1200 : 200) + (index * 80)
+const getNavDelay = index => (auth.isJustLoggedIn ? 1200 : 200) + index * 80
 
 // Gunakan computed agar reaktifitasnya terjamin
 const currentPath = computed(() => route.path)
@@ -60,7 +56,7 @@ const openIndex = ref(
   props.items.findIndex(item => item.items?.length && isParentActive(item.items))
 )
 
-const toggleItem = (index) => {
+const toggleItem = index => {
   openIndex.value = openIndex.value === index ? null : index
 }
 // ────────────────────────────────────────────────────────────────────────────
@@ -70,17 +66,25 @@ const toggleItem = (index) => {
   <SidebarGroup>
     <SidebarGroupLabel>Menu Utama</SidebarGroupLabel>
     <SidebarMenu class="gap-1.5 px-2 group-data-[collapsible=icon]:px-0">
-      <template v-for="(item, itemIndex) in items" :key="item.title">
+      <template
+        v-for="(item, itemIndex) in items"
+        :key="item.title"
+      >
         <!-- CASE 1: MENU DENGAN SUB-ITEMS -->
-        <SidebarMenuItem 
+        <SidebarMenuItem
           v-if="item.items && item.items.length > 0"
           v-motion
           :initial="navItemSlide.initial"
-          :enter="{ ...navItemSlide.enter, transition: { ...navItemSlide.enter.transition, delay: getNavDelay(itemIndex) } }"
+          :enter="{
+            ...navItemSlide.enter,
+            transition: { ...navItemSlide.enter.transition, delay: getNavDelay(itemIndex) }
+          }"
         >
-          
           <!-- HOVERCARD UNTUK MODE COLLAPSED (ICON) -->
-          <HoverCard :open-delay="100" :close-delay="100">
+          <HoverCard
+            :open-delay="100"
+            :close-delay="100"
+          >
             <HoverCardTrigger as-child>
               <!-- Tombol ini HANYA tampil saat mode collapsed -->
               <SidebarMenuButton
@@ -91,18 +95,31 @@ const toggleItem = (index) => {
                     : '!bg-transparent text-sidebar-foreground/70 hover:!bg-sidebar-accent hover:!text-sidebar-foreground font-medium'
                 ]"
               >
-                <component :is="item.icon" v-if="item.icon" class="!size-5 shrink-0" />
+                <component
+                  :is="item.icon"
+                  v-if="item.icon"
+                  class="!size-5 shrink-0"
+                />
               </SidebarMenuButton>
             </HoverCardTrigger>
-            <HoverCardContent side="right" align="start" :side-offset="8" class="w-56 p-2 rounded-lg flex flex-col gap-1">
+            <HoverCardContent
+              side="right"
+              align="start"
+              :side-offset="8"
+              class="w-56 p-2 rounded-lg flex flex-col gap-1"
+            >
               <div class="px-2 py-1.5 font-bold text-sm text-foreground">{{ item.title }}</div>
               <div class="h-px bg-border my-1 -mx-2"></div>
               <router-link
-                v-for="subItem in item.items" 
-                :key="subItem.title" 
+                v-for="subItem in item.items"
+                :key="subItem.title"
                 :to="subItem.url"
                 class="flex items-center px-2 py-1.5 text-sm rounded-md transition-colors hover:bg-muted hover:text-foreground outline-none focus:outline-none focus:ring-0"
-                :class="[isPageActive(subItem.url) ? 'bg-primary/10 text-primary font-bold' : 'text-muted-foreground']"
+                :class="[
+                  isPageActive(subItem.url)
+                    ? 'bg-primary/10 text-primary font-bold'
+                    : 'text-muted-foreground'
+                ]"
               >
                 {{ subItem.title }}
               </router-link>
@@ -125,7 +142,11 @@ const toggleItem = (index) => {
                     : '!bg-transparent text-sidebar-foreground/70 hover:!bg-sidebar-accent hover:!text-sidebar-foreground font-medium'
                 ]"
               >
-                <component :is="item.icon" v-if="item.icon" class="!size-5 shrink-0" />
+                <component
+                  :is="item.icon"
+                  v-if="item.icon"
+                  class="!size-5 shrink-0"
+                />
                 <span>{{ item.title }}</span>
                 <ChevronRight
                   class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 !size-4"
@@ -134,7 +155,10 @@ const toggleItem = (index) => {
             </CollapsibleTrigger>
             <CollapsibleContent class="mt-1">
               <SidebarMenuSub class="ml-4 border-l-2 border-primary/10 pl-2">
-                <SidebarMenuSubItem v-for="subItem in item.items" :key="subItem.title">
+                <SidebarMenuSubItem
+                  v-for="subItem in item.items"
+                  :key="subItem.title"
+                >
                   <!-- Jika subItem punya anak lagi (Level 3) -->
                   <Collapsible
                     v-if="subItem.items && subItem.items.length > 0"
@@ -152,12 +176,17 @@ const toggleItem = (index) => {
                         ]"
                       >
                         <span>{{ subItem.title }}</span>
-                        <ChevronRight class="ml-auto transition-transform duration-200 group-data-[state=open]/subcollapsible:rotate-90 !size-3.5" />
+                        <ChevronRight
+                          class="ml-auto transition-transform duration-200 group-data-[state=open]/subcollapsible:rotate-90 !size-3.5"
+                        />
                       </SidebarMenuSubButton>
                     </CollapsibleTrigger>
                     <CollapsibleContent class="mt-1">
                       <SidebarMenuSub class="ml-2 border-l border-primary/20 pl-2">
-                        <SidebarMenuSubItem v-for="child in subItem.items" :key="child.title">
+                        <SidebarMenuSubItem
+                          v-for="child in subItem.items"
+                          :key="child.title"
+                        >
                           <SidebarMenuSubButton
                             as-child
                             :is-active="isPageActive(child.url)"
@@ -189,7 +218,10 @@ const toggleItem = (index) => {
                         : '!bg-transparent text-sidebar-foreground/70 hover:!bg-sidebar-accent hover:!text-sidebar-foreground font-medium'
                     ]"
                   >
-                    <router-link :to="subItem.url" class="outline-none focus:outline-none focus:ring-0">
+                    <router-link
+                      :to="subItem.url"
+                      class="outline-none focus:outline-none focus:ring-0"
+                    >
                       <span>{{ subItem.title }}</span>
                     </router-link>
                   </SidebarMenuSubButton>
@@ -203,7 +235,10 @@ const toggleItem = (index) => {
         <SidebarMenuItem
           v-motion
           :initial="navItemSlide.initial"
-          :enter="{ ...navItemSlide.enter, transition: { ...navItemSlide.enter.transition, delay: getNavDelay(itemIndex) } }"
+          :enter="{
+            ...navItemSlide.enter,
+            transition: { ...navItemSlide.enter.transition, delay: getNavDelay(itemIndex) }
+          }"
         >
           <SidebarMenuButton
             v-if="!item.items || item.items.length === 0"
@@ -216,8 +251,15 @@ const toggleItem = (index) => {
                 : '!bg-transparent text-sidebar-foreground/70 hover:!bg-sidebar-accent hover:!text-sidebar-foreground font-medium'
             ]"
           >
-            <router-link :to="item.url" class="outline-none focus:outline-none focus:ring-0">
-              <component :is="item.icon" v-if="item.icon" class="!size-5 shrink-0" />
+            <router-link
+              :to="item.url"
+              class="outline-none focus:outline-none focus:ring-0"
+            >
+              <component
+                :is="item.icon"
+                v-if="item.icon"
+                class="!size-5 shrink-0"
+              />
               <span class="group-data-[collapsible=icon]:hidden">{{ item.title }}</span>
             </router-link>
           </SidebarMenuButton>

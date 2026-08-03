@@ -56,7 +56,10 @@ function deleteBerita(item) {
     <div
       v-motion
       :initial="glassSlide.initial"
-      :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 100 } }"
+      :visible-once="{
+        ...glassSlide.visible,
+        transition: { ...glassSlide.visible.transition, delay: 100 }
+      }"
     >
       <StatCard
         label="Total Berita Terbuat"
@@ -71,12 +74,15 @@ function deleteBerita(item) {
     <div
       v-motion
       :initial="glassSlide.initial"
-      :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 200 } }"
+      :visible-once="{
+        ...glassSlide.visible,
+        transition: { ...glassSlide.visible.transition, delay: 200 }
+      }"
     >
-      <BeritaKegiatanTable 
-        :items="beritaKegiatans" 
-        @view="viewBerita" 
-        @edit="editBerita" 
+      <BeritaKegiatanTable
+        :items="beritaKegiatans"
+        @view="viewBerita"
+        @edit="editBerita"
         @delete="deleteBerita"
       />
     </div>

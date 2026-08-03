@@ -57,7 +57,12 @@ const asPesan = (item: unknown) => item as PesanItem
     >
       <template #item="{ item }">
         <!-- Avatar inisial -->
-        <div :class="['size-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0', asPesan(item).warna]">
+        <div
+          :class="[
+            'size-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0',
+            asPesan(item).warna
+          ]"
+        >
           {{ asPesan(item).inisial }}
         </div>
         <div class="min-w-0 flex-1 ml-2">

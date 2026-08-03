@@ -27,14 +27,14 @@
   --muted-foreground: oklch(0.55 0.03 160);
 
   --accent: oklch(0.95 0.02 160);
-  --accent-foreground: oklch(0.20 0.05 160);
+  --accent-foreground: oklch(0.2 0.05 160);
 
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(1 0 0);
 
-  --border: oklch(0.92 0.01 160 / 0.60);
-  --input: oklch(0.94 0.01 160 / 0.50);
-  --ring: oklch(0.65 0.13 155 / 0.30);
+  --border: oklch(0.92 0.01 160 / 0.6);
+  --input: oklch(0.94 0.01 160 / 0.5);
+  --ring: oklch(0.65 0.13 155 / 0.3);
   --radius: 0.875rem;
 
   --sidebar: oklch(0.99 0.005 160 / 0.85);
@@ -42,12 +42,12 @@
   --sidebar-primary: oklch(0.65 0.13 155);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.94 0.02 160);
-  --sidebar-accent-foreground: oklch(0.20 0.05 160);
-  --sidebar-border: oklch(0.92 0.01 160 / 0.50);
-  --sidebar-ring: oklch(0.65 0.13 155 / 0.30);
+  --sidebar-accent-foreground: oklch(0.2 0.05 160);
+  --sidebar-border: oklch(0.92 0.01 160 / 0.5);
+  --sidebar-ring: oklch(0.65 0.13 155 / 0.3);
 
   --grad-primary: linear-gradient(135deg, oklch(0.67 0.13 155), oklch(0.62 0.12 162));
-  --ambient-grad-1: oklch(0.95 0.04 150 / 0.50);
+  --ambient-grad-1: oklch(0.95 0.04 150 / 0.5);
   --ambient-grad-2: oklch(0.96 0.03 165 / 0.45);
 }
 
@@ -77,9 +77,9 @@
   --destructive: oklch(0.637 0.214 27.91);
   --destructive-foreground: oklch(0.96 0 0);
 
-  --border: oklch(0.25 0.02 160 / 0.60);
-  --input: oklch(0.24 0.02 160 / 0.50);
-  --ring: oklch(0.65 0.13 155 / 0.30);
+  --border: oklch(0.25 0.02 160 / 0.6);
+  --input: oklch(0.24 0.02 160 / 0.5);
+  --ring: oklch(0.65 0.13 155 / 0.3);
   --radius: 0.875rem;
 
   --sidebar: oklch(0.14 0.02 160 / 0.85);
@@ -88,8 +88,8 @@
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.22 0.03 160);
   --sidebar-accent-foreground: oklch(0.96 0.01 160);
-  --sidebar-border: oklch(0.25 0.02 160 / 0.50);
-  --sidebar-ring: oklch(0.65 0.13 155 / 0.30);
+  --sidebar-border: oklch(0.25 0.02 160 / 0.5);
+  --sidebar-ring: oklch(0.65 0.13 155 / 0.3);
 
   --grad-primary: linear-gradient(135deg, oklch(0.67 0.13 150), oklch(0.62 0.12 160));
   --ambient-grad-1: oklch(0.25 0.04 150 / 0.35);

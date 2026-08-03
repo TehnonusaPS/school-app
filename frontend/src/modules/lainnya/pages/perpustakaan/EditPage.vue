@@ -15,17 +15,17 @@ const isLoading = ref(true)
 
 onMounted(() => {
   const targetId = route.params.id
-  
+
   setTimeout(() => {
     const foundData = store.getById(targetId)
-    
+
     if (foundData) {
       bookData.value = foundData
     } else {
       toast.error('Data buku tidak ditemukan')
       router.push('/lainnya/perpustakaan')
     }
-    
+
     isLoading.value = false
   }, 500)
 })
@@ -43,22 +43,25 @@ function handleCancel() {
 
 <template>
   <div class="space-y-6">
-    <PageHeader 
-      title="Edit Buku Perpustakaan" 
+    <PageHeader
+      title="Edit Buku Perpustakaan"
       description="Ubah informasi data buku di bawah ini"
       back
     />
-    
-    <div v-if="isLoading" class="flex justify-center items-center py-20">
+
+    <div
+      v-if="isLoading"
+      class="flex justify-center items-center py-20"
+    >
       <p class="text-muted-foreground font-medium animate-pulse">Memuat data buku...</p>
     </div>
-    
-    <PerpustakaanForm 
+
+    <PerpustakaanForm
       v-else
-      :initial-data="bookData" 
+      :initial-data="bookData"
       is-edit
-      @submit="handleSubmit" 
-      @cancel="handleCancel" 
+      @submit="handleSubmit"
+      @cancel="handleCancel"
     />
   </div>
 </template>

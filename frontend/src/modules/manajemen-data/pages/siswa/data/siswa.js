@@ -148,23 +148,31 @@ export const actions = [
 ]
 
 export const columns = [
-  { key: 'nama', label: 'Nama Siswa',avatar: true, avatarKey: 'foto' },
+  { key: 'nama', label: 'Nama Siswa', avatar: true, avatarKey: 'foto' },
   { key: 'nisn', label: 'NISN', type: 'code' },
   { key: 'kelas', label: 'Kelas' },
-  { key: 'jenisKelamin', label: 'Jenis Kelamin', badge: true,
+  {
+    key: 'jenisKelamin',
+    label: 'Jenis Kelamin',
+    badge: true,
     badgeVariant: {
       Perempuan: 'pink',
       'Laki-laki': 'blue'
-    }  },
+    }
+  },
   { key: 'tahunMasuk', label: 'Tahun Masuk', type: 'number' },
   { key: 'alamat', label: 'Alamat', type: 'muted', truncate: true },
-  { key: 'status', label: 'Status', badge: true,
+  {
+    key: 'status',
+    label: 'Status',
+    badge: true,
     badgeVariant: {
       Aktif: 'green',
       Nonaktif: 'gray',
       Pindah: 'amber',
       Lulus: 'purple'
-    } },
+    }
+  },
   { key: 'namaWali', label: 'Nama Wali' },
   { key: 'actions', label: 'Aksi' }
 ]
@@ -410,7 +418,7 @@ export const agamaOptions = [
   {
     label: 'Konghucu',
     value: 'A06'
-  },
+  }
 ]
 
 export const kelaminOptions = [
@@ -421,7 +429,7 @@ export const kelaminOptions = [
   {
     label: 'Perempuan',
     value: 'JK02'
-  },
+  }
 ]
 export const pekerjaanOptions = [
   {
@@ -493,5 +501,5 @@ export const kelasOptions = [
   {
     label: '3-B',
     value: 'K0006'
-  },
+  }
 ]

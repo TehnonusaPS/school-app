@@ -1,10 +1,5 @@
 <script setup>
-import {
-  Field,
-  FieldContent,
-  FieldError,
-  FieldLabel
-} from '@/components/ui/field'
+import { Field, FieldContent, FieldError, FieldLabel } from '@/components/ui/field'
 
 import { Textarea } from '@/components/ui/textarea'
 
@@ -27,7 +22,11 @@ defineEmits(['update:modelValue'])
   <Field :data-invalid="!!error">
     <FieldLabel>
       {{ label }}
-      <span v-if="required" class="text-destructive">*</span>
+      <span
+        v-if="required"
+        class="text-destructive"
+        >*</span
+      >
     </FieldLabel>
 
     <FieldContent>

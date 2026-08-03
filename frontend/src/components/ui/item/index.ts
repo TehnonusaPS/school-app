@@ -19,19 +19,19 @@ export const itemVariants = cva(
       variant: {
         default: 'border-transparent',
         outline: 'border-border',
-        muted: 'bg-muted/50 border-transparent',
+        muted: 'bg-muted/50 border-transparent'
       },
       size: {
         default: 'gap-2.5 px-3 py-2.5',
         sm: 'gap-2.5 px-3 py-2.5',
-        xs: 'gap-2 px-2.5 py-2 in-data-[slot=dropdown-menu-content]:p-0',
-      },
+        xs: 'gap-2 px-2.5 py-2 in-data-[slot=dropdown-menu-content]:p-0'
+      }
     },
     defaultVariants: {
       variant: 'default',
-      size: 'default',
-    },
-  },
+      size: 'default'
+    }
+  }
 )
 
 export const itemMediaVariants = cva(
@@ -41,13 +41,14 @@ export const itemMediaVariants = cva(
       variant: {
         default: 'bg-transparent',
         icon: '[&_svg:not([class*=size-])]:size-4',
-        image: 'size-10 overflow-hidden rounded-sm group-data-[size=sm]/item:size-8 group-data-[size=xs]/item:size-6 [&_img]:size-full [&_img]:object-cover',
-      },
+        image:
+          'size-10 overflow-hidden rounded-sm group-data-[size=sm]/item:size-8 group-data-[size=xs]/item:size-6 [&_img]:size-full [&_img]:object-cover'
+      }
     },
     defaultVariants: {
-      variant: 'default',
-    },
-  },
+      variant: 'default'
+    }
+  }
 )
 
 export type ItemVariants = VariantProps<typeof itemVariants>

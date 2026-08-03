@@ -53,16 +53,16 @@ const props = defineProps({
     default: 'textbook'
   },
   selectable: {
-  type: Boolean,
-  default: false
+    type: Boolean,
+    default: false
   },
   selectedRows: {
     type: Array,
     default: () => []
   },
   rowDisabled: {
-  type: Function,
-  default: null
+    type: Function,
+    default: null
   },
   fixedHeight: {
     type: Boolean,
@@ -70,7 +70,12 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:page', 'update:filterValues', 'update:perPage', 'update:selectedRows'])
+const emit = defineEmits([
+  'update:page',
+  'update:filterValues',
+  'update:perPage',
+  'update:selectedRows'
+])
 
 const localFilterValues = computed({
   get: () => props.filterValues,
@@ -135,7 +140,8 @@ const resolvedRowActions = computed(() =>
 
 const illustrationUrl = computed(() => {
   if (!props.illustration) return ''
-  return new URL(`../../assets/images/illustrations/${props.illustration}.png`, import.meta.url).href
+  return new URL(`../../assets/images/illustrations/${props.illustration}.png`, import.meta.url)
+    .href
 })
 </script>
 

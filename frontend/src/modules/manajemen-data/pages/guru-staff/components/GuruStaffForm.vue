@@ -1,11 +1,5 @@
 <script setup>
-import { 
-  Phone, 
-  Image,
-  SquareUserRound,
-  BriefcaseBusiness,
-  UserCog,
-} from 'lucide-vue-next'
+import { Phone, Image, SquareUserRound, BriefcaseBusiness, UserCog } from 'lucide-vue-next'
 import { Separator } from '@/components/ui/separator'
 import ImageUpload from '@/components/forms/ImageUpload.vue'
 import FormInput from '@/components/forms/FormInput.vue'
@@ -28,7 +22,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['image-change'])
 
-const handleImageChange = (file) => {
+const handleImageChange = file => {
   emit('image-change', file)
 }
 </script>

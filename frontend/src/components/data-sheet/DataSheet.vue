@@ -1,9 +1,20 @@
 <script setup>
 import { computed } from 'vue'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription
+} from '@/components/ui/sheet'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '@/components/ui/accordion'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { File } from 'lucide-vue-next'
@@ -155,7 +166,7 @@ const resolvedBadgeVariant = computed(() => {
   return defaultMapping[label] || 'default'
 })
 
-const resolveFieldValue = (field) => {
+const resolveFieldValue = field => {
   if (field.value !== undefined && field.value !== null) {
     return field.value
   }
@@ -168,11 +179,17 @@ const resolveFieldValue = (field) => {
 
 <template>
   <Sheet v-model:open="isOpen">
-    <SheetContent :show-close-button="false" class="gap-2">
+    <SheetContent
+      :show-close-button="false"
+      class="gap-2"
+    >
       <slot name="header">
         <SheetHeader class="border-b border-border pb-3">
           <div class="flex items-center gap-4">
-            <Avatar v-if="showAvatar" class="size-16 border-2 border-border/80 shrink-0">
+            <Avatar
+              v-if="showAvatar"
+              class="size-16 border-2 border-border/80 shrink-0"
+            >
               <AvatarImage
                 v-if="resolvedAvatar"
                 :src="resolvedAvatar"
@@ -187,11 +204,17 @@ const resolveFieldValue = (field) => {
                 <SheetTitle class="text-base font-bold text-foreground truncate">
                   {{ resolvedTitle }}
                 </SheetTitle>
-                <Badge v-if="resolvedBadge" :variant="resolvedBadgeVariant">
+                <Badge
+                  v-if="resolvedBadge"
+                  :variant="resolvedBadgeVariant"
+                >
                   {{ resolvedBadge }}
                 </Badge>
               </div>
-              <SheetDescription v-if="resolvedDescription" class="text-xs text-muted-foreground">
+              <SheetDescription
+                v-if="resolvedDescription"
+                class="text-xs text-muted-foreground"
+              >
                 {{ resolvedDescription }}
               </SheetDescription>
             </div>
@@ -202,7 +225,11 @@ const resolveFieldValue = (field) => {
       <!-- Body / Accordion -->
       <div class="overflow-y-auto pr-1 flex-1 no-scrollbar">
         <slot>
-          <Accordion type="multiple" class="w-full" :default-value="sections.map(s => s.id)">
+          <Accordion
+            type="multiple"
+            class="w-full"
+            :default-value="sections.map(s => s.id)"
+          >
             <AccordionItem
               v-for="section in sections"
               :key="section.id"
@@ -212,13 +239,20 @@ const resolveFieldValue = (field) => {
                 {{ section.title }}
               </AccordionTrigger>
               <AccordionContent class="space-y-4 pt-3">
-                <slot :name="`section-${section.id}`" :section="section">
+                <slot
+                  :name="`section-${section.id}`"
+                  :section="section"
+                >
                   <div
                     v-for="field in section.fields"
                     :key="field.label"
                     class="grid gap-1.5"
                   >
-                    <slot :name="`field-${field.key || field.label.toLowerCase().replace(/\s+/g, '-')}`" :field="field" :value="resolveFieldValue(field)">
+                    <slot
+                      :name="`field-${field.key || field.label.toLowerCase().replace(/\s+/g, '-')}`"
+                      :field="field"
+                      :value="resolveFieldValue(field)"
+                    >
                       <div class="flex items-center gap-1.5">
                         <component
                           v-if="field.icon"

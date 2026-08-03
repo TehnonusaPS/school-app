@@ -8,7 +8,8 @@ export const mockSuratPeringatan = [
     nisn: '1234567890',
     kelas: 'XII-A',
     tanggal: '2026-05-19',
-    perihalPelanggaran: 'Terlambat lebih dari 3 kali berturut-turut pada minggu ini tanpa alasan yang jelas.'
+    perihalPelanggaran:
+      'Terlambat lebih dari 3 kali berturut-turut pada minggu ini tanpa alasan yang jelas.'
   },
   {
     id: 2,
@@ -19,7 +20,8 @@ export const mockSuratPeringatan = [
     nisn: '1234567891',
     kelas: 'XII-A',
     tanggal: '2026-05-17',
-    perihalPelanggaran: 'Membawa barang yang dilarang di lingkungan sekolah sesuai peraturan tata tertib sekolah.'
+    perihalPelanggaran:
+      'Membawa barang yang dilarang di lingkungan sekolah sesuai peraturan tata tertib sekolah.'
   },
   {
     id: 3,

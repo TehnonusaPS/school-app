@@ -51,7 +51,9 @@ const waveClip =
             >
               <Sparkles class="h-3.5 w-3.5" /> Untuk siswa & guru
             </span>
-            <h2 class="mt-4 text-2xl sm:text-4xl font-bold tracking-tight text-foreground md:text-5xl">
+            <h2
+              class="mt-4 text-2xl sm:text-4xl font-bold tracking-tight text-foreground md:text-5xl"
+            >
               Pengalaman sekolah yang menyenangkan, dari hari pertama.
             </h2>
             <p class="mt-4 text-sm sm:text-base text-foreground/70">
@@ -77,9 +79,16 @@ const waveClip =
           </div>
 
           <div class="relative min-w-0">
-            <svg width="0" height="0" class="absolute">
+            <svg
+              width="0"
+              height="0"
+              class="absolute"
+            >
               <defs>
-                <clipPath id="waveCard" clipPathUnits="objectBoundingBox">
+                <clipPath
+                  id="waveCard"
+                  clipPathUnits="objectBoundingBox"
+                >
                   <path
                     d="M0,0.08 C0.1,0.0 0.25,0.16 0.4,0.06 C0.55,-0.04 0.75,0.14 1,0.04 L1,0.92 C0.88,1.02 0.7,0.86 0.55,0.96 C0.35,1.06 0.18,0.88 0,0.96 Z"
                   />
@@ -113,7 +122,7 @@ const waveClip =
                       />
                     </div>
                     <figcaption
-                      class="absolute inset-x-4 bottom-6 z-10 rounded-full bg-background/85 px-3 py-1.5 text-center text-xs font-semibold text-foreground "
+                      class="absolute inset-x-4 bottom-6 z-10 rounded-full bg-background/85 px-3 py-1.5 text-center text-xs font-semibold text-foreground"
                     >
                       {{ slide.label }}
                     </figcaption>

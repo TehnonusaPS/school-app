@@ -75,12 +75,6 @@ const handleFormSubmit = formData => {
   }, 1000)
 }
 
-
-
-
-
-
-
 const filteredItems = computed(() => {
   return itemsList.value.filter(item => {
     const searchVal = filterValues.value.search?.trim().toLowerCase() || ''
@@ -176,7 +170,9 @@ const customTableActions = computed(() => [
     v-model:open="isFormSheetOpen"
     :item="selectedItemForEdit"
     :title="selectedItemForEdit ? 'Edit Siswa' : 'Tambah Siswa'"
-    :description="selectedItemForEdit ? 'Ubah data rincian siswa' : 'Tambahkan siswa baru ke database'"
+    :description="
+      selectedItemForEdit ? 'Ubah data rincian siswa' : 'Tambahkan siswa baru ke database'
+    "
     :sections="studentSections"
     :loading="isSaving"
     @submit="handleFormSubmit"

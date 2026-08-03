@@ -30,19 +30,21 @@ const marqueeItems = [...yayasan, ...yayasan]
   <section class="relative overflow-hidden pb-24 pt-36">
     <!-- Background Image with premium blend overlays using standard CSS variable gradients -->
     <div class="absolute inset-0 z-0 overflow-hidden">
-      <img 
-        :src="heroBg" 
-        alt="Hero Background" 
-        class="w-full h-full object-cover opacity-25 dark:opacity-30 pointer-events-none select-none scale-105 transition-opacity duration-700" 
+      <img
+        :src="heroBg"
+        alt="Hero Background"
+        class="w-full h-full object-cover opacity-25 dark:opacity-30 pointer-events-none select-none scale-105 transition-opacity duration-700"
       />
       <!-- Fading vertical and radial overlays using standard CSS variables to ensure flawless compilation -->
-      <div 
+      <div
         class="absolute inset-0"
-        style="background: linear-gradient(to bottom, transparent 20%, var(--background) 95%);"
+        style="background: linear-gradient(to bottom, transparent 20%, var(--background) 95%)"
       ></div>
-      <div 
+      <div
         class="absolute inset-0"
-        style="background: radial-gradient(circle at center, transparent 20%, var(--background) 90%);"
+        style="
+          background: radial-gradient(circle at center, transparent 20%, var(--background) 90%);
+        "
       ></div>
     </div>
 
@@ -64,7 +66,8 @@ const marqueeItems = [...yayasan, ...yayasan]
         Kelola seluruh sekolah yayasan Anda dari
         <span class="relative inline-block">
           <span class="relative z-10">satu dashboard</span>
-          <span class="absolute inset-x-0 bottom-2 z-0 h-3 rounded-full bg-secondary/70" /></span>.
+          <span class="absolute inset-x-0 bottom-2 z-0 h-3 rounded-full bg-secondary/70" /></span
+        >.
       </h1>
       <p class="mx-auto mt-6 max-w-2xl text-base sm:text-lg text-muted-foreground md:text-xl leading-relaxed">
         Sekolahku menyatukan akademik, keuangan, kesiswaan, dan komunikasi orang tua untuk semua

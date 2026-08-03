@@ -1,5 +1,10 @@
 <script setup>
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '@/components/ui/accordion'
 import FormInput from '@/components/forms/FormInput.vue'
 import FormSelect from '@/components/forms/FormSelect.vue'
 
@@ -17,11 +22,13 @@ defineProps({
 
 <template>
   <div class="w-full space-y-4 text-left">
-    <Accordion type="multiple" class="w-full" :default-value="['info']">
+    <Accordion
+      type="multiple"
+      class="w-full"
+      :default-value="['info']"
+    >
       <AccordionItem value="info">
-        <AccordionTrigger class="text-sm font-semibold">
-          Informasi Kelas
-        </AccordionTrigger>
+        <AccordionTrigger class="text-sm font-semibold"> Informasi Kelas </AccordionTrigger>
         <AccordionContent class="space-y-4 pt-3">
           <div class="grid gap-4 grid-cols-1">
             <FormInput
@@ -31,7 +38,7 @@ defineProps({
               :error="errors.name"
               required
             />
-            
+
             <div class="grid grid-cols-2 gap-4">
               <FormSelect
                 v-model="form.grade"
@@ -76,7 +83,7 @@ defineProps({
                 required
               />
             </div>
-            
+
             <FormSelect
               v-model="form.status"
               label="Status"

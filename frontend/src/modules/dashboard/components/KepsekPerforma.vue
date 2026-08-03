@@ -10,7 +10,8 @@ const rataColor = (val: number) => {
   return 'text-emerald-500'
 }
 
-const kehadiranVariant = (val: number) => val < 80 ? 'destructive' : val < 90 ? 'secondary' : 'outline'
+const kehadiranVariant = (val: number) =>
+  val < 80 ? 'destructive' : val < 90 ? 'secondary' : 'outline'
 
 const props = defineProps({
   delay: { type: Number, default: 0 }
@@ -28,7 +29,7 @@ const props = defineProps({
     <template #header-action>
       <TrendingDown class="size-4 text-rose-500" />
     </template>
-    
+
     <!-- Fixed header -->
     <table class="w-full text-sm border-b">
       <colgroup>
@@ -67,7 +68,10 @@ const props = defineProps({
           <td class="pl-6 py-3 text-xs text-muted-foreground">{{ i + 1 }}</td>
           <td class="py-3 font-semibold text-sm">{{ k.nama }}</td>
           <td class="py-3 text-center">
-            <Badge :variant="kehadiranVariant(k.kehadiran)" class="text-xs font-mono">
+            <Badge
+              :variant="kehadiranVariant(k.kehadiran)"
+              class="text-xs font-mono"
+            >
               {{ k.kehadiran }}%
             </Badge>
           </td>

@@ -43,7 +43,10 @@ const asPesan = (item: unknown) => item as PesanItem
           <span class="text-muted-foreground">Kehadiran</span>
           <span class="font-semibold">{{ akademik.kehadiran }}%</span>
         </div>
-        <Progress :model-value="akademik.kehadiran" class="h-2" />
+        <Progress
+          :model-value="akademik.kehadiran"
+          class="h-2"
+        />
       </div>
     </WidgetCard>
 
@@ -59,7 +62,12 @@ const asPesan = (item: unknown) => item as PesanItem
       illustration="paper_plane"
     >
       <template #item="{ item }">
-        <div :class="['size-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0', asPesan(item).warna]">
+        <div
+          :class="[
+            'size-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0',
+            asPesan(item).warna
+          ]"
+        >
           {{ asPesan(item).inisial }}
         </div>
         <div class="min-w-0 flex-1 ml-2">

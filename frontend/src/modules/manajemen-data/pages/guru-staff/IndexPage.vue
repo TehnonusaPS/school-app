@@ -101,29 +101,6 @@ const fetchTeachers = async () => {
   }
 }
 
-  return tableItems.value.filter(
-    item => item.unitId === auth.user?.unitId || item.unit_id === auth.user?.unitId
-  )
-})
-
-const fetchTeachers = async () => {
-  isLoading.value = true
-  try {
-    const res = await getTeachers()
-    tableItems.value = res.data.map(item => ({
-      ...item,
-      nip: item.nip_nuptk || '-',
-      unitKerja: item.unit_kerja || '-',
-      unitId: item.unit_id,
-      status: item.status_kepegawaian || '-'
-    }))
-  } catch (error) {
-    toast.error('Gagal mengambil data guru dan staff')
-  } finally {
-    isLoading.value = false
-  }
-}
-
 onMounted(() => {
   fetchTeachers()
 })

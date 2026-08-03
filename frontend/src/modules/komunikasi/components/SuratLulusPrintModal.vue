@@ -1,12 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { Printer } from 'lucide-vue-next'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
@@ -25,7 +20,7 @@ const emit = defineEmits(['update:open'])
 
 const isOpen = computed({
   get: () => props.open,
-  set: (val) => emit('update:open', val)
+  set: val => emit('update:open', val)
 })
 
 // Mock values for school exam subjects based on item ID to keep it dynamic but predictable
@@ -109,7 +104,7 @@ function handlePrint() {
   setTimeout(() => {
     iframe.contentWindow.focus()
     iframe.contentWindow.print()
-    
+
     // Cleanup after print dialog closes
     setTimeout(() => {
       document.body.removeChild(iframe)
@@ -126,46 +121,70 @@ const letterNumber = computed(() => {
 </script>
 
 <template>
-  <Dialog :open="isOpen" @update:open="isOpen = $event">
-    <DialogContent class="sm:max-w-4xl p-0 overflow-hidden bg-slate-100 dark:bg-slate-900 border-none rounded-xl">
-      <DialogHeader class="px-6 py-4 border-b border-border/40 bg-white dark:bg-slate-950 flex flex-row items-center justify-between sticky top-0 z-10 print:hidden">
+  <Dialog
+    :open="isOpen"
+    @update:open="isOpen = $event"
+  >
+    <DialogContent
+      class="sm:max-w-4xl p-0 overflow-hidden bg-slate-100 dark:bg-slate-900 border-none rounded-xl"
+    >
+      <DialogHeader
+        class="px-6 py-4 border-b border-border/40 bg-white dark:bg-slate-950 flex flex-row items-center justify-between sticky top-0 z-10 print:hidden"
+      >
         <DialogTitle class="text-xl font-bold">Preview Surat Keterangan Lulus</DialogTitle>
-        <Button @click="handlePrint" class="gap-2 rounded-full px-6 shadow-sm bg-emerald-600 hover:bg-emerald-700 text-white">
+        <Button
+          @click="handlePrint"
+          class="gap-2 rounded-full px-6 shadow-sm bg-emerald-600 hover:bg-emerald-700 text-white"
+        >
           <Printer class="size-4" />
           Cetak Dokumen
         </Button>
       </DialogHeader>
 
-      <ScrollArea class="h-[80vh] bg-slate-100/50 dark:bg-slate-900/50 p-6 sm:p-10 print:h-auto print:p-0 print:bg-transparent">
+      <ScrollArea
+        class="h-[80vh] bg-slate-100/50 dark:bg-slate-900/50 p-6 sm:p-10 print:h-auto print:p-0 print:bg-transparent"
+      >
         <!-- Paper Sheet -->
-        <div id="printable-area-skl" class="bg-white text-black max-w-[210mm] min-h-[297mm] mx-auto p-12 shadow-md print:shadow-none print:m-0 print:p-8 rounded-sm font-serif">
-          
+        <div
+          id="printable-area-skl"
+          class="bg-white text-black max-w-[210mm] min-h-[297mm] mx-auto p-12 shadow-md print:shadow-none print:m-0 print:p-8 rounded-sm font-serif"
+        >
           <!-- KOP SURAT -->
           <div class="flex items-center justify-between border-b-4 border-black pb-4 mb-1">
-            <div class="w-[100px] h-[100px] flex items-center justify-center border border-dashed border-gray-400">
-              <span class="text-gray-400 text-xs text-center">Logo<br>Sekolah</span>
+            <div
+              class="w-[100px] h-[100px] flex items-center justify-center border border-dashed border-gray-400"
+            >
+              <span class="text-gray-400 text-xs text-center">Logo<br />Sekolah</span>
             </div>
             <div class="flex-1 text-center">
-              <h2 class="text-lg font-bold uppercase leading-tight">KEMENTERIAN PENDIDIKAN TINGGI, SAINS DAN TEKNOLOGI</h2>
+              <h2 class="text-lg font-bold uppercase leading-tight">
+                KEMENTERIAN PENDIDIKAN TINGGI, SAINS DAN TEKNOLOGI
+              </h2>
               <h1 class="text-2xl font-bold uppercase mt-1">SDN TEHNONUSA PRIMA I</h1>
-              <p class="text-xs mt-1 font-sans">Jl. Pendidikan No. 1, Kec. Ilmu, Kota Pengetahuan 12345</p>
+              <p class="text-xs mt-1 font-sans">
+                Jl. Pendidikan No. 1, Kec. Ilmu, Kota Pengetahuan 12345
+              </p>
               <p class="text-xs font-sans">Email: sdn_tp1@sekolah.sch.id | Telp: (021) 12345678</p>
             </div>
-            <div class="w-[100px]"></div> <!-- Balancer for centering -->
+            <div class="w-[100px]"></div>
+            <!-- Balancer for centering -->
           </div>
           <!-- Double border line -->
           <div class="border-b border-black mb-8"></div>
 
           <!-- TITLE -->
           <div class="text-center mb-8">
-            <h3 class="text-lg font-bold underline underline-offset-4 uppercase">SURAT KETERANGAN LULUS</h3>
+            <h3 class="text-lg font-bold underline underline-offset-4 uppercase">
+              SURAT KETERANGAN LULUS
+            </h3>
             <p class="mt-1 text-sm">Nomor : {{ letterNumber }}</p>
           </div>
 
           <!-- BODY -->
           <div class="leading-relaxed text-justify space-y-6 text-[14px]">
             <p>
-              Yang bertanda tangan di bawah ini, Kepala Sekolah SD Tehnonusa Prima I dengan ini menerangkan bahwa :
+              Yang bertanda tangan di bawah ini, Kepala Sekolah SD Tehnonusa Prima I dengan ini
+              menerangkan bahwa :
             </p>
 
             <table class="w-full ml-6">
@@ -201,7 +220,8 @@ const letterNumber = computed(() => {
             </table>
 
             <p>
-              Yang bersangkutan dinyatakan <strong>LULUS</strong> berdasarkan hasil keputusan rapat Dewan Guru SD Tehnonusa Prima I dengan nilai sebagai berikut :
+              Yang bersangkutan dinyatakan <strong>LULUS</strong> berdasarkan hasil keputusan rapat
+              Dewan Guru SD Tehnonusa Prima I dengan nilai sebagai berikut :
             </p>
 
             <!-- NILAI TABLE -->
@@ -210,30 +230,54 @@ const letterNumber = computed(() => {
                 <thead>
                   <tr class="bg-slate-50">
                     <th class="border border-black py-2 px-3 w-[60px] font-bold">No</th>
-                    <th class="border border-black py-2 px-3 text-left font-bold">Mata Pelajaran</th>
-                    <th class="border border-black py-2 px-3 w-[200px] font-bold">Nilai Ujian Sekolah</th>
+                    <th class="border border-black py-2 px-3 text-left font-bold">
+                      Mata Pelajaran
+                    </th>
+                    <th class="border border-black py-2 px-3 w-[200px] font-bold">
+                      Nilai Ujian Sekolah
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="item in listNilai" :key="item.no">
+                  <tr
+                    v-for="item in listNilai"
+                    :key="item.no"
+                  >
                     <td class="border border-black py-1.5 px-3 font-sans">{{ item.no }}</td>
                     <td class="border border-black py-1.5 px-3 text-left">{{ item.mapel }}</td>
-                    <td class="border border-black py-1.5 px-3 font-bold font-sans">{{ item.nilai }}</td>
+                    <td class="border border-black py-1.5 px-3 font-bold font-sans">
+                      {{ item.nilai }}
+                    </td>
                   </tr>
                   <tr class="font-bold">
-                    <td colspan="2" class="border border-black py-2 px-3 text-center uppercase">JUMLAH</td>
-                    <td class="border border-black py-2 px-3 font-sans text-center">{{ totalNilai }}</td>
+                    <td
+                      colspan="2"
+                      class="border border-black py-2 px-3 text-center uppercase"
+                    >
+                      JUMLAH
+                    </td>
+                    <td class="border border-black py-2 px-3 font-sans text-center">
+                      {{ totalNilai }}
+                    </td>
                   </tr>
                   <tr class="font-bold">
-                    <td colspan="2" class="border border-black py-2 px-3 text-center uppercase">RATA - RATA</td>
-                    <td class="border border-black py-2 px-3 font-sans text-center">{{ rataRataNilai }}</td>
+                    <td
+                      colspan="2"
+                      class="border border-black py-2 px-3 text-center uppercase"
+                    >
+                      RATA - RATA
+                    </td>
+                    <td class="border border-black py-2 px-3 font-sans text-center">
+                      {{ rataRataNilai }}
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
             <p>
-              Surat Keterangan Lulus ini berlaku sementara sampai dengan diterbitkannya ijazah asli kepada yang bersangkutan.
+              Surat Keterangan Lulus ini berlaku sementara sampai dengan diterbitkannya ijazah asli
+              kepada yang bersangkutan.
             </p>
           </div>
 
@@ -242,12 +286,14 @@ const letterNumber = computed(() => {
             <div class="text-center text-[14px]">
               <p>Jakarta, {{ data?.tanggalDibuat || new Date().toISOString().split('T')[0] }}</p>
               <p class="mb-20">Kepala Sekolah</p>
-              
+
               <!-- CAP/TTD DIGITAL PLACEHOLDER -->
-              <div class="my-2 h-14 flex items-center justify-center select-none text-slate-300 dark:text-slate-800 text-[10px] font-sans italic border border-dashed border-slate-200 w-36 mx-auto rounded">
+              <div
+                class="my-2 h-14 flex items-center justify-center select-none text-slate-300 dark:text-slate-800 text-[10px] font-sans italic border border-dashed border-slate-200 w-36 mx-auto rounded"
+              >
                 [ Cap & TTD Digital ]
               </div>
-              
+
               <p class="font-bold underline underline-offset-2 mt-4">Dr. H. Ahmad Dahlan, M.Pd.</p>
               <p class="text-xs">NIP. 19700101 199512 1 001</p>
             </div>

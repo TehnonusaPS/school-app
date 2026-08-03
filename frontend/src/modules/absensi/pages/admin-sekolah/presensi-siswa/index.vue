@@ -18,7 +18,7 @@ import {
   LogOut,
   Maximize2,
   Minimize2,
-  Lock,
+  Lock
 } from 'lucide-vue-next'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -58,8 +58,17 @@ let clockInterval = null
 
 function updateClock() {
   const now = new Date()
-  currentTime.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-  currentDate.value = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  currentTime.value = now.toLocaleTimeString('id-ID', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
+  currentDate.value = now.toLocaleDateString('id-ID', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })
 }
 
 // ─── Scan Success State ─────────────────────────────────
@@ -79,10 +88,7 @@ let logPollInterval = null
 
 async function loadData() {
   try {
-    const [students, logs] = await Promise.all([
-      getStudents(),
-      getLogs()
-    ])
+    const [students, logs] = await Promise.all([getStudents(), getLogs()])
     absensiData.value = students
     scanResults.value = logs
   } catch (error) {
@@ -255,13 +261,13 @@ let realFaceScanInterval = null
 async function startCamera() {
   cameraStatus.value = 'loading'
   cameraError.value = ''
-  
+
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
-      audio: false,
+      audio: false
     })
-    
+
     mediaStream.value = stream
     cameraStatus.value = 'active'
     await nextTick()
@@ -633,11 +639,18 @@ const filteredStudents = computed(() => absensiData.value)
   <div class="kiosk-root">
     <!-- ══ TOP HEADER BAR ══ -->
     <header class="kiosk-header">
-      <button v-if="!isFullscreen" class="back-btn" @click="router.push('/absensi/siswa')">
+      <button
+        v-if="!isFullscreen"
+        class="back-btn"
+        @click="router.push('/absensi/siswa')"
+      >
         <ArrowLeft class="size-4" />
         Kembali
       </button>
-      <div v-else class="back-btn-placeholder" />
+      <div
+        v-else
+        class="back-btn-placeholder"
+      />
       <div class="header-center">
         <h1 class="header-title">Absensi & Presensi</h1>
         <p class="header-sub">Sistem Presensi</p>
@@ -658,8 +671,14 @@ const filteredStudents = computed(() => absensiData.value)
 
     <!-- ══ PASSWORD GUARD MODAL ══ -->
     <Teleport to="body">
-      <div v-if="isPasswordGuardOpen" class="pg-overlay">
-        <div class="pg-card" :class="{ 'pg-shake': passwordShake }">
+      <div
+        v-if="isPasswordGuardOpen"
+        class="pg-overlay"
+      >
+        <div
+          class="pg-card"
+          :class="{ 'pg-shake': passwordShake }"
+        >
           <!-- Icon -->
           <div class="pg-icon">
             <Lock class="size-8" />
@@ -668,8 +687,8 @@ const filteredStudents = computed(() => absensiData.value)
           <!-- Title -->
           <h2 class="pg-title">Verifikasi Admin</h2>
           <p class="pg-desc">
-            Anda keluar dari mode fullscreen. Masukkan password Admin Sekolah
-            untuk melanjutkan, atau kembali ke mode fullscreen.
+            Anda keluar dari mode fullscreen. Masukkan password Admin Sekolah untuk melanjutkan,
+            atau kembali ke mode fullscreen.
           </p>
 
           <!-- Password Input -->
@@ -682,15 +701,26 @@ const filteredStudents = computed(() => absensiData.value)
             autofocus
             @keyup.enter="submitPasswordGuard"
           />
-          <p v-if="passwordError" class="pg-error">{{ passwordError }}</p>
+          <p
+            v-if="passwordError"
+            class="pg-error"
+          >
+            {{ passwordError }}
+          </p>
 
           <!-- Actions -->
           <div class="pg-actions">
-            <button class="pg-btn-fullscreen" @click="goBackToFullscreen">
+            <button
+              class="pg-btn-fullscreen"
+              @click="goBackToFullscreen"
+            >
               <Maximize2 class="size-4" />
               Kembali Fullscreen
             </button>
-            <button class="pg-btn-confirm" @click="submitPasswordGuard">
+            <button
+              class="pg-btn-confirm"
+              @click="submitPasswordGuard"
+            >
               Konfirmasi
             </button>
           </div>
@@ -701,7 +731,12 @@ const filteredStudents = computed(() => absensiData.value)
     <!-- ══ MAIN CONTENT ══ -->
     <main class="kiosk-main">
       <!-- LEFT: Live Viewport (Kamera + Success Card Overlay) -->
-      <section class="viewport-section" v-motion :initial="glassSlide.initial" :visible-once="glassSlide.visible">
+      <section
+        class="viewport-section"
+        v-motion
+        :initial="glassSlide.initial"
+        :visible-once="glassSlide.visible"
+      >
         <Card class="scanner-card">
           <!-- Viewport Header -->
           <div class="scanner-topbar">
@@ -745,7 +780,10 @@ const filteredStudents = computed(() => absensiData.value)
             <canvas v-show="cameraStatus === 'active' && !activeScannedSiswa" ref="overlayCanvasRef" class="overlay-canvas" />
 
             <!-- Scanning Sci-Fi Reticle Overlay (only when no success card is active) -->
-            <div v-if="cameraStatus === 'active' && !activeScannedSiswa" class="cam-overlay">
+            <div
+              v-if="cameraStatus === 'active' && !activeScannedSiswa"
+              class="cam-overlay"
+            >
               <span class="corner corner-tl" />
               <span class="corner corner-tr" />
               <span class="corner corner-bl" />
@@ -754,33 +792,61 @@ const filteredStudents = computed(() => absensiData.value)
             </div>
 
             <!-- Camera Loading State -->
-            <div v-if="cameraStatus === 'loading'" class="cam-state-wrap">
+            <div
+              v-if="cameraStatus === 'loading'"
+              class="cam-state-wrap"
+            >
               <div class="cam-spinner" />
               <span class="cam-state-text">Menghubungkan Kamera...</span>
             </div>
 
             <!-- Camera Error State -->
-            <div v-if="cameraStatus === 'error'" class="cam-state-wrap">
+            <div
+              v-if="cameraStatus === 'error'"
+              class="cam-state-wrap"
+            >
               <div class="cam-error-icon"><CameraOff class="size-7" /></div>
               <p class="cam-error-text">{{ cameraError }}</p>
-              <button class="cam-retry-btn" @click="startCamera">Coba Ulang</button>
+              <button
+                class="cam-retry-btn"
+                @click="startCamera"
+              >
+                Coba Ulang
+              </button>
             </div>
 
             <!-- Camera Idle (Off) State -->
-            <div v-if="cameraStatus === 'idle'" class="cam-state-wrap">
-              <div class="cam-idle-icon"><Camera class="size-10" style="color: var(--muted-foreground)" /></div>
+            <div
+              v-if="cameraStatus === 'idle'"
+              class="cam-state-wrap"
+            >
+              <div class="cam-idle-icon">
+                <Camera
+                  class="size-10"
+                  style="color: var(--muted-foreground)"
+                />
+              </div>
               <p class="cam-idle-text">Kamera Kiosk Siap Dinyalakan</p>
-              <button class="cam-start-btn" @click="startCamera">
+              <button
+                class="cam-start-btn"
+                @click="startCamera"
+              >
                 <Camera class="size-4" />
                 Aktifkan Kamera
               </button>
             </div>
 
             <!-- Unified Success Overlay (displays on top of camera/idle state) -->
-            <div v-if="activeScannedSiswa" class="cam-success-overlay">
+            <div
+              v-if="activeScannedSiswa"
+              class="cam-success-overlay"
+            >
               <div class="kiosk-success-card">
                 <div class="success-icon-badge">
-                  <CheckCircle class="size-8" style="color: var(--primary)" />
+                  <CheckCircle
+                    class="size-8"
+                    style="color: var(--primary)"
+                  />
                 </div>
                 <p class="success-status-label">{{ scanSuccessMsg }}</p>
                 
@@ -847,12 +913,23 @@ const filteredStudents = computed(() => absensiData.value)
       </section>
 
       <!-- RIGHT: Clock, Controls, Simulation list, and Scan Logs -->
-      <section class="controls-section" v-motion :initial="glassSlide.initial" :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 200 } }">
+      <section
+        class="controls-section"
+        v-motion
+        :initial="glassSlide.initial"
+        :visible-once="{
+          ...glassSlide.visible,
+          transition: { ...glassSlide.visible.transition, delay: 200 }
+        }"
+      >
         <!-- Clock Card -->
         <Card class="clock-card">
           <div class="clock-time">{{ currentTime }}</div>
           <div class="clock-date">
-            <CalendarDays class="size-4" style="color: var(--muted-foreground)" />
+            <CalendarDays
+              class="size-4"
+              style="color: var(--muted-foreground)"
+            />
             <span>{{ currentDate }}</span>
           </div>
         </Card>
@@ -860,7 +937,10 @@ const filteredStudents = computed(() => absensiData.value)
         <!-- Student Simulation Panel (For testing/demo) -->
         <Card class="simulation-card">
           <div class="log-header">
-            <Fingerprint class="size-4" style="color: var(--primary)" />
+            <Fingerprint
+              class="size-4"
+              style="color: var(--primary)"
+            />
             <span class="log-title">Simulasi Tap Siswa</span>
           </div>
 
@@ -893,8 +973,14 @@ const filteredStudents = computed(() => absensiData.value)
             <Badge variant="secondary" class="log-badge">{{ scanResults.length }}</Badge>
           </div>
           <div class="log-list">
-            <div v-if="scanResults.length === 0" class="log-empty">
-              <Clock class="size-5" style="color: var(--muted-foreground)" />
+            <div
+              v-if="scanResults.length === 0"
+              class="log-empty"
+            >
+              <Clock
+                class="size-5"
+                style="color: var(--muted-foreground)"
+              />
               <span>Menunggu pemindaian pertama...</span>
             </div>
             <div
@@ -965,7 +1051,9 @@ const filteredStudents = computed(() => absensiData.value)
   width: 90px;
   flex-shrink: 0;
 }
-.header-center { text-align: center; }
+.header-center {
+  text-align: center;
+}
 .header-title {
   font-size: 1.15rem;
   font-weight: 800;
@@ -986,7 +1074,8 @@ const filteredStudents = computed(() => absensiData.value)
   font-weight: 600;
 }
 .status-pulse {
-  width: 8px; height: 8px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--primary);
   animation: kpulse 2s infinite;
@@ -1028,7 +1117,7 @@ const filteredStudents = computed(() => absensiData.value)
   flex-direction: column;
   gap: 1rem;
   overflow: hidden;
-  box-shadow: var(--glass-shadow, 0 2px 12px rgba(0,0,0,0.08));
+  box-shadow: var(--glass-shadow, 0 2px 12px rgba(0, 0, 0, 0.08));
 }
 
 .scanner-topbar {
@@ -1040,9 +1129,14 @@ const filteredStudents = computed(() => absensiData.value)
   border-radius: var(--radius-md, 10px);
   padding: 0.6rem 1rem;
 }
-.scanner-topbar-left { display: flex; align-items: center; gap: 0.5rem; }
+.scanner-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 .scanner-dot {
-  width: 8px; height: 8px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--primary);
   animation: kpulse 1.5s infinite;
@@ -1075,8 +1169,10 @@ const filteredStudents = computed(() => absensiData.value)
 }
 
 .cam-feed {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   transform: scaleX(-1); /* mirror effect */
 }
@@ -1094,19 +1190,51 @@ const filteredStudents = computed(() => absensiData.value)
 
 /* Sci-fi Overlay */
 .cam-overlay {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 10;
   pointer-events: none;
 }
-.corner { position: absolute; width: 24px; height: 24px; border-color: var(--primary); border-style: solid; }
-.corner-tl { top: 15%; left: 20%; border-width: 3px 0 0 3px; border-radius: 6px 0 0 0; }
-.corner-tr { top: 15%; right: 20%; border-width: 3px 3px 0 0; border-radius: 0 6px 0 0; }
-.corner-bl { bottom: 15%; left: 20%; border-width: 0 0 3px 3px; border-radius: 0 0 0 6px; }
-.corner-br { bottom: 15%; right: 20%; border-width: 0 3px 3px 0; border-radius: 0 0 6px 0; }
+.corner {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: var(--primary);
+  border-style: solid;
+}
+.corner-tl {
+  top: 15%;
+  left: 20%;
+  border-width: 3px 0 0 3px;
+  border-radius: 6px 0 0 0;
+}
+.corner-tr {
+  top: 15%;
+  right: 20%;
+  border-width: 3px 3px 0 0;
+  border-radius: 0 6px 0 0;
+}
+.corner-bl {
+  bottom: 15%;
+  left: 20%;
+  border-width: 0 0 3px 3px;
+  border-radius: 0 0 0 6px;
+}
+.corner-br {
+  bottom: 15%;
+  right: 20%;
+  border-width: 0 3px 3px 0;
+  border-radius: 0 0 6px 0;
+}
 
 .cam-scan-line {
-  position: absolute; left: 20%; right: 20%; height: 3px;
+  position: absolute;
+  left: 20%;
+  right: 20%;
+  height: 3px;
   background: linear-gradient(90deg, transparent, var(--primary), transparent);
   animation: kscan 2.5s linear infinite;
   box-shadow: 0 0 10px var(--primary);
@@ -1202,10 +1330,14 @@ const filteredStudents = computed(() => absensiData.value)
 
 /* Success Overlay */
 .cam-success-overlay {
-  position: absolute; inset: 0; z-index: 30;
+  position: absolute;
+  inset: 0;
+  z-index: 30;
   background: rgba(11, 15, 25, 0.75);
   backdrop-filter: blur(8px);
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 1.5rem;
 }
 
@@ -1216,7 +1348,9 @@ const filteredStudents = computed(() => absensiData.value)
   padding: 2rem;
   width: 100%;
   max-width: 420px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(59, 130, 246, 0.15);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.5),
+    0 0 15px rgba(59, 130, 246, 0.15);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1225,11 +1359,14 @@ const filteredStudents = computed(() => absensiData.value)
 }
 
 .success-icon-badge {
-  width: 64px; height: 64px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   background: color-mix(in oklch, var(--primary) 12%, transparent);
   border: 1px solid color-mix(in oklch, var(--primary) 30%, transparent);
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   animation: kbounce 2s infinite;
 }
 
@@ -1253,13 +1390,17 @@ const filteredStudents = computed(() => absensiData.value)
 }
 
 .student-avatar-large {
-  width: 50px; height: 50px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   background: var(--primary);
   color: var(--primary-foreground);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.15rem; font-weight: 800;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  font-weight: 800;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .student-details-text {
@@ -1293,8 +1434,11 @@ const filteredStudents = computed(() => absensiData.value)
 }
 
 .success-time-row {
-  display: flex; align-items: center; gap: 0.375rem;
-  font-size: 0.8rem; color: var(--muted-foreground);
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
 }
 
 /* Countdown bar */
@@ -1340,15 +1484,23 @@ const filteredStudents = computed(() => absensiData.value)
 }
 
 @keyframes shrinkWidth {
-  from { width: 100%; }
-  to { width: 0%; }
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
 }
 
 /* Hardware indicators */
 .scanner-footer {
-  display: flex; align-items: center; justify-content: space-between;
-  background: var(--muted); border: 1px solid var(--border);
-  border-radius: var(--radius-md, 10px); padding: 0.6rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  padding: 0.6rem 1rem;
 }
 
 .hardware-indicators-row {
@@ -1367,7 +1519,8 @@ const filteredStudents = computed(() => absensiData.value)
 }
 
 .indicator-dot {
-  width: 7px; height: 7px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: #64748b;
 }
@@ -1378,7 +1531,12 @@ const filteredStudents = computed(() => absensiData.value)
   animation: kpulse 1.8s infinite;
 }
 
-.footer-ver { font-size: 0.65rem; color: var(--muted-foreground); font-family: monospace; opacity: 0.6; }
+.footer-ver {
+  font-size: 0.65rem;
+  color: var(--muted-foreground);
+  font-family: monospace;
+  opacity: 0.6;
+}
 
 /* ══════════════════════════════════════════
    RIGHT PANEL CONTROLS
@@ -1389,7 +1547,7 @@ const filteredStudents = computed(() => absensiData.value)
   border-radius: var(--radius-lg, 14px);
   padding: 1.25rem 1.5rem;
   text-align: center;
-  box-shadow: var(--glass-shadow, 0 2px 8px rgba(0,0,0,0.06));
+  box-shadow: var(--glass-shadow, 0 2px 8px rgba(0, 0, 0, 0.06));
 }
 
 .clock-time {
@@ -1472,7 +1630,7 @@ const filteredStudents = computed(() => absensiData.value)
   padding: 1.125rem;
   display: flex;
   flex-direction: column;
-  box-shadow: var(--glass-shadow, 0 2px 8px rgba(0,0,0,0.06));
+  box-shadow: var(--glass-shadow, 0 2px 8px rgba(0, 0, 0, 0.06));
 }
 
 .sim-list {
@@ -1492,17 +1650,38 @@ const filteredStudents = computed(() => absensiData.value)
 }
 
 .sim-avatar {
-  width: 34px; height: 34px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   background: var(--accent);
   border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.75rem; font-weight: 700; color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
 }
 
-.sim-info { flex: 1; text-align: left; min-width: 0; }
-.sim-name { font-size: 0.78rem; font-weight: 700; color: var(--foreground); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; }
-.sim-meta { font-size: 0.65rem; color: var(--muted-foreground); margin: 0; }
+.sim-info {
+  flex: 1;
+  text-align: left;
+  min-width: 0;
+}
+.sim-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+.sim-meta {
+  font-size: 0.65rem;
+  color: var(--muted-foreground);
+  margin: 0;
+}
 
 .sim-actions {
   display: flex;
@@ -1534,7 +1713,7 @@ const filteredStudents = computed(() => absensiData.value)
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: var(--glass-shadow, 0 2px 8px rgba(0,0,0,0.06));
+  box-shadow: var(--glass-shadow, 0 2px 8px rgba(0, 0, 0, 0.06));
 }
 
 .log-header {
@@ -1590,21 +1769,44 @@ const filteredStudents = computed(() => absensiData.value)
   animation: kslideIn 0.25s ease;
 }
 .log-avatar {
-  width: 30px; height: 30px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: var(--accent);
   border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.65rem; font-weight: 700; color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--primary);
   flex-shrink: 0;
 }
-.log-info { flex: 1; min-width: 0; text-align: left; }
-.log-name { font-size: 0.75rem; font-weight: 700; color: var(--foreground); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; }
-.log-meta { font-size: 0.65rem; color: var(--muted-foreground); margin: 0; }
+.log-info {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+.log-name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+.log-meta {
+  font-size: 0.65rem;
+  color: var(--muted-foreground);
+  margin: 0;
+}
 .log-badge-type {
-  font-size: 0.6rem; font-weight: 700;
+  font-size: 0.6rem;
+  font-weight: 700;
   padding: 0.125rem 0.4rem;
-  border-radius: 4px; flex-shrink: 0;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 .badge-masuk {
   background: rgba(59, 130, 246, 0.1);
@@ -1620,22 +1822,92 @@ const filteredStudents = computed(() => absensiData.value)
 /* ══════════════════════════════════════════
    KEYFRAMES
    ══════════════════════════════════════════ */
-@keyframes kpulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
-@keyframes kscan { 0% { top: 15%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 85%; opacity: 0; } }
-@keyframes kspin { to { transform: rotate(360deg); } }
-@keyframes kslideIn { from { transform: translateY(-5px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-@keyframes kzoomIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-@keyframes kbounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes kpulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+@keyframes kscan {
+  0% {
+    top: 15%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    top: 85%;
+    opacity: 0;
+  }
+}
+@keyframes kspin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes kslideIn {
+  from {
+    transform: translateY(-5px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes kzoomIn {
+  from {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes kbounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
 @keyframes pg-enter {
-  from { opacity: 0; transform: scale(0.9) translateY(20px); }
-  to   { opacity: 1; transform: scale(1)   translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 @keyframes pg-shake {
-  0%, 100% { transform: translateX(0); }
-  20%      { transform: translateX(-10px); }
-  40%      { transform: translateX(10px); }
-  60%      { transform: translateX(-7px); }
-  80%      { transform: translateX(7px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-10px);
+  }
+  40% {
+    transform: translateX(10px);
+  }
+  60% {
+    transform: translateX(-7px);
+  }
+  80% {
+    transform: translateX(7px);
+  }
 }
 
 /* ══════════════════════════════════════════
@@ -1699,7 +1971,9 @@ const filteredStudents = computed(() => absensiData.value)
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
   animation: pg-enter 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -1746,7 +2020,9 @@ const filteredStudents = computed(() => absensiData.value)
   color: var(--foreground);
   font-size: 0.95rem;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   font-family: inherit;
 }
 .pg-input:focus {
@@ -1806,7 +2082,9 @@ const filteredStudents = computed(() => absensiData.value)
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.15s;
+  transition:
+    opacity 0.2s,
+    transform 0.15s;
   font-family: inherit;
 }
 .pg-btn-confirm:hover {
@@ -1818,40 +2096,81 @@ const filteredStudents = computed(() => absensiData.value)
 }
 
 .cam-state-wrap {
-  position: absolute; inset: 0; z-index: 20;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 0.75rem; background: rgba(0,0,0,0.75); text-align: center; padding: 1rem;
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: rgba(0, 0, 0, 0.75);
+  text-align: center;
+  padding: 1rem;
 }
 .cam-spinner {
-  width: 32px; height: 32px;
+  width: 32px;
+  height: 32px;
   border: 3px solid rgba(59, 130, 246, 0.2);
   border-top-color: var(--primary);
-  border-radius: 50%; animation: kspin 0.8s linear infinite;
+  border-radius: 50%;
+  animation: kspin 0.8s linear infinite;
 }
-.cam-state-text { font-size: 0.75rem; color: #94a3b8; font-weight: 600; }
+.cam-state-text {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
 .cam-error-icon {
-  padding: 1rem; border-radius: 50%;
-  background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.2); color: #f87171;
+  padding: 1rem;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #f87171;
 }
-.cam-error-text { font-size: 0.75rem; color: #f87171; max-width: 220px; }
+.cam-error-text {
+  font-size: 0.75rem;
+  color: #f87171;
+  max-width: 220px;
+}
 .cam-retry-btn {
-  padding: 0.45rem 1.25rem; border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.08); color: #e2e8f0;
-  font-size: 0.75rem; cursor: pointer; transition: all 0.2s;
+  padding: 0.45rem 1.25rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
 }
-.cam-retry-btn:hover { background: rgba(255,255,255,0.15); }
+.cam-retry-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
 .cam-idle-icon {
-  padding: 1.25rem; border-radius: 50%;
-  background: var(--muted); border: 1px solid var(--border);
+  padding: 1.25rem;
+  border-radius: 50%;
+  background: var(--muted);
+  border: 1px solid var(--border);
 }
-.cam-idle-text { font-size: 0.75rem; color: var(--muted-foreground); }
+.cam-idle-text {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
 .cam-start-btn {
-  display: flex; align-items: center; gap: 0.5rem;
-  padding: 0.55rem 1.5rem; border-radius: var(--radius-md, 10px);
-  background: var(--primary); color: var(--primary-foreground);
-  border: none; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.5rem;
+  border-radius: var(--radius-md, 10px);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
   transition: opacity 0.2s;
 }
-.cam-start-btn:hover { opacity: 0.9; }
+.cam-start-btn:hover {
+  opacity: 0.9;
+}
 </style>

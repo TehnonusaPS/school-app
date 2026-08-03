@@ -25,7 +25,17 @@ onMounted(() => {
 
   // Bersihkan semua class tema atau background yang mungkin terbawa dari dashboard
   document.body.classList.forEach(cls => {
-    if (cls.startsWith('theme-') || ['bg-animated', 'bg-static_squares', 'bg-glass', 'bg-school', 'bg-solid', 'finish-solid'].includes(cls)) {
+    if (
+      cls.startsWith('theme-') ||
+      [
+        'bg-animated',
+        'bg-static_squares',
+        'bg-glass',
+        'bg-school',
+        'bg-solid',
+        'finish-solid'
+      ].includes(cls)
+    ) {
       document.body.classList.remove(cls)
     }
   })
@@ -44,7 +54,10 @@ onMounted(() => {
 <template>
   <div class="font-sans antialiased text-foreground bg-background overflow-x-hidden">
     <!-- Navbar (floating glass) -->
-    <LandingNavbar brandName="Sekolahku ERP" loginPath="/login" />
+    <LandingNavbar
+      brandName="App School Tehnonusa"
+      loginPath="/login"
+    />
 
     <!-- Hero Section -->
     <LandingHeroSection />
@@ -68,7 +81,7 @@ onMounted(() => {
     <LandingCtaSection />
 
     <!-- Footer Section -->
-    <LandingFooter brandName="Sekolahku ERP" />
+    <LandingFooter brandName="App School Tehnonusa" />
 
     <!-- Live Floating WhatsApp Chat Helper -->
     <LandingChatWidget />
@@ -77,4 +90,3 @@ onMounted(() => {
     <PwaInstallModal />
   </div>
 </template>
-

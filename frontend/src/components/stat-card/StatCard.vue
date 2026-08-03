@@ -82,7 +82,8 @@ function getTrendConfig(direction) {
 
 const illustrationUrl = computed(() => {
   if (!props.illustration) return ''
-  return new URL(`../../assets/images/illustrations/${props.illustration}.png`, import.meta.url).href
+  return new URL(`../../assets/images/illustrations/${props.illustration}.png`, import.meta.url)
+    .href
 })
 </script>
 
@@ -155,7 +156,9 @@ const illustrationUrl = computed(() => {
       >
         <div class="flex items-center justify-between text-[9px] sm:text-xs">
           <span class="text-muted-foreground truncate max-w-[70%]">{{ sub || 'Realisasi' }}</span>
-          <span :class="['font-semibold', getColorClasses(resolvedColor).color]">{{ progress }}%</span>
+          <span :class="['font-semibold', getColorClasses(resolvedColor).color]"
+            >{{ progress }}%</span
+          >
         </div>
         <Progress
           :model-value="progress"
@@ -166,7 +169,13 @@ const illustrationUrl = computed(() => {
 
       <!-- Variant Trend Default -->
       <div
-        v-else-if="resolvedType === 'up' || resolvedType === 'down' || resolvedType === 'neutral' || trend || sub"
+        v-else-if="
+          resolvedType === 'up' ||
+          resolvedType === 'down' ||
+          resolvedType === 'neutral' ||
+          trend ||
+          sub
+        "
         class="mt-0.5 sm:mt-1 flex flex-col items-start gap-0 sm:flex-row sm:items-center sm:gap-1.5"
       >
         <span
@@ -208,6 +217,8 @@ const illustrationUrl = computed(() => {
 .animate-card-enter {
   opacity: 0;
   animation: card-enter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  animation-delay: calc(var(--base-delay, 0ms) + var(--delay-index, 0) * var(--stagger-delay, 100ms));
+  animation-delay: calc(
+    var(--base-delay, 0ms) + var(--delay-index, 0) * var(--stagger-delay, 100ms)
+  );
 }
 </style>

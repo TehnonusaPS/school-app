@@ -1,10 +1,5 @@
 <script setup>
-import {
-  Field,
-  FieldContent,
-  FieldError,
-  FieldLabel
-} from '@/components/ui/field'
+import { Field, FieldContent, FieldError, FieldLabel } from '@/components/ui/field'
 
 import {
   Select,
@@ -33,7 +28,11 @@ defineEmits(['update:modelValue'])
   <Field :data-invalid="!!error">
     <FieldLabel>
       {{ label }}
-      <span v-if="required" class="text-destructive">*</span>
+      <span
+        v-if="required"
+        class="text-destructive"
+        >*</span
+      >
     </FieldLabel>
 
     <FieldContent>
@@ -41,7 +40,10 @@ defineEmits(['update:modelValue'])
         :model-value="modelValue"
         @update:model-value="$emit('update:modelValue', $event)"
       >
-        <SelectTrigger class="w-full" :class="{'border-destructive': error}">
+        <SelectTrigger
+          class="w-full"
+          :class="{ 'border-destructive': error }"
+        >
           <SelectValue :placeholder="placeholder" />
         </SelectTrigger>
 

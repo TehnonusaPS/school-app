@@ -57,12 +57,20 @@
   --animate-accordion-up: accordion-up 0.2s ease-out;
 
   @keyframes accordion-down {
-    from { height: 0; }
-    to { height: var(--reka-accordion-content-height, var(--radix-accordion-content-height)); }
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--reka-accordion-content-height, var(--radix-accordion-content-height));
+    }
   }
   @keyframes accordion-up {
-    from { height: var(--reka-accordion-content-height, var(--radix-accordion-content-height)); }
-    to { height: 0; }
+    from {
+      height: var(--reka-accordion-content-height, var(--radix-accordion-content-height));
+    }
+    to {
+      height: 0;
+    }
   }
 }
 
@@ -103,7 +111,7 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
-  --coral: oklch(0.65 0.20 35);
+  --coral: oklch(0.65 0.2 35);
   --coral-foreground: oklch(1 0 0);
   --lavender: oklch(0.78 0.12 280);
   --lavender-foreground: oklch(1 0 0);
@@ -141,9 +149,9 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(0.278 0.033 256.848);
   --sidebar-ring: oklch(0.443 0.032 258.919);
-  --coral: oklch(0.60 0.18 35);
+  --coral: oklch(0.6 0.18 35);
   --coral-foreground: oklch(1 0 0);
-  --lavender: oklch(0.70 0.12 280);
+  --lavender: oklch(0.7 0.12 280);
   --lavender-foreground: oklch(1 0 0);
 }
 
@@ -204,38 +212,37 @@
   }
 
   /* ══ INTERACTIVE ELEMENTS (Solid Mode) ══ */
-  [data-slot="button"],
-  [data-slot="badge"],
-  [data-slot="progress-indicator"],
-  [data-slot="slider-range"],
-  [data-slot="slider-thumb"],
-  [data-slot="alert-dialog-action"],
-  [data-slot="alert-dialog-cancel"],
-  [data-slot="alert-dialog-trigger"],
-  [data-slot="dialog-trigger"],
-  [data-slot="toggle-group-item"],
-  [data-slot="calendar-cell-trigger"],
-  [data-slot="checkbox"],
-  [data-slot="switch"],
-  [data-slot="switch-thumb"],
-  [data-slot="radio-group-indicator"],
-  [data-slot="tabs-trigger"],
-  [data-slot="pagination-link"],
-  [data-slot="pagination-previous"],
-  [data-slot="pagination-next"],
-  [data-slot="pagination-first"],
-  [data-slot="pagination-last"] {
+  [data-slot='button'],
+  [data-slot='badge'],
+  [data-slot='progress-indicator'],
+  [data-slot='slider-range'],
+  [data-slot='slider-thumb'],
+  [data-slot='alert-dialog-action'],
+  [data-slot='alert-dialog-cancel'],
+  [data-slot='alert-dialog-trigger'],
+  [data-slot='dialog-trigger'],
+  [data-slot='toggle-group-item'],
+  [data-slot='calendar-cell-trigger'],
+  [data-slot='checkbox'],
+  [data-slot='switch'],
+  [data-slot='switch-thumb'],
+  [data-slot='radio-group-indicator'],
+  [data-slot='tabs-trigger'],
+  [data-slot='pagination-link'],
+  [data-slot='pagination-previous'],
+  [data-slot='pagination-next'],
+  [data-slot='pagination-first'],
+  [data-slot='pagination-last'] {
     letter-spacing: 0.02em;
   }
 
-
   /* ══ GLOBAL GLASS COMPONENTS ══ */
   /* Card, Calendar & Alert - backdrop-filter langsung di elemen agar production-safe */
-  [data-slot="card"],
-  [data-slot="calendar"],
-  [data-slot="range-calendar"],
-  [data-slot="alert"],
-  [data-slot="sidebar-inner"] {
+  [data-slot='card'],
+  [data-slot='calendar'],
+  [data-slot='range-calendar'],
+  [data-slot='alert'],
+  [data-slot='sidebar-inner'] {
     position: relative;
     z-index: 1;
     background: rgba(255, 255, 255, 0.18) !important;
@@ -252,20 +259,20 @@
   }
 
   @media (min-width: 640px) {
-    [data-slot="card"],
-    [data-slot="calendar"],
-    [data-slot="range-calendar"],
-    [data-slot="alert"],
-    [data-slot="sidebar-inner"] {
+    [data-slot='card'],
+    [data-slot='calendar'],
+    [data-slot='range-calendar'],
+    [data-slot='alert'],
+    [data-slot='sidebar-inner'] {
       border-radius: 32px !important;
     }
   }
 
-  .dark [data-slot="card"],
-  .dark [data-slot="calendar"],
-  .dark [data-slot="range-calendar"],
-  .dark [data-slot="alert"],
-  .dark [data-slot="sidebar-inner"] {
+  .dark [data-slot='card'],
+  .dark [data-slot='calendar'],
+  .dark [data-slot='range-calendar'],
+  .dark [data-slot='alert'],
+  .dark [data-slot='sidebar-inner'] {
     background: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     border-top: 1.5px solid rgba(255, 255, 255, 0.18) !important;
@@ -277,12 +284,12 @@
   }
 
   /* Dekoratif highlight-only ::after — TANPA backdrop-filter */
-  [data-slot="card"]::after,
-  [data-slot="calendar"]::after,
-  [data-slot="range-calendar"]::after,
-  [data-slot="alert"]::after,
-  [data-slot="sidebar-inner"]::after {
-    content: " ";
+  [data-slot='card']::after,
+  [data-slot='calendar']::after,
+  [data-slot='range-calendar']::after,
+  [data-slot='alert']::after,
+  [data-slot='sidebar-inner']::after {
+    content: ' ';
     position: absolute;
     inset: 0;
     pointer-events: none;
@@ -296,11 +303,11 @@
     z-index: 0;
   }
 
-  .dark [data-slot="card"]::after,
-  .dark [data-slot="calendar"]::after,
-  .dark [data-slot="range-calendar"]::after,
-  .dark [data-slot="alert"]::after,
-  .dark [data-slot="sidebar-inner"]::after {
+  .dark [data-slot='card']::after,
+  .dark [data-slot='calendar']::after,
+  .dark [data-slot='range-calendar']::after,
+  .dark [data-slot='alert']::after,
+  .dark [data-slot='sidebar-inner']::after {
     background: linear-gradient(
       160deg,
       rgba(255, 255, 255, 0.07) 0%,
@@ -388,9 +395,9 @@
     box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.1) !important;
     border: none !important;
   }
-  
+
   .glass-btn::after {
-    content: " ";
+    content: ' ';
     position: absolute;
     inset: 0;
     border-radius: inherit;
@@ -414,25 +421,23 @@
 
   /* Dekoratif highlight-only ::after untuk glass-header — TANPA backdrop-filter */
   .glass-header::after {
-    content: " ";
+    content: ' ';
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
     z-index: -1;
   }
 
   .dark .glass-header::after {
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
   }
 
   /* Input & Select & Checkbox */
-  [data-slot="input"],
-  [data-slot="textarea"],
-  [data-slot="select-trigger"],
-  [data-slot="checkbox"] {
+  [data-slot='input'],
+  [data-slot='textarea'],
+  [data-slot='select-trigger'],
+  [data-slot='checkbox'] {
     border-color: color-mix(in oklch, var(--foreground) 22%, transparent) !important;
     transition:
       border-color 0.2s ease,
@@ -447,14 +452,14 @@
   }
 
   /* Popover & Dropdown & Tooltip */
-  [data-slot="popover-content"],
-  [data-slot="dropdown-menu-content"],
-  [data-slot="context-menu-content"],
-  [data-slot="select-content"],
-  [data-slot="hover-card-content"],
-  [data-slot="tooltip-content"],
-  [data-slot="command"],
-  [data-slot="tabs-list"] {
+  [data-slot='popover-content'],
+  [data-slot='dropdown-menu-content'],
+  [data-slot='context-menu-content'],
+  [data-slot='select-content'],
+  [data-slot='hover-card-content'],
+  [data-slot='tooltip-content'],
+  [data-slot='command'],
+  [data-slot='tabs-list'] {
     background: color-mix(in oklch, var(--popover) 70%, transparent) !important;
     -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
     backdrop-filter: blur(24px) saturate(200%) !important;
@@ -462,14 +467,14 @@
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
   }
 
-  .dark [data-slot="popover-content"],
-  .dark [data-slot="dropdown-menu-content"],
-  .dark [data-slot="context-menu-content"],
-  .dark [data-slot="select-content"],
-  .dark [data-slot="hover-card-content"],
-  .dark [data-slot="tooltip-content"],
-  .dark [data-slot="command"],
-  .dark [data-slot="tabs-list"] {
+  .dark [data-slot='popover-content'],
+  .dark [data-slot='dropdown-menu-content'],
+  .dark [data-slot='context-menu-content'],
+  .dark [data-slot='select-content'],
+  .dark [data-slot='hover-card-content'],
+  .dark [data-slot='tooltip-content'],
+  .dark [data-slot='command'],
+  .dark [data-slot='tabs-list'] {
     border-color: rgba(255, 255, 255, 0.1) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
   }
@@ -489,7 +494,7 @@
       0 8px 32px -4px color-mix(in oklch, var(--primary) 40%, transparent),
       inset 0px 1px 1px 0px rgba(255, 255, 255, 0.4) !important;
   }
-  
+
   .dark [data-sonner-toast] {
     background: color-mix(in oklch, var(--primary) 80%, transparent) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -501,9 +506,9 @@
   }
 
   /* Dialog / Sheet / Drawer */
-  [data-slot="dialog-content"],
-  [data-slot="sheet-content"],
-  [data-slot="drawer-content"] {
+  [data-slot='dialog-content'],
+  [data-slot='sheet-content'],
+  [data-slot='drawer-content'] {
     background: color-mix(in oklch, var(--card) 60%, transparent) !important;
     -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
     backdrop-filter: blur(32px) saturate(200%) !important;
@@ -512,8 +517,8 @@
   }
 
   /* Strip glass-ui card styles when calendar is embedded inside popovers */
-  [data-slot="popover-content"] [data-slot="calendar"],
-  [data-slot="popover-content"] [data-slot="range-calendar"] {
+  [data-slot='popover-content'] [data-slot='calendar'],
+  [data-slot='popover-content'] [data-slot='range-calendar'] {
     background: transparent !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -521,28 +526,28 @@
     box-shadow: none !important;
     border-radius: 0 !important;
   }
-  [data-slot="popover-content"] [data-slot="calendar"]::after,
-  [data-slot="popover-content"] [data-slot="range-calendar"]::after {
+  [data-slot='popover-content'] [data-slot='calendar']::after,
+  [data-slot='popover-content'] [data-slot='range-calendar']::after {
     display: none !important;
   }
 
   /* ══ SOLID FINISH OVERRIDES (.finish-solid) ══ */
-  .finish-solid [data-slot="card"],
-  .finish-solid [data-slot="calendar"],
-  .finish-solid [data-slot="range-calendar"],
-  .finish-solid [data-slot="alert"],
-  .finish-solid [data-slot="sidebar-inner"] {
+  .finish-solid [data-slot='card'],
+  .finish-solid [data-slot='calendar'],
+  .finish-solid [data-slot='range-calendar'],
+  .finish-solid [data-slot='alert'],
+  .finish-solid [data-slot='sidebar-inner'] {
     background: var(--card) !important;
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
     border: 1px solid var(--border) !important;
     box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.08) !important;
   }
-  .finish-solid [data-slot="card"]::after,
-  .finish-solid [data-slot="calendar"]::after,
-  .finish-solid [data-slot="range-calendar"]::after,
-  .finish-solid [data-slot="alert"]::after,
-  .finish-solid [data-slot="sidebar-inner"]::after {
+  .finish-solid [data-slot='card']::after,
+  .finish-solid [data-slot='calendar']::after,
+  .finish-solid [data-slot='range-calendar']::after,
+  .finish-solid [data-slot='alert']::after,
+  .finish-solid [data-slot='sidebar-inner']::after {
     display: none !important;
   }
 
@@ -590,19 +595,19 @@
   .finish-solid .glass-btn::after {
     display: none !important;
   }
-  .finish-solid .glass-btn[class*="border-border"],
-  .finish-solid .glass-btn[class*="border-input"] {
+  .finish-solid .glass-btn[class*='border-border'],
+  .finish-solid .glass-btn[class*='border-input'] {
     border: 1px solid var(--border) !important;
   }
 
-  .finish-solid [data-slot="popover-content"],
-  .finish-solid [data-slot="dropdown-menu-content"],
-  .finish-solid [data-slot="context-menu-content"],
-  .finish-solid [data-slot="select-content"],
-  .finish-solid [data-slot="hover-card-content"],
-  .finish-solid [data-slot="tooltip-content"],
-  .finish-solid [data-slot="command"],
-  .finish-solid [data-slot="tabs-list"] {
+  .finish-solid [data-slot='popover-content'],
+  .finish-solid [data-slot='dropdown-menu-content'],
+  .finish-solid [data-slot='context-menu-content'],
+  .finish-solid [data-slot='select-content'],
+  .finish-solid [data-slot='hover-card-content'],
+  .finish-solid [data-slot='tooltip-content'],
+  .finish-solid [data-slot='command'],
+  .finish-solid [data-slot='tabs-list'] {
     background: var(--popover) !important;
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
@@ -619,14 +624,16 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
   }
 
-  .finish-solid [data-slot="dialog-content"],
-  .finish-solid [data-slot="sheet-content"],
-  .finish-solid [data-slot="drawer-content"] {
+  .finish-solid [data-slot='dialog-content'],
+  .finish-solid [data-slot='sheet-content'],
+  .finish-solid [data-slot='drawer-content'] {
     background: var(--card) !important;
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
     border: 1px solid var(--border) !important;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    box-shadow:
+      0 20px 25px -5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
   }
 
   .finish-solid .glossy-active {
@@ -662,7 +669,6 @@
 }
 
 @layer utilities {
-
   /* Active class for selected navigation items */
   .glossy-active {
     position: relative;
@@ -679,7 +685,7 @@
 
   /* Dekoratif highlight-only ::after untuk glossy-active — TANPA backdrop-filter */
   .glossy-active::after {
-    content: " ";
+    content: ' ';
     position: absolute;
     inset: 0;
 
@@ -691,8 +697,7 @@
     border-top: 1px solid rgba(255, 255, 255, 0.4);
     border-left: 1px solid rgba(255, 255, 255, 0.2);
 
-    box-shadow:
-      inset 0px 1px 2px rgba(255, 255, 255, 0.3);
+    box-shadow: inset 0px 1px 2px rgba(255, 255, 255, 0.3);
 
     z-index: -1;
     pointer-events: none;
@@ -816,12 +821,20 @@
     border-radius: inherit;
     pointer-events: none;
     /* Overlay putih transparan tipis */
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.01) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0.01) 100%
+    );
   }
 
   .dark .glass-overlay::after {
     /* Overlay gelap transparan tipis */
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.01) 100%
+    );
   }
 
   /* 3. Neon Glow Shadow */
@@ -870,7 +883,6 @@ body.bg-static_squares .background-squares-static {
   display: block !important;
 }
 
-
 /* 🏫 School Doodle Background (Always Visible Overlay) */
 .school-background {
   position: fixed;
@@ -881,7 +893,7 @@ body.bg-static_squares .background-squares-static {
 }
 
 .school-background::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
@@ -910,12 +922,12 @@ body.bg-static_squares .background-squares-static {
 
 [data-slot='sidebar-inner']::before,
 [data-slot='sidebar'][data-mobile='true']::before {
-  content: "" !important;
+  content: '' !important;
   position: absolute !important;
   inset: 0 !important;
   z-index: -1 !important;
   pointer-events: none !important;
-  
+
   /* Colorized with primary color */
   background-color: var(--primary) !important;
   -webkit-mask-image: url('./images/bg-school-sidebar.png') !important;
@@ -926,14 +938,14 @@ body.bg-static_squares .background-squares-static {
   mask-position: center 50px !important;
   -webkit-mask-repeat: no-repeat !important;
   mask-repeat: no-repeat !important;
-  
+
   opacity: 0.12 !important;
   transition: opacity 0.3s ease;
 }
 
 .dark [data-slot='sidebar-inner']::before,
 .dark [data-slot='sidebar'][data-mobile='true']::before {
-  opacity: 0.10 !important;
+  opacity: 0.1 !important;
 }
 
 @media (max-width: 768px) {
@@ -944,7 +956,6 @@ body.bg-static_squares .background-squares-static {
     mask-position: center -100px !important;
   }
 }
-
 
 /* 🧊 Apple Glass Dynamic Image Background */
 .apple-glass-background {
@@ -1435,7 +1446,6 @@ body.bg-static_squares .background-squares-static {
 }
 
 @keyframes wa-pulse {
-
   0%,
   100% {
     box-shadow: 0 0 0 0 rgb(15 118 110 / 0.35);
@@ -1498,51 +1508,93 @@ body.bg-static_squares .background-squares-static {
 }
 
 @keyframes fade-out-instantly {
-  0% { opacity: 1; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 @keyframes slide-out-left {
-  0% { transform: translateX(0); opacity: 1; }
-  50% { opacity: 1; }
-  100% { transform: translateX(-100%); opacity: 0; }
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
 }
 
 @keyframes slide-out-right {
-  0% { transform: translateX(0); opacity: 1; }
-  50% { opacity: 1; }
-  100% { transform: translateX(100%); opacity: 0; }
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
 }
 
 @keyframes slide-in-left {
-  0% { transform: translateX(-100%); opacity: 0; }
-  50% { opacity: 1; }
-  100% { transform: translateX(0); opacity: 1; }
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 @keyframes slide-in-right {
-  0% { transform: translateX(100%); opacity: 0; }
-  50% { opacity: 1; }
-  100% { transform: translateX(0); opacity: 1; }
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 /* --- Kelas Animasi Keluar (Exit) Sidebar & Topbar --- */
 .sidebar-exit-active {
   transform: translateX(-120%) !important;
   opacity: 0 !important;
-  transition: transform 0.6s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.6s ease-in-out !important;
+  transition:
+    transform 0.6s cubic-bezier(0.76, 0, 0.24, 1),
+    opacity 0.6s ease-in-out !important;
 }
 
 .topbar-exit-active {
   transform: translateY(-100px) !important;
   opacity: 0 !important;
-  transition: transform 0.6s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.6s ease-in-out !important;
+  transition:
+    transform 0.6s cubic-bezier(0.76, 0, 0.24, 1),
+    opacity 0.6s ease-in-out !important;
 }
 
 .content-exit-active {
   transform: translateY(40px) !important;
   opacity: 0 !important;
-  transition: transform 0.6s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.6s ease-in-out !important;
+  transition:
+    transform 0.6s cubic-bezier(0.76, 0, 0.24, 1),
+    opacity 0.6s ease-in-out !important;
 }
 
 /* --- Entrance Animations for Login Page (First Load) --- */

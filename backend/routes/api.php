@@ -256,6 +256,7 @@ Route::middleware('auth:sanctum')->group(function () {
         ->prefix('orang-tua')
         ->group(function () {
             Route::get('/schedule', [AcademicCalendarController::class, 'parentSchedule']);
+        });
     // Student Attendance & Face Registration
     Route::get('/absensi/siswa', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'index']);
     Route::get('/absensi/siswa/logs', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'logs']);

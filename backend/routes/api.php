@@ -215,6 +215,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('finance')->group(function () {
         Route::get('/spp/dashboard', [\App\Http\Controllers\Api\SppController::class, 'getDashboard']);
         Route::get('/spp/bills', [\App\Http\Controllers\Api\SppController::class, 'getBills']);
+        Route::get('/spp/payments', [\App\Http\Controllers\Api\SppController::class, 'getPayments']);
+        Route::get('/spp/payments/{id}', [\App\Http\Controllers\Api\SppController::class, 'getPaymentDetails']);
         Route::post('/spp/payments', [\App\Http\Controllers\Api\SppController::class, 'createPayment']);
         Route::post('/spp/payments/{id}/verify', [\App\Http\Controllers\Api\SppController::class, 'verifyPayment']);
         

@@ -133,7 +133,7 @@ const handleSubmit = async () => {
     const res = await createSppPayment(payload)
     if (res.status === 'success') {
       toast.success('Pembayaran SPP berhasil dicatat!')
-      router.push('/keuangan/spp')
+      router.push(`/keuangan/cetak-kwitansi?payment_id=${res.data.id}`)
     } else {
       throw new Error(res.message || 'Gagal menyimpan pembayaran.')
     }

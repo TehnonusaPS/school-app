@@ -64,3 +64,19 @@ export async function deleteSppTariff(id) {
   const response = await api.delete(`/finance/spp/tariffs/${id}`)
   return response.data
 }
+
+/**
+ * Get student SPP payments list.
+ */
+export async function getSppPayments(params = {}) {
+  const response = await api.get('/finance/spp/payments', { params })
+  return response.data
+}
+
+/**
+ * Get details of a single SPP payment.
+ */
+export async function getSppPaymentDetails(id) {
+  const response = await api.get(`/finance/spp/payments/${id}`)
+  return response.data
+}

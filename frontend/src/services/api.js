@@ -18,12 +18,20 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+<<<<<<< Updated upstream
 
+=======
+  
+>>>>>>> Stashed changes
   // Allow browser to auto-detect boundary for FormData requests by deleting the default Content-Type
   if (config.data instanceof FormData) {
     delete config.headers['Content-Type']
   }
+<<<<<<< Updated upstream
 
+=======
+  
+>>>>>>> Stashed changes
   return config
 })
 

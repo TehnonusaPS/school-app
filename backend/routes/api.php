@@ -11,10 +11,9 @@ use App\Http\Controllers\Api\TeacherController;
 use App\Http\Controllers\Api\ExtracurricularController;
 use App\Http\Controllers\Api\SubjectController;
 use App\Http\Controllers\Api\AcademicYearController;
-<<<<<<< Updated upstream
-=======
+
 use Illuminate\Support\Facades\Broadcast;
->>>>>>> Stashed changes
+
 use Illuminate\Support\Facades\Route;
 
 /*

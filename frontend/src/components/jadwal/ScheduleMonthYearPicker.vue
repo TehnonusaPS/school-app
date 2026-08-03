@@ -100,24 +100,28 @@ const onYearChange = (event: Event) => {
       </div>
     </div>
 
-    <!-- Row 2: Dot Legends -->
-    <div class="flex items-center gap-4 text-xs font-medium text-muted-foreground flex-wrap">
-      <div class="flex items-center gap-1.5">
-        <span class="size-2.5 rounded-full bg-blue-500 shrink-0"></span>
-        <span>Mata Pelajaran</span>
+    <!-- Row 2: Dot Legends & Action Slot -->
+    <div class="flex items-center justify-between gap-4 text-xs font-medium text-muted-foreground flex-wrap pt-0.5">
+      <div class="flex items-center gap-4 flex-wrap">
+        <div class="flex items-center gap-1.5">
+          <span class="size-2.5 rounded-full bg-blue-500 shrink-0"></span>
+          <span>Mata Pelajaran</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="size-2.5 rounded-full bg-purple-500 shrink-0"></span>
+          <span>Ujian</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="size-2.5 rounded-full bg-red-500 shrink-0"></span>
+          <span>Libur</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="size-2.5 rounded-full bg-emerald-500 shrink-0"></span>
+          <span>Tugas</span>
+        </div>
       </div>
-      <div class="flex items-center gap-1.5">
-        <span class="size-2.5 rounded-full bg-purple-500 shrink-0"></span>
-        <span>Ujian</span>
-      </div>
-      <div class="flex items-center gap-1.5">
-        <span class="size-2.5 rounded-full bg-red-500 shrink-0"></span>
-        <span>Libur</span>
-      </div>
-      <div class="flex items-center gap-1.5">
-        <span class="size-2.5 rounded-full bg-emerald-500 shrink-0"></span>
-        <span>Tugas</span>
-      </div>
+
+      <slot name="action" />
     </div>
   </div>
 </template>

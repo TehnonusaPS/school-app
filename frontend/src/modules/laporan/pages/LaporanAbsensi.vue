@@ -11,7 +11,7 @@ import {
   RefreshCw,
   Download,
 } from 'lucide-vue-next'
-import { getRecapData } from '@/services/api/absensi'
+import { getSchoolAttendance } from '@/services/api/reports'
 import { Badge } from '@/components/ui/badge'
 import {
   Tabs,
@@ -73,7 +73,7 @@ const perPageSummary = ref(10)
 async function loadData() {
   isLoading.value = true
   try {
-    const data = await getRecapData(filterValues.value.startDate, filterValues.value.endDate)
+    const data = await getSchoolAttendance()
     recapData.value = data
   } catch (err) {
     console.error(err)

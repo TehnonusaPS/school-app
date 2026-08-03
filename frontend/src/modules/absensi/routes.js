@@ -183,5 +183,84 @@ export default [
       parent: 'Absensi',
       description: 'Isi lembar kehadiran siswa secara harian dan periodik.'
     }
+  },
+
+  // 5. Rute Permintaan Izin/Cuti Staff & Persetujuan
+  {
+    path: 'absensi/admin-sekolah/persetujuan-cuti',
+    component: () => import('./pages/admin-sekolah/persetujuan-cuti/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin_sekolah'],
+      title: 'Persetujuan Cuti / Izin',
+      parent: 'Absensi',
+      description: 'Persetujuan pengajuan cuti dan izin guru/staff.'
+    }
+  },
+  {
+    path: 'absensi/admin-sekolah/izin-cuti',
+    component: () => import('./pages/admin-sekolah/izin-cuti/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin_sekolah'],
+      title: 'Pengajuan Izin / Cuti',
+      parent: 'Absensi',
+      description: 'Ajukan izin atau cuti kerja.'
+    }
+  },
+  {
+    path: 'absensi/admin-sekolah/pengaturan',
+    component: () => import('./pages/admin-sekolah/pengaturan/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin_sekolah'],
+      title: 'Pengaturan Absensi',
+      parent: 'Absensi',
+      description: 'Atur jam masuk absensi operasional sekolah.'
+    }
+  },
+  {
+    path: 'absensi/guru/izin-cuti',
+    component: () => import('./pages/guru/izin-cuti/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['guru'],
+      title: 'Pengajuan Izin / Cuti',
+      parent: 'Absensi',
+      description: 'Ajukan izin atau cuti kerja.'
+    }
+  },
+  {
+    path: 'absensi/wali-kelas/izin-cuti',
+    component: () => import('./pages/wali-kelas/izin-cuti/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['wali_kelas'],
+      title: 'Pengajuan Izin / Cuti',
+      parent: 'Absensi',
+      description: 'Ajukan izin atau cuti kerja.'
+    }
+  },
+  {
+    path: 'absensi/kepala-sekolah/izin-cuti',
+    component: () => import('./pages/kepala-sekolah/izin-cuti/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['kepala_sekolah'],
+      title: 'Pengajuan Izin / Cuti',
+      parent: 'Absensi',
+      description: 'Ajukan izin atau cuti kerja.'
+    }
+  },
+  {
+    path: 'absensi/tata-usaha/izin-cuti',
+    component: () => import('./pages/tata-usaha/izin-cuti/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['tata_usaha'],
+      title: 'Pengajuan Izin / Cuti',
+      parent: 'Absensi',
+      description: 'Ajukan izin atau cuti kerja.'
+    }
   }
 ]

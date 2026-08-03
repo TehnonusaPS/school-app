@@ -48,22 +48,9 @@ import { Separator } from '@/components/ui/separator'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
 import { today, getLocalTimeZone, startOfMonth, endOfMonth } from '@internationalized/date'
-
-const mockPemasukan = [
-  { id: 1, tanggal: '2 Jan 2026', keterangan: 'SPP Januari - XI IPA 1', kategori: 'SPP', jumlah: 12500000, status: 'lunas' },
-  { id: 2, tanggal: '3 Jan 2026', keterangan: 'SPP Januari - XI IPA 2', kategori: 'SPP', jumlah: 11800000, status: 'lunas' },
-  { id: 3, tanggal: '5 Jan 2026', keterangan: 'Dana BOS Triwulan I', kategori: 'BOS', jumlah: 45000000, status: 'lunas' },
-  { id: 4, tanggal: '10 Jan 2026', keterangan: 'SPP Januari - XII IPA 1', kategori: 'SPP', jumlah: 13200000, status: 'sebagian' },
-  { id: 5, tanggal: '15 Jan 2026', keterangan: 'Donasi Orang Tua Siswa', kategori: 'Donasi', jumlah: 5000000, status: 'lunas' },
-]
-
-const mockPengeluaran = [
-  { id: 1, tanggal: '3 Jan 2026', keterangan: 'Gaji Guru & Staf Januari', kategori: 'Gaji', jumlah: 38000000, status: 'dibayar' },
-  { id: 2, tanggal: '5 Jan 2026', keterangan: 'Listrik & Air Januari', kategori: 'Operasional', jumlah: 3200000, status: 'dibayar' },
-  { id: 3, tanggal: '8 Jan 2026', keterangan: 'Pembelian ATK & Bahan Ajar', kategori: 'Operasional', jumlah: 1850000, status: 'dibayar' },
-  { id: 4, tanggal: '12 Jan 2026', keterangan: 'Perbaikan Fasilitas Perpustakaan', kategori: 'Pemeliharaan', jumlah: 4500000, status: 'dibayar' },
-  { id: 5, tanggal: '20 Jan 2026', keterangan: 'Kegiatan Ekstrakurikuler', kategori: 'Kegiatan', jumlah: 2200000, status: 'dibayar' },
-]
+import StatCardGrid from '@/components/stat-card/StatCardGrid.vue'
+import StatCard from '@/components/stat-card/StatCard.vue'
+import { getSchoolFinance } from '@/services/api/reports'
 
 const isLoading = ref(true)
 const pemasukan = ref([])
@@ -72,12 +59,16 @@ const selectedBulan = ref('1')
 const selectedTahun = ref('2026')
 const searchQuery = ref('')
 
-onMounted(() => {
-  setTimeout(() => {
-    pemasukan.value = mockPemasukan
-    pengeluaran.value = mockPengeluaran
+onMounted(async () => {
+  try {
+    const res = await getSchoolFinance()
+    pemasukan.value = res.pemasukan || []
+    pengeluaran.value = res.pengeluaran || []
+  } catch (error) {
+    console.error('Failed to fetch school finance data:', error)
+  } finally {
     isLoading.value = false
-  }, 500)
+  }
 })
 
 function formatRp(val) {
@@ -151,43 +142,32 @@ const bulanList = [
     </div>
 
     <!-- Summary Cards -->
-    <div class="grid gap-4 grid-cols-1 md:grid-cols-3">
-      <Card class="p-5 border-green-200 dark:border-green-900/40 bg-green-50/30 dark:bg-green-950/10 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-sm font-medium text-green-700 dark:text-green-400">Total Pemasukan</span>
-          <div class="p-2 bg-green-100 dark:bg-green-900/40 rounded-xl">
-            <ArrowUpRight class="size-5 text-green-600 dark:text-green-400" />
-          </div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-9 w-40" />
-        <div v-else class="text-2xl font-bold text-green-700 dark:text-green-400">{{ formatRp(totalPemasukan) }}</div>
-        <p class="text-xs text-green-600 dark:text-green-500 mt-1">{{ pemasukan.length }} transaksi</p>
-      </Card>
-
-      <Card class="p-5 border-red-200 dark:border-red-900/40 bg-red-50/30 dark:bg-red-950/10 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-sm font-medium text-red-700 dark:text-red-400">Total Pengeluaran</span>
-          <div class="p-2 bg-red-100 dark:bg-red-900/40 rounded-xl">
-            <ArrowDownRight class="size-5 text-red-600 dark:text-red-400" />
-          </div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-9 w-40" />
-        <div v-else class="text-2xl font-bold text-red-700 dark:text-red-400">{{ formatRp(totalPengeluaran) }}</div>
-        <p class="text-xs text-red-600 dark:text-red-500 mt-1">{{ pengeluaran.length }} transaksi</p>
-      </Card>
-
-      <Card class="p-5 hover:shadow-md transition-shadow" :class="saldo >= 0 ? 'border-blue-200 dark:border-blue-900/40 bg-blue-50/30 dark:bg-blue-950/10' : 'border-red-200 dark:border-red-900/40 bg-red-50/30 dark:bg-red-950/10'">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-sm font-medium" :class="saldo >= 0 ? 'text-blue-700 dark:text-blue-400' : 'text-red-700 dark:text-red-400'">Saldo Bersih</span>
-          <div class="p-2 rounded-xl" :class="saldo >= 0 ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-red-100 dark:bg-red-900/40'">
-            <component :is="saldo >= 0 ? TrendingUp : TrendingDown" class="size-5" :class="saldo >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400'" />
-          </div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-9 w-40" />
-        <div v-else class="text-2xl font-bold" :class="saldo >= 0 ? 'text-blue-700 dark:text-blue-400' : 'text-red-700 dark:text-red-400'">{{ formatRp(Math.abs(saldo)) }}</div>
-        <p class="text-xs mt-1" :class="saldo >= 0 ? 'text-blue-600 dark:text-blue-500' : 'text-red-600 dark:text-red-500'">{{ saldo >= 0 ? 'Surplus' : 'Defisit' }}</p>
-      </Card>
-    </div>
+    <StatCardGrid cols="3">
+      <StatCard
+        label="Total Pemasukan"
+        :value="isLoading ? '' : formatRp(totalPemasukan)"
+        :sub="`${pemasukan.length} transaksi`"
+        :icon="ArrowUpRight"
+        variant="emerald"
+        :loading="isLoading"
+      />
+      <StatCard
+        label="Total Pengeluaran"
+        :value="isLoading ? '' : formatRp(totalPengeluaran)"
+        :sub="`${pengeluaran.length} transaksi`"
+        :icon="ArrowDownRight"
+        variant="destructive"
+        :loading="isLoading"
+      />
+      <StatCard
+        label="Saldo Bersih"
+        :value="isLoading ? '' : formatRp(Math.abs(saldo))"
+        :sub="saldo >= 0 ? 'Surplus' : 'Defisit'"
+        :icon="saldo >= 0 ? TrendingUp : TrendingDown"
+        :variant="saldo >= 0 ? 'primary' : 'destructive'"
+        :loading="isLoading"
+      />
+    </StatCardGrid>
 
     <!-- Tabs -->
     <Tabs default-value="pemasukan">

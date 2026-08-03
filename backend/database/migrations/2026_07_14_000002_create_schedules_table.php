@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('academic_year_id')->constrained('academic_years')->cascadeOnDelete();
             $table->foreignId('classroom_id')->constrained('classrooms')->cascadeOnDelete();
             $table->foreignId('subject_id')->constrained('subjects')->cascadeOnDelete();
-            $table->foreignUuid('teacher_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('teacher_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('time_slot_id')->constrained('time_slots')->cascadeOnDelete();
             $table->tinyInteger('day_of_week'); // 1 = Senin, 2 = Selasa, ..., 6 = Sabtu, 7 = Minggu
             $table->timestamps();

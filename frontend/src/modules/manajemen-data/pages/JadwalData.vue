@@ -1,8 +1,7 @@
 <script setup>
-import PlaceholderPage from '@/components/PlaceholderPage.vue'
-import { CalendarDays } from 'lucide-vue-next'
+import IndexPage from './jadwal/IndexPage.vue'
 </script>
 
 <template>
-  <PlaceholderPage :icon="CalendarDays" />
+  <IndexPage />
 </template>

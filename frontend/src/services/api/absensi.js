@@ -1,3 +1,5 @@
+import api from '../api'
+
 const SIMULATE_NETWORK_DELAY = 400; // ms
 const ERROR_PROBABILITY = 0.05; // 5% chance of error
 
@@ -38,18 +40,13 @@ function simulateError() {
 
 // ─── API endpoints ─────────────────────────────────────────────────────────
 
-export const getStudents = async () => {
-  initDB();
-  await delay(SIMULATE_NETWORK_DELAY);
-  simulateError();
-  return JSON.parse(localStorage.getItem('api_students'));
+export const getStudents = async (params) => {
+  const response = await api.get('/absensi/siswa', { params });
+  return response.data;
 };
 
 export const getSummary = async () => {
-  initDB();
-  await delay(SIMULATE_NETWORK_DELAY);
-  simulateError();
-  const students = JSON.parse(localStorage.getItem('api_students'));
+  const students = await getStudents();
   return {
     totalSiswa: students.length,
     sudahHadir: students.filter(s => s.status === 'hadir').length,
@@ -59,60 +56,23 @@ export const getSummary = async () => {
 };
 
 export const getLogs = async () => {
-  initDB();
-  await delay(SIMULATE_NETWORK_DELAY);
-  simulateError();
-  return JSON.parse(localStorage.getItem('api_logs'));
+  const response = await api.get('/absensi/siswa/logs');
+  return response.data;
 };
 
-export const postScan = async (studentId, type = 'Masuk') => {
-  initDB();
-  await delay(SIMULATE_NETWORK_DELAY);
-  simulateError();
-
-  const students = JSON.parse(localStorage.getItem('api_students'));
-  const logs = JSON.parse(localStorage.getItem('api_logs'));
-
-  const student = students.find(s => s.id === studentId);
-  if (!student) {
-    throw new Error('Siswa tidak ditemukan');
-  }
-
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-  // Update student status
-  if (type === 'Masuk') {
-    student.jamMasuk = timeStr;
-    // Simple logic for late check
-    const isLate = now.getHours() >= 7 && now.getMinutes() > 15;
-    student.status = isLate ? 'terlambat' : 'hadir';
+export const postScan = async (payload) => {
+  // payload can be FormData (for real webcam upload) or standard object (for simulation)
+  let response;
+  if (payload instanceof FormData) {
+    response = await api.post('/absensi/siswa/scan', payload, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
   } else {
-    student.jamKeluar = timeStr;
+    response = await api.post('/absensi/siswa/scan', payload);
   }
-
-  // Create log
-  const initials = student.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-  const newLog = {
-    id: Date.now(),
-    nama: student.nama,
-    kelas: student.kelas,
-    nisn: student.nisn,
-    inisial: initials,
-    waktu: timeStr,
-    tipe: type,
-  };
-
-  logs.unshift(newLog); // prepend to log list
-
-  // Save back
-  localStorage.setItem('api_students', JSON.stringify(students));
-  localStorage.setItem('api_logs', JSON.stringify(logs));
-
-  return newLog;
+  return response.data;
 };
 
-// Khusus untuk Dashboard Guru (dummy clock in / out tanpa mengaitkan ke array siswa)
 export const postGuruScan = async (type = 'in') => {
   await delay(SIMULATE_NETWORK_DELAY);
   simulateError();
@@ -129,32 +89,14 @@ export const postGuruScan = async (type = 'in') => {
   };
 };
 
-// ─── Fitur Tambahan ────────────────────────────────────────────────────────
-
 export const updateStudentStatus = async (studentId, status) => {
-  initDB();
-  await delay(SIMULATE_NETWORK_DELAY);
-  simulateError();
-
-  const students = JSON.parse(localStorage.getItem('api_students'));
-  const student = students.find(s => s.id === studentId);
-  if (!student) throw new Error('Siswa tidak ditemukan');
-
-  student.status = status;
-  // If setting to izin/sakit/alpa, reset their check-in times for simplicity
-  if (['izin', 'sakit', 'alpa'].includes(status)) {
-    student.jamMasuk = null;
-    student.jamKeluar = null;
-  }
-
-  localStorage.setItem('api_students', JSON.stringify(students));
-  return student;
+  const response = await api.post(`/absensi/siswa/${studentId}/status`, { status });
+  return response.data;
 };
 
 export const getPersonalHistory = async (userId) => {
   await delay(SIMULATE_NETWORK_DELAY);
   simulateError();
-  // Mock response for student personal history
   return [
     { id: 1, tanggal: '20 Mei 2026', mapel: 'Matematika', jamMasuk: '07:15', jamKeluar: '14:00', status: 'hadir' },
     { id: 2, tanggal: '19 Mei 2026', mapel: 'Fisika', jamMasuk: '07:20', jamKeluar: '13:50', status: 'hadir' },
@@ -169,8 +111,6 @@ export const getRecapData = async (startDate, endDate) => {
   await delay(SIMULATE_NETWORK_DELAY);
   simulateError();
 
-  // Create mock recap based on api_students but randomized dates within the range
-  // For simplicity, we just return a static mock list
   return [
     { id: 101, tanggal: '20 Mei 2026', nama: 'Ahmad Fadil', kelas: 'XI IPA 1', jamMasuk: '07:12:45', jamKeluar: '10:15:20', status: 'hadir' },
     { id: 102, tanggal: '20 Mei 2026', nama: 'Bunga Citra', kelas: 'XI IPA 1', jamMasuk: '07:25:10', jamKeluar: '-', status: 'terlambat' },
@@ -179,4 +119,67 @@ export const getRecapData = async (startDate, endDate) => {
     { id: 105, tanggal: '18 Mei 2026', nama: 'Elsa Novita', kelas: 'XI IPA 2', jamMasuk: '07:05:22', jamKeluar: '14:14:10', status: 'hadir' },
     { id: 106, tanggal: '17 Mei 2026', nama: 'Farhan Ramdan', kelas: 'XI IPA 2', jamMasuk: '-', jamKeluar: '-', status: 'alpa' },
   ];
+};
+
+export const getMonthlyGrid = async (params) => {
+  const response = await api.get('/absensi/siswa/monthly-grid', { params });
+  return response.data;
+};
+
+export const updateMonthlyCell = async (payload) => {
+  const response = await api.post('/absensi/siswa/monthly-grid/update', payload);
+  return response.data;
+};
+
+export const registerStudentFace = async (studentId, formData) => {
+  const response = await api.post(`/absensi/siswa/${studentId}/register-face`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+  return response.data;
+};
+
+// ─── Real Staff Attendance & Leave APIs ──────────────────────────────────────
+
+export const clockInStaff = async (formData) => {
+  const response = await api.post('/absensi/clock-in', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+  return response.data;
+};
+
+export const getStaffAttendanceHistory = async () => {
+  const response = await api.get('/absensi/history');
+  return response.data;
+};
+
+export const submitLeaveRequest = async (payload) => {
+  const response = await api.post('/absensi/leaves', payload);
+  return response.data;
+};
+
+export const getStaffLeaveRequests = async () => {
+  const response = await api.get('/absensi/leaves');
+  return response.data;
+};
+
+export const getAdminLeaveRequests = async () => {
+  const response = await api.get('/admin/absensi/leaves');
+  return response.data;
+};
+
+export const actionLeaveRequest = async (id, payload) => {
+  const response = await api.post(`/admin/absensi/leaves/${id}/action`, payload);
+  return response.data;
+};
+
+export const getAbsensiSettings = async () => {
+  const response = await api.get('/admin/absensi/settings');
+  return response.data;
+};
+
+export const updateAbsensiSettings = async (payload) => {
+  const response = await api.put('/admin/absensi/settings', payload);
+  return response.data;
 };

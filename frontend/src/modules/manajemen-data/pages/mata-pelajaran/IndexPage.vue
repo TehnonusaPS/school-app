@@ -39,11 +39,12 @@ import {
   ToggleRight
 } from 'lucide-vue-next'
 import {
-  getSubjects,
-  saveSubjects,
-  columns,
-  filters
-} from './data/mockMataPelajaran'
+  fetchAllSubjects,
+  createSubject,
+  updateSubject,
+  deleteSubject
+} from '@/services/subjectService'
+import { columns, filters } from './data/mockMataPelajaran'
 
 const auth = useAuthStore()
 
@@ -59,15 +60,36 @@ const filterValues = ref({
   search: '',
   status: 'all'
 })
+const isLoading = ref(false)
+
+async function fetchSubjectsData() {
+  isLoading.value = true
+  try {
+    const res = await fetchAllSubjects()
+    subjects.value = res.data.map(item => ({
+      id: item.id,
+      kode: item.code,
+      nama: item.name,
+      deskripsi: item.description,
+      status: item.is_active ? 'approved' : 'draft',
+      isActive: item.is_active,
+      grades: item.grades ? item.grades.map(g => g.grade) : []
+    }))
+  } catch (err) {
+    toast.error('Gagal mengambil data mata pelajaran')
+  } finally {
+    isLoading.value = false
+  }
+}
 
 onMounted(() => {
-  subjects.value = getSubjects()
+  fetchSubjectsData()
 })
 
 // --- Computed Stats ---
 const totalCount = computed(() => subjects.value.length)
 const approvedCount = computed(() => subjects.value.filter(s => s.status === 'approved').length)
-const pendingCount = computed(() => subjects.value.filter(s => s.status === 'pending').length)
+const pendingCount = computed(() => 0)
 const draftOrRejectedCount = computed(() => subjects.value.filter(s => s.status === 'draft' || s.status === 'rejected').length)
 
 const stats = computed(() => [
@@ -119,11 +141,13 @@ function getStatusBadgeVariant(status, item) {
 // --- Form Sheet State & Methods (Inline Create/Edit) ---
 const isFormSheetOpen = ref(false)
 const isEditMode = ref(false)
+const isSaveConfirmOpen = ref(false)
 const formItem = ref({
   id: '',
   kode: '',
   nama: '',
-  deskripsi: ''
+  deskripsi: '',
+  grades: [1, 2, 3, 4, 5, 6]
 })
 
 const handleCreate = () => {
@@ -132,7 +156,9 @@ const handleCreate = () => {
     id: '',
     kode: '',
     nama: '',
-    deskripsi: ''
+    deskripsi: '',
+    grades: [1, 2, 3, 4, 5, 6],
+    status: 'approved'
   }
   isFormSheetOpen.value = true
 }
@@ -143,15 +169,16 @@ const handleEdit = (item) => {
     id: item.id,
     kode: item.kode,
     nama: item.nama,
-    deskripsi: item.deskripsi || ''
+    deskripsi: item.deskripsi || '',
+    grades: [...(item.grades || [])],
+    status: item.status
   }
   isFormSheetOpen.value = true
 }
 
-const handleSave = () => {
+const handleSavePrompt = () => {
   const code = formItem.value.kode?.trim().toUpperCase()
   const name = formItem.value.nama?.trim()
-  const desc = formItem.value.deskripsi?.trim()
 
   if (!code || !name) {
     toast.error('Gagal Menyimpan', {
@@ -164,7 +191,7 @@ const handleSave = () => {
   const isDuplicate = subjects.value.some(s => {
     const isSameCode = s.kode.toUpperCase() === code
     if (isEditMode.value) {
-      return isSameCode && s.id !== formItem.value.id
+      return isSameCode && String(s.id) !== String(formItem.value.id)
     }
     return isSameCode
   })
@@ -176,45 +203,40 @@ const handleSave = () => {
     return
   }
 
-  if (isEditMode.value) {
-    // Edit mode
-    const updated = subjects.value.map(s => {
-      if (s.id === formItem.value.id) {
-        return {
-          ...s,
-          kode: code,
-          nama: name,
-          deskripsi: desc,
-          status: s.status === 'rejected' ? 'draft' : s.status,
-          rejectedReason: s.status === 'rejected' ? '' : s.rejectedReason
-        }
-      }
-      return s
-    })
-    subjects.value = updated
-    saveSubjects(updated)
-    toast.success('Berhasil Diperbarui', {
-      description: `Mata pelajaran "${name}" telah diperbarui.`
-    })
-  } else {
-    // Create mode
-    const newSubject = {
-      id: String(Date.now()),
-      kode: code,
-      nama: name,
-      deskripsi: desc,
-      status: 'draft',
-      rejectedReason: ''
-    }
-    const updated = [newSubject, ...subjects.value]
-    subjects.value = updated
-    saveSubjects(updated)
-    toast.success('Berhasil Ditambahkan', {
-      description: `Mata pelajaran "${name}" telah ditambahkan sebagai Draft.`
-    })
+  isSaveConfirmOpen.value = true
+}
+
+const executeSave = async () => {
+  const code = formItem.value.kode?.trim().toUpperCase()
+  const name = formItem.value.nama?.trim()
+  const desc = formItem.value.deskripsi?.trim()
+
+  const payload = {
+    code: code,
+    name: name,
+    description: desc,
+    grades: formItem.value.grades || [],
+    is_active: isEditMode.value ? (formItem.value.status === 'approved' || formItem.value.status === 'draft') : true
   }
 
-  isFormSheetOpen.value = false
+  try {
+    if (isEditMode.value) {
+      await updateSubject(formItem.value.id, payload)
+      toast.success('Berhasil Diperbarui', {
+        description: `Mata pelajaran "${name}" telah diperbarui.`
+      })
+    } else {
+      await createSubject(payload)
+      toast.success('Berhasil Ditambahkan', {
+        description: `Mata pelajaran "${name}" telah ditambahkan.`
+      })
+    }
+    isSaveConfirmOpen.value = false
+    isFormSheetOpen.value = false
+    fetchSubjectsData()
+  } catch (err) {
+    toast.error('Gagal menyimpan mata pelajaran')
+  }
 }
 
 // Search & Filter
@@ -314,24 +336,25 @@ const openRequestConfirm = (item) => {
   isRequestConfirmOpen.value = true
 }
 
-const confirmRequest = () => {
+const confirmRequest = async () => {
   if (!selectedItemToRequest.value) return
   
-  const updated = subjects.value.map(s => {
-    if (s.id === selectedItemToRequest.value.id) {
-      return { ...s, status: 'pending', rejectedReason: '' }
-    }
-    return s
-  })
-  
-  subjects.value = updated
-  saveSubjects(updated)
-  isRequestConfirmOpen.value = false
-  
-  toast.success('Pengajuan Dikirim', {
-    description: `Mata pelajaran "${selectedItemToRequest.value.nama}" telah diajukan ke Kepala Sekolah.`
-  })
-  selectedItemToRequest.value = null
+  try {
+    await updateSubject(selectedItemToRequest.value.id, {
+      code: selectedItemToRequest.value.kode,
+      name: selectedItemToRequest.value.nama,
+      description: selectedItemToRequest.value.deskripsi,
+      is_active: true // Auto approve for now
+    })
+    isRequestConfirmOpen.value = false
+    toast.success('Pengajuan Dikirim', {
+      description: `Mata pelajaran "${selectedItemToRequest.value.nama}" telah diaktifkan.`
+    })
+    selectedItemToRequest.value = null
+    fetchSubjectsData()
+  } catch (err) {
+    toast.error('Gagal mengajukan mata pelajaran')
+  }
 }
 
 // 2. DELETE (Admin)
@@ -343,18 +366,20 @@ const openDeleteConfirm = (item) => {
   isDeleteConfirmOpen.value = true
 }
 
-const confirmDelete = () => {
+const confirmDelete = async () => {
   if (!selectedItemToDelete.value) return
   
-  const updated = subjects.value.filter(s => s.id !== selectedItemToDelete.value.id)
-  subjects.value = updated
-  saveSubjects(updated)
-  isDeleteConfirmOpen.value = false
-  
-  toast.success('Berhasil Dihapus', {
-    description: `Mata pelajaran "${selectedItemToDelete.value.nama}" telah dihapus.`
-  })
-  selectedItemToDelete.value = null
+  try {
+    await deleteSubject(selectedItemToDelete.value.id)
+    isDeleteConfirmOpen.value = false
+    toast.success('Berhasil Dihapus', {
+      description: `Mata pelajaran "${selectedItemToDelete.value.nama}" telah dihapus.`
+    })
+    selectedItemToDelete.value = null
+    fetchSubjectsData()
+  } catch (err) {
+    toast.error('Gagal menghapus mata pelajaran')
+  }
 }
 
 // 3. APPROVE (Kepsek)
@@ -366,24 +391,25 @@ const openApproveConfirm = (item) => {
   isApproveConfirmOpen.value = true
 }
 
-const confirmApprove = () => {
+const confirmApprove = async () => {
   if (!selectedItemToApprove.value) return
   
-  const updated = subjects.value.map(s => {
-    if (s.id === selectedItemToApprove.value.id) {
-      return { ...s, status: 'approved', rejectedReason: '' }
-    }
-    return s
-  })
-  
-  subjects.value = updated
-  saveSubjects(updated)
-  isApproveConfirmOpen.value = false
-  
-  toast.success('Mata Pelajaran Disetujui', {
-    description: `Mata pelajaran "${selectedItemToApprove.value.nama}" kini berstatus Aktif.`
-  })
-  selectedItemToApprove.value = null
+  try {
+    await updateSubject(selectedItemToApprove.value.id, {
+      code: selectedItemToApprove.value.kode,
+      name: selectedItemToApprove.value.nama,
+      description: selectedItemToApprove.value.deskripsi,
+      is_active: true
+    })
+    isApproveConfirmOpen.value = false
+    toast.success('Mata Pelajaran Disetujui', {
+      description: `Mata pelajaran "${selectedItemToApprove.value.nama}" kini berstatus Aktif.`
+    })
+    selectedItemToApprove.value = null
+    fetchSubjectsData()
+  } catch (err) {
+    toast.error('Gagal menyetujui mata pelajaran')
+  }
 }
 
 // 4. REJECT (Kepsek)
@@ -399,43 +425,46 @@ const openRejectDialog = (item) => {
   isRejectDialogOpen.value = true
 }
 
-const confirmReject = () => {
+const confirmReject = async () => {
   if (!rejectReason.value.trim()) {
     rejectReasonError.value = 'Alasan penolakan wajib diisi.'
     return
   }
   
-  const updated = subjects.value.map(s => {
-    if (s.id === selectedItemToReject.value.id) {
-      return { ...s, status: 'rejected', rejectedReason: rejectReason.value.trim() }
-    }
-    return s
-  })
-  
-  subjects.value = updated
-  saveSubjects(updated)
-  isRejectDialogOpen.value = false
-  
-  toast.success('Pengajuan Ditolak', {
-    description: `Mata pelajaran "${selectedItemToReject.value.nama}" telah ditolak dengan alasan.`
-  })
-  selectedItemToReject.value = null
+  try {
+    await updateSubject(selectedItemToReject.value.id, {
+      code: selectedItemToReject.value.kode,
+      name: selectedItemToReject.value.nama,
+      description: selectedItemToReject.value.deskripsi,
+      is_active: false
+    })
+    isRejectDialogOpen.value = false
+    toast.success('Pengajuan Ditolak', {
+      description: `Mata pelajaran "${selectedItemToReject.value.nama}" telah dinonaktifkan.`
+    })
+    selectedItemToReject.value = null
+    fetchSubjectsData()
+  } catch (err) {
+    toast.error('Gagal menolak mata pelajaran')
+  }
 }
 
-const toggleActiveState = (item) => {
-  const nextState = item.isActive === false
-  const updated = subjects.value.map(s => {
-    if (s.id === item.id) {
-      return { ...s, isActive: nextState }
-    }
-    return s
-  })
-  subjects.value = updated
-  saveSubjects(updated)
-  
-  toast.success(nextState ? 'Mata Pelajaran Diaktifkan' : 'Mata Pelajaran Dinonaktifkan', {
-    description: `Mata pelajaran "${item.nama}" telah ${nextState ? 'diaktifkan' : 'dinonaktifkan'}.`
-  })
+const toggleActiveState = async (item) => {
+  const nextState = !item.isActive
+  try {
+    await updateSubject(item.id, {
+      code: item.kode,
+      name: item.nama,
+      description: item.deskripsi,
+      is_active: nextState
+    })
+    toast.success(nextState ? 'Mata Pelajaran Diaktifkan' : 'Mata Pelajaran Dinonaktifkan', {
+      description: `Mata pelajaran "${item.nama}" telah ${nextState ? 'diaktifkan' : 'dinonaktifkan'}.`
+    })
+    fetchSubjectsData()
+  } catch (err) {
+    toast.error('Gagal mengubah status aktif')
+  }
 }
 </script>
 
@@ -472,6 +501,21 @@ const toggleActiveState = (item) => {
       :page="currentPage"
       @update:page="currentPage = $event"
     >
+      <!-- Custom Grades Render -->
+      <template #cell-grades="{ value }">
+        <div class="flex flex-wrap gap-1 max-w-[140px]">
+          <Badge
+            v-for="g in (value || [])"
+            :key="g"
+            variant="outline"
+            class="text-[10px] px-1.5 py-0 border-primary/20 bg-primary/5 text-primary font-semibold"
+          >
+            Kls {{ g }}
+          </Badge>
+          <span v-if="!value || value.length === 0" class="text-xs text-muted-foreground italic">Semua Kelas</span>
+        </div>
+      </template>
+
       <!-- Custom Badge Status Render -->
       <template #cell-status="{ value, item }">
         <div class="flex flex-col items-center gap-1">
@@ -504,21 +548,20 @@ const toggleActiveState = (item) => {
 
           <!-- Aksi untuk Admin Sekolah -->
           <template v-if="isAdminSekolah">
-            <!-- Edit: Draft or Rejected only -->
+            <!-- Edit: Available for Admin Sekolah -->
             <button
-              v-if="item.status === 'draft' || item.status === 'rejected'"
-              class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-foreground transition-colors"
-              title="Edit"
+              class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-primary transition-colors"
+              title="Edit Mata Pelajaran"
               @click="handleEdit(item)"
             >
-              <Pencil class="size-4 transition-transform group-hover/btn:scale-110" />
+              <Pencil class="size-4 transition-transform group-hover/btn:scale-110 text-primary/80" />
               <span class="text-[9px] font-semibold leading-none">Edit</span>
             </button>
 
             <!-- Hapus: Draft or Rejected only -->
             <button
               v-if="item.status === 'draft' || item.status === 'rejected'"
-              class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-foreground transition-colors"
+              class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-rose-500 transition-colors"
               title="Hapus"
               @click="openDeleteConfirm(item)"
             >
@@ -616,12 +659,12 @@ const toggleActiveState = (item) => {
             {{ isEditMode ? 'Edit Mata Pelajaran' : 'Tambah Mata Pelajaran' }}
           </SheetTitle>
           <SheetDescription class="text-xs text-muted-foreground">
-            {{ isEditMode ? 'Perbarui informasi mata pelajaran.' : 'Tambahkan mata pelajaran baru untuk Sekolah Dasar.' }}
+            {{ isEditMode ? 'Perbarui informasi dan alokasi tingkat kelas mata pelajaran.' : 'Tambahkan mata pelajaran baru untuk jenjang sekolah.' }}
           </SheetDescription>
         </SheetHeader>
 
         <div class="flex-1 overflow-y-auto py-6 pr-1 space-y-6 no-scrollbar">
-          <MataPelajaranForm :form="formItem" />
+          <MataPelajaranForm :form="formItem" :is-edit="isEditMode" />
         </div>
 
         <div class="border-t border-border pt-4 flex items-center justify-end gap-2 shrink-0">
@@ -636,7 +679,7 @@ const toggleActiveState = (item) => {
           <Button
             type="button"
             class="text-xs font-bold rounded-xl cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 shadow-none border-none"
-            @click="handleSave"
+            @click="handleSavePrompt"
           >
             {{ isEditMode ? 'Simpan Perubahan' : 'Simpan' }}
           </Button>
@@ -784,6 +827,39 @@ const toggleActiveState = (item) => {
             @click="confirmReject"
           >
             Tolak Mapel
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <!-- 5. SAVE CONFIRMATION DIALOG -->
+    <Dialog v-model:open="isSaveConfirmOpen">
+      <DialogContent class="sm:max-w-[400px] rounded-2xl p-6 text-left">
+        <DialogHeader>
+          <DialogTitle class="text-sm font-bold text-foreground flex items-center gap-2">
+            <BookCheck class="h-5 w-5 text-primary" />
+            Konfirmasi Simpan Data
+          </DialogTitle>
+          <DialogDescription class="text-xs text-muted-foreground leading-relaxed mt-2">
+            Apakah Anda yakin ingin menyimpan {{ isEditMode ? 'perubahan' : 'data baru' }} untuk Mata Pelajaran <strong class="text-foreground">"{{ formItem.nama }}"</strong> (Kode: {{ formItem.kode?.toUpperCase() }})?
+          </DialogDescription>
+        </DialogHeader>
+
+        <DialogFooter class="flex flex-row items-center justify-end gap-2 pt-4 border-t border-border mt-4">
+          <Button
+            type="button"
+            variant="ghost"
+            class="text-xs font-bold rounded-xl cursor-pointer"
+            @click="isSaveConfirmOpen = false"
+          >
+            Batal
+          </Button>
+          <Button
+            type="button"
+            class="text-xs font-bold rounded-xl cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90"
+            @click="executeSave"
+          >
+            Ya, Simpan
           </Button>
         </DialogFooter>
       </DialogContent>

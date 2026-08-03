@@ -297,8 +297,6 @@ const categoryBadgeClass = (kategori) => {
             }
           ]"
         />
-        
-
 
         <div class="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-6">
           <!-- Form Container -->

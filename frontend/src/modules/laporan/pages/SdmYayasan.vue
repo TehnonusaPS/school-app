@@ -2,6 +2,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { Users, Download, Printer, UserCheck, Briefcase, Star, GraduationCap, Search } from 'lucide-vue-next'
 import { Skeleton } from '@/components/ui/skeleton'
+import StatCardGrid from '@/components/stat-card/StatCardGrid.vue'
+import StatCard from '@/components/stat-card/StatCard.vue'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -10,21 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-
-const mockGuruData = [
-  { id: 1, sekolah: 'SDN Tunas Bangsa', jenjang: 'SD', totalGuru: 18, totalStaf: 6, s1: 14, s2: 4, tetap: 15, honorer: 9, sertifikasi: 11 },
-  { id: 2, sekolah: 'SMPN Harapan Ilmu', jenjang: 'SMP', totalGuru: 22, totalStaf: 9, s1: 16, s2: 6, tetap: 20, honorer: 11, sertifikasi: 16 },
-  { id: 3, sekolah: 'SMAN Bina Prestasi', jenjang: 'SMA', totalGuru: 30, totalStaf: 12, s1: 20, s2: 10, tetap: 28, honorer: 14, sertifikasi: 22 },
-  { id: 4, sekolah: 'SMK Teknologi Maju', jenjang: 'SMK', totalGuru: 19, totalStaf: 8, s1: 15, s2: 4, tetap: 17, honorer: 10, sertifikasi: 13 },
-]
-
-const mockAbsensiGuru = [
-  { id: 1, nama: 'Pak Budi, S.Pd', sekolah: 'SDN Tunas Bangsa', mapel: 'Matematika', hadir: 22, terlambat: 1, izin: 0, alpa: 0, persen: 100 },
-  { id: 2, nama: 'Bu Rina, M.Pd', sekolah: 'SDN Tunas Bangsa', mapel: 'IPA', hadir: 20, terlambat: 2, izin: 1, alpa: 0, persen: 91 },
-  { id: 3, nama: 'Bu Sari Dewi, S.Pd', sekolah: 'SMPN Harapan Ilmu', mapel: 'Bahasa Indonesia', hadir: 21, terlambat: 0, izin: 1, alpa: 0, persen: 95 },
-  { id: 4, nama: 'Pak Rahmat, M.Pd', sekolah: 'SMPN Harapan Ilmu', mapel: 'Fisika', hadir: 18, terlambat: 3, izin: 2, alpa: 0, persen: 82 },
-  { id: 5, nama: 'Pak Hasan, M.Pd', sekolah: 'SMAN Bina Prestasi', mapel: 'Kimia', hadir: 22, terlambat: 0, izin: 0, alpa: 0, persen: 100 },
-]
+import { getFoundationHR } from '@/services/api/reports'
 
 const isLoading = ref(true)
 const guruData = ref([])
@@ -32,7 +20,17 @@ const absensiData = ref([])
 const selectedTahun = ref('2025/2026')
 const searchQuery = ref('')
 
-onMounted(() => { setTimeout(() => { guruData.value = mockGuruData; absensiData.value = mockAbsensiGuru; isLoading.value = false }, 500) })
+onMounted(async () => {
+  try {
+    const res = await getFoundationHR()
+    guruData.value = res.guru || []
+    absensiData.value = res.absensi || []
+  } catch (error) {
+    console.error('Failed to fetch HR data:', error)
+  } finally {
+    isLoading.value = false
+  }
+})
 
 const totalGuru = computed(() => guruData.value.reduce((s,k)=>s+k.totalGuru,0))
 const totalStaf = computed(() => guruData.value.reduce((s,k)=>s+k.totalStaf,0))
@@ -66,32 +64,42 @@ const jenjangColor = { SD: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 
       </div>
     </div>
 
-    <div class="grid gap-4 grid-cols-2 lg:grid-cols-4">
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Guru</span><div class="p-1.5 bg-primary/10 rounded-lg"><GraduationCap class="size-4 text-primary" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-12" />
-        <div v-else class="text-3xl font-bold text-primary">{{ totalGuru }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Pendidik aktif</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Tenaga Kependidikan</span><div class="p-1.5 bg-muted rounded-lg"><Briefcase class="size-4 text-muted-foreground" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-12" />
-        <div v-else class="text-3xl font-bold">{{ totalStaf }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Staff aktif</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Tersertifikasi</span><div class="p-1.5 bg-green-50 dark:bg-green-950/40 rounded-lg"><Star class="size-4 text-green-600" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-12" />
-        <div v-else class="text-3xl font-bold text-green-600 dark:text-green-400">{{ totalSertifikasi }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Guru bersertifikat</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Unit Sekolah</span><div class="p-1.5 bg-muted rounded-lg"><UserCheck class="size-4 text-muted-foreground" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-10" />
-        <div v-else class="text-3xl font-bold">{{ guruData.length }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Aktif dalam yayasan</p>
-      </Card>
-    </div>
+    <StatCardGrid cols="4">
+      <StatCard
+        label="Total Guru"
+        :value="totalGuru"
+        sub="Pendidik aktif"
+        :icon="GraduationCap"
+        variant="primary"
+        :delay="100"
+      />
+      <StatCard
+        label="Tenaga Kependidikan"
+        :value="totalStaf"
+        sub="Staff aktif"
+        :icon="Briefcase"
+        variant="default"
+        color="slate"
+        :delay="200"
+      />
+      <StatCard
+        label="Tersertifikasi"
+        :value="totalSertifikasi"
+        sub="Guru bersertifikat"
+        :icon="Star"
+        variant="emerald"
+        :delay="300"
+      />
+      <StatCard
+        label="Unit Sekolah"
+        :value="guruData.length"
+        sub="Aktif dalam yayasan"
+        :icon="UserCheck"
+        variant="default"
+        color="slate"
+        :delay="400"
+      />
+    </StatCardGrid>
 
     <Tabs default-value="sdm">
       <TabsList>

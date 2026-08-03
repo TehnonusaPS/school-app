@@ -51,11 +51,22 @@ const onTambahAgenda = () => {
 
       <!-- LEFT: Calendar Card (fixed height, no internal scroll) -->
       <Card class="relative flex flex-col overflow-hidden min-h-0">
-        <!-- Month/Year Picker + Legend -->
+        <!-- Month/Year Picker + Legend + Action Button -->
         <ScheduleMonthYearPicker
           v-model:month="visibleMonth"
           v-model:year="visibleYear"
-        />
+        >
+          <template #action v-if="role === 'guru'">
+            <Button
+              @click="onTambahAgenda"
+              size="sm"
+              class="h-7 text-xs font-bold rounded-lg gap-1.5 px-3 bg-primary text-primary-foreground hover:bg-primary/90 shadow-2xs"
+            >
+              <Plus class="size-3.5" />
+              Tambah Agenda
+            </Button>
+          </template>
+        </ScheduleMonthYearPicker>
 
         <!-- Separator -->
         <div class="h-px bg-border/30 mx-4 shrink-0" />
@@ -71,17 +82,6 @@ const onTambahAgenda = () => {
           :getAssignmentsForDate="getAssignmentsForDate"
           @select-date="onSelectDate"
         />
-
-        <!-- Tambah Agenda button — pojok kanan bawah kalender (guru only) -->
-        <Button
-          v-if="role === 'guru'"
-          @click="onTambahAgenda"
-          size="sm"
-          class="absolute bottom-4 right-4 z-10 flex items-center gap-1.5 shadow-lg"
-        >
-          <Plus class="size-4" />
-          Tambah Agenda
-        </Button>
       </Card>
 
       <!-- RIGHT: Detail Panel (only this scrolls) -->

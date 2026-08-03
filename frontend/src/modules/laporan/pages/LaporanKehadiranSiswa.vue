@@ -21,20 +21,7 @@ import StatCardGrid from '@/components/stat-card/StatCardGrid.vue'
 import DataTableCard from '@/components/data-table/DataTableCard.vue'
 import { glassSlide, glassFade } from '@/config/motion'
 import { toast } from 'vue-sonner'
-
-// Mock data untuk kehadiran siswa
-const mockData = [
-  { id: 1, nisn: '0051234567', nama: 'Ahmad Fadil', kelas: 'XI IPA 1', totalHari: 22, hadir: 20, terlambat: 1, izin: 1, sakit: 0, alpa: 0 },
-  { id: 2, nisn: '0069876543', nama: 'Bunga Citra', kelas: 'XI IPA 1', totalHari: 22, hadir: 18, terlambat: 2, izin: 1, sakit: 1, alpa: 0 },
-  { id: 3, nisn: '0054321987', nama: 'Cakra Khan', kelas: 'XI IPA 1', totalHari: 22, hadir: 14, terlambat: 1, izin: 2, sakit: 1, alpa: 4 },
-  { id: 4, nisn: '0061122334', nama: 'Dian Sastro', kelas: 'XI IPA 1', totalHari: 22, hadir: 21, terlambat: 0, izin: 1, sakit: 0, alpa: 0 },
-  { id: 5, nisn: '0055566778', nama: 'Elsa Novita', kelas: 'XI IPA 2', totalHari: 22, hadir: 22, terlambat: 0, izin: 0, sakit: 0, alpa: 0 },
-  { id: 6, nisn: '0068899001', nama: 'Farhan Ramdan', kelas: 'XI IPA 2', totalHari: 22, hadir: 12, terlambat: 2, izin: 1, sakit: 2, alpa: 5 },
-  { id: 7, nisn: '0052233445', nama: 'Gita Nirmala', kelas: 'XI IPA 2', totalHari: 22, hadir: 19, terlambat: 1, izin: 2, sakit: 0, alpa: 0 },
-  { id: 8, nisn: '0067788990', nama: 'Hendra Saputra', kelas: 'XI IPA 1', totalHari: 22, hadir: 17, terlambat: 3, izin: 0, sakit: 2, alpa: 0 },
-  { id: 9, nisn: '0051199887', nama: 'Indira Putri', kelas: 'XI IPS 1', totalHari: 22, hadir: 10, terlambat: 1, izin: 3, sakit: 2, alpa: 6 },
-  { id: 10, nisn: '0063344556', nama: 'Joko Susilo', kelas: 'XI IPS 1', totalHari: 22, hadir: 20, terlambat: 0, izin: 0, sakit: 2, alpa: 0 },
-]
+import { getStudentAttendance } from '@/services/api/reports'
 
 const THRESHOLD = 75 // % kehadiran minimum
 
@@ -50,11 +37,15 @@ const filterValues = ref({
   kelas: 'all'
 })
 
-onMounted(() => {
-  setTimeout(() => {
-    siswaData.value = mockData
+onMounted(async () => {
+  try {
+    const res = await getStudentAttendance()
+    siswaData.value = res || []
+  } catch (error) {
+    console.error('Failed to fetch student attendance data:', error)
+  } finally {
     isLoading.value = false
-  }, 600)
+  }
 })
 
 watch(() => filterValues.value, () => {
@@ -172,7 +163,7 @@ const pageHeaderActions = computed(() => [
     v-motion
     :initial="glassFade.initial"
     :visible-once="glassFade.visible"
-    class="space-y-6 max-w-[1400px] mx-auto pb-8 text-left"
+    class="space-y-6 w-full pb-8 text-left"
   >
     <!-- Header -->
     <PageHeader

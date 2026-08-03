@@ -13,6 +13,8 @@ import {
   ChevronRight,
   ExternalLink,
 } from 'lucide-vue-next'
+import StatCardGrid from '@/components/stat-card/StatCardGrid.vue'
+import StatCard from '@/components/stat-card/StatCard.vue'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import {
@@ -40,24 +42,22 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Separator } from '@/components/ui/separator'
-
-const mockSekolah = [
-  { id: 1, nama: 'SDN Tunas Bangsa', jenjang: 'SD', totalSiswa: 412, guru: 24, rataNilai: 82.3, kehadiran: 94, pemasukan: 185000000, pengeluaran: 162000000 },
-  { id: 2, nama: 'SMPN Harapan Ilmu', jenjang: 'SMP', totalSiswa: 356, guru: 31, rataNilai: 79.8, kehadiran: 91, pemasukan: 220000000, pengeluaran: 198000000 },
-  { id: 3, nama: 'SMAN Bina Prestasi', jenjang: 'SMA', totalSiswa: 487, guru: 42, rataNilai: 81.5, kehadiran: 93, pemasukan: 345000000, pengeluaran: 298000000 },
-  { id: 4, nama: 'SMK Teknologi Maju', jenjang: 'SMK', totalSiswa: 298, guru: 27, rataNilai: 77.9, kehadiran: 89, pemasukan: 210000000, pengeluaran: 195000000 },
-]
+import { getFoundationConsolidation } from '@/services/api/reports'
 
 const isLoading = ref(true)
 const sekolahData = ref([])
 const selectedTahun = ref('2025/2026')
 const selectedSemester = ref('1')
 
-onMounted(() => {
-  setTimeout(() => {
-    sekolahData.value = mockSekolah
+onMounted(async () => {
+  try {
+    const data = await getFoundationConsolidation()
+    sekolahData.value = data
+  } catch (error) {
+    console.error('Failed to fetch consolidation data:', error)
+  } finally {
     isLoading.value = false
-  }, 600)
+  }
 })
 
 function formatRp(v) {
@@ -116,62 +116,56 @@ const jenjangColor = { SD: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 
     </div>
 
     <!-- Ringkasan Yayasan -->
-    <div class="grid gap-4 grid-cols-2 lg:grid-cols-3">
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Unit Sekolah</span>
-          <div class="p-1.5 bg-muted rounded-lg"><Building2 class="size-4 text-muted-foreground" /></div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-8 w-12" />
-        <div v-else class="text-3xl font-bold">{{ sekolahData.length }}</div>
-        <p class="text-xs text-muted-foreground mt-1">SD, SMP, SMA, SMK</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Siswa</span>
-          <div class="p-1.5 bg-primary/10 rounded-lg"><Users class="size-4 text-primary" /></div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-8 w-14" />
-        <div v-else class="text-3xl font-bold text-primary">{{ totalSiswa }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Di seluruh unit</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Pendidik</span>
-          <div class="p-1.5 bg-muted rounded-lg"><Users class="size-4 text-muted-foreground" /></div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-8 w-12" />
-        <div v-else class="text-3xl font-bold">{{ totalGuru }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Guru & tenaga kependidikan</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Rata-rata Nilai</span>
-          <div class="p-1.5 bg-green-50 dark:bg-green-950/40 rounded-lg"><BookOpen class="size-4 text-green-600" /></div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-8 w-14" />
-        <div v-else class="text-3xl font-bold text-green-600 dark:text-green-400">{{ avgNilai }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Akademik seluruh sekolah</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow border-green-200 dark:border-green-900/40 bg-green-50/30 dark:bg-green-950/10">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-green-700 dark:text-green-400 uppercase tracking-wider">Total Pemasukan</span>
-          <div class="p-1.5 bg-green-100 dark:bg-green-900/40 rounded-lg"><TrendingUp class="size-4 text-green-600" /></div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-8 w-32" />
-        <div v-else class="text-xl font-bold text-green-700 dark:text-green-400">{{ formatRp(totalPemasukan) }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Periode berjalan</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow border-red-200 dark:border-red-900/40 bg-red-50/30 dark:bg-red-950/10">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-red-700 dark:text-red-400 uppercase tracking-wider">Total Pengeluaran</span>
-          <div class="p-1.5 bg-red-100 dark:bg-red-900/40 rounded-lg"><TrendingDown class="size-4 text-red-600" /></div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-8 w-32" />
-        <div v-else class="text-xl font-bold text-red-700 dark:text-red-400">{{ formatRp(totalPengeluaran) }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Periode berjalan</p>
-      </Card>
-    </div>
+    <StatCardGrid cols="3">
+      <StatCard
+        label="Unit Sekolah"
+        :value="sekolahData.length"
+        sub="SD, SMP, SMA, SMK"
+        :icon="Building2"
+        variant="violet"
+        :delay="100"
+      />
+      <StatCard
+        label="Total Siswa"
+        :value="totalSiswa"
+        sub="Di seluruh unit"
+        :icon="Users"
+        variant="primary"
+        :delay="200"
+      />
+      <StatCard
+        label="Total Pendidik"
+        :value="totalGuru"
+        sub="Guru & tenaga kependidikan"
+        :icon="Users"
+        variant="blue"
+        :delay="300"
+      />
+      <StatCard
+        label="Rata-rata Nilai"
+        :value="avgNilai"
+        sub="Akademik seluruh sekolah"
+        :icon="BookOpen"
+        variant="emerald"
+        :delay="400"
+      />
+      <StatCard
+        label="Total Pemasukan"
+        :value="formatRp(totalPemasukan)"
+        sub="Periode berjalan"
+        :icon="TrendingUp"
+        variant="emerald"
+        :delay="500"
+      />
+      <StatCard
+        label="Total Pengeluaran"
+        :value="formatRp(totalPengeluaran)"
+        sub="Periode berjalan"
+        :icon="TrendingDown"
+        variant="amber"
+        :delay="600"
+      />
+    </StatCardGrid>
 
     <!-- Tabel per Sekolah -->
     <Card class="overflow-hidden">

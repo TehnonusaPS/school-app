@@ -49,7 +49,7 @@ const handleCellClick = (studentId, dateNum) => {
           <TableHead rowspan="2" class="font-bold text-foreground text-center border-r border-border/60 w-[110px] text-xs uppercase tracking-wider">NIS</TableHead>
           <TableHead rowspan="2" class="font-bold text-foreground text-center border-r border-border/60 w-[60px] text-xs uppercase tracking-wider">L/P</TableHead>
           <TableHead :colspan="daysInMonth.length" class="font-bold text-foreground text-center border-b border-r border-border/60 py-2 text-xs uppercase tracking-wider">Tanggal</TableHead>
-          <TableHead colspan="4" class="font-bold text-foreground text-center border-b border-border/60 py-2 text-xs uppercase tracking-wider">Jumlah</TableHead>
+          <TableHead colspan="5" class="font-bold text-foreground text-center border-b border-border/60 py-2 text-xs uppercase tracking-wider">Jumlah</TableHead>
         </TableRow>
         <!-- Row 2: Date list & Rekap labels -->
         <TableRow class="bg-muted/20">
@@ -65,9 +65,10 @@ const handleCellClick = (studentId, dateNum) => {
               <span class="text-[8px] text-muted-foreground uppercase font-bold">{{ d.dayName }}</span>
             </div>
           </TableHead>
-          <!-- Rekap Labels (H, I, S, A) -->
+          <!-- Rekap Labels (H, T, I, S, A) -->
           <TableHead class="text-center font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 text-[10px] w-[30px] border-r border-border/60">H</TableHead>
-          <TableHead class="text-center font-extrabold text-amber-600 dark:text-amber-400 bg-amber-500/5 text-[10px] w-[30px] border-r border-border/60">I</TableHead>
+          <TableHead class="text-center font-extrabold text-amber-500 dark:text-amber-400 bg-amber-500/5 text-[10px] w-[30px] border-r border-border/60">T</TableHead>
+          <TableHead class="text-center font-extrabold text-indigo-600 dark:text-indigo-400 bg-indigo-500/5 text-[10px] w-[30px] border-r border-border/60">I</TableHead>
           <TableHead class="text-center font-extrabold text-blue-600 dark:text-blue-400 bg-blue-500/5 text-[10px] w-[30px] border-r border-border/60">S</TableHead>
           <TableHead class="text-center font-extrabold text-red-600 dark:text-red-400 bg-red-500/5 text-[10px] w-[30px]">A</TableHead>
         </TableRow>
@@ -103,12 +104,13 @@ const handleCellClick = (studentId, dateNum) => {
               type="button"
               @click="handleCellClick(student.id, d.dateNum)"
               :disabled="isReadOnly || d.isWeekend"
-              class="w-full aspect-square max-w-[28px] max-h-[28px] mx-auto rounded flex items-center justify-center font-extrabold text-[10px] transition-all focus:outline-none"
+              class="w-7 h-7 mx-auto rounded flex items-center justify-center font-extrabold text-[10px] transition-all focus:outline-none"
               :class="[
                 d.isWeekend ? 'cursor-not-allowed opacity-40' : (isReadOnly ? 'cursor-not-allowed' : 'cursor-pointer hover:scale-105 active:scale-95'),
                 getStatus(student.id, d.dateNum) === 'H' ? 'bg-emerald-500 text-white shadow-xs' : '',
+                getStatus(student.id, d.dateNum) === 'T' ? 'bg-amber-500 text-white shadow-xs' : '',
                 getStatus(student.id, d.dateNum) === 'S' ? 'bg-blue-500 text-white shadow-xs' : '',
-                getStatus(student.id, d.dateNum) === 'I' ? 'bg-amber-500 text-white shadow-xs' : '',
+                getStatus(student.id, d.dateNum) === 'I' ? 'bg-amber-500/80 text-white shadow-xs' : '',
                 getStatus(student.id, d.dateNum) === 'A' ? 'bg-red-500 text-white shadow-xs' : '',
                 !getStatus(student.id, d.dateNum) ? 'text-muted-foreground/40 hover:bg-muted/30' : ''
               ]"
@@ -117,9 +119,10 @@ const handleCellClick = (studentId, dateNum) => {
             </button>
           </TableCell>
 
-          <!-- Realtime totals (H, I, S, A) -->
+          <!-- Realtime totals (H, T, I, S, A) -->
           <TableCell class="text-center font-extrabold text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 border-r border-border/60 py-3">{{ getStudentTotal(student.id, 'H') }}</TableCell>
-          <TableCell class="text-center font-extrabold text-xs text-amber-600 dark:text-amber-400 bg-amber-500/5 border-r border-border/60 py-3">{{ getStudentTotal(student.id, 'I') }}</TableCell>
+          <TableCell class="text-center font-extrabold text-xs text-amber-500 dark:text-amber-400 bg-amber-500/5 border-r border-border/60 py-3">{{ getStudentTotal(student.id, 'T') }}</TableCell>
+          <TableCell class="text-center font-extrabold text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-50/5 border-r border-border/60 py-3">{{ getStudentTotal(student.id, 'I') }}</TableCell>
           <TableCell class="text-center font-extrabold text-xs text-blue-600 dark:text-blue-400 bg-blue-500/5 border-r border-border/60 py-3">{{ getStudentTotal(student.id, 'S') }}</TableCell>
           <TableCell class="text-center font-extrabold text-xs text-red-600 dark:text-red-400 bg-red-500/5 py-3">{{ getStudentTotal(student.id, 'A') }}</TableCell>
         </TableRow>

@@ -60,13 +60,30 @@ const initialRight = (() => {
 const leftDisplay = ref<DateValue>(initialLeft)
 const rightDisplay = ref<DateValue>(initialRight)
 
-// Reset display months when modelValue is cleared/reset from outside
-watch(() => props.modelValue, (newVal) => {
-  if (!newVal || (typeof newVal === 'object' && !('start' in newVal && newVal.start))) {
-    leftDisplay.value = props.defaultPlaceholder ?? todayDate
-    rightDisplay.value = (props.defaultPlaceholder ?? todayDate).add({ months: 1 })
+// Reset or update display months when modelValue or placeholder changes from outside
+watch([() => props.modelValue, () => props.placeholder], ([newModel, newPlaceholder]) => {
+  const targetDate = (() => {
+    if (newModel && typeof newModel === 'object' && 'start' in newModel && newModel.start) {
+      return newModel.start
+    }
+    if (newPlaceholder && typeof newPlaceholder === 'object') {
+      return newPlaceholder
+    }
+    return props.defaultPlaceholder ?? todayDate
+  })()
+
+  leftDisplay.value = targetDate
+  if (newModel && typeof newModel === 'object' && 'end' in newModel && newModel.end) {
+    const endVal = newModel.end
+    if (endVal.year > targetDate.year || (endVal.year === targetDate.year && endVal.month > targetDate.month)) {
+      rightDisplay.value = endVal
+    } else {
+      rightDisplay.value = targetDate.add({ months: 1 })
+    }
+  } else {
+    rightDisplay.value = targetDate.add({ months: 1 })
   }
-}, { deep: true })
+}, { deep: true, immediate: true })
 
 // ── Shared year range ────────────────────────────────────────────
 const yearRange = computed(() =>

@@ -287,7 +287,6 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/finance', [\App\Http\Controllers\Api\Reports\ReportSchoolController::class, 'finance']);
             Route::get('/grades', [\App\Http\Controllers\Api\Reports\ReportSchoolController::class, 'grades']);
             Route::get('/student-development', [\App\Http\Controllers\Api\Reports\ReportSchoolController::class, 'studentDevelopment']);
-            Route::get('/accountability', [\App\Http\Controllers\Api\Reports\ReportSchoolController::class, 'accountability']);
             Route::get('/staff', [\App\Http\Controllers\Api\Reports\ReportSchoolController::class, 'staff']);
         });
 

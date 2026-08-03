@@ -142,6 +142,9 @@ class LandingPageConfigController extends Controller
             'message' => 'Konfigurasi landing page Yayasan berhasil disimpan.',
             'data' => [
                 'id'                   => $foundation->id,
+                'name'                 => $foundation->name,
+                'legal_number'         => $foundation->deed_number ?? '',
+                'logo'                 => $foundation->logo ?? '',
                 'landing_page_enabled' => (bool)$foundation->landing_page_enabled,
                 'landing_page_theme'   => $foundation->landing_page_theme,
                 'landing_page_config'  => $foundation->landing_page_config
@@ -202,6 +205,9 @@ class LandingPageConfigController extends Controller
             'message' => 'Konfigurasi landing page Sekolah berhasil disimpan.',
             'data' => [
                 'id'                   => $school->id,
+                'name'                 => $school->name,
+                'legal_number'         => $school->npsn ?? '',
+                'logo'                 => $school->logo ?? '',
                 'landing_page_enabled' => (bool)$school->landing_page_enabled,
                 'landing_page_theme'   => $school->landing_page_theme,
                 'landing_page_config'  => $school->landing_page_config

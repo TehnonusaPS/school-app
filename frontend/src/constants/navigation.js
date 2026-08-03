@@ -9,13 +9,14 @@ import {
   MoreHorizontal,
   Palette,
   LayoutTemplate,
-  Settings2,
+  Settings,
   Image,
   BookOpen,
   Building,
   HeartHandshake,
   Layers,
-  PhoneCall
+  PhoneCall,
+  Users
 } from 'lucide-vue-next'
 
 export const navMain = [
@@ -411,7 +412,7 @@ export const navMain = [
       {
         title: 'Pengaturan Umum',
         url: '/landing-editor/general',
-        icon: Settings2,
+        icon: Settings,
         roles: ['admin_yayasan', 'admin_sekolah', 'kepala_sekolah']
       },
       {
@@ -430,6 +431,12 @@ export const navMain = [
         title: 'Profil Akademik',
         url: '/landing-editor/about',
         icon: BookOpen,
+        roles: ['admin_sekolah', 'kepala_sekolah']
+      },
+      {
+        title: 'Informasi PPDB',
+        url: '/landing-editor/ppdb',
+        icon: Users,
         roles: ['admin_sekolah', 'kepala_sekolah']
       },
       {

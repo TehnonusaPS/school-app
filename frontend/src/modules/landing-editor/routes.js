@@ -36,6 +36,16 @@ export default [
     }
   },
   {
+    path: '/landing-editor/ppdb',
+    name: 'LandingEditorPPDB',
+    component: () => import('./pages/LandingEditorPPDB.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin_sekolah', 'kepala_sekolah'],
+      title: 'Landing Page — Informasi PPDB'
+    }
+  },
+  {
     path: '/landing-editor/sections',
     name: 'LandingEditorSections',
     component: () => import('./pages/LandingEditorSections.vue'),

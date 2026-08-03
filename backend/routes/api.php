@@ -210,8 +210,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/spp/tariffs/{id}', [\App\Http\Controllers\Api\SppController::class, 'updateTariff']);
         Route::delete('/spp/tariffs/{id}', [\App\Http\Controllers\Api\SppController::class, 'deleteTariff']);
     });
-<<<<<<< Updated upstream
-=======
 
     // Kalender Akademik - Admin Sekolah & Kepala Sekolah (CRUD + Approval)
     Route::middleware('role:admin_sekolah,kepala_sekolah')
@@ -291,6 +289,5 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/hr', [\App\Http\Controllers\Api\Reports\ReportFoundationController::class, 'hr']);
             Route::get('/students', [\App\Http\Controllers\Api\Reports\ReportFoundationController::class, 'students']);
         });
->>>>>>> Stashed changes
 });
 

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -24,6 +25,7 @@ class Foundation extends Model
         'decree_number',
         'decree_date',
         'logo',
+        'curriculum_id',
     ];
 
     protected function casts(): array
@@ -33,6 +35,14 @@ class Foundation extends Model
             'deed_date'        => 'date',
             'decree_date'      => 'date',
         ];
+    }
+
+    /**
+     * Get the default curriculum for this foundation.
+     */
+    public function curriculum(): BelongsTo
+    {
+        return $this->belongsTo(Curriculum::class);
     }
 
     /**
@@ -76,5 +86,19 @@ class Foundation extends Model
             ->whereIn('status', ['active', 'trial'])
             ->where('ends_at', '>=', now()->toDateString())
             ->latestOfMany();
+    }
+
+    /**
+     * Get the logo URL.
+     */
+    public function getLogoAttribute($value)
+    {
+        if (!$value) {
+            return null;
+        }
+        if (filter_var($value, FILTER_VALIDATE_URL)) {
+            return $value;
+        }
+        return asset('storage/' . $value);
     }
 }

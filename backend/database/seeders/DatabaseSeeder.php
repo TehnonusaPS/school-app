@@ -13,6 +13,10 @@ use App\Models\Subject;
 use App\Models\TeacherProfile;
 use App\Models\User;
 use App\Models\Extracurricular;
+use App\Models\TeacherSubjectAssignment;
+use App\Models\SubjectMaterial;
+use App\Models\Assessment;
+use App\Models\AssessmentScore;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -27,13 +31,14 @@ class DatabaseSeeder extends Seeder
         //  1. Seed Roles
         // ─────────────────────────────────────────────
         $this->call(RoleSeeder::class);
-
         $roles = Role::all()->keyBy('name');
 
+        $defaultPassword = Hash::make('123456');
+
         // ─────────────────────────────────────────────
-        //  2. Foundation (Yayasan)
+        //  2. Seed 2 Foundations (Yayasan)
         // ─────────────────────────────────────────────
-        $foundation = Foundation::create([
+        $foundationA = Foundation::create([
             'code'             => 'Y0001',
             'name'             => 'Yayasan Nusantara Pintar',
             'established_date' => '2010-01-15',
@@ -64,10 +69,11 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // ─────────────────────────────────────────────
-        //  3. School (Sekolah)
+        //  3. Seed 4 Schools (2 under Yayasan A, 2 under Yayasan B)
         // ─────────────────────────────────────────────
-        $school = School::create([
-            'foundation_id'        => $foundation->id,
+        // School 1 (Yayasan A - SD)
+        $school1 = School::create([
+            'foundation_id'        => $foundationA->id,
             'name'                 => 'SD Nusantara Pintar Bekasi',
             'npsn'                 => '20100001',
             'level'                => 'SD',
@@ -106,29 +112,6 @@ class DatabaseSeeder extends Seeder
             'accreditation_number' => 'AKR-2023-0002',
         ]);
 
-<<<<<<< Updated upstream
-=======
-        $school2 = School::create([
-            'foundation_id'        => $foundation2->id,
-            'name'                 => 'SMP Harapan Bangsa Jakarta',
-            'npsn'                 => '20200001',
-            'level'                => 'SMP',
-            'established_date'     => '2016-07-01',
-            'status'               => 'active',
-            'address'              => 'Jl. Harapan No. 89, Jakarta Selatan',
-            'email'                => 'info@smphbjakarta.sch.id',
-            'phone'                => '021-87650001',
-            'website'              => 'https://smphbjakarta.sch.id',
-            'decree_number'        => 'SK-004/SMPHB/2016',
-            'decree_date'          => '2016-06-15',
-            'permit_number'        => 'IZIN-003/2016',
-            'permit_date'          => '2016-06-01',
-            'accreditation'        => 'A',
-            'accreditation_date'   => '2023-05-10',
-            'accreditation_number' => 'AKR-2023-0003',
-        ]);
-
->>>>>>> Stashed changes
         // ─────────────────────────────────────────────
         //  4. Academic Year (Tahun Ajaran) & 5. Subjects (Mata Pelajaran) for all schools
         // ─────────────────────────────────────────────
@@ -181,438 +164,455 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        // ─────────────────────────────────────────────
-        //  6. Users — One per role
-        // ─────────────────────────────────────────────
-        $defaultPassword = Hash::make('123456');
-
-        // 6.1 Superadmin
-        User::create([
-            'name'       => 'Super Admin',
-            'email'      => 'superadmin@mail.com',
-            'password'   => $defaultPassword,
-            'role_id'    => $roles['superadmin']->id,
-            'is_active'  => true,
+            'accreditation_date'   => '2023-08-15',
+            'accreditation_number' => 'AKR-2023-0002',
         ]);
 
-        User::create([
-            'name'       => 'Super Admin 2',
-            'email'      => 'superadmin2@mail.com',
-            'password'   => $defaultPassword,
-            'role_id'    => $roles['superadmin']->id,
-            'is_active'  => true,
+        // School 3 (Yayasan B - SMA)
+        $school3 = School::create([
+            'foundation_id'        => $foundationB->id,
+            'name'                 => 'SMA Cendekia Mulia Bandung',
+            'npsn'                 => '20100003',
+            'level'                => 'SMA',
+            'established_date'     => '2016-07-01',
+            'status'               => 'active',
+            'address'              => 'Jl. Dago No. 102, Bandung',
+            'email'                => 'info@smacmbandung.sch.id',
+            'phone'                => '022-33445566',
+            'website'              => 'https://smacmbandung.sch.id',
+            'decree_number'        => 'SK-004/SMACM/2016',
+            'decree_date'          => '2016-06-15',
+            'permit_number'        => 'IZIN-003/2016',
+            'permit_date'          => '2016-06-01',
+            'accreditation'        => 'A',
+            'accreditation_date'   => '2024-01-20',
+            'accreditation_number' => 'AKR-2024-0003',
         ]);
 
-        // 6.2 Admin Yayasan
+        // School 4 (Yayasan B - SMK)
+        $school4 = School::create([
+            'foundation_id'        => $foundationB->id,
+            'name'                 => 'SMK Cendekia Mulia Bogor',
+            'npsn'                 => '20100004',
+            'level'                => 'SMK',
+            'established_date'     => '2018-07-01',
+            'status'               => 'active',
+            'address'              => 'Jl. Pajajaran No. 77, Bogor',
+            'email'                => 'info@smkcmbogor.sch.id',
+            'phone'                => '0251-11223344',
+            'website'              => 'https://smkcmbogor.sch.id',
+            'decree_number'        => 'SK-005/SMKCM/2018',
+            'decree_date'          => '2018-06-15',
+            'permit_number'        => 'IZIN-004/2018',
+            'permit_date'          => '2018-06-01',
+            'accreditation'        => 'B',
+            'accreditation_date'   => '2024-03-10',
+            'accreditation_number' => 'AKR-2024-0004',
+        ]);
+
+        $allSchools = [$school1, $school2, $school3, $school4];
+
+        // ─────────────────────────────────────────────
+        //  4. Core System Users (Superadmin & Foundation Admins)
+        // ─────────────────────────────────────────────
+        // Superadmin
         User::create([
-            'name'          => 'Admin Yayasan',
+            'name'      => 'Super Admin',
+            'email'     => 'superadmin@mail.com',
+            'password'  => $defaultPassword,
+            'role_id'   => $roles['superadmin']->id,
+            'is_active' => true,
+        ]);
+        User::create([
+            'name'      => 'Super Admin 2',
+            'email'     => 'superadmin2@mail.com',
+            'password'  => $defaultPassword,
+            'role_id'   => $roles['superadmin']->id,
+            'is_active' => true,
+        ]);
+
+        // Admin Yayasan A
+        User::create([
+            'name'          => 'Admin Yayasan Nusantara',
             'email'         => 'adminyayasan@mail.com',
             'password'      => $defaultPassword,
             'role_id'       => $roles['admin_yayasan']->id,
-            'foundation_id' => $foundation->id,
+            'foundation_id' => $foundationA->id,
             'is_active'     => true,
         ]);
-
         User::create([
-            'name'          => 'Admin Yayasan 2',
+            'name'          => 'Admin Yayasan Nusantara 2',
             'email'         => 'adminyayasan2@mail.com',
             'password'      => $defaultPassword,
             'role_id'       => $roles['admin_yayasan']->id,
-            'foundation_id' => $foundation->id,
+            'foundation_id' => $foundationA->id,
             'is_active'     => true,
         ]);
 
-        // 6.3 Kepala Sekolah
-        $kepalaSekolah = User::create([
-            'name'      => 'Kepala Sekolah',
-            'email'     => 'kepalasekolah@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['kepala_sekolah']->id,
-            'school_id' => $school->id,
-            'is_active' => true,
+        // Admin Yayasan B
+        User::create([
+            'name'          => 'Admin Yayasan Cendekia',
+            'email'         => 'adminyayasanb@mail.com',
+            'password'      => $defaultPassword,
+            'role_id'       => $roles['admin_yayasan']->id,
+            'foundation_id' => $foundationB->id,
+            'is_active'     => true,
         ]);
-
-        TeacherProfile::create([
-            'user_id'           => $kepalaSekolah->id,
-            'nip_nuptk'         => '1980010120050101',
-            'birth_place'       => 'Jakarta',
-            'birth_date'        => '1980-01-01',
-            'gender'            => 'male',
-            'religion'          => 'Islam',
-            'last_education'    => 'S2',
-            'position'          => 'Kepala Sekolah',
-            'employment_status' => 'Tetap',
-            'join_date'         => '2005-01-01',
-        ]);
-
-        $kepalaSekolah2 = User::create([
-            'name'      => 'Kepala Sekolah 2',
-            'email'     => 'kepalasekolah2@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['kepala_sekolah']->id,
-            'school_id' => $school->id,
-            'is_active' => true,
-        ]);
-
-        TeacherProfile::create([
-            'user_id'           => $kepalaSekolah2->id,
-            'nip_nuptk'         => '1981010120060102',
-            'birth_place'       => 'Bandung',
-            'birth_date'        => '1981-01-01',
-            'gender'            => 'female',
-            'religion'          => 'Islam',
-            'last_education'    => 'S2',
-            'position'          => 'Kepala Sekolah',
-            'employment_status' => 'Tetap',
-            'join_date'         => '2006-01-01',
-        ]);
-
-        // 6.4 Admin Sekolah
-        $adminSekolah = User::create([
-            'name'      => 'Admin Sekolah',
-            'email'     => 'adminsekolah@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['admin_sekolah']->id,
-            'school_id' => $school->id,
-            'is_active' => true,
-        ]);
-
-        TeacherProfile::create([
-            'user_id'           => $adminSekolah->id,
-            'birth_place'       => 'Bekasi',
-            'birth_date'        => '1985-05-10',
-            'gender'            => 'female',
-            'religion'          => 'Islam',
-            'last_education'    => 'S1',
-            'position'          => 'Admin Sekolah',
-            'employment_status' => 'Tetap',
-            'join_date'         => '2015-07-01',
-        ]);
-
-        $adminSekolah2 = User::create([
-            'name'      => 'Admin Sekolah 2',
-            'email'     => 'adminsekolah2@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['admin_sekolah']->id,
-            'school_id' => $school->id,
-            'is_active' => true,
-        ]);
-
-        TeacherProfile::create([
-            'user_id'           => $adminSekolah2->id,
-            'birth_place'       => 'Tangerang',
-            'birth_date'        => '1987-06-12',
-            'gender'            => 'male',
-            'religion'          => 'Islam',
-            'last_education'    => 'S1',
-            'position'          => 'Admin Sekolah',
-            'employment_status' => 'Tetap',
-            'join_date'         => '2016-07-01',
-        ]);
-
-        // 6.5 Tata Usaha
-        $tataUsaha = User::create([
-            'name'      => 'Tata Usaha',
-            'email'     => 'tatausaha@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['tata_usaha']->id,
-            'school_id' => $school->id,
-            'is_active' => true,
-        ]);
-
-        TeacherProfile::create([
-            'user_id'           => $tataUsaha->id,
-            'birth_place'       => 'Depok',
-            'birth_date'        => '1988-03-20',
-            'gender'            => 'female',
-            'religion'          => 'Islam',
-            'last_education'    => 'D3',
-            'position'          => 'Tata Usaha',
-            'employment_status' => 'Kontrak',
-            'join_date'         => '2018-01-15',
-        ]);
-
-        $tataUsaha2 = User::create([
-            'name'      => 'Tata Usaha 2',
-            'email'     => 'tatausaha2@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['tata_usaha']->id,
-            'school_id' => $school->id,
-            'is_active' => true,
-        ]);
-
-        TeacherProfile::create([
-            'user_id'           => $tataUsaha2->id,
-            'birth_place'       => 'Bogor',
-            'birth_date'        => '1990-04-15',
-            'gender'            => 'male',
-            'religion'          => 'Islam',
-            'last_education'    => 'D3',
-            'position'          => 'Tata Usaha',
-            'employment_status' => 'Kontrak',
-            'join_date'         => '2019-02-01',
-        ]);
-
-        // 6.6 Guru
-        $guru = User::create([
-            'name'      => 'Guru Pengajar',
-            'email'     => 'guru@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['guru']->id,
-            'school_id' => $school->id,
-            'is_active' => true,
-        ]);
-
-        TeacherProfile::create([
-            'user_id'           => $guru->id,
-            'nip_nuptk'         => '1990020220120201',
-            'birth_place'       => 'Bandung',
-            'birth_date'        => '1990-02-02',
-            'gender'            => 'male',
-            'religion'          => 'Islam',
-            'last_education'    => 'S1',
-            'position'          => 'Guru',
-            'employment_status' => 'Tetap',
-            'join_date'         => '2012-02-01',
-        ]);
-
-        $guru2 = User::create([
-            'name'      => 'Guru Pengajar 2',
-            'email'     => 'guru2@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['guru']->id,
-            'school_id' => $school->id,
-            'is_active' => true,
-        ]);
-
-        TeacherProfile::create([
-            'user_id'           => $guru2->id,
-            'nip_nuptk'         => '1991030320130302',
-            'birth_place'       => 'Yogyakarta',
-            'birth_date'        => '1991-03-03',
-            'gender'            => 'female',
-            'religion'          => 'Islam',
-            'last_education'    => 'S1',
-            'position'          => 'Guru',
-            'employment_status' => 'Tetap',
-            'join_date'         => '2013-03-01',
-        ]);
-
-        // 6.7 Wali Kelas
-        $waliKelas = User::create([
-            'name'      => 'Wali Kelas',
-            'email'     => 'walikelas@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['wali_kelas']->id,
-            'school_id' => $school->id,
-            'is_active' => true,
-        ]);
-
-        TeacherProfile::create([
-            'user_id'           => $waliKelas->id,
-            'nip_nuptk'         => '1992030320140301',
-            'birth_place'       => 'Surabaya',
-            'birth_date'        => '1992-03-03',
-            'gender'            => 'female',
-            'religion'          => 'Kristen',
-            'last_education'    => 'S1',
-            'position'          => 'Guru',
-            'employment_status' => 'Tetap',
-            'join_date'         => '2014-03-01',
-        ]);
-
-        $waliKelas2 = User::create([
-            'name'      => 'Wali Kelas 2',
-            'email'     => 'walikelas2@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['wali_kelas']->id,
-            'school_id' => $school->id,
-            'is_active' => true,
-        ]);
-
-        TeacherProfile::create([
-            'user_id'           => $waliKelas2->id,
-            'nip_nuptk'         => '1993040420150402',
-            'birth_place'       => 'Malang',
-            'birth_date'        => '1993-04-04',
-            'gender'            => 'male',
-            'religion'          => 'Islam',
-            'last_education'    => 'S1',
-            'position'          => 'Guru',
-            'employment_status' => 'Tetap',
-            'join_date'         => '2015-04-01',
+        User::create([
+            'name'          => 'Admin Yayasan Cendekia 2',
+            'email'         => 'adminyayasanb2@mail.com',
+            'password'      => $defaultPassword,
+            'role_id'       => $roles['admin_yayasan']->id,
+            'foundation_id' => $foundationB->id,
+            'is_active'     => true,
         ]);
 
         // ─────────────────────────────────────────────
-        //  7. Classroom (Kelas) — assigned to wali kelas
+        //  5. Seed School Admins, Principals, TU & Academic Infrastructure per School
         // ─────────────────────────────────────────────
-        $classroom = Classroom::create([
-            'school_id'           => $school->id,
-            'academic_year_id'    => $academicYear->id,
-            'name'                => '2-D',
-            'grade'               => 2,
-            'major'               => 'MIPA',
-            'room'                => 'R. 101',
-            'status'              => 'active',
-            'homeroom_teacher_id' => $waliKelas->id,
-            'capacity'            => 30,
-        ]);
+        $schoolClassrooms = [];
+        $schoolTeachers = [];
+        $schoolAcademicYears = [];
+        $schoolSubjects = [];
 
-        $classroom2 = Classroom::create([
-            'school_id'           => $school->id,
-            'academic_year_id'    => $academicYear->id,
-            'name'                => '2-E',
-            'grade'               => 2,
-            'major'               => 'IPS',
-            'room'                => 'R. 102',
-            'status'              => 'active',
-            'homeroom_teacher_id' => $waliKelas2->id,
-            'capacity'            => 30,
-        ]);
+        foreach ($allSchools as $sIndex => $sch) {
+            $sNum = $sIndex + 1;
+
+            // 5.1 Principal (Kepala Sekolah)
+            $pEmail = $sNum === 1 ? 'kepalasekolah@mail.com' : "kepalasekolah{$sNum}@mail.com";
+            $principal = User::create([
+                'name'      => "Kepala Sekolah {$sch->name}",
+                'email'     => $pEmail,
+                'password'  => $defaultPassword,
+                'role_id'   => $roles['kepala_sekolah']->id,
+                'school_id' => $sch->id,
+                'is_active' => true,
+            ]);
+            TeacherProfile::create([
+                'user_id'           => $principal->id,
+                'nip_nuptk'         => '1980' . str_pad($sNum, 12, '0', STR_PAD_LEFT),
+                'birth_place'       => 'Jakarta',
+                'birth_date'        => '1980-01-0' . $sNum,
+                'gender'            => 'male',
+                'religion'          => 'Islam',
+                'last_education'    => 'S2',
+                'position'          => 'Kepala Sekolah',
+                'employment_status' => 'Tetap',
+                'join_date'         => '2005-01-01',
+            ]);
+
+            // 5.2 School Admin (Admin Sekolah)
+            $adminEmail = $sNum === 1 ? 'adminsekolah@mail.com' : "adminsekolah{$sNum}@mail.com";
+            $adminSekolah = User::create([
+                'name'      => "Admin {$sch->name}",
+                'email'     => $adminEmail,
+                'password'  => $defaultPassword,
+                'role_id'   => $roles['admin_sekolah']->id,
+                'school_id' => $sch->id,
+                'is_active' => true,
+            ]);
+            TeacherProfile::create([
+                'user_id'           => $adminSekolah->id,
+                'birth_place'       => 'Bekasi',
+                'birth_date'        => '1985-05-1' . $sNum,
+                'gender'            => 'female',
+                'religion'          => 'Islam',
+                'last_education'    => 'S1',
+                'position'          => 'Admin Sekolah',
+                'employment_status' => 'Tetap',
+                'join_date'         => '2015-07-01',
+            ]);
+
+            // 5.3 Tata Usaha
+            $tuEmail = $sNum === 1 ? 'tatausaha@mail.com' : "tatausaha{$sNum}@mail.com";
+            $tataUsaha = User::create([
+                'name'      => "Tata Usaha {$sch->name}",
+                'email'     => $tuEmail,
+                'password'  => $defaultPassword,
+                'role_id'   => $roles['tata_usaha']->id,
+                'school_id' => $sch->id,
+                'is_active' => true,
+            ]);
+            TeacherProfile::create([
+                'user_id'           => $tataUsaha->id,
+                'birth_place'       => 'Depok',
+                'birth_date'        => '1988-03-2' . $sNum,
+                'gender'            => 'female',
+                'religion'          => 'Islam',
+                'last_education'    => 'D3',
+                'position'          => 'Tata Usaha',
+                'employment_status' => 'Kontrak',
+                'join_date'         => '2018-01-15',
+            ]);
+
+            // 5.4 Academic Years (Tahun Ajaran)
+            $academicYear = AcademicYear::create([
+                'school_id'  => $sch->id,
+                'name'       => '2024/2025',
+                'semester'   => 'even',
+                'start_date' => '2025-01-06',
+                'end_date'   => '2025-06-30',
+                'is_active'  => true,
+            ]);
+            $academicYearOdd = AcademicYear::create([
+                'school_id'  => $sch->id,
+                'name'       => '2024/2025',
+                'semester'   => 'odd',
+                'start_date' => '2024-07-15',
+                'end_date'   => '2024-12-20',
+                'is_active'  => false,
+            ]);
+            $schoolAcademicYears[$sch->id] = [$academicYear, $academicYearOdd];
+
+            // 5.5 Subjects (Mata Pelajaran)
+            $subjectsData = [
+                ['code' => 'MTK', 'name' => 'Matematika'],
+                ['code' => 'BIN', 'name' => 'Bahasa Indonesia'],
+                ['code' => 'IPA', 'name' => 'Ilmu Pengetahuan Alam'],
+                ['code' => 'IPS', 'name' => 'Ilmu Pengetahuan Sosial'],
+                ['code' => 'BIG', 'name' => 'Bahasa Inggris'],
+                ['code' => 'PAI', 'name' => 'Pendidikan Agama Islam'],
+                ['code' => 'PJK', 'name' => 'Pendidikan Jasmani'],
+                ['code' => 'SBD', 'name' => 'Seni Budaya'],
+            ];
+            $schoolSubjects[$sch->id] = [];
+            foreach ($subjectsData as $subject) {
+                $sub = Subject::create([
+                    'school_id'   => $sch->id,
+                    'code'        => $subject['code'],
+                    'name'        => $subject['name'],
+                    'is_active'   => true,
+                ]);
+                $schoolSubjects[$sch->id][$subject['code']] = $sub;
+            }
+
+            // 5.6 Extracurriculars
+            $extracurriculars = [
+                ['name' => 'Pramuka', 'description' => 'Kegiatan kepramukaan untuk mengembangkan karakter.', 'is_active' => true],
+                ['name' => 'Paduan Suara', 'description' => 'Ekstrakulikuler paduan suara dan vokal.', 'is_active' => true],
+                ['name' => 'Futsal', 'description' => 'Kegiatan olahraga futsal siswa.', 'is_active' => true],
+                ['name' => 'Seni Tari', 'description' => 'Ekstrakulikuler tari tradisional.', 'is_active' => false],
+                ['name' => 'Robotika', 'description' => 'Belajar perakitan robot sederhana.', 'is_active' => true],
+            ];
+            foreach ($extracurriculars as $ekskul) {
+                Extracurricular::create([
+                    'school_id'   => $sch->id,
+                    'name'        => $ekskul['name'],
+                    'description' => $ekskul['description'],
+                    'is_active'   => $ekskul['is_active'],
+                ]);
+            }
+        }
 
         // ─────────────────────────────────────────────
-        //  8. Siswa
+        //  6. Seed 20 Teachers / Staff (5 Teachers per School)
         // ─────────────────────────────────────────────
-        $siswa = User::create([
-            'name'      => 'Ahmad Wibowo',
-            'email'     => 'siswa@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['siswa']->id,
-            'school_id' => $school->id,
-            'is_active' => true,
-        ]);
+        $teacherNamesMaster = [
+            // School 1 (SD) - 5 Teachers
+            ['name' => 'Guru Pengajar', 'email' => 'guru@mail.com', 'role' => 'guru', 'position' => 'Guru MTK', 'gender' => 'male', 'school_index' => 0],
+            ['name' => 'Guru Pengajar 2', 'email' => 'guru2@mail.com', 'role' => 'guru', 'position' => 'Guru IPA', 'gender' => 'female', 'school_index' => 0],
+            ['name' => 'Wali Kelas 1-A', 'email' => 'walikelas@mail.com', 'role' => 'wali_kelas', 'position' => 'Wali Kelas', 'gender' => 'female', 'school_index' => 0],
+            ['name' => 'Wali Kelas 1-B', 'email' => 'walikelas2@mail.com', 'role' => 'wali_kelas', 'position' => 'Wali Kelas', 'gender' => 'male', 'school_index' => 0],
+            ['name' => 'Guru Agama SD', 'email' => 'guru.sd5@mail.com', 'role' => 'guru', 'position' => 'Guru PAI', 'gender' => 'male', 'school_index' => 0],
 
-        $studentProfile = StudentProfile::create([
-            'user_id'         => $siswa->id,
-            'classroom_id'    => $classroom->id,
-            'nisn'            => '0012345678',
-            'birth_place'     => 'Jakarta',
-            'birth_date'      => '2016-08-15',
-            'gender'          => 'male',
-            'address'         => 'Jl. Mawar No. 10, Bekasi',
-            'enrollment_date' => '2022-07-01',
-            'status'          => 'active',
-        ]);
+            // School 2 (SMP) - 5 Teachers
+            ['name' => 'Guru SMP 1 (Wali 7-A)', 'email' => 'guru.smp1@mail.com', 'role' => 'wali_kelas', 'position' => 'Wali Kelas 7-A', 'gender' => 'female', 'school_index' => 1],
+            ['name' => 'Guru SMP 2 (Wali 7-B)', 'email' => 'guru.smp2@mail.com', 'role' => 'wali_kelas', 'position' => 'Wali Kelas 7-B', 'gender' => 'male', 'school_index' => 1],
+            ['name' => 'Guru Matematika SMP', 'email' => 'guru.smp3@mail.com', 'role' => 'guru', 'position' => 'Guru MTK', 'gender' => 'male', 'school_index' => 1],
+            ['name' => 'Guru Bahasa Inggris SMP', 'email' => 'guru.smp4@mail.com', 'role' => 'guru', 'position' => 'Guru BIG', 'gender' => 'female', 'school_index' => 1],
+            ['name' => 'Guru IPA SMP', 'email' => 'guru.smp5@mail.com', 'role' => 'guru', 'position' => 'Guru IPA', 'gender' => 'female', 'school_index' => 1],
 
-        $siswa2 = User::create([
-            'name'      => 'Budi Santoso',
-            'email'     => 'siswa2@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['siswa']->id,
-            'school_id' => $school->id,
-            'is_active' => true,
-        ]);
+            // School 3 (SMA) - 5 Teachers
+            ['name' => 'Guru SMA 1 (Wali 10-MIPA)', 'email' => 'guru.sma1@mail.com', 'role' => 'wali_kelas', 'position' => 'Wali Kelas 10-MIPA', 'gender' => 'male', 'school_index' => 2],
+            ['name' => 'Guru SMA 2 (Wali 10-IPS)', 'email' => 'guru.sma2@mail.com', 'role' => 'wali_kelas', 'position' => 'Wali Kelas 10-IPS', 'gender' => 'female', 'school_index' => 2],
+            ['name' => 'Guru Fisika SMA', 'email' => 'guru.sma3@mail.com', 'role' => 'guru', 'position' => 'Guru Fisika', 'gender' => 'male', 'school_index' => 2],
+            ['name' => 'Guru Kimia SMA', 'email' => 'guru.sma4@mail.com', 'role' => 'guru', 'position' => 'Guru Kimia', 'gender' => 'female', 'school_index' => 2],
+            ['name' => 'Guru Biologi SMA', 'email' => 'guru.sma5@mail.com', 'role' => 'guru', 'position' => 'Guru Biologi', 'gender' => 'male', 'school_index' => 2],
 
-        $studentProfile2 = StudentProfile::create([
-            'user_id'         => $siswa2->id,
-            'classroom_id'    => $classroom->id,
-            'nisn'            => '0012345679',
-            'birth_place'     => 'Bandung',
-            'birth_date'      => '2016-09-12',
-            'gender'          => 'male',
-            'address'         => 'Jl. Anggrek No. 5, Bekasi',
-            'enrollment_date' => '2022-07-01',
-            'status'          => 'active',
-        ]);
+            // School 4 (SMK) - 5 Teachers
+            ['name' => 'Guru SMK 1 (Wali 10-TKJ)', 'email' => 'guru.smk1@mail.com', 'role' => 'wali_kelas', 'position' => 'Wali Kelas 10-TKJ', 'gender' => 'female', 'school_index' => 3],
+            ['name' => 'Guru SMK 2 (Wali 10-RPL)', 'email' => 'guru.smk2@mail.com', 'role' => 'wali_kelas', 'position' => 'Wali Kelas 10-RPL', 'gender' => 'male', 'school_index' => 3],
+            ['name' => 'Guru Produktif RPL', 'email' => 'guru.smk3@mail.com', 'role' => 'guru', 'position' => 'Guru RPL', 'gender' => 'male', 'school_index' => 3],
+            ['name' => 'Guru Produktif TKJ', 'email' => 'guru.smk4@mail.com', 'role' => 'guru', 'position' => 'Guru TKJ', 'gender' => 'female', 'school_index' => 3],
+            ['name' => 'Guru Kewirausahaan SMK', 'email' => 'guru.smk5@mail.com', 'role' => 'guru', 'position' => 'Guru KWU', 'gender' => 'female', 'school_index' => 3],
+        ];
 
-        $siswa3 = User::create([
-            'name'      => 'Citra Lestari',
-            'email'     => 'siswa3@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['siswa']->id,
-            'school_id' => $school->id,
-            'is_active' => true,
-        ]);
+        $teacherUserObjects = [];
 
-        $studentProfile3 = StudentProfile::create([
-            'user_id'         => $siswa3->id,
-            'classroom_id'    => $classroom2->id,
-            'nisn'            => '0012345680',
-            'birth_place'     => 'Surabaya',
-            'birth_date'      => '2016-05-23',
-            'gender'          => 'female',
-            'address'         => 'Jl. Melati No. 12, Bekasi',
-            'enrollment_date' => '2022-07-01',
-            'status'          => 'active',
-        ]);
+        foreach ($teacherNamesMaster as $tIdx => $tData) {
+            $schObj = $allSchools[$tData['school_index']];
+
+            $gUser = User::create([
+                'name'      => $tData['name'],
+                'email'     => $tData['email'],
+                'password'  => $defaultPassword,
+                'role_id'   => $roles[$tData['role']]->id,
+                'school_id' => $schObj->id,
+                'is_active' => true,
+            ]);
+
+            TeacherProfile::create([
+                'user_id'           => $gUser->id,
+                'nip_nuptk'         => '19900' . str_pad($tIdx + 1, 11, '0', STR_PAD_LEFT),
+                'birth_place'       => 'Kota ' . ($tIdx + 1),
+                'birth_date'        => '1990-05-' . str_pad(($tIdx % 28) + 1, 2, '0', STR_PAD_LEFT),
+                'gender'            => $tData['gender'],
+                'religion'          => 'Islam',
+                'last_education'    => 'S1',
+                'position'          => $tData['position'],
+                'employment_status' => 'Tetap',
+                'join_date'         => '2015-07-01',
+            ]);
+
+            $teacherUserObjects[$tData['email']] = $gUser;
+        }
 
         // ─────────────────────────────────────────────
-        //  9. Orang Tua / Wali
+        //  7. Seed Classrooms per School (assigned to Wali Kelas)
         // ─────────────────────────────────────────────
-        $orangTua = User::create([
-            'name'      => 'Orang Tua / Wali',
-            'email'     => 'orangtua@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['orang_tua']->id,
-            'phone'     => '081234567890',
-            'is_active' => true,
-        ]);
+        $classroomSpecs = [
+            // School 1 (SD)
+            ['school_index' => 0, 'name' => '2-D', 'grade' => 2, 'major' => 'MIPA', 'room' => 'R. 101', 'wali_email' => 'walikelas@mail.com'],
+            ['school_index' => 0, 'name' => '2-E', 'grade' => 2, 'major' => 'IPS', 'room' => 'R. 102', 'wali_email' => 'walikelas2@mail.com'],
 
-        $parentProfile = ParentProfile::create([
-            'user_id'        => $orangTua->id,
-            'nik'            => '3201010101800001',
-            'gender'         => 'male',
-            'birth_place'    => 'Jakarta',
-            'birth_date'     => '1980-05-20',
-            'religion'       => 'Islam',
-            'last_education' => 'S1',
-            'marital_status' => 'Menikah',
-            'relationship'   => 'father',
-            'occupation'     => 'Wiraswasta',
-            'address'        => 'Jl. Mawar No. 10, Bekasi',
-        ]);
+            // School 2 (SMP)
+            ['school_index' => 1, 'name' => '7-A', 'grade' => 7, 'major' => 'UMUM', 'room' => 'R. 201', 'wali_email' => 'guru.smp1@mail.com'],
+            ['school_index' => 1, 'name' => '7-B', 'grade' => 7, 'major' => 'UMUM', 'room' => 'R. 202', 'wali_email' => 'guru.smp2@mail.com'],
 
-        $parentProfile->children()->attach($studentProfile->id);
+            // School 3 (SMA)
+            ['school_index' => 2, 'name' => '10-MIPA-1', 'grade' => 10, 'major' => 'MIPA', 'room' => 'R. 301', 'wali_email' => 'guru.sma1@mail.com'],
+            ['school_index' => 2, 'name' => '10-IPS-1', 'grade' => 10, 'major' => 'IPS', 'room' => 'R. 302', 'wali_email' => 'guru.sma2@mail.com'],
 
-        $orangTua2 = User::create([
-            'name'      => 'Orang Tua / Wali 2',
-            'email'     => 'orangtua2@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['orang_tua']->id,
-            'phone'     => '081234567891',
-            'is_active' => true,
-        ]);
+            // School 4 (SMK)
+            ['school_index' => 3, 'name' => '10-TKJ-1', 'grade' => 10, 'major' => 'TKJ', 'room' => 'Lab Komputer 1', 'wali_email' => 'guru.smk1@mail.com'],
+            ['school_index' => 3, 'name' => '10-RPL-1', 'grade' => 10, 'major' => 'RPL', 'room' => 'Lab Komputer 2', 'wali_email' => 'guru.smk2@mail.com'],
+        ];
 
-        $parentProfile2 = ParentProfile::create([
-            'user_id'        => $orangTua2->id,
-            'nik'            => '3201010101800002',
-            'gender'         => 'female',
-            'birth_place'    => 'Bandung',
-            'birth_date'     => '1982-06-15',
-            'religion'       => 'Islam',
-            'last_education' => 'S1',
-            'marital_status' => 'Menikah',
-            'relationship'   => 'mother',
-            'occupation'     => 'Ibu Rumah Tangga',
-            'address'        => 'Jl. Anggrek No. 5, Bekasi',
-        ]);
+        $seededClassrooms = [];
+        $seededClassroomsOdd = [];
 
-        $parentProfile2->children()->attach($studentProfile2->id);
+        foreach ($classroomSpecs as $cSpec) {
+            $schObj = $allSchools[$cSpec['school_index']];
+            $ay = $schoolAcademicYears[$schObj->id][0]; // Even
+            $ayOdd = $schoolAcademicYears[$schObj->id][1]; // Odd
+            $wali = $teacherUserObjects[$cSpec['wali_email']] ?? null;
 
-        $orangTua3 = User::create([
-            'name'      => 'Orang Tua / Wali 3',
-            'email'     => 'orangtua3@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['orang_tua']->id,
-            'phone'     => '081234567892',
-            'is_active' => true,
-        ]);
+            $crEven = Classroom::create([
+                'school_id'           => $schObj->id,
+                'academic_year_id'    => $ay->id,
+                'name'                => $cSpec['name'],
+                'grade'               => $cSpec['grade'],
+                'major'               => $cSpec['major'],
+                'room'                => $cSpec['room'],
+                'status'              => 'active',
+                'homeroom_teacher_id' => $wali ? $wali->id : null,
+                'capacity'            => 30,
+            ]);
 
-        $parentProfile3 = ParentProfile::create([
-            'user_id'        => $orangTua3->id,
-            'nik'            => '3201010101800003',
-            'gender'         => 'male',
-            'birth_place'    => 'Surabaya',
-            'birth_date'     => '1979-11-02',
-            'religion'       => 'Kristen',
-            'last_education' => 'S1',
-            'marital_status' => 'Menikah',
-            'relationship'   => 'father',
-            'occupation'     => 'PNS',
-            'address'        => 'Jl. Melati No. 12, Bekasi',
-        ]);
+            $crOdd = Classroom::create([
+                'school_id'           => $schObj->id,
+                'academic_year_id'    => $ayOdd->id,
+                'name'                => $cSpec['name'],
+                'grade'               => $cSpec['grade'],
+                'major'               => $cSpec['major'],
+                'room'                => $cSpec['room'],
+                'status'              => 'active',
+                'homeroom_teacher_id' => $wali ? $wali->id : null,
+                'capacity'            => 30,
+            ]);
 
-        $parentProfile3->children()->attach($studentProfile3->id);
+            $seededClassrooms[] = $crEven;
+            $seededClassroomsOdd[] = $crOdd;
+        }
+
+        // ─────────────────────────────────────────────
+        //  8. Seed Students (40 Students Total across 4 Schools)
+        // ─────────────────────────────────────────────
+        $studentNamesPool = [
+            'Ahmad Wibowo', 'Budi Santoso', 'Citra Lestari', 'Dian Pratama', 'Eka Wijaya',
+            'Fitri Handayani', 'Giri Nugroho', 'Hendra Kusuma', 'Indah Permata', 'Joko Susilo',
+            'Kiki Amalia', 'Luki Hermawan', 'Maya Putri', 'Naufal Rizky', 'Olivia Tan',
+            'Pratama Putra', 'Qori Aina', 'Rian Hidayat', 'Siti Rahma', 'Taufik Hidayat',
+            'Umar Faruq', 'Vina Panduwinata', 'Wahyu Hidayat', 'Xavier Lee', 'Yuni Shara',
+            'Zaky Mubarak', 'Aditya Saputra', 'Bela Cantika', 'Candra Wijaya', 'Daffa Al-Faris',
+            'Elsa Manora', 'Faris Ramadhan', 'Gita Gutawa', 'Hafiz Azhari', 'Irfan Bachdim',
+            'Jasmine Noor', 'Kevin Sanjaya', 'Larasati Putri', 'Muhammad Iqbal', 'Nabila Syakieb'
+        ];
+
+        $studentProfilesAll = [];
+
+        foreach ($studentNamesPool as $idx => $sName) {
+            $classIdx = $idx % count($seededClassrooms);
+            $targetClassroom = $seededClassrooms[$classIdx];
+            $schObj = School::find($targetClassroom->school_id);
+
+            $num = $idx === 0 ? '' : ($idx + 1);
+            $email = "siswa{$num}@mail.com";
+
+            $sUser = User::create([
+                'name'      => $sName,
+                'email'     => $email,
+                'password'  => $defaultPassword,
+                'role_id'   => $roles['siswa']->id,
+                'school_id' => $schObj->id,
+                'is_active' => true,
+            ]);
+
+            $sProfile = StudentProfile::create([
+                'user_id'         => $sUser->id,
+                'classroom_id'    => $targetClassroom->id,
+                'nisn'            => '00' . str_pad($idx + 12345, 8, '0', STR_PAD_LEFT),
+                'birth_place'     => ($idx % 2 === 0) ? 'Jakarta' : 'Bandung',
+                'birth_date'      => '2010-0' . (($idx % 9) + 1) . '-' . str_pad(($idx % 28) + 1, 2, '0', STR_PAD_LEFT),
+                'gender'          => ($idx % 2 === 0) ? 'male' : 'female',
+                'address'         => "Jl. Pendidikan No. " . ($idx + 1) . ", " . $schObj->name,
+                'enrollment_date' => '2022-07-01',
+                'status'          => 'active',
+            ]);
+
+            $studentProfilesAll[] = $sProfile;
+        }
+
+        // ─────────────────────────────────────────────
+        //  9. Seed Parents (Orang Tua / Wali)
+        // ─────────────────────────────────────────────
+        $parentSpecs = [
+            ['name' => 'Orang Tua / Wali', 'email' => 'orangtua@mail.com', 'child_idx' => 0],
+            ['name' => 'Orang Tua / Wali 2', 'email' => 'orangtua2@mail.com', 'child_idx' => 1],
+            ['name' => 'Orang Tua / Wali 3', 'email' => 'orangtua3@mail.com', 'child_idx' => 2],
+            ['name' => 'Orang Tua Wali SMP', 'email' => 'orangtuasmp@mail.com', 'child_idx' => 5],
+            ['name' => 'Orang Tua Wali SMA', 'email' => 'orangtuasma@mail.com', 'child_idx' => 10],
+            ['name' => 'Orang Tua Wali SMK', 'email' => 'orangtuasmk@mail.com', 'child_idx' => 15],
+        ];
+
+        foreach ($parentSpecs as $pIdx => $pData) {
+            $oUser = User::create([
+                'name'      => $pData['name'],
+                'email'     => $pData['email'],
+                'password'  => $defaultPassword,
+                'role_id'   => $roles['orang_tua']->id,
+                'phone'     => '0812345678' . str_pad($pIdx, 2, '0', STR_PAD_LEFT),
+                'is_active' => true,
+            ]);
+
+            $pProfile = ParentProfile::create([
+                'user_id'        => $oUser->id,
+                'nik'            => '32010101018000' . str_pad($pIdx + 1, 2, '0', STR_PAD_LEFT),
+                'gender'         => ($pIdx % 2 === 0) ? 'male' : 'female',
+                'birth_place'    => 'Jakarta',
+                'birth_date'     => '1980-05-20',
+                'religion'       => 'Islam',
+                'last_education' => 'S1',
+                'marital_status' => 'Menikah',
+                'relationship'   => ($pIdx % 2 === 0) ? 'father' : 'mother',
+                'occupation'     => 'Wiraswasta',
+                'address'        => 'Jl. Mawar No. ' . ($pIdx + 10),
+            ]);
+
+            if (isset($studentProfilesAll[$pData['child_idx']])) {
+                $pProfile->children()->attach($studentProfilesAll[$pData['child_idx']]->id);
+            }
+        }
 
         // ─────────────────────────────────────────────
         //  10. Subscriptions & Payments
@@ -620,607 +620,103 @@ class DatabaseSeeder extends Seeder
         $this->call(SubscriptionSeeder::class);
 
         // ─────────────────────────────────────────────
-        //  11. Extracurriculars
+        //  11. Academic Assignments, Materials & Assessments for School 1
         // ─────────────────────────────────────────────
-        $extracurriculars = [
-            ['name' => 'Pramuka', 'description' => 'Kegiatan kepramukaan untuk mengembangkan karakter, kemandirian, dan jiwa kepemimpinan siswa.', 'is_active' => true],
-            ['name' => 'Paduan Suara', 'description' => 'Ekstrakulikuler paduan suara untuk mengembangkan bakat seni musik dan vokal siswa.', 'is_active' => true],
-            ['name' => 'Futsal', 'description' => 'Kegiatan olahraga futsal untuk melatih kerjasama tim dan kebugaran fisik siswa.', 'is_active' => true],
-            ['name' => 'Seni Tari', 'description' => 'Ekstrakulikuler tari tradisional dan modern untuk mengembangkan apresiasi seni budaya Indonesia.', 'is_active' => false],
-            ['name' => 'Robotika', 'description' => 'Kegiatan belajar pemrograman dan perakitan robot sederhana untuk melatih berpikir logis dan kreatif.', 'is_active' => true],
-            ['name' => 'Jurnalistik', 'description' => 'Ekstrakulikuler penulisan berita dan fotografi untuk mengembangkan kemampuan komunikasi dan literasi siswa.', 'is_active' => false],
-        ];
+        $sch1 = $school1;
+        $subjectMtk = $schoolSubjects[$sch1->id]['MTK'] ?? null;
+        $subjectBin = $schoolSubjects[$sch1->id]['BIN'] ?? null;
+        $subjectIpa = $schoolSubjects[$sch1->id]['IPA'] ?? null;
 
-        foreach ($extracurriculars as $ekskul) {
-            Extracurricular::create([
-                'school_id'   => $school->id,
-                'name'        => $ekskul['name'],
-                'description' => $ekskul['description'],
-                'is_active'   => $ekskul['is_active'],
-            ]);
-        }
-<<<<<<< Updated upstream
-=======
+        $guruUser = $teacherUserObjects['guru@mail.com'] ?? null;
+        $guru2User = $teacherUserObjects['guru2@mail.com'] ?? null;
 
-        // Query the seeded entities for akademik assignments & samples
-        $subjectMtk = Subject::where('code', 'MTK')->first();
-        $subjectBin = Subject::where('code', 'BIN')->first();
-        $subjectIpa = Subject::where('code', 'IPA')->first();
+        $classroom1Obj = $seededClassrooms[0]; // 2-D
+        $classroom2Obj = $seededClassrooms[1]; // 2-E
+        $classroom1OddObj = $seededClassroomsOdd[0];
 
-        $guruUser = User::where('email', 'guru@mail.com')->first();
-        $guru2User = User::where('email', 'guru2@mail.com')->first();
+        $academicYear1 = $schoolAcademicYears[$sch1->id][0];
+        $academicYear1Odd = $schoolAcademicYears[$sch1->id][1];
 
-        $classroomObj = Classroom::where('name', '2-D')->first();
-        $classroom2Obj = Classroom::where('name', '2-E')->first();
-
-        // 1. Teacher subject assignments
-        // Even Semester (classroom)
-        if ($guruUser && $subjectMtk && $classroom) {
+        if ($guruUser && $subjectMtk && $classroom1Obj) {
             TeacherSubjectAssignment::create([
-                'school_id' => $school->id,
-                'teacher_id' => $guruUser->id,
-                'subject_id' => $subjectMtk->id,
-                'classroom_id' => $classroom->id,
-                'academic_year_id' => $academicYear->id,
-                'is_active' => true,
+                'school_id'        => $sch1->id,
+                'teacher_id'       => $guruUser->id,
+                'subject_id'       => $subjectMtk->id,
+                'classroom_id'     => $classroom1Obj->id,
+                'academic_year_id' => $academicYear1->id,
+                'is_active'        => true,
             ]);
         }
-
-        if ($guruUser && $subjectBin && $classroom) {
+        if ($guruUser && $subjectBin && $classroom1Obj) {
             TeacherSubjectAssignment::create([
-                'school_id' => $school->id,
-                'teacher_id' => $guruUser->id,
-                'subject_id' => $subjectBin->id,
-                'classroom_id' => $classroom->id,
-                'academic_year_id' => $academicYear->id,
-                'is_active' => true,
+                'school_id'        => $sch1->id,
+                'teacher_id'       => $guruUser->id,
+                'subject_id'       => $subjectBin->id,
+                'classroom_id'     => $classroom1Obj->id,
+                'academic_year_id' => $academicYear1->id,
+                'is_active'        => true,
             ]);
         }
-
-        if ($guruUser && $subjectMtk && $classroom2) {
+        if ($guru2User && $subjectIpa && $classroom2Obj) {
             TeacherSubjectAssignment::create([
-                'school_id' => $school->id,
-                'teacher_id' => $guruUser->id,
-                'subject_id' => $subjectMtk->id,
-                'classroom_id' => $classroom2->id,
-                'academic_year_id' => $academicYear->id,
-                'is_active' => true,
+                'school_id'        => $sch1->id,
+                'teacher_id'       => $guru2User->id,
+                'subject_id'       => $subjectIpa->id,
+                'classroom_id'     => $classroom2Obj->id,
+                'academic_year_id' => $academicYear1->id,
+                'is_active'        => true,
             ]);
         }
 
-        if ($guru2User && $subjectIpa && $classroom2) {
-            TeacherSubjectAssignment::create([
-                'school_id' => $school->id,
-                'teacher_id' => $guru2User->id,
-                'subject_id' => $subjectIpa->id,
-                'classroom_id' => $classroom2->id,
-                'academic_year_id' => $academicYear->id,
-                'is_active' => true,
-            ]);
-        }
-
-        // Odd Semester (classroomOdd)
-        if ($guruUser && $subjectMtk && $classroomOdd) {
-            TeacherSubjectAssignment::create([
-                'school_id' => $school->id,
-                'teacher_id' => $guruUser->id,
-                'subject_id' => $subjectMtk->id,
-                'classroom_id' => $classroomOdd->id,
-                'academic_year_id' => $academicYearOdd->id,
-                'is_active' => true,
-            ]);
-        }
-
-        if ($guruUser && $subjectBin && $classroomOdd) {
-            TeacherSubjectAssignment::create([
-                'school_id' => $school->id,
-                'teacher_id' => $guruUser->id,
-                'subject_id' => $subjectBin->id,
-                'classroom_id' => $classroomOdd->id,
-                'academic_year_id' => $academicYearOdd->id,
-                'is_active' => true,
-            ]);
-        }
-
-        // 2. Subject Materials (Sample Metadata)
-        // Even Semester (classroom)
-        $mtkMat1Even = null;
-        $mtkMat2Even = null;
-        if ($guruUser && $subjectMtk && $classroom) {
+        // Materials & Assessments
+        if ($guruUser && $subjectMtk && $classroom1Obj) {
             $mtkMat1Even = SubjectMaterial::create([
-                'school_id' => $school->id,
-                'subject_id' => $subjectMtk->id,
-                'classroom_id' => $classroom->id,
-                'academic_year_id' => $academicYear->id,
-                'uploaded_by' => $guruUser->id,
-                'title' => 'Bab 1 : Pengenalan Aljabar Dasar',
-                'file_path' => 'materials/' . $school->id . '/' . $subjectMtk->id . '/aljabar_dasar.pdf',
-                'file_name' => 'Aljabar Dasar.pdf',
-                'file_type' => 'pdf',
-                'file_size' => 1024 * 1024 * 2, // 2MB
+                'school_id'        => $sch1->id,
+                'subject_id'       => $subjectMtk->id,
+                'classroom_id'     => $classroom1Obj->id,
+                'academic_year_id' => $academicYear1->id,
+                'uploaded_by'      => $guruUser->id,
+                'title'            => 'Bab 1 : Pengenalan Aljabar Dasar',
+                'file_path'        => 'materials/' . $sch1->id . '/' . $subjectMtk->id . '/aljabar_dasar.pdf',
+                'file_name'        => 'Aljabar Dasar.pdf',
+                'file_type'        => 'pdf',
+                'file_size'        => 1024 * 1024 * 2,
                 'uploaded_by_name' => $guruUser->name,
-                'is_active' => true,
+                'is_active'        => true,
             ]);
 
-            $mtkMat2Even = SubjectMaterial::create([
-                'school_id' => $school->id,
-                'subject_id' => $subjectMtk->id,
-                'classroom_id' => $classroom->id,
-                'academic_year_id' => $academicYear->id,
-                'uploaded_by' => $guruUser->id,
-                'title' => 'Bab 2 : Himpunan & Diagram Venn',
-                'file_path' => 'materials/' . $school->id . '/' . $subjectMtk->id . '/himpunan.pptx',
-                'file_name' => 'Himpunan.pptx',
-                'file_type' => 'pptx',
-                'file_size' => 1024 * 1024 * 5, // 5MB
-                'uploaded_by_name' => $guruUser->name,
-                'is_active' => true,
-            ]);
-        }
-
-        // Odd Semester (classroomOdd)
-        $mtkMat1Odd = null;
-        $mtkMat2Odd = null;
-        if ($guruUser && $subjectMtk && $classroomOdd) {
-            $mtkMat1Odd = SubjectMaterial::create([
-                'school_id' => $school->id,
-                'subject_id' => $subjectMtk->id,
-                'classroom_id' => $classroomOdd->id,
-                'academic_year_id' => $academicYearOdd->id,
-                'uploaded_by' => $guruUser->id,
-                'title' => 'Bab 1 : Review Matematika Dasar',
-                'file_path' => 'materials/' . $school->id . '/' . $subjectMtk->id . '/review_dasar.pdf',
-                'file_name' => 'Review Dasar.pdf',
-                'file_type' => 'pdf',
-                'file_size' => 1024 * 1024 * 1, // 1MB
-                'uploaded_by_name' => $guruUser->name,
-                'is_active' => true,
-            ]);
-
-            $mtkMat2Odd = SubjectMaterial::create([
-                'school_id' => $school->id,
-                'subject_id' => $subjectMtk->id,
-                'classroom_id' => $classroomOdd->id,
-                'academic_year_id' => $academicYearOdd->id,
-                'uploaded_by' => $guruUser->id,
-                'title' => 'Bab 2 : Geometri Sederhana',
-                'file_path' => 'materials/' . $school->id . '/' . $subjectMtk->id . '/geometri.pptx',
-                'file_name' => 'Geometri.pptx',
-                'file_type' => 'pptx',
-                'file_size' => 1024 * 1024 * 3, // 3MB
-                'uploaded_by_name' => $guruUser->name,
-                'is_active' => true,
-            ]);
-        }
-
-        // 3. Assessments (Sample Tugas & Ujian)
-        // Even Semester (classroom)
-        $studentsInClass = StudentProfile::where('classroom_id', $classroom->id)->get();
-
-        if ($guruUser && $subjectMtk && $classroom) {
             $tugas = Assessment::create([
-                'school_id' => $school->id,
-                'subject_id' => $subjectMtk->id,
-                'classroom_id' => $classroom->id,
-                'academic_year_id' => $academicYear->id,
-                'created_by' => $guruUser->id,
-                'material_id' => $mtkMat1Even ? $mtkMat1Even->id : null,
-                'category' => 'tugas',
-                'type' => 'tugas_sekolah',
-                'title' => 'Tugas I : Latihan Aljabar Dasar',
+                'school_id'        => $sch1->id,
+                'subject_id'       => $subjectMtk->id,
+                'classroom_id'     => $classroom1Obj->id,
+                'academic_year_id' => $academicYear1->id,
+                'created_by'       => $guruUser->id,
+                'material_id'      => $mtkMat1Even->id,
+                'category'         => 'tugas',
+                'type'             => 'tugas_sekolah',
+                'title'            => 'Tugas I : Latihan Aljabar Dasar',
                 'uploaded_by_name' => $guruUser->name,
-                'is_active' => true,
+                'is_active'        => true,
             ]);
 
+            $studentsInClass = StudentProfile::where('classroom_id', $classroom1Obj->id)->get();
             foreach ($studentsInClass as $st) {
                 AssessmentScore::create([
                     'assessment_id' => $tugas->id,
-                    'student_id' => $st->id,
-                    'score' => $st->nisn === '0012345678' ? 85.00 : 90.00,
-                ]);
-            }
-
-            $ujian = Assessment::create([
-                'school_id' => $school->id,
-                'subject_id' => $subjectMtk->id,
-                'classroom_id' => $classroom->id,
-                'academic_year_id' => $academicYear->id,
-                'created_by' => $guruUser->id,
-                'material_id' => $mtkMat1Even ? $mtkMat1Even->id : null,
-                'category' => 'ujian',
-                'type' => 'ujian_harian',
-                'title' => 'Ujian Harian I : Aljabar',
-                'uploaded_by_name' => $guruUser->name,
-                'is_active' => true,
-            ]);
-
-            foreach ($studentsInClass as $st) {
-                AssessmentScore::create([
-                    'assessment_id' => $ujian->id,
-                    'student_id' => $st->id,
-                    'score' => $st->nisn === '0012345678' ? 78.50 : 88.00,
-                ]);
-            }
-        }
-
-        // Odd Semester (classroomOdd)
-        if ($guruUser && $subjectMtk && $classroomOdd) {
-            // Assessment 1: Tugas Sekolah tied to Bab 1
-            $tugasOdd1 = Assessment::create([
-                'school_id' => $school->id,
-                'subject_id' => $subjectMtk->id,
-                'classroom_id' => $classroomOdd->id,
-                'academic_year_id' => $academicYearOdd->id,
-                'created_by' => $guruUser->id,
-                'material_id' => $mtkMat1Odd ? $mtkMat1Odd->id : null,
-                'category' => 'tugas',
-                'type' => 'tugas_sekolah',
-                'title' => 'Tugas I : Latihan Penjumlahan Dasar',
-                'uploaded_by_name' => $guruUser->name,
-                'is_active' => true,
-            ]);
-
-            foreach ($studentsInClass as $st) {
-                AssessmentScore::create([
-                    'assessment_id' => $tugasOdd1->id,
-                    'student_id' => $st->id,
-                    'score' => $st->nisn === '0012345678' ? 80.00 : 85.00,
-                ]);
-            }
-
-            // Assessment 2: Tugas Sekolah tied to Bab 2
-            $tugasOdd2 = Assessment::create([
-                'school_id' => $school->id,
-                'subject_id' => $subjectMtk->id,
-                'classroom_id' => $classroomOdd->id,
-                'academic_year_id' => $academicYearOdd->id,
-                'created_by' => $guruUser->id,
-                'material_id' => $mtkMat2Odd ? $mtkMat2Odd->id : null,
-                'category' => 'tugas',
-                'type' => 'tugas_sekolah',
-                'title' => 'Tugas II : Geometri Segitiga',
-                'uploaded_by_name' => $guruUser->name,
-                'is_active' => true,
-            ]);
-
-            foreach ($studentsInClass as $st) {
-                AssessmentScore::create([
-                    'assessment_id' => $tugasOdd2->id,
-                    'student_id' => $st->id,
-                    'score' => $st->nisn === '0012345678' ? 85.00 : 92.00,
-                ]);
-            }
-
-            // Assessment 3: Ujian Harian tied to Bab 1
-            $ujianOdd1 = Assessment::create([
-                'school_id' => $school->id,
-                'subject_id' => $subjectMtk->id,
-                'classroom_id' => $classroomOdd->id,
-                'academic_year_id' => $academicYearOdd->id,
-                'created_by' => $guruUser->id,
-                'material_id' => $mtkMat1Odd ? $mtkMat1Odd->id : null,
-                'category' => 'ujian',
-                'type' => 'ujian_harian',
-                'title' => 'Ujian Harian I : Aritmatika',
-                'uploaded_by_name' => $guruUser->name,
-                'is_active' => true,
-            ]);
-
-            foreach ($studentsInClass as $st) {
-                AssessmentScore::create([
-                    'assessment_id' => $ujianOdd1->id,
-                    'student_id' => $st->id,
-                    'score' => $st->nisn === '0012345678' ? 75.00 : 80.00,
-                ]);
-            }
-
-            // Assessment 4: UTS (No material)
-            $utsOdd = Assessment::create([
-                'school_id' => $school->id,
-                'subject_id' => $subjectMtk->id,
-                'classroom_id' => $classroomOdd->id,
-                'academic_year_id' => $academicYearOdd->id,
-                'created_by' => $guruUser->id,
-                'material_id' => null,
-                'category' => 'ujian',
-                'type' => 'uts',
-                'title' => 'UTS',
-                'uploaded_by_name' => $guruUser->name,
-                'is_active' => true,
-            ]);
-
-            foreach ($studentsInClass as $st) {
-                AssessmentScore::create([
-                    'assessment_id' => $utsOdd->id,
-                    'student_id' => $st->id,
-                    'score' => $st->nisn === '0012345678' ? 90.00 : 94.00,
-                ]);
-            }
-
-            // Assessment 5: UAS (No material)
-            $uasOdd = Assessment::create([
-                'school_id' => $school->id,
-                'subject_id' => $subjectMtk->id,
-                'classroom_id' => $classroomOdd->id,
-                'academic_year_id' => $academicYearOdd->id,
-                'created_by' => $guruUser->id,
-                'material_id' => null,
-                'category' => 'ujian',
-                'type' => 'uas',
-                'title' => 'UAS',
-                'uploaded_by_name' => $guruUser->name,
-                'is_active' => true,
-            ]);
-
-            foreach ($studentsInClass as $st) {
-                AssessmentScore::create([
-                    'assessment_id' => $uasOdd->id,
-                    'student_id' => $st->id,
-                    'score' => $st->nisn === '0012345678' ? 88.00 : 91.00,
+                    'student_id'    => $st->id,
+                    'score'         => 88.00,
                 ]);
             }
         }
 
         // ─────────────────────────────────────────────
-        //  ADDITIONAL MULTI-TENANT SEED DATA
+        //  12. Additional Seeders (Certificates, News, SPP)
         // ─────────────────────────────────────────────
-        // Admin Yayasan 2
-        User::create([
-            'name'          => 'Admin Yayasan Harapan',
-            'email'         => 'adminyayasan_harapan@mail.com',
-            'password'      => $defaultPassword,
-            'role_id'       => $roles['admin_yayasan']->id,
-            'foundation_id' => $foundation2->id,
-            'is_active'     => true,
-        ]);
+        $this->call(ActiveStudentCertificateSeeder::class);
+        $this->call(StudentDispensationCertificateSeeder::class);
+        $this->call(StudentWarningCertificateSeeder::class);
+        $this->call(ActivityNewsSeeder::class);
+        $this->call(SppSeeder::class);
 
-        // 12. School 1B (SMP Nusantara Pintar) Users & Profiles
-        $kepalaSekolah1B = User::create([
-            'name'      => 'Kepala Sekolah SMP NP',
-            'email'     => 'kepalasekolahsmpnp@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['kepala_sekolah']->id,
-            'school_id' => $school1B->id,
-            'is_active' => true,
-        ]);
-
-        TeacherProfile::create([
-            'user_id'           => $kepalaSekolah1B->id,
-            'nip_nuptk'         => '1982010120070101',
-            'birth_place'       => 'Jakarta',
-            'birth_date'        => '1982-01-01',
-            'gender'            => 'male',
-            'religion'          => 'Islam',
-            'last_education'    => 'S2',
-            'position'          => 'Kepala Sekolah',
-            'employment_status' => 'Tetap',
-            'join_date'         => '2007-01-01',
-        ]);
-
-        $adminSekolah1B = User::create([
-            'name'      => 'Admin Sekolah SMP NP',
-            'email'     => 'adminsekolahsmpnp@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['admin_sekolah']->id,
-            'school_id' => $school1B->id,
-            'is_active' => true,
-        ]);
-
-        TeacherProfile::create([
-            'user_id'           => $adminSekolah1B->id,
-            'birth_place'       => 'Bekasi',
-            'birth_date'        => '1986-05-10',
-            'gender'            => 'female',
-            'religion'          => 'Islam',
-            'last_education'    => 'S1',
-            'position'          => 'Admin Sekolah',
-            'employment_status' => 'Tetap',
-            'join_date'         => '2016-07-01',
-        ]);
-
-        $waliKelas1B = User::create([
-            'name'      => 'Wali Kelas SMP NP',
-            'email'     => 'walikelassmpnp@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['wali_kelas']->id,
-            'school_id' => $school1B->id,
-            'is_active' => true,
-        ]);
-
-        TeacherProfile::create([
-            'user_id'           => $waliKelas1B->id,
-            'nip_nuptk'         => '1994030320160301',
-            'birth_place'       => 'Depok',
-            'birth_date'        => '1994-03-03',
-            'gender'            => 'female',
-            'religion'          => 'Islam',
-            'last_education'    => 'S1',
-            'position'          => 'Guru',
-            'employment_status' => 'Tetap',
-            'join_date'         => '2016-03-01',
-        ]);
-
-        $classroom1B = Classroom::create([
-            'school_id'           => $school1B->id,
-            'academic_year_id'    => AcademicYear::where('school_id', $school1B->id)->where('is_active', true)->first()->id,
-            'name'                => '7-A',
-            'grade'               => 7,
-            'major'               => 'MIPA',
-            'room'                => 'R. 201',
-            'status'              => 'active',
-            'homeroom_teacher_id' => $waliKelas1B->id,
-            'capacity'            => 30,
-        ]);
-
-        $siswa1B = User::create([
-            'name'      => 'Dedi Hermawan',
-            'email'     => 'siswa1b@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['siswa']->id,
-            'school_id' => $school1B->id,
-            'is_active' => true,
-        ]);
-
-        $studentProfile1B = StudentProfile::create([
-            'user_id'         => $siswa1B->id,
-            'classroom_id'    => $classroom1B->id,
-            'nisn'            => '0012345690',
-            'birth_place'     => 'Jakarta',
-            'birth_date'      => '2012-08-15',
-            'gender'          => 'male',
-            'address'         => 'Jl. Melur No. 20, Bekasi',
-            'enrollment_date' => '2024-07-01',
-            'status'          => 'active',
-        ]);
-
-        $orangTua1B = User::create([
-            'name'      => 'Orang Tua Dedi',
-            'email'     => 'orangtua1b@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['orang_tua']->id,
-            'phone'     => '081234567895',
-            'is_active' => true,
-        ]);
-
-        $parentProfile1B = ParentProfile::create([
-            'user_id'        => $orangTua1B->id,
-            'nik'            => '3201010101800005',
-            'gender'         => 'male',
-            'birth_place'    => 'Jakarta',
-            'birth_date'     => '1981-05-20',
-            'religion'       => 'Islam',
-            'last_education' => 'S1',
-            'marital_status' => 'Menikah',
-            'relationship'   => 'father',
-            'occupation'     => 'Karyawan Swasta',
-            'address'        => 'Jl. Melur No. 20, Bekasi',
-        ]);
-
-        $parentProfile1B->children()->attach($studentProfile1B->id);
-
-        // 13. School 2 (SMP Harapan Bangsa) Users & Profiles
-        $kepalaSekolah2 = User::create([
-            'name'      => 'Kepala Sekolah SMP HB',
-            'email'     => 'kepalasekolahsmphb@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['kepala_sekolah']->id,
-            'school_id' => $school2->id,
-            'is_active' => true,
-        ]);
-
-        TeacherProfile::create([
-            'user_id'           => $kepalaSekolah2->id,
-            'nip_nuptk'         => '1983010120080101',
-            'birth_place'       => 'Tangerang',
-            'birth_date'        => '1983-01-01',
-            'gender'            => 'female',
-            'religion'          => 'Kristen',
-            'last_education'    => 'S2',
-            'position'          => 'Kepala Sekolah',
-            'employment_status' => 'Tetap',
-            'join_date'         => '2008-01-01',
-        ]);
-
-        $adminSekolah2 = User::create([
-            'name'      => 'Admin Sekolah SMP HB',
-            'email'     => 'adminsekolahsmphb@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['admin_sekolah']->id,
-            'school_id' => $school2->id,
-            'is_active' => true,
-        ]);
-
-        TeacherProfile::create([
-            'user_id'           => $adminSekolah2->id,
-            'birth_place'       => 'Tangerang',
-            'birth_date'        => '1987-06-12',
-            'gender'            => 'male',
-            'religion'          => 'Islam',
-            'last_education'    => 'S1',
-            'position'          => 'Admin Sekolah',
-            'employment_status' => 'Tetap',
-            'join_date'         => '2017-07-01',
-        ]);
-
-        $waliKelas2HB = User::create([
-            'name'      => 'Wali Kelas SMP HB',
-            'email'     => 'walikelassmphb@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['wali_kelas']->id,
-            'school_id' => $school2->id,
-            'is_active' => true,
-        ]);
-
-        TeacherProfile::create([
-            'user_id'           => $waliKelas2HB->id,
-            'nip_nuptk'         => '1995040420170402',
-            'birth_place'       => 'Depok',
-            'birth_date'        => '1995-04-04',
-            'gender'            => 'male',
-            'religion'          => 'Islam',
-            'last_education'    => 'S1',
-            'position'          => 'Guru',
-            'employment_status' => 'Tetap',
-            'join_date'         => '2017-04-01',
-        ]);
-
-        $classroom2HB = Classroom::create([
-            'school_id'           => $school2->id,
-            'academic_year_id'    => AcademicYear::where('school_id', $school2->id)->where('is_active', true)->first()->id,
-            'name'                => '7-B',
-            'grade'               => 7,
-            'major'               => 'IPS',
-            'room'                => 'R. 202',
-            'status'              => 'active',
-            'homeroom_teacher_id' => $waliKelas2HB->id,
-            'capacity'            => 30,
-        ]);
-
-        $siswa2HB = User::create([
-            'name'      => 'Elisa Fitri',
-            'email'     => 'siswa2hb@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['siswa']->id,
-            'school_id' => $school2->id,
-            'is_active' => true,
-        ]);
-
-        $studentProfile2HB = StudentProfile::create([
-            'user_id'         => $siswa2HB->id,
-            'classroom_id'    => $classroom2HB->id,
-            'nisn'            => '0012345691',
-            'birth_place'     => 'Tangerang',
-            'birth_date'      => '2012-09-12',
-            'gender'          => 'female',
-            'address'         => 'Jl. Melati No. 5, Tangerang',
-            'enrollment_date' => '2024-07-01',
-            'status'          => 'active',
-        ]);
-
-        $orangTua2HB = User::create([
-            'name'      => 'Orang Tua Elisa',
-            'email'     => 'orangtua2hb@mail.com',
-            'password'  => $defaultPassword,
-            'role_id'   => $roles['orang_tua']->id,
-            'phone'     => '081234567896',
-            'is_active' => true,
-        ]);
-
-        $parentProfile2HB = ParentProfile::create([
-            'user_id'        => $orangTua2HB->id,
-            'nik'            => '3201010101800006',
-            'gender'         => 'female',
-            'birth_place'    => 'Tangerang',
-            'birth_date'     => '1983-06-15',
-            'religion'       => 'Islam',
-            'last_education' => 'S1',
-            'marital_status' => 'Menikah',
-            'relationship'   => 'mother',
-            'occupation'     => 'PNS',
-            'address'        => 'Jl. Melati No. 5, Tangerang',
-        ]);
-
-        $parentProfile2HB->children()->attach($studentProfile2HB->id);
->>>>>>> Stashed changes
     }
 }

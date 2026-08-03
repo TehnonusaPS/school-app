@@ -1,7 +1,6 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { toast } from 'vue-sonner'
-import { mockAnnouncements } from '../../../data/mockAnnouncements'
 import AnnouncementTable from '../../../components/AnnouncementTable.vue'
 import AnnouncementDetailModal from '../../../components/AnnouncementDetailModal.vue'
 import AnnouncementFormModal from '../../../components/AnnouncementFormModal.vue'
@@ -11,28 +10,53 @@ import PageHeader from '@/components/page-header/PageHeader.vue'
 import StatCard from '@/components/stat-card/StatCard.vue'
 import { Plus, Megaphone } from 'lucide-vue-next'
 import { glassSlide, glassFade } from '@/config/motion'
+import {
+  getAnnouncements,
+  createAnnouncement,
+  updateAnnouncement,
+  deleteAnnouncement as deleteAnnouncementApi
+} from '@/services/announcementService'
 
 const authStore = useAuthStore()
 const currentUser = authStore.user
 
 // Determine school scope based on user role to avoid modifying the auth store itself
 const isSchoolRole = currentUser?.role === 'kepala_sekolah' || currentUser?.role === 'admin_sekolah'
-const userSchool = isSchoolRole
-  ? '8D Tehnonusa I'
-  : currentUser?.sekolah
-
-// Filter announcements so that school-scoped users (like Kepala Sekolah) only see their school's data and "SEMUA SEKOLAH"
-const filteredMockData = userSchool
-  ? mockAnnouncements.filter(item => item.sekolah === userSchool || item.sekolah === 'SEMUA SEKOLAH')
-  : mockAnnouncements
 
 // --- State Variables ---
-const announcements = ref([...filteredMockData])
+const announcements = ref([])
+const loading = ref(false)
 const isFormOpen = ref(false)
 const isDetailOpen = ref(false)
 const isDeleteConfirmOpen = ref(false)
 const selectedAnnouncement = ref(null)
 const formMode = ref('create')
+
+// --- API Loading ---
+async function loadAnnouncements() {
+  loading.value = true
+  try {
+    const data = await getAnnouncements()
+    announcements.value = data.map(item => ({
+      id: item.id,
+      judul: item.title,
+      deskripsi: item.content,
+      kategori: item.category,
+      sekolah: item.target_school ? item.target_school.name : 'SEMUA SEKOLAH',
+      tanggal: item.publish_date,
+      target_school_id: item.target_school_id
+    }))
+  } catch (error) {
+    console.error('Gagal memuat pengumuman:', error)
+    toast.error('Gagal mengambil data pengumuman.')
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  loadAnnouncements()
+})
 
 // --- CRUD Actions ---
 function openCreateDialog() {
@@ -57,40 +81,43 @@ function confirmDelete(item) {
   isDeleteConfirmOpen.value = true
 }
 
-function saveAnnouncement(payload) {
-  if (formMode.value === 'create') {
-    announcements.value.unshift({
-      id: Date.now(),
-      judul: payload.judul,
-      deskripsi: payload.deskripsi,
-      kategori: payload.kategori,
-      sekolah: payload.sekolah,
-      tanggal: payload.tanggal
-    })
-    toast.success('Pengumuman baru dipublikasikan!')
-  } else {
-    const index = announcements.value.findIndex(a => a.id === payload.id)
-    if (index !== -1) {
-      announcements.value[index] = {
-        ...announcements.value[index],
-        judul: payload.judul,
-        deskripsi: payload.deskripsi,
-        kategori: payload.kategori,
-        sekolah: payload.sekolah,
-        tanggal: payload.tanggal
-      }
+async function saveAnnouncement(payload) {
+  try {
+    const body = {
+      title: payload.judul,
+      content: payload.deskripsi,
+      category: payload.kategori,
+      target_school_id: payload.target_school_id || null,
+      publish_date: payload.tanggal
+    }
+
+    if (formMode.value === 'create') {
+      await createAnnouncement(body)
+      toast.success('Pengumuman baru dipublikasikan!')
+    } else {
+      await updateAnnouncement(payload.id, body)
       toast.success('Pengumuman berhasil disimpan!')
     }
+    loadAnnouncements()
+    isFormOpen.value = false
+  } catch (error) {
+    console.error('Gagal menyimpan pengumuman:', error)
+    toast.error('Gagal mempublikasikan pengumuman.')
   }
-  isFormOpen.value = false
 }
 
-function deleteAnnouncement() {
+async function deleteAnnouncement() {
   if (!selectedAnnouncement.value) return
-  announcements.value = announcements.value.filter(a => a.id !== selectedAnnouncement.value.id)
-  toast.success('Pengumuman berhasil dihapus!')
-  isDeleteConfirmOpen.value = false
-  selectedAnnouncement.value = null
+  try {
+    await deleteAnnouncementApi(selectedAnnouncement.value.id)
+    toast.success('Pengumuman berhasil dihapus!')
+    loadAnnouncements()
+    isDeleteConfirmOpen.value = false
+    selectedAnnouncement.value = null
+  } catch (error) {
+    console.error('Gagal menghapus pengumuman:', error)
+    toast.error('Gagal menghapus pengumuman.')
+  }
 }
 </script>
 

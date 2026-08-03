@@ -139,6 +139,13 @@ const fetchSchools = async () => {
     total.value = res.data.total
     from.value = res.data.from || 1
     to.value = res.data.to || 1
+
+    if (res.stats) {
+      stats.value[0].value = String(res.stats.total)
+      stats.value[1].value = String(res.stats.active)
+      stats.value[2].value = String(res.stats.trial)
+      stats.value[3].value = String(res.stats.inactive)
+    }
   } catch (error) {
     toast.error('Gagal mengambil data sekolah')
   } finally {

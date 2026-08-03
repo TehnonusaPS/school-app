@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -14,7 +15,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, HasUuids, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -52,7 +53,6 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
             'is_active'         => 'boolean',
         ];
     }
@@ -109,6 +109,22 @@ class User extends Authenticatable
         return $this->hasOne(ParentProfile::class);
     }
 
+    /**
+     * Get staff attendances.
+     */
+    public function staffAttendances(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(StaffAttendance::class);
+    }
+
+    /**
+     * Get leave requests.
+     */
+    public function leaveRequests(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(LeaveRequest::class);
+    }
+
     // ──────────────────────────────────────────────
     //  Helper Methods
     // ──────────────────────────────────────────────
@@ -135,5 +151,21 @@ class User extends Authenticatable
     public function isSuperAdmin(): bool
     {
         return $this->hasRole('superadmin');
+    }
+
+    /**
+     * Get all subject-classroom teaching assignments for this user (guru/wali_kelas).
+     */
+    public function teacherSubjectAssignments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TeacherSubjectAssignment::class, 'teacher_id');
+    }
+
+    /**
+     * Get all teaching schedules for this teacher user.
+     */
+    public function teachingSchedules(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Schedule::class, 'teacher_id');
     }
 }

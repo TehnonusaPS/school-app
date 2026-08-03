@@ -29,4 +29,35 @@ class Subject extends Model
     {
         return $this->belongsTo(School::class);
     }
+
+    public function materials(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(SubjectMaterial::class);
+    }
+
+    public function assessments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Assessment::class);
+    }
+
+    public function teacherAssignments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TeacherSubjectAssignment::class);
+    }
+
+    /**
+     * Get all schedules for this subject.
+     */
+    public function schedules(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Schedule::class);
+    }
+
+    /**
+     * Get grade levels mapped to this subject.
+     */
+    public function grades(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(SubjectGrade::class);
+    }
 }

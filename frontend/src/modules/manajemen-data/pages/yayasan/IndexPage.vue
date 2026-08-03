@@ -85,13 +85,23 @@ const filterValues = ref({
   status: 'all'
 })
 
+// Debounced search query
+const searchQuery = ref('')
+let debounceTimeout = null
+watch(() => filterValues.value.search, (newVal) => {
+  clearTimeout(debounceTimeout)
+  debounceTimeout = setTimeout(() => {
+    searchQuery.value = newVal
+  }, 300)
+})
+
 const fetchFoundations = async () => {
   isLoading.value = true
   try {
     const params = {
       page: currentPage.value,
       per_page: perPage.value,
-      search: filterValues.value.search,
+      search: searchQuery.value,
     }
     if (filterValues.value.status !== 'all') {
       const statusMap = {
@@ -128,6 +138,13 @@ const fetchFoundations = async () => {
     total.value = res.data.total
     from.value = res.data.from || 1
     to.value = res.data.to || 1
+
+    if (res.stats) {
+      stats.value[0].value = String(res.stats.total)
+      stats.value[1].value = String(res.stats.active)
+      stats.value[2].value = String(res.stats.trial)
+      stats.value[3].value = String(res.stats.inactive)
+    }
   } catch (error) {
     toast.error('Gagal mengambil data yayasan')
   } finally {
@@ -140,9 +157,19 @@ onMounted(() => {
   fetchStats()
 })
 
-watch([currentPage, perPage, filterValues], () => {
+// Watch search and status filter to reset page to 1
+watch([searchQuery, () => filterValues.value.status], () => {
+  if (currentPage.value !== 1) {
+    currentPage.value = 1
+  } else {
+    fetchFoundations()
+  }
+})
+
+// Watch pagination values to fetch data
+watch([currentPage, perPage], () => {
   fetchFoundations()
-}, { deep: true })
+})
 
 const deleteItem = async (id, item) => {
   try {

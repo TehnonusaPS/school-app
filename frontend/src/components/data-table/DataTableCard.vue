@@ -63,6 +63,10 @@ const props = defineProps({
   rowDisabled: {
   type: Function,
   default: null
+  },
+  fixedHeight: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -188,6 +192,7 @@ const illustrationUrl = computed(() => {
       :selectedRows="selectedRows"
       @update:selectedRows="emit('update:selectedRows', $event)"
       :rowDisabled="rowDisabled"
+      :fixed-height="fixedHeight"
     >
       <!-- Forward all dynamic cell slots -->
       <template

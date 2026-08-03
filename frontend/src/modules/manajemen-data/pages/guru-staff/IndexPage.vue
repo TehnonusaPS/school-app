@@ -70,10 +70,36 @@ const filterValues = ref({
   status: 'all'
 })
 
-const items = computed(() => {
-  if (isAdminYayasan.value) {
-    return tableItems.value
+const fetchTeachers = async () => {
+  isLoading.value = true
+  try {
+    const params = {}
+    const res = await getTeachers(params)
+    tableItems.value = res.data.map(item => ({
+      ...item,
+      id: item.id,
+      nama: item.nama,
+      nip: item.nip_nuptk,
+      unitKerja: item.unit_kerja,
+      unitId: item.unit_id,
+      jabatan: item.jabatan,
+      masaKerja: item.masaKerja,
+      statusKepegawaian: item.status_kepegawaian,
+      status: item.status_aktif
+    }))
+
+    if (res.stats) {
+      stats.value[0].value = String(res.stats.total)
+      stats.value[1].value = String(res.stats.active)
+      stats.value[2].value = String(res.stats.guru)
+      stats.value[3].value = String(res.stats.staff)
+    }
+  } catch (err) {
+    toast.error('Gagal mengambil data guru dan staff')
+  } finally {
+    isLoading.value = false
   }
+}
 
   return tableItems.value.filter(
     item => item.unitId === auth.user?.unitId || item.unit_id === auth.user?.unitId

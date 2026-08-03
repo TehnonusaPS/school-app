@@ -63,6 +63,16 @@ export default [
       description: 'Kelola daftar mata pelajaran yang tersedia.'
     }
   },
+  // KURIKULUM
+  {
+    path: 'manajemen-data/kurikulum',
+    component: () => import('../akademik/pages/Kurikulum.vue'),
+    meta: {
+      title: 'Jenis Kurikulum & Mapel Wajib',
+      parent: 'Manajemen Data',
+      description: 'Master data jenis kurikulum dan mata pelajaran wajib standar nasional.'
+    }
+  },
   // TAHUN AJARAN
   {
     path: 'manajemen-data/tahun-ajaran',

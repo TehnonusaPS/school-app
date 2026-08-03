@@ -91,7 +91,8 @@ const aktifCount = computed(() => statsData.value.aktif)
 const nonaktifCount = computed(() => statsData.value.nonaktif)
 
 function getRoleLabel(role) {
-  return ROLE_LABELS[role] || role
+  const roleName = typeof role === 'object' && role !== null ? role.name : role;
+  return ROLE_LABELS[roleName] || roleName || ''
 }
 
 function getStatusLabel(status) {

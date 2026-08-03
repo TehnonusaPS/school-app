@@ -1,38 +1,29 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>school-app</title>
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#aa3bff" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
-    <script>
-      // Capture PWA install prompt as early as possible
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        window.deferredPrompt = e;
-        if (window.onBeforeInstallPrompt) {
-          window.onBeforeInstallPrompt(e);
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>school-app</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    rel="stylesheet" />
+  <script>
+    // Inisialisasi dark mode sebelum Vue mount → cegah FOUC
+    (function () {
+      try {
+        var theme = localStorage.getItem('theme') || 'system'
+        if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark')
         }
-      });
-    </script>
-    <script>
-      // Inisialisasi dark mode sebelum Vue mount → cegah FOUC
-      (function () {
-        try {
-          var theme = localStorage.getItem('theme') || 'system'
-          if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark')
-          }
-        } catch (e) {}
-      })()
-    </script>
-  </head>
-  <body>
-    <script>
+      } catch (e) { }
+    })()
+  </script>
+</head>
+
+<body>
+  <script>
       // Terapkan theme class ke body (harus di dalam body agar document.body tersedia)
       (function () {
         try {
@@ -41,14 +32,15 @@
           document.body.classList.add('theme-' + style)
           var finish = localStorage.getItem('themeFinish') || 'glossy'
           if (finish === 'solid') document.body.classList.add('finish-solid')
-          
+
           // Background Style
           var bgStyle = localStorage.getItem('backgroundStyle') || 'animated'
           document.body.classList.add('bg-' + bgStyle)
-        } catch (e) {}
+        } catch (e) { }
       })()
-    </script>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+  </script>
+  <div id="app"></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+
 </html>

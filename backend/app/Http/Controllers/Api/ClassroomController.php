@@ -147,6 +147,19 @@ class ClassroomController extends Controller
             $academicYearId = $activeYear->id;
         }
 
+        $homeroomTeacherId = $request->input('homeroom_teacher_id');
+        if (!$homeroomTeacherId && $request->filled('homeroom_teacher')) {
+            $teacherName = $request->input('homeroom_teacher');
+            $teacher = \App\Models\User::where('name', 'like', "%{$teacherName}%")
+                ->whereHas('role', function($q) {
+                    $q->whereIn('name', ['guru', 'wali_kelas']);
+                })
+                ->first();
+            if ($teacher) {
+                $homeroomTeacherId = $teacher->id;
+            }
+        }
+
         $classroom = Classroom::create([
             'school_id'           => $schoolId,
             'academic_year_id'    => $academicYearId,
@@ -155,7 +168,7 @@ class ClassroomController extends Controller
             'major'               => $request->input('major'),
             'room'                => $request->input('room'),
             'status'              => $request->input('status', 'active'),
-            'homeroom_teacher_id' => $request->input('homeroom_teacher_id'),
+            'homeroom_teacher_id' => $homeroomTeacherId,
             'capacity'            => $request->input('capacity', 36),
         ]);
 
@@ -260,9 +273,23 @@ class ClassroomController extends Controller
             ], 422);
         }
 
-        $classroom->update($request->only([
-            'name', 'grade', 'major', 'room', 'status', 'homeroom_teacher_id', 'capacity', 'academic_year_id'
-        ]));
+        $homeroomTeacherId = $request->input('homeroom_teacher_id');
+        if (!$homeroomTeacherId && $request->filled('homeroom_teacher')) {
+            $teacherName = $request->input('homeroom_teacher');
+            $teacher = \App\Models\User::where('name', 'like', "%{$teacherName}%")
+                ->whereHas('role', function($q) {
+                    $q->whereIn('name', ['guru', 'wali_kelas']);
+                })
+                ->first();
+            if ($teacher) {
+                $homeroomTeacherId = $teacher->id;
+            }
+        }
+
+        $classroom->update(array_merge(
+            $request->only(['name', 'grade', 'major', 'room', 'status', 'capacity', 'academic_year_id']),
+            ['homeroom_teacher_id' => $homeroomTeacherId]
+        ));
 
         return response()->json([
             'status'  => 'success',

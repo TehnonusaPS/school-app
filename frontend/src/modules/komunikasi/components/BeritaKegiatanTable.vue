@@ -7,6 +7,10 @@ const props = defineProps({
   items: {
     type: Array,
     required: true
+  },
+  canManage: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -78,7 +82,8 @@ watch(filteredItems, () => {
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '-'
-  const [year, month, day] = dateStr.split('-')
+  const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0]
+  const [year, month, day] = datePart.split('-')
   return `${day}/${month}/${year}`
 }
 </script>
@@ -97,8 +102,10 @@ const formatDate = (dateStr) => {
     :page="currentPage"
     @update:page="currentPage = $event"
     @view="(id, item) => $emit('view', item)"
-    @edit="(item) => $emit('edit', item)"
-    @delete="(id, item) => $emit('delete', item)"
+    v-bind="canManage ? {
+      onEdit: (item) => $emit('edit', item),
+      onDelete: (id, item) => $emit('delete', item)
+    } : {}"
     delete-label="judul"
   >
     <template #cell-judul="{ item }">

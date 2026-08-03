@@ -1,7 +1,9 @@
 <script setup>
-import { computed, ref, watch, onMounted } from 'vue'
-import { Plus, Mail, AlertTriangle, CreditCard } from 'lucide-vue-next'
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
+import { Plus, Mail, AlertTriangle, CreditCard, Check, ChevronsUpDown } from 'lucide-vue-next'
 import { useSuratPeringatanStore } from '@/stores/suratPeringatanStore'
+import { useAuthStore } from '@/stores/authStore'
+import { echo } from '@/services/echoService'
 import { usePagination } from '@/composables/usePagination'
 import { toast } from 'vue-sonner'
 import DataTableCard from '@/components/data-table/DataTableCard.vue'
@@ -22,9 +24,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { fetchAllSiswa } from '@/services/siswaService'
 
 const store = useSuratPeringatanStore()
+const auth = useAuthStore()
 
 const isPrintModalOpen = ref(false)
 const selectedSurat = ref(null)
@@ -33,6 +38,7 @@ const selectedSurat = ref(null)
 const isFormSheetOpen = ref(false)
 const isEditMode = ref(false)
 const isLoadingSiswa = ref(false)
+const isSiswaPopoverOpen = ref(false)
 const siswaList = ref([])
 
 const formItem = ref({
@@ -44,27 +50,54 @@ const formItem = ref({
   kelas: '',
   tanggal: '',
   perihalPelanggaran: '',
-  jumlahTunggakan: ''
+  jumlahTunggakan: '',
+  status: 'Selesai'
 })
 
 onMounted(async () => {
   isLoadingSiswa.value = true
   try {
-    const data = await fetchAllSiswa()
-    siswaList.value = data.map(user => {
-      const randomKelas = ['VI A', 'VI B', 'V A', 'V B', 'IV A', 'IV B'][user.id % 6]
-      return {
-        ...user,
-        nisn: '10' + user.id.toString().padStart(4, '0') + Math.floor(1000 + Math.random() * 9000),
-        kelas: randomKelas
-      }
-    })
+    // Load real warning letters from backend
+    await store.fetchItems()
+
+    // Fetch and map active student database list correctly
+    const resSiswa = await fetchAllSiswa()
+    siswaList.value = (resSiswa.data || []).map(student => ({
+      id: student.id,
+      name: student.nama,
+      nisn: student.nisn,
+      kelas: student.kelas
+    }))
   } catch (error) {
-    toast.error('Gagal memuat data siswa.')
+    toast.error('Gagal memuat data awal.')
+    console.error(error)
   } finally {
     isLoadingSiswa.value = false
   }
+
+  // Bind Pusher Realtime
+  const schoolId = auth.user?.school_id
+  if (schoolId && echo) {
+    echo.private(`persuratan.${schoolId}`)
+      .listen('StudentWarningCertificateCreated', (event) => {
+        if (!store.items.some(item => item.id === event.id)) {
+          store.items.unshift(event)
+          toast.info('Surat Peringatan Baru Dibuat!', {
+            description: `Surat peringatan untuk siswa ${event.namaSiswa} telah diterbitkan.`,
+            duration: 5000
+          })
+        }
+      })
+  }
 })
+
+onUnmounted(() => {
+  const schoolId = auth.user?.school_id
+  if (schoolId && echo) {
+    echo.leaveChannel(`persuratan.${schoolId}`)
+  }
+})
+
 const computedSiswaList = computed(() => {
   const list = [...siswaList.value]
   if (formItem.value.namaSiswa && !list.some(s => s.name === formItem.value.namaSiswa)) {
@@ -90,7 +123,7 @@ function onSiswaSelected(siswaId) {
     formItem.value.siswaId = siswa.id
     formItem.value.namaSiswa = siswa.name
     formItem.value.nisn = siswa.nisn
-    formItem.value.kelas = siswa.kelas
+    formItem.value.kelas = siswa.kelas || ''
   }
 }
 
@@ -153,7 +186,8 @@ function openCreateForm() {
     kelas: '',
     tanggal: new Date().toISOString().split('T')[0],
     perihalPelanggaran: '',
-    jumlahTunggakan: ''
+    jumlahTunggakan: '',
+    status: 'Selesai'
   }
   isFormSheetOpen.value = true
 }
@@ -169,28 +203,38 @@ function viewSurat(id, item) {
   isPrintModalOpen.value = true
 }
 
-function editSurat(item) {
+function editSurat(id, item) {
   isEditMode.value = true
+  const resolvedItem = (item && typeof item === 'object') ? item : id
+  
+  // Find database latest student details if possible
+  const currentStudent = siswaList.value.find(s => s.id === resolvedItem.studentId || s.name === resolvedItem.namaSiswa || s.nisn === resolvedItem.nisn)
+
   formItem.value = {
-    id: item.id,
-    jenisSurat: item.jenisSurat,
-    siswaId: item.siswaId,
-    namaSiswa: item.namaSiswa,
-    nisn: item.nisn,
-    kelas: item.kelas,
-    tanggal: item.tanggal,
-    perihalPelanggaran: item.perihalPelanggaran || '',
-    jumlahTunggakan: item.jumlahTunggakan || ''
+    id: resolvedItem.id,
+    jenisSurat: resolvedItem.jenisSurat,
+    siswaId: currentStudent ? currentStudent.id : resolvedItem.siswaId,
+    namaSiswa: resolvedItem.namaSiswa,
+    nisn: resolvedItem.nisn,
+    kelas: currentStudent ? (currentStudent.kelas || '') : resolvedItem.kelas,
+    tanggal: resolvedItem.tanggal,
+    perihalPelanggaran: resolvedItem.perihalPelanggaran || '',
+    jumlahTunggakan: resolvedItem.jumlahTunggakan || '',
+    status: resolvedItem.status || 'Selesai'
   }
   isFormSheetOpen.value = true
 }
 
-function deleteSurat(id, item) {
-  store.remove(id)
-  toast.success('Surat berhasil dihapus!')
+async function deleteSurat(id) {
+  try {
+    await store.remove(id)
+    toast.success('Surat peringatan berhasil dihapus!')
+  } catch (error) {
+    toast.error('Gagal menghapus surat peringatan.')
+  }
 }
 
-function handleSave() {
+async function handleSave() {
   if (!formItem.value.namaSiswa || !formItem.value.jenisSurat) {
     toast.error('Mohon lengkapi Jenis Surat dan Nama Siswa.')
     return
@@ -212,12 +256,22 @@ function handleSave() {
     formItem.value.perihalPelanggaran = ''
   }
 
+  const payload = {
+    jenisSurat: formItem.value.jenisSurat,
+    studentId: formItem.value.siswaId,
+    kelas: formItem.value.kelas,
+    tanggal: formItem.value.tanggal,
+    perihalPelanggaran: formItem.value.perihalPelanggaran,
+    jumlahTunggakan: formItem.value.jumlahTunggakan,
+    status: formItem.value.status || 'Selesai'
+  }
+
   try {
     if (isEditMode.value) {
-      store.update(formItem.value.id, { ...formItem.value })
+      await store.update(formItem.value.id, payload)
       toast.success('Surat peringatan berhasil diperbarui!')
     } else {
-      store.add({ ...formItem.value })
+      await store.add(payload)
       toast.success('Surat peringatan berhasil dibuat!')
     }
     isFormSheetOpen.value = false
@@ -349,23 +403,57 @@ function handleSave() {
                     </Select>
                   </div>
 
-                  <!-- Nama Siswa -->
+                  <!-- Nama Siswa (Searchable Popover Combobox) -->
                   <div class="space-y-1.5">
                     <label class="text-xs font-semibold text-muted-foreground">Nama Siswa</label>
-                    <Select :modelValue="selectedSiswaId" @update:modelValue="onSiswaSelected" :disabled="isLoadingSiswa">
-                      <SelectTrigger class="h-10 rounded-xl">
-                        <SelectValue :placeholder="isLoadingSiswa ? 'Memuat data siswa...' : 'Pilih Siswa...'" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem 
-                          v-for="siswa in computedSiswaList" 
-                          :key="siswa.id" 
-                          :value="siswa.id.toString()"
+                    <Popover v-model:open="isSiswaPopoverOpen">
+                      <PopoverTrigger as-child>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          :aria-expanded="isSiswaPopoverOpen"
+                          class="h-10 w-full justify-between rounded-xl px-3 font-normal text-muted-foreground hover:bg-background/50 border-input shadow-none"
+                          :disabled="isLoadingSiswa"
                         >
-                          {{ siswa.name }} - {{ siswa.nisn }}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                          <span v-if="formItem.namaSiswa" class="text-foreground font-medium">
+                            {{ formItem.namaSiswa }} - {{ formItem.nisn }}
+                          </span>
+                          <span v-else>
+                            {{ isLoadingSiswa ? 'Memuat data siswa...' : 'Pilih Siswa...' }}
+                          </span>
+                          <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent class="w-[var(--reka-popover-trigger-width)] p-0 rounded-xl shadow-xl border border-border/50" align="start">
+                        <Command>
+                          <CommandInput placeholder="Cari nama, NISN, atau kelas..." class="h-9" />
+                          <CommandList class="max-h-[250px] overflow-y-auto">
+                            <CommandEmpty>Siswa tidak ditemukan.</CommandEmpty>
+                            <CommandGroup>
+                              <CommandItem
+                                v-for="siswa in computedSiswaList"
+                                :key="siswa.id"
+                                :value="`${siswa.name} ${siswa.nisn} ${siswa.kelas}`"
+                                @select="() => {
+                                  onSiswaSelected(siswa.id.toString())
+                                  isSiswaPopoverOpen = false
+                                }"
+                                class="flex items-center justify-between cursor-pointer py-2 px-3 text-xs"
+                              >
+                                <div class="flex flex-col text-left">
+                                  <span class="font-semibold text-foreground text-sm">{{ siswa.name }}</span>
+                                  <span class="text-[10px] text-muted-foreground">NISN: {{ siswa.nisn }} | Kelas: {{ siswa.kelas || '-' }}</span>
+                                </div>
+                                <Check
+                                  v-if="selectedSiswaId === siswa.id.toString()"
+                                  class="h-4 w-4 text-primary shrink-0 ml-2"
+                                />
+                              </CommandItem>
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                   </div>
 
                   <!-- Kelas -->

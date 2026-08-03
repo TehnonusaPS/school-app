@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('student_profiles', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->unique()->constrained('users')->cascadeOnDelete();
+            $table->foreignUuid('user_id')->unique()->constrained('users')->cascadeOnDelete();
             $table->foreignId('classroom_id')->nullable()->constrained('classrooms')->nullOnDelete();
             $table->string('nisn')->nullable()->unique();
             $table->string('birth_place')->nullable();

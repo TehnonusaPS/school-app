@@ -50,7 +50,7 @@ export const stats = [
 ]
 
 export const columns = [
-  { key: 'nama', label: 'Nama Yayasan', avatar: true, avatarKey: 'foto'  },
+  { key: 'nama', label: 'Nama Yayasan', avatar: true, avatarKey: 'logo'  },
   { key: 'jmlSekolah', label: 'Jumlah Sekolah', type: 'number' },
   { key: 'alamat', label: 'Alamat Yayasan', type: 'muted', truncate: true  },
   { key: 'jmlPengguna', label: 'Jumlah Pengguna', type: 'number' },
@@ -77,15 +77,15 @@ export const filters = [
     options: [
       {
         label: 'Aktif',
-        value: 'Aktif'
+        value: 'active'
       },
       {
         label: 'Nonaktif',
-        value: 'Nonaktif'
+        value: 'inactive'
       },
       {
         label: 'Trial',
-        value: 'Trial'
+        value: 'trial'
       }
     ]
   }

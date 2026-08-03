@@ -33,8 +33,14 @@ onMounted(async () => {
       const res = await getSiswaDetail(studentId)
       form.value = {
         ...res.data,
-        tanggal_lahir: res.data.tanggal_lahir ? new Date(res.data.tanggal_lahir) : '',
-        tahun_masuk: res.data.tahun_masuk ? new Date(res.data.tahun_masuk) : ''
+        tanggal_lahir: res.data.tanggal_lahir || '',
+        tahun_masuk: res.data.tahun_masuk || ''
+      }
+      if (res.data.foto) {
+        const photo = res.data.foto
+        imagePreview.value = photo.startsWith('http')
+          ? photo
+          : `http://127.0.0.1:8000/${photo.startsWith('/') ? photo.slice(1) : photo}`
       }
     } catch (err) {
       toast.error('Gagal memuat data detail siswa')
@@ -57,6 +63,7 @@ const imagePreview = ref('')
 
 const handleImage = (file) => {
   imagePreview.value = URL.createObjectURL(file)
+  form.value.foto = file
 }
 
 const handleSubmit = async () => {
@@ -64,8 +71,8 @@ const handleSubmit = async () => {
 
   const payload = {
     ...form.value,
-    tanggal_lahir: form.value.tanggal_lahir ? new Date(form.value.tanggal_lahir).toISOString().split('T')[0] : null,
-    tahun_masuk: form.value.tahun_masuk ? new Date(form.value.tahun_masuk).toISOString().split('T')[0] : null
+    tanggal_lahir: form.value.tanggal_lahir || null,
+    tahun_masuk: form.value.tahun_masuk || null
   }
 
   try {

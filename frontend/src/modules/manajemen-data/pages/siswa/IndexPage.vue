@@ -11,7 +11,7 @@ import { toast } from 'vue-sonner'
 import DataSheet from '@/components/data-sheet/DataSheet.vue'
 import { rawSiswaItem, siswaSheetSections} from './data/dataSheetDetail.js'
 import { useRouter } from 'vue-router'
-import { fetchAllSiswa, deleteSiswa } from '@/services/siswaService'
+import { fetchAllSiswa, deleteSiswa, getSiswaDetail } from '@/services/siswaService'
 import { getClassrooms } from '@/services/managementService'
 import { Users, UserCheck, UserRound, UserRoundCheck } from 'lucide-vue-next'
 
@@ -96,6 +96,22 @@ const fetchSiswa = async () => {
     }
     const res = await fetchAllSiswa(params)
     tableItems.value = res.data
+
+    if (res.stats) {
+      stats.value[0].value = String(res.stats.total)
+      stats.value[1].value = String(res.stats.active)
+      stats.value[2].value = String(res.stats.male)
+      stats.value[3].value = String(res.stats.female)
+
+      const sum = res.stats.male + res.stats.female
+      if (sum > 0) {
+        stats.value[2].progress = Math.round((res.stats.male / sum) * 100)
+        stats.value[3].progress = Math.round((res.stats.female / sum) * 100)
+      } else {
+        stats.value[2].progress = 0
+        stats.value[3].progress = 0
+      }
+    }
   } catch (err) {
     toast.error('Gagal memuat data siswa')
   } finally {
@@ -183,11 +199,36 @@ watch(filteredItems, () => {
 const isDetailSheetOpen = ref(false)
 const selectedItemForDetail = ref(null)
 
-const handleViewDetail = id => {
-  const item = items.value.find(x => x.id === id)
-  if (item) {
-    selectedItemForDetail.value = item
+const handleViewDetail = async id => {
+  try {
+    const res = await getSiswaDetail(id)
+    const statusMap = {
+      '1': 'Aktif',
+      '0': 'Nonaktif',
+      '2': 'Pindah',
+      '3': 'Lulus'
+    }
+    const genderMap = {
+      'JK01': 'Laki-laki',
+      'JK02': 'Perempuan'
+    }
+    const relationMap = {
+      'ayah': 'Ayah',
+      'ibu': 'Ibu',
+      'wali': 'Wali',
+      'lainnya': 'Lainnya'
+    }
+    selectedItemForDetail.value = {
+      ...res.data,
+      status: statusMap[res.data.status] || res.data.status,
+      jenis_kelamin: genderMap[res.data.jenis_kelamin] || res.data.jenis_kelamin,
+      kelamin_wali: genderMap[res.data.kelamin_wali] || res.data.kelamin_wali,
+      hubungan_siswa: relationMap[res.data.hubungan_siswa] || res.data.hubungan_siswa,
+      kelas: res.data.kelas_nama || '-'
+    }
     isDetailSheetOpen.value = true
+  } catch (err) {
+    toast.error('Gagal memuat detail siswa')
   }
 }
 
@@ -242,7 +283,7 @@ const handleEdit = (idOrItem) => {
   <!-- Detail Sheet -->
   <DataSheet
     v-model:open="isDetailSheetOpen"
-    :item="rawSiswaItem"
+    :item="selectedItemForDetail || rawSiswaItem"
     title-key="nama"
     description-key="nisn"
     description-prefix="NISN: "

@@ -3,11 +3,38 @@ import { useAuthStore } from '@/stores/authStore'
 export default [
   {
     path: 'komunikasi/pengumuman',
+    meta: {
+      requiresAuth: true,
+      roles: ['admin_yayasan', 'kepala_sekolah', 'admin_sekolah']
+    },
+    redirect: to => {
+      const auth = useAuthStore()
+      const role = auth.user?.role
+      if (role === 'admin_yayasan') return { path: '/komunikasi/admin-yayasan/pengumuman', query: to.query }
+      if (role === 'kepala_sekolah' || role === 'admin_sekolah') return { path: '/komunikasi/kepala-sekolah/pengumuman', query: to.query }
+      return '/dashboard'
+    }
+  },
+  {
+    path: 'komunikasi/admin-yayasan/pengumuman',
     component: () => import('./pages/admin-yayasan/pengumuman/index.vue'),
     meta: {
       title: 'Pengumuman',
       parent: 'Komunikasi',
-      description: 'Buat dan kelola pengumuman sekolah.'
+      description: 'Buat dan kelola pengumuman sekolah.',
+      requiresAuth: true,
+      roles: ['admin_yayasan']
+    }
+  },
+  {
+    path: 'komunikasi/kepala-sekolah/pengumuman',
+    component: () => import('./pages/kepala-sekolah/pengumuman/index.vue'),
+    meta: {
+      title: 'Pengumuman',
+      parent: 'Komunikasi',
+      description: 'Daftar pengumuman sekolah.',
+      requiresAuth: true,
+      roles: ['kepala_sekolah', 'admin_sekolah']
     }
   },
   {
@@ -16,7 +43,9 @@ export default [
     meta: {
       title: 'Berita Kegiatan',
       parent: 'Komunikasi',
-      description: 'Kelola berita kegiatan untuk siswa dan orang tua.'
+      description: 'Kelola berita kegiatan untuk siswa dan orang tua.',
+      requiresAuth: true,
+      roles: ['kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'siswa', 'orang_tua']
     }
   },
   {

@@ -15,6 +15,7 @@ const props = defineProps<{
     lessons: any[];
     exams: any[];
     assignments: any[];
+    calendarEvents: any[];
   };
   upcomingEvents: any[];
 }>();
@@ -40,7 +41,8 @@ const hasNoEvents = computed(() => {
   return !props.selectedDateDetails.holiday &&
     props.selectedDateDetails.exams.length === 0 &&
     props.selectedDateDetails.assignments.length === 0 &&
-    props.selectedDateDetails.lessons.length === 0;
+    props.selectedDateDetails.lessons.length === 0 &&
+    (!props.selectedDateDetails.calendarEvents || props.selectedDateDetails.calendarEvents.length === 0);
 });
 </script>
 
@@ -67,56 +69,40 @@ const hasNoEvents = computed(() => {
             Agenda Tanggal Ini
           </h3>
 
-          <ScheduleEventCard
-            v-if="selectedDateDetails.holiday"
-            type="holiday"
-            :title="selectedDateDetails.holiday.localName"
-            subtitle="Libur"
-            time="Sepanjang Hari"
-          />
+          <ScheduleEventCard v-if="selectedDateDetails.holiday" type="holiday"
+            :title="selectedDateDetails.holiday.localName" subtitle="Libur" time="Sepanjang Hari" />
+
+          <!-- Calendar Events from Database (Kegiatan, Ujian, Libur) -->
+          <div v-if="selectedDateDetails.calendarEvents && selectedDateDetails.calendarEvents.length > 0"
+            class="space-y-2.5">
+            <ScheduleEventCard v-for="event in selectedDateDetails.calendarEvents" :key="`cal-${event.id}`"
+              :type="event.type === 'libur_nasional' || event.type === 'tanggal_merah' ? 'holiday' : (event.type === 'ujian' ? 'exam' : 'assignment')"
+              :title="event.title"
+              :subtitle="event.type === 'libur_nasional' || event.type === 'tanggal_merah' ? 'Hari Libur' : (event.type === 'ujian' ? 'Ujian Akademik' : 'Kegiatan Sekolah')"
+              :time="event.startDate === event.endDate ? 'Sepanjang Hari' : `${event.startDate} s.d ${event.endDate}`"
+              :description="event.description" />
+          </div>
 
           <div v-if="selectedDateDetails.exams.length > 0" class="space-y-2.5">
-            <ScheduleEventCard
-              v-for="exam in selectedDateDetails.exams"
-              :key="exam.id"
-              type="exam"
-              :title="exam.nama"
-              :subtitle="exam.mapel"
-              :time="exam.waktu"
-              :location="exam.ruang"
-            />
+            <ScheduleEventCard v-for="exam in selectedDateDetails.exams" :key="exam.id" type="exam" :title="exam.nama"
+              :subtitle="exam.mapel" :time="exam.waktu" :location="exam.ruang" />
           </div>
 
           <div v-if="selectedDateDetails.assignments.length > 0" class="space-y-2.5">
-            <ScheduleEventCard
-              v-for="task in selectedDateDetails.assignments"
-              :key="task.id"
-              type="assignment"
-              :title="task.nama"
-              :subtitle="task.mapel"
-              :time="`Kumpul s.d ${task.deadline}`"
-              :description="task.deskripsi"
-            />
+            <ScheduleEventCard v-for="task in selectedDateDetails.assignments" :key="task.id" type="assignment"
+              :title="task.nama" :subtitle="task.mapel" :time="`Kumpul s.d ${task.deadline}`"
+              :description="task.deskripsi" />
           </div>
 
           <div v-if="selectedDateDetails.lessons.length > 0" class="space-y-2.5">
-            <ScheduleEventCard
-              v-for="lesson in selectedDateDetails.lessons"
-              :key="lesson.id"
-              type="lesson"
-              :title="lesson.mapel"
-              :subtitle="lesson.kelas"
-              :time="`${lesson.mulai} - ${lesson.selesai} WIB`"
-              :location="lesson.ruang"
-              :guru="lesson.guru"
-            />
+            <ScheduleEventCard v-for="lesson in selectedDateDetails.lessons" :key="lesson.id" type="lesson"
+              :title="lesson.mapel" :subtitle="lesson.kelas" :time="`${lesson.mulai} - ${lesson.selesai} WIB`"
+              :location="lesson.ruang" :guru="lesson.guru" />
           </div>
 
           <!-- Empty State -->
-          <div
-            v-if="hasNoEvents"
-            class="flex flex-col items-center justify-center py-8 text-center bg-muted/10 border border-dashed border-border/30 rounded-xl"
-          >
+          <div v-if="hasNoEvents"
+            class="flex flex-col items-center justify-center py-8 text-center bg-muted/10 border border-dashed border-border/30 rounded-xl">
             <Sparkles class="size-6 text-muted-foreground/30 mb-2" />
             <p class="text-xs text-muted-foreground px-6 leading-relaxed">
               Tidak ada jadwal pelajaran atau kegiatan sekolah pada tanggal ini.
@@ -133,13 +119,9 @@ const hasNoEvents = computed(() => {
             <h3 class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
               Mendatang
             </h3>
-            <Button
-              v-if="upcomingEvents.length > 3"
-              variant="link"
-              size="sm"
+            <Button v-if="upcomingEvents.length > 3" variant="link" size="sm"
               class="h-auto p-0 text-xs font-bold text-primary hover:no-underline flex items-center gap-0.5"
-              @click="emit('view-all')"
-            >
+              @click="emit('view-all')">
               Lihat Semua
               <ArrowRight class="size-3" />
             </Button>
@@ -150,21 +132,13 @@ const hasNoEvents = computed(() => {
           </div>
 
           <div v-else class="space-y-3">
-            <div
-              v-for="event in limitedUpcomingEvents"
-              :key="event.id"
-              class="relative pl-3.5 border-l-2 border-primary/20 space-y-1.5"
-            >
+            <div v-for="event in limitedUpcomingEvents" :key="event.id"
+              class="relative pl-3.5 border-l-2 border-primary/20 space-y-1.5">
               <span class="text-[10px] font-bold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full inline-block">
                 {{ new Date(event.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) }}
               </span>
-              <ScheduleEventCard
-                :type="event.type"
-                :title="event.title"
-                :subtitle="event.subtitle"
-                :time="event.time"
-                :location="event.location"
-              />
+              <ScheduleEventCard :type="event.type" :title="event.title" :subtitle="event.subtitle" :time="event.time"
+                :location="event.location" />
             </div>
           </div>
         </div>

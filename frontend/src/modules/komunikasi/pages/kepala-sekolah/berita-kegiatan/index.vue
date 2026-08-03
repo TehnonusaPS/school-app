@@ -1,5 +1,6 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { toast } from 'vue-sonner'
 import BeritaKegiatanTable from '../../../components/BeritaKegiatanTable.vue'
 import { Button } from '@/components/ui/button'
@@ -17,12 +18,32 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import DataSheet from '@/components/data-sheet/DataSheet.vue'
 import { Plus, Megaphone, Trash2, UploadCloud } from 'lucide-vue-next'
 import { useBeritaKegiatanStore } from '@/stores/beritaKegiatanStore'
+import { useAuthStore } from '@/stores/authStore'
 import PageHeader from '@/components/page-header/PageHeader.vue'
 import StatCard from '@/components/stat-card/StatCard.vue'
 import { glassSlide, glassFade } from '@/config/motion'
 
 const store = useBeritaKegiatanStore()
+const authStore = useAuthStore()
+const route = useRoute()
+
+const currentUser = authStore.user
 const beritaKegiatans = computed(() => store.items)
+
+const canManage = computed(() => {
+  return currentUser?.role === 'kepala_sekolah' || currentUser?.role === 'admin_sekolah'
+})
+
+onMounted(async () => {
+  await store.fetchItems()
+  const queryId = route.query.id
+  if (queryId) {
+    const found = store.getById(queryId)
+    if (found) {
+      viewBerita(found)
+    }
+  }
+})
 
 // --- Inline State Variables ---
 const isFormSheetOpen = ref(false)
@@ -190,14 +211,14 @@ const detailSections = computed(() => {
     <PageHeader
       title="Daftar Berita Kegiatan"
       description="Kelola dan Kirim Berita kegiatan"
-      :actions="[
+      :actions="canManage ? [
         {
           label: 'Buat Berita Baru',
           icon: Plus,
           variant: 'default',
           click: openCreateForm
         }
-      ]"
+      ] : []"
     />
 
     <div
@@ -222,6 +243,7 @@ const detailSections = computed(() => {
     >
       <BeritaKegiatanTable 
         :items="beritaKegiatans" 
+        :can-manage="canManage"
         @view="viewBerita" 
         @edit="editBerita" 
         @delete="deleteBerita"

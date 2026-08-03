@@ -38,6 +38,12 @@ class FinanceController extends Controller
             "))
             ->first()->mrr ?? 0;
 
+        // Calculate Total Nominal Subscribe (sum of all active plan prices)
+        $totalNominalSubscribe = DB::table('foundation_subscriptions')
+            ->join('subscription_plans', 'foundation_subscriptions.subscription_plan_id', '=', 'subscription_plans.id')
+            ->where('foundation_subscriptions.status', 'active')
+            ->sum('subscription_plans.price') ?? 0;
+
         // Recent transactions
         $recentPayments = FoundationPayment::with(['foundation', 'plan'])
             ->latest()
@@ -58,6 +64,7 @@ class FinanceController extends Controller
                     'active_subscriptions_count' => $activeSubsCount,
                     'pending_verifications_count'=> $pendingPaymentsCount,
                     'monthly_recurring_revenue'  => (float) $mrr,
+                    'total_nominal_subscribe'    => (float) $totalNominalSubscribe,
                 ],
                 'recent_payments'      => $recentPayments,
                 'recent_subscriptions' => $recentSubscriptions,
@@ -370,6 +377,38 @@ class FinanceController extends Controller
                 'message' => 'An error occurred during verification: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Show details of a subscription.
+     */
+    public function subscriptionsShow(FoundationSubscription $subscription)
+    {
+        return response()->json([
+            'status' => 'success',
+            'data'   => $subscription->load(['foundation:id,name,code,email,phone', 'plan']),
+        ]);
+    }
+
+    /**
+     * Update an existing subscription.
+     */
+    public function subscriptionsUpdate(Request $request, FoundationSubscription $subscription)
+    {
+        $validated = $request->validate([
+            'subscription_plan_id' => 'required|exists:subscription_plans,id',
+            'status'               => 'required|in:active,expired,cancelled,trial',
+            'starts_at'            => 'required|date',
+            'ends_at'              => 'required|date|after_or_equal:starts_at',
+        ]);
+
+        $subscription->update($validated);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Subscription updated successfully.',
+            'data'    => $subscription->load(['foundation:id,name', 'plan']),
+        ]);
     }
 
     /**

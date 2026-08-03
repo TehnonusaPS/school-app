@@ -7,14 +7,25 @@ import { useAuthStore } from '@/stores/authStore'
 import SekolahForm from './components/SekolahForm.vue'
 import { defaultForm } from './data/defaultForm'
 import { toast } from 'vue-sonner'
-import { Save } from 'lucide-vue-next'
+import { Save, ArrowLeft, CheckCircle2, HelpCircle } from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog'
 import { getSchool, updateSchool, getFoundations } from '@/services/managementService'
+import { glassFade } from '@/config/motion'
 
 const auth = useAuthStore()
 const isSuperAdmin = computed(() => auth.user?.role === 'superadmin')
 const router = useRouter()
 const route = useRoute()
 const isLoading = ref(false)
+const isConfirmOpen = ref(false)
 const schoolId = route.query.id
 
 const foundationOptions = ref([])
@@ -50,10 +61,12 @@ onMounted(async () => {
       yayasan: school.foundation_id,
       jenjang: school.level,
       tanggal_berdiri: school.established_date ? school.established_date.split('T')[0] : '',
-      status: school.status.charAt(0).toUpperCase() + school.status.slice(1),
+      status: school.status ? school.status.charAt(0).toUpperCase() + school.status.slice(1) : '',
       alamat: school.address,
       email: school.email,
       no_hp: school.phone,
+      emailLogin: school.email,
+      noHpLogin: school.phone,
       website: school.website,
       instagram: school.instagram,
       facebook: school.facebook,
@@ -64,8 +77,9 @@ onMounted(async () => {
       akreditasi: school.accreditation,
       tanggal_akreditasi: school.accreditation_date ? school.accreditation_date.split('T')[0] : '',
       no_akreditasi: school.accreditation_number,
-      emailLogin: '-',
-      noHpLogin: '-'
+      curriculum_id: school.curriculum_id ? String(school.curriculum_id) : '',
+      emailLogin: school.users && school.users[0] ? school.users[0].email : '',
+      noHpLogin: school.users && school.users[0] ? school.users[0].phone : ''
     }
     imagePreview.value = school.logo || ''
   } catch (err) {
@@ -78,9 +92,103 @@ onMounted(async () => {
 
 const formErrors = ref({})
 
+function onClickSave() {
+  formErrors.value = {}
+  if (!form.value.nama?.trim()) formErrors.value.name = 'Nama sekolah wajib diisi.'
+  if (!form.value.email?.trim()) formErrors.value.email = 'Email sekolah wajib diisi.'
+
+  if (Object.keys(formErrors.value).length > 0) {
+    toast.error('Gagal Menyimpan', { description: 'Harap lengkapi semua isian wajib terlebih dahulu.' })
+    return
+  }
+
+  isConfirmOpen.value = true
+}
+
 const handleSubmit = async () => {
+  isConfirmOpen.value = false
   isLoading.value = true
   formErrors.value = {}
+
+  // Client-side Validation: All fields must be filled
+  const errors = {}
+  if (!form.value.email) {
+    errors.email = 'E-mail sekolah harus diisi'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+    errors.email = 'Format e-mail tidak valid'
+  }
+  if (!form.value.no_hp) {
+    errors.phone = 'No. Telp harus diisi'
+  }
+  if (!form.value.website) {
+    errors.website = 'Website harus diisi'
+  }
+  if (!form.value.instagram) {
+    errors.instagram = 'Instagram harus diisi'
+  }
+  if (!form.value.facebook) {
+    errors.facebook = 'Facebook harus diisi'
+  }
+  if (!form.value.nama) {
+    errors.name = 'Nama sekolah harus diisi'
+  }
+  if (!form.value.npsn) {
+    errors.npsn = 'NPSN harus diisi'
+  }
+  if (isSuperAdmin.value && !form.value.yayasan) {
+    errors.foundation_id = 'Yayasan harus dipilih'
+  }
+  if (!form.value.jenjang) {
+    errors.level = 'Jenjang pendidikan harus dipilih'
+  }
+  if (!form.value.tanggal_berdiri) {
+    errors.established_date = 'Tanggal berdiri harus diisi'
+  }
+  if (!form.value.status) {
+    errors.status = 'Status harus dipilih'
+  }
+  if (!form.value.alamat) {
+    errors.address = 'Alamat lengkap harus diisi'
+  }
+  if (!form.value.no_sk) {
+    errors.decree_number = 'No. SK Pendirian harus diisi'
+  }
+  if (!form.value.tanggal_sk) {
+    errors.decree_date = 'Tanggal SK Pendirian harus diisi'
+  }
+  if (!form.value.no_izin) {
+    errors.permit_number = 'No. Izin Operasional harus diisi'
+  }
+  if (!form.value.tanggal_izin) {
+    errors.permit_date = 'Tanggal Izin Operasional harus diisi'
+  }
+  if (!form.value.akreditasi) {
+    errors.accreditation = 'Akreditasi harus dipilih'
+  }
+  if (!form.value.tanggal_akreditasi) {
+    errors.accreditation_date = 'Tanggal akreditasi harus diisi'
+  }
+  if (!form.value.no_akreditasi) {
+    errors.accreditation_number = 'No. SK Akreditasi harus diisi'
+  }
+  if (!form.value.emailLogin) {
+    errors.emailLogin = 'E-mail login administrator harus diisi'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.emailLogin)) {
+    errors.emailLogin = 'Format e-mail login tidak valid'
+  }
+  if (!form.value.noHpLogin) {
+    errors.noHpLogin = 'No. HP login administrator harus diisi'
+  }
+
+  if (Object.keys(errors).length > 0) {
+    formErrors.value = errors
+    toast.error('Gagal Menyimpan', {
+      description: 'Harap lengkapi semua data formulir sebelum menyimpan.'
+    })
+    return
+  }
+
+  isLoading.value = true
   try {
     const formData = new FormData()
     formData.append('foundation_id', form.value.yayasan)
@@ -102,6 +210,9 @@ const handleSubmit = async () => {
     if (form.value.akreditasi) formData.append('accreditation', form.value.akreditasi)
     if (form.value.tanggal_akreditasi) formData.append('accreditation_date', form.value.tanggal_akreditasi)
     if (form.value.no_akreditasi) formData.append('accreditation_number', form.value.no_akreditasi)
+    if (form.value.curriculum_id) formData.append('curriculum_id', form.value.curriculum_id)
+    if (form.value.emailLogin) formData.append('emailLogin', form.value.emailLogin)
+    if (form.value.noHpLogin) formData.append('noHpLogin', form.value.noHpLogin)
     if (logoFile.value) {
       formData.append('logo', logoFile.value)
     }
@@ -115,8 +226,17 @@ const handleSubmit = async () => {
     if (err.response?.status === 422 && err.response?.data?.errors) {
       const serverErrors = err.response.data.errors
       const localErrors = {}
+      const isUserValidationError = err.response.data.message?.toLowerCase().includes('administrator')
       Object.keys(serverErrors).forEach(key => {
-        localErrors[key] = serverErrors[key][0]
+        if (isUserValidationError) {
+          if (key === 'email') localErrors.emailLogin = serverErrors[key][0]
+          else if (key === 'phone') localErrors.noHpLogin = serverErrors[key][0]
+          else localErrors[key] = serverErrors[key][0]
+        } else {
+          if (key === 'email') localErrors.email = serverErrors[key][0]
+          else if (key === 'phone') localErrors.phone = serverErrors[key][0]
+          else localErrors[key] = serverErrors[key][0]
+        }
       })
       formErrors.value = localErrors
       toast.error('Gagal', { description: 'Terdapat kesalahan validasi pada data sekolah.' })
@@ -129,36 +249,67 @@ const handleSubmit = async () => {
   }
 }
 
-const customActions = computed(() => [
-  {
-    label: isLoading.value ? 'Menyimpan...' : 'Simpan',
-    icon: Save,
-    loading: isLoading.value,
-    click: handleSubmit
-  },
-])
-
+const goToList = () => {
+  router.push('/manajemen-data/sekolah')
+}
 </script>
 
 <template>
-  <div class="space-y-6 p-1 pb-10">
-    <PageHeader
-      back
-      title="Edit Sekolah"
-      description="Lengkapi formulir berikut untuk mengedit data sekolah"
-      :actions="customActions"
-    /> 
+  <div v-motion :initial="glassFade.initial" :visible-once="glassFade.visible" class="space-y-6 p-1 pb-24 text-left">
+    <!-- Header dengan Tombol Kembali -->
+    <PageHeader back title="Edit Data Sekolah"
+      description="Lengkapi formulir berikut untuk memperbarui data unit sekolah." />
 
     <!-- Form Sekolah -->
-    <SekolahForm
-      v-model:form="form"
-      :image-preview="imagePreview"
-      :foundation-options="foundationOptions"
-      :jenjang-options="jenjangOptions"
-      :status-options="statusOptions"
-      :akreditasi="akreditasi"
-      :errors="formErrors"
-      @image-change="handleImage"
-    />
+    <SekolahForm v-model:form="form" :image-preview="imagePreview" :foundation-options="foundationOptions"
+      :jenjang-options="jenjangOptions" :status-options="statusOptions" :akreditasi="akreditasi" :errors="formErrors"
+      @image-change="handleImage" />
+
+    <!-- Bottom Footer Actions (Tombol Batal & Simpan di Bawah) -->
+    <div
+      class="fixed bottom-0 left-0 right-0 z-20 backdrop-blur-md bg-background/80 dark:bg-zinc-900/80 border-t border-border dark:border-zinc-800 p-4 transition-all">
+      <div class="max-w-7xl mx-auto flex items-center justify-end gap-3 px-4 sm:px-6">
+        <Button type="button" variant="outline" @click="goToList" :disabled="isLoading" class="gap-1.5">
+          <ArrowLeft class="h-4 w-4" />
+          Batal
+        </Button>
+
+        <Button type="button" @click="onClickSave" :disabled="isLoading" class="gap-1.5 px-6 shadow-sm">
+          <Save class="h-4 w-4" />
+          {{ isLoading ? 'Menyimpan...' : 'Simpan Perubahan' }}
+        </Button>
+      </div>
+    </div>
   </div>
+
+  <!-- Confirmation Dialog (Konfirmasi Sebelum Simpan) -->
+  <Dialog :open="isConfirmOpen" @update:open="isConfirmOpen = false">
+    <DialogContent class="sm:max-w-md bg-card dark:bg-zinc-900 border border-border dark:border-zinc-800">
+      <DialogHeader>
+        <div class="flex items-center gap-3">
+          <div class="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <HelpCircle class="h-5 w-5" />
+          </div>
+          <div>
+            <DialogTitle class="text-base font-semibold text-foreground dark:text-zinc-100">
+              Konfirmasi Perubahan Data Sekolah
+            </DialogTitle>
+            <DialogDescription class="text-xs text-muted-foreground dark:text-zinc-400 mt-0.5">
+              Apakah Anda yakin ingin menyimpan perubahan data pada {{ form.nama }}?
+            </DialogDescription>
+          </div>
+        </div>
+      </DialogHeader>
+
+      <DialogFooter class="gap-2 sm:gap-0">
+        <Button variant="outline" type="button" @click="isConfirmOpen = false" :disabled="isLoading">
+          Batal
+        </Button>
+        <Button type="button" :disabled="isLoading" @click="handleSubmit" class="gap-1.5">
+          <CheckCircle2 class="h-4 w-4" />
+          {{ isLoading ? 'Memproses...' : 'Ya, Simpan Perubahan' }}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>

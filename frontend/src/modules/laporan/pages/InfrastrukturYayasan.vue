@@ -2,6 +2,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { Building2, Download, Printer, Package, Wrench, CheckCircle2, AlertTriangle, Search } from 'lucide-vue-next'
 import { Skeleton } from '@/components/ui/skeleton'
+import StatCardGrid from '@/components/stat-card/StatCardGrid.vue'
+import StatCard from '@/components/stat-card/StatCard.vue'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -11,22 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-
-const mockSarana = [
-  { id: 1, sekolah: 'SDN Tunas Bangsa', jenjang: 'SD', ruangKelas: 14, perpustakaan: 1, lab: 1, toilet: 8, kondisiBaik: 85, kondisiRusak: 15 },
-  { id: 2, sekolah: 'SMPN Harapan Ilmu', jenjang: 'SMP', ruangKelas: 18, perpustakaan: 1, lab: 3, toilet: 10, kondisiBaik: 78, kondisiRusak: 22 },
-  { id: 3, sekolah: 'SMAN Bina Prestasi', jenjang: 'SMA', ruangKelas: 24, perpustakaan: 2, lab: 5, toilet: 14, kondisiBaik: 92, kondisiRusak: 8 },
-  { id: 4, sekolah: 'SMK Teknologi Maju', jenjang: 'SMK', ruangKelas: 16, perpustakaan: 1, lab: 8, toilet: 10, kondisiBaik: 71, kondisiRusak: 29 },
-]
-
-const mockInventaris = [
-  { id: 1, nama: 'Komputer / Laptop', sekolah: 'SMAN Bina Prestasi', jumlah: 45, kondisi: 'Baik', tahun: '2024' },
-  { id: 2, nama: 'Proyektor', sekolah: 'SMPN Harapan Ilmu', jumlah: 18, kondisi: 'Baik', tahun: '2023' },
-  { id: 3, nama: 'Meja Siswa', sekolah: 'SDN Tunas Bangsa', jumlah: 412, kondisi: 'Perlu Perbaikan', tahun: '2019' },
-  { id: 4, nama: 'Peralatan Lab Kimia', sekolah: 'SMAN Bina Prestasi', jumlah: 5, kondisi: 'Baik', tahun: '2025' },
-  { id: 5, nama: 'Mesin CNC', sekolah: 'SMK Teknologi Maju', jumlah: 3, kondisi: 'Perlu Perbaikan', tahun: '2020' },
-  { id: 6, nama: 'Kursi Kantor', sekolah: 'SMPN Harapan Ilmu', jumlah: 50, kondisi: 'Baik', tahun: '2022' },
-]
+import { getFoundationInfrastructure } from '@/services/api/reports'
 
 const isLoading = ref(true)
 const saranaData = ref([])
@@ -34,7 +21,17 @@ const inventarisData = ref([])
 const searchQuery = ref('')
 const selectedTahun = ref('2026')
 
-onMounted(() => { setTimeout(() => { saranaData.value = mockSarana; inventarisData.value = mockInventaris; isLoading.value = false }, 500) })
+onMounted(async () => {
+  try {
+    const res = await getFoundationInfrastructure()
+    saranaData.value = res.sarana || []
+    inventarisData.value = res.inventaris || []
+  } catch (error) {
+    console.error('Failed to fetch infrastructure data:', error)
+  } finally {
+    isLoading.value = false
+  }
+})
 
 const totalRuangKelas = computed(() => saranaData.value.reduce((s,k)=>s+k.ruangKelas,0))
 const avgKondisiBaik = computed(() => saranaData.value.length ? Math.round(saranaData.value.reduce((s,k)=>s+k.kondisiBaik,0)/saranaData.value.length) : 0)
@@ -61,32 +58,41 @@ const jenjangColor = { SD: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 
       </div>
     </div>
 
-    <div class="grid gap-4 grid-cols-2 lg:grid-cols-4">
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Ruang Kelas</span><div class="p-1.5 bg-primary/10 rounded-lg"><Building2 class="size-4 text-primary" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-12" />
-        <div v-else class="text-3xl font-bold text-primary">{{ totalRuangKelas }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Di seluruh unit</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Kondisi Baik</span><div class="p-1.5 bg-green-50 dark:bg-green-950/40 rounded-lg"><CheckCircle2 class="size-4 text-green-600" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-14" />
-        <div v-else class="text-3xl font-bold text-green-600 dark:text-green-400">{{ avgKondisiBaik }}%</div>
-        <p class="text-xs text-muted-foreground mt-1">Rata-rata kondisi</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Butuh Perbaikan</span><div class="p-1.5 bg-red-50 dark:bg-red-950/40 rounded-lg"><Wrench class="size-4 text-red-600" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-10" />
-        <div v-else class="text-3xl font-bold text-red-600 dark:text-red-400">{{ needRepair }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Unit perlu perhatian</p>
-      </Card>
-      <Card class="p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-2"><span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Inventaris</span><div class="p-1.5 bg-muted rounded-lg"><Package class="size-4 text-muted-foreground" /></div></div>
-        <Skeleton v-if="isLoading" class="h-8 w-12" />
-        <div v-else class="text-3xl font-bold">{{ inventarisData.length }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Jenis barang tercatat</p>
-      </Card>
-    </div>
+    <StatCardGrid cols="4">
+      <StatCard
+        label="Ruang Kelas"
+        :value="totalRuangKelas"
+        sub="Di seluruh unit"
+        :icon="Building2"
+        variant="primary"
+        :delay="100"
+      />
+      <StatCard
+        label="Kondisi Baik"
+        :value="avgKondisiBaik + '%'"
+        sub="Rata-rata kondisi"
+        :icon="CheckCircle2"
+        variant="emerald"
+        :delay="200"
+      />
+      <StatCard
+        label="Butuh Perbaikan"
+        :value="needRepair"
+        sub="Unit perlu perhatian"
+        :icon="Wrench"
+        variant="amber"
+        :delay="300"
+      />
+      <StatCard
+        label="Inventaris"
+        :value="inventarisData.length"
+        sub="Jenis barang tercatat"
+        :icon="Package"
+        variant="default"
+        color="slate"
+        :delay="400"
+      />
+    </StatCardGrid>
 
     <Tabs default-value="sarana">
       <TabsList>

@@ -42,6 +42,7 @@ const imagePreview = ref('')
 
 const handleImage = (file) => {
   imagePreview.value = URL.createObjectURL(file)
+  form.value.foto = file
 }
 
 const showSuccessModal = ref(false)
@@ -57,8 +58,8 @@ const handleSubmit = async () => {
 
   const payload = {
     ...form.value,
-    tanggal_lahir: form.value.tanggal_lahir ? new Date(form.value.tanggal_lahir).toISOString().split('T')[0] : null,
-    tahun_masuk: form.value.tahun_masuk ? new Date(form.value.tahun_masuk).toISOString().split('T')[0] : null
+    tanggal_lahir: form.value.tanggal_lahir || null,
+    tahun_masuk: form.value.tahun_masuk || null
   }
 
   try {

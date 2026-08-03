@@ -3,13 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\HasCurriculumMappingTrait;
 use App\Models\School;
+use App\Models\Foundation;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class SchoolController extends Controller
 {
+    use HasCurriculumMappingTrait;
     /**
      * Display a listing of the resource.
      */
@@ -24,7 +28,7 @@ class SchoolController extends Controller
                 $search = $request->input('search');
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('npsn', 'like', "%{$search}%");
+                       ->orWhere('npsn', 'like', "%{$search}%");
                 });
             }
 
@@ -39,6 +43,12 @@ class SchoolController extends Controller
             if ($request->has('status')) {
                 $query->where('status', $request->input('status'));
             }
+
+            $statsQuery = School::query();
+            $total = (clone $statsQuery)->count();
+            $active = (clone $statsQuery)->where('status', 'active')->count();
+            $trial = (clone $statsQuery)->where('status', 'trial')->count();
+            $inactive = (clone $statsQuery)->where('status', 'inactive')->count();
 
             return response()->json([
                 'status' => 'success',
@@ -55,7 +65,7 @@ class SchoolController extends Controller
                 $search = $request->input('search');
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('npsn', 'like', "%{$search}%");
+                       ->orWhere('npsn', 'like', "%{$search}%");
                 });
             }
 
@@ -66,6 +76,12 @@ class SchoolController extends Controller
             if ($request->has('status')) {
                 $query->where('status', $request->input('status'));
             }
+
+            $statsQuery = School::where('foundation_id', $user->foundation_id);
+            $total = (clone $statsQuery)->count();
+            $active = (clone $statsQuery)->where('status', 'active')->count();
+            $trial = (clone $statsQuery)->where('status', 'trial')->count();
+            $inactive = (clone $statsQuery)->where('status', 'inactive')->count();
 
             return response()->json([
                 'status' => 'success',
@@ -82,6 +98,13 @@ class SchoolController extends Controller
                 ], 404);
             }
 
+            $stats = [
+                'total' => 1,
+                'active' => $school->status === 'active' ? 1 : 0,
+                'trial' => $school->status === 'trial' ? 1 : 0,
+                'inactive' => $school->status === 'inactive' ? 1 : 0,
+            ];
+
             return response()->json([
                 'status' => 'success',
                 'data'   => [
@@ -89,6 +112,7 @@ class SchoolController extends Controller
                     'data' => [$school],
                     'total' => 1,
                 ],
+                'stats' => $stats,
             ]);
         }
 
@@ -131,6 +155,7 @@ class SchoolController extends Controller
             'accreditation'        => 'nullable|string|max:10',
             'accreditation_date'   => 'nullable|date',
             'accreditation_number' => 'nullable|string|max:255',
+            'curriculum_id'        => 'nullable|exists:curriculums,id',
             'logo'                 => 'nullable|image|max:2048',
         ];
 
@@ -156,6 +181,14 @@ class SchoolController extends Controller
             $data['foundation_id'] = $user->foundation_id;
         }
 
+        // Inherit curriculum_id from Foundation if not explicitly provided
+        if (empty($data['curriculum_id']) && !empty($data['foundation_id'])) {
+            $foundation = Foundation::find($data['foundation_id']);
+            if ($foundation && $foundation->curriculum_id) {
+                $data['curriculum_id'] = $foundation->curriculum_id;
+            }
+        }
+
         if ($request->hasFile('logo')) {
             $path = $request->file('logo')->store('logos', 'public');
             $data['logo'] = asset('storage/' . $path);
@@ -165,10 +198,13 @@ class SchoolController extends Controller
 
         $school = School::create($data);
 
+        // Auto sync mandatory subjects from curriculum
+        $this->syncSchoolSubjectsFromCurriculum($school);
+
         return response()->json([
             'status'  => 'success',
             'message' => 'School created successfully.',
-            'data'    => $school,
+            'data'    => $school->load('curriculum'),
         ], 201);
     }
 
@@ -187,21 +223,16 @@ class SchoolController extends Controller
             ], 404);
         }
 
-        if ($user->isSuperAdmin()) {
-            return response()->json([
-                'status' => 'success',
-                'data'   => $school,
-            ]);
-        }
+        if ($user->isSuperAdmin() || 
+            ($user->hasRole('admin_yayasan') && $user->foundation_id == $school->foundation_id) ||
+            ($user->hasRole('admin_sekolah') && $user->school_id == $school->id)) {
+            
+            $school->load(['users' => function ($q) {
+                $q->whereIn('role_id', function ($sq) {
+                    $sq->select('id')->from('roles')->where('name', 'admin_sekolah');
+                });
+            }]);
 
-        if ($user->hasRole('admin_yayasan') && $user->foundation_id == $school->foundation_id) {
-            return response()->json([
-                'status' => 'success',
-                'data'   => $school,
-            ]);
-        }
-
-        if ($user->hasRole('admin_sekolah') && $user->school_id == $school->id) {
             return response()->json([
                 'status' => 'success',
                 'data'   => $school,
@@ -295,6 +326,49 @@ class SchoolController extends Controller
         }
 
         $school->update($data);
+
+        // Update administrator user details if provided in request
+        $adminUser = User::where('school_id', $school->id)
+            ->whereIn('role_id', function ($sq) {
+                $sq->select('id')->from('roles')->where('name', 'admin_sekolah');
+            })->first();
+
+        if ($adminUser) {
+            $userUpdateData = [];
+            if ($request->has('emailLogin') && $request->filled('emailLogin')) {
+                $userUpdateData['email'] = $request->input('emailLogin');
+            }
+            if ($request->has('noHpLogin') && $request->filled('noHpLogin')) {
+                $userUpdateData['phone'] = $request->input('noHpLogin');
+            }
+            if ($request->has('name') && $request->filled('name')) {
+                $userUpdateData['name'] = 'Admin ' . $request->input('name');
+            }
+
+            if (!empty($userUpdateData)) {
+                // Validate email and phone if they are being updated
+                $userRules = [];
+                if (isset($userUpdateData['email'])) {
+                    $userRules['email'] = 'required|email|unique:users,email,' . $adminUser->id;
+                }
+                if (isset($userUpdateData['phone'])) {
+                    $userRules['phone'] = 'required|string|max:50|unique:users,phone,' . $adminUser->id;
+                }
+
+                if (!empty($userRules)) {
+                    $userValidator = Validator::make($userUpdateData, $userRules);
+                    if ($userValidator->fails()) {
+                        return response()->json([
+                            'status'  => 'error',
+                            'message' => 'Validation error on administrator account.',
+                            'errors'  => $userValidator->errors(),
+                        ], 422);
+                    }
+                }
+
+                $adminUser->update($userUpdateData);
+            }
+        }
 
         return response()->json([
             'status'  => 'success',

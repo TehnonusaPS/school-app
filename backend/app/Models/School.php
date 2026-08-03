@@ -32,6 +32,7 @@ class School extends Model
         'accreditation_date',
         'accreditation_number',
         'logo',
+        'curriculum_id',
     ];
 
     protected function casts(): array
@@ -42,6 +43,14 @@ class School extends Model
             'permit_date'         => 'date',
             'accreditation_date'  => 'date',
         ];
+    }
+
+    /**
+     * Get the curriculum for this school.
+     */
+    public function curriculum(): BelongsTo
+    {
+        return $this->belongsTo(Curriculum::class);
     }
 
     /**

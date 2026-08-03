@@ -8,20 +8,25 @@ import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-
-const mockData = [
-  { id: 1, sekolah: 'SDN Tunas Bangsa', jenjang: 'SD', spp: 85000000, bos: 45000000, donasi: 10000000, gaji: 62000000, operasional: 15000000, pemeliharaan: 8000000 },
-  { id: 2, sekolah: 'SMPN Harapan Ilmu', jenjang: 'SMP', spp: 112000000, bos: 62000000, donasi: 8000000, gaji: 98000000, operasional: 22000000, pemeliharaan: 12000000 },
-  { id: 3, sekolah: 'SMAN Bina Prestasi', jenjang: 'SMA', spp: 156000000, bos: 82000000, donasi: 15000000, gaji: 148000000, operasional: 35000000, pemeliharaan: 18000000 },
-  { id: 4, sekolah: 'SMK Teknologi Maju', jenjang: 'SMK', spp: 98000000, bos: 54000000, donasi: 6000000, gaji: 85000000, operasional: 28000000, pemeliharaan: 14000000 },
-]
+import StatCardGrid from '@/components/stat-card/StatCardGrid.vue'
+import StatCard from '@/components/stat-card/StatCard.vue'
+import { getFoundationFinance } from '@/services/api/reports'
 
 const isLoading = ref(true)
 const data = ref([])
 const selectedBulan = ref('5')
 const selectedTahun = ref('2026')
 
-onMounted(() => { setTimeout(() => { data.value = mockData; isLoading.value = false }, 500) })
+onMounted(async () => {
+  try {
+    const res = await getFoundationFinance()
+    data.value = res || []
+  } catch (error) {
+    console.error('Failed to fetch finance data:', error)
+  } finally {
+    isLoading.value = false
+  }
+})
 
 function formatRp(v) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(v) }
 
@@ -80,37 +85,32 @@ const jenjangColor = { SD: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 
       </div>
     </div>
 
-    <div class="grid gap-4 grid-cols-1 md:grid-cols-3">
-      <Card class="p-5 border-green-200 dark:border-green-900/40 bg-green-50/30 dark:bg-green-950/10 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-sm font-medium text-green-700 dark:text-green-400">Total Pemasukan</span>
-          <div class="p-2 bg-green-100 dark:bg-green-900/40 rounded-xl"><ArrowUpRight class="size-5 text-green-600" /></div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-9 w-40" />
-        <div v-else class="text-xl font-bold text-green-700 dark:text-green-400">{{ formatRp(totalPemasukan) }}</div>
-        <p class="text-xs text-muted-foreground mt-1">SPP + BOS + Donasi</p>
-      </Card>
-      <Card class="p-5 border-red-200 dark:border-red-900/40 bg-red-50/30 dark:bg-red-950/10 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-sm font-medium text-red-700 dark:text-red-400">Total Pengeluaran</span>
-          <div class="p-2 bg-red-100 dark:bg-red-900/40 rounded-xl"><ArrowDownRight class="size-5 text-red-600" /></div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-9 w-40" />
-        <div v-else class="text-xl font-bold text-red-700 dark:text-red-400">{{ formatRp(totalPengeluaran) }}</div>
-        <p class="text-xs text-muted-foreground mt-1">Gaji + Operasional + Pemeliharaan</p>
-      </Card>
-      <Card class="p-5 hover:shadow-md transition-shadow" :class="totalSaldo >= 0 ? 'border-blue-200 dark:border-blue-900/40 bg-blue-50/30 dark:bg-blue-950/10' : 'border-red-200 dark:border-red-900/40'">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-sm font-medium" :class="totalSaldo >= 0 ? 'text-blue-700 dark:text-blue-400' : 'text-red-700 dark:text-red-400'">Saldo Bersih Yayasan</span>
-          <div class="p-2 rounded-xl" :class="totalSaldo >= 0 ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-red-100 dark:bg-red-900/40'">
-            <component :is="totalSaldo >= 0 ? TrendingUp : TrendingDown" class="size-5" :class="totalSaldo >= 0 ? 'text-blue-600' : 'text-red-600'" />
-          </div>
-        </div>
-        <Skeleton v-if="isLoading" class="h-9 w-40" />
-        <div v-else class="text-xl font-bold" :class="totalSaldo >= 0 ? 'text-blue-700 dark:text-blue-400' : 'text-red-700 dark:text-red-400'">{{ formatRp(Math.abs(totalSaldo)) }}</div>
-        <p class="text-xs mt-1 text-muted-foreground">{{ totalSaldo >= 0 ? 'Surplus' : 'Defisit' }}</p>
-      </Card>
-    </div>
+    <StatCardGrid cols="3">
+      <StatCard
+        label="Total Pemasukan"
+        :value="isLoading ? '' : formatRp(totalPemasukan)"
+        sub="SPP + BOS + Donasi"
+        :icon="ArrowUpRight"
+        variant="emerald"
+        :loading="isLoading"
+      />
+      <StatCard
+        label="Total Pengeluaran"
+        :value="isLoading ? '' : formatRp(totalPengeluaran)"
+        sub="Gaji + Operasional + Pemeliharaan"
+        :icon="ArrowDownRight"
+        variant="destructive"
+        :loading="isLoading"
+      />
+      <StatCard
+        label="Saldo Bersih Yayasan"
+        :value="isLoading ? '' : formatRp(Math.abs(totalSaldo))"
+        :sub="totalSaldo >= 0 ? 'Surplus' : 'Defisit'"
+        :icon="totalSaldo >= 0 ? TrendingUp : TrendingDown"
+        :variant="totalSaldo >= 0 ? 'primary' : 'destructive'"
+        :loading="isLoading"
+      />
+    </StatCardGrid>
 
     <Card class="overflow-hidden">
       <div class="overflow-x-auto">

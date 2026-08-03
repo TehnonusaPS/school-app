@@ -61,7 +61,7 @@ export const navMain = [
       { 
         title: 'Jadwal Pelajaran', 
         url: '/manajemen-data/jadwal',
-        roles: ['kepala_sekolah']
+        roles: ['kepala_sekolah', 'admin_sekolah']
       },
       { title: 'Kelas', 
         url: '/manajemen-data/kelas', 
@@ -104,23 +104,8 @@ export const navMain = [
         roles: ['siswa']
       },
       {
-        title: 'Materi',
-        url: '/akademik/materi',
-        roles: ['siswa']
-      },
-      {
         title: 'Mata Pelajaran',
         url: '/akademik/mapel',
-        roles: ['siswa']
-      },
-      {
-        title: 'Tugas',
-        url: '/akademik/tugas',
-        roles: ['siswa']
-      },
-      {
-        title: 'Ujian',
-        url: '/akademik/ujian',
         roles: ['siswa']
       },
       {
@@ -205,11 +190,34 @@ export const navMain = [
     items: [
       { title: 'Absensi Siswa', url: '/absensi/siswa', roles: ['admin_sekolah'] },
       { title: 'Absensi Staff', url: '/absensi/guru-staff', roles: ['admin_sekolah', 'kepala_sekolah', 'tata_usaha'] },
+      { title: 'Persetujuan Cuti/Izin', url: '/absensi/admin-sekolah/persetujuan-cuti', roles: ['admin_sekolah'] },
+      { title: 'Pengaturan Absensi', url: '/absensi/admin-sekolah/pengaturan', roles: ['admin_sekolah'] },
+      { title: 'Pengajuan Izin/Cuti', url: '/absensi/admin-sekolah/izin-cuti', roles: ['admin_sekolah'] },
       { title: 'Rekap Bulanan', url: '/absensi/rekap', roles: ['admin_sekolah'] },
       {
         title: 'Absensi Guru',
         url: '/absensi/guru-staff',
         roles: ['guru', 'wali_kelas']
+      },
+      {
+        title: 'Pengajuan Izin/Cuti',
+        url: '/absensi/guru/izin-cuti',
+        roles: ['guru']
+      },
+      {
+        title: 'Pengajuan Izin/Cuti',
+        url: '/absensi/wali-kelas/izin-cuti',
+        roles: ['wali_kelas']
+      },
+      {
+        title: 'Pengajuan Izin/Cuti',
+        url: '/absensi/kepala-sekolah/izin-cuti',
+        roles: ['kepala_sekolah']
+      },
+      {
+        title: 'Pengajuan Izin/Cuti',
+        url: '/absensi/tata-usaha/izin-cuti',
+        roles: ['tata_usaha']
       },
       {
         title: 'Kehadiran',
@@ -232,13 +240,13 @@ export const navMain = [
     title: 'Komunikasi',
     url: '/komunikasi',
     icon: MessageSquare,
-    excludeRoles: ['superadmin', 'guru', 'wali_kelas', 'siswa'],
+    excludeRoles: ['superadmin'],
     items: [
-      { title: 'Pengumuman', url: '/komunikasi/pengumuman', excludeRoles: ['tata_usaha', 'kepala_sekolah', 'admin_sekolah', 'orang_tua'] },
-      { title: 'Berita Kegiatan', url: '/komunikasi/berita-kegiatan', excludeRoles: ['tata_usaha', 'admin_yayasan', 'orang_tua'] },
-      { title: 'Feedback', url: '/komunikasi/feedback', excludeRoles: ['tata_usaha', 'admin_yayasan'] },
-      { title: 'Pesan Internal', url: '/komunikasi/pesan', excludeRoles: ['tata_usaha', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'orang_tua'] },
-      { title: 'Notifikasi', url: '/komunikasi/notifikasi', excludeRoles: ['tata_usaha', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'orang_tua'] },
+      { title: 'Pengumuman', url: '/komunikasi/pengumuman', excludeRoles: ['tata_usaha', 'orang_tua', 'guru', 'wali_kelas', 'siswa'] },
+      { title: 'Berita Kegiatan', url: '/komunikasi/berita-kegiatan', excludeRoles: ['tata_usaha', 'admin_yayasan'] },
+      { title: 'Feedback', url: '/komunikasi/feedback', excludeRoles: ['tata_usaha', 'admin_yayasan', 'guru', 'wali_kelas', 'siswa'] },
+      { title: 'Pesan Internal', url: '/komunikasi/pesan', excludeRoles: ['tata_usaha', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'orang_tua', 'guru', 'wali_kelas', 'siswa'] },
+      { title: 'Notifikasi', url: '/komunikasi/notifikasi', excludeRoles: ['tata_usaha', 'admin_yayasan', 'kepala_sekolah', 'admin_sekolah', 'orang_tua', 'guru', 'wali_kelas', 'siswa'] },
       { title: 'Keterangan Aktif', url: '/komunikasi/persuratan/aktif', roles: ['tata_usaha'] },
       {
         title: 'Surat Dispensasi',

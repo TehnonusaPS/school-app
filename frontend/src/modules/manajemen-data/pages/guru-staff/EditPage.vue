@@ -8,23 +8,11 @@ import PageHeader from '@/components/page-header/PageHeader.vue'
 import { defaultForm } from './data/defaultForm'
 import { useAuthStore } from '@/stores/authStore'
 import GuruStaffForm from './components/GuruStaffForm.vue'
-import { agamaOptions, jabatanOptions, kelaminOptions, pendidikanOptions, statusKepegawaianOptions, statusOptions, statusPernikahanOptions, unitKerjaOptions } from './data/guruStaff'
+import { agamaOptions, jabatanOptions, kelaminOptions, pendidikanOptions, statusKepegawaianOptions, statusOptions, statusPernikahanOptions } from './data/guruStaff'
 import { toast } from 'vue-sonner'
 import { getTeacher, updateTeacher } from '@/services/managementService'
 
 const auth = useAuthStore()
-const isAdminYayasan = computed(() => auth.user?.role === 'admin_yayasan')
-
-const unitOptions = computed(() => {
-  if (isAdminYayasan.value) {
-    return unitKerjaOptions
-  }
-
-  return unitKerjaOptions.filter(
-    item => item.value === auth.user?.unitId
-  )
-})
-
 const router = useRouter()
 const route = useRoute()
 const isLoading = ref(false)
@@ -34,9 +22,9 @@ const form = ref({ ...defaultForm })
 const imagePreview = ref('')
 const formErrors = ref({})
 
-const handleImage = (file) => {
-  imagePreview.value = URL.createObjectURL(file)
-}
+const loadTeacher = async () => {
+  const id = route.query.id
+  if (!id) return
 
 const mapAgamaToValue = (label) => {
   const map = {

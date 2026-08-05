@@ -255,7 +255,15 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/approve', [AcademicCalendarController::class, 'approve']);
             Route::post('/reject', [AcademicCalendarController::class, 'reject']);
             Route::post('/reset', [AcademicCalendarController::class, 'reset']);
+
+            // Exam Schedule routes
+            Route::get('/exam-schedules', [\App\Http\Controllers\Api\ExamScheduleController::class, 'index']);
+            Route::post('/exam-schedules/bulk', [\App\Http\Controllers\Api\ExamScheduleController::class, 'bulkStore']);
+            Route::delete('/exam-schedules/sessions/{id}', [\App\Http\Controllers\Api\ExamScheduleController::class, 'destroySession']);
         });
+
+    // Exam Schedule Read-Only / My Schedule for all authenticated roles
+    Route::get('/exam-schedules/my-schedule', [\App\Http\Controllers\Api\ExamScheduleController::class, 'mySchedule']);
 
     // Kalender Akademik - Read-Only (Guru, Wali Kelas, Siswa, Orang Tua)
     Route::middleware('role:guru,wali_kelas,siswa,orang_tua')

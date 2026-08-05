@@ -66,7 +66,12 @@ class AcademicCalendarController extends Controller
         $academicYearId = $request->query('academic_year_id');
 
         if (!$academicYearId) {
-            return response()->json(['status' => 'error', 'message' => 'academic_year_id is required.'], 400);
+            $activeYear = AcademicYear::where('school_id', $schoolId)->where('is_active', true)->first();
+            $academicYearId = $activeYear ? $activeYear->id : AcademicYear::where('school_id', $schoolId)->latest()->value('id');
+        }
+
+        if (!$academicYearId) {
+            return response()->json(['status' => 'success', 'data' => []]);
         }
 
         $targetYear = AcademicYear::where('id', $academicYearId)

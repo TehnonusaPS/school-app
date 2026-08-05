@@ -71,6 +71,16 @@ const getCellClasses = (weekDate: any, monthValue: any) => {
     markers.isExam && 'sched-cell--exam'
   ].filter(Boolean).join(' ');
 };
+
+const getExamBadgeText = (dateStr: string) => {
+  const exams = props.getExamsForDate(dateStr)
+  if (exams && exams.length > 0) {
+    const title = (exams[0].event_title || exams[0].nama || '').toUpperCase()
+    if (title.includes('UTS') || title.includes('MID') || title.includes('PTS')) return 'UTS'
+    if (title.includes('UAS') || title.includes('PAS') || title.includes('SAT') || title.includes('FINAL')) return 'UAS'
+  }
+  return 'Ujian'
+};
 </script>
 
 <template>
@@ -104,9 +114,7 @@ const getCellClasses = (weekDate: any, monthValue: any) => {
                   <Badge v-if="getDateMarkers(weekDate.toString()).isHoliday" variant="red" showDot pulse
                     :title="getHolidayForDate(weekDate.toString())?.localName" class="sched-micro-badge">Libur</Badge>
                   <Badge v-if="getDateMarkers(weekDate.toString()).isExam" variant="purple" showDot pulse
-                    :title="getExamsForDate(weekDate.toString())[0]?.nama" class="sched-micro-badge">Ujian</Badge>
-                  <Badge v-if="getDateMarkers(weekDate.toString()).isAssignment" variant="green" showDot pulse
-                    :title="getAssignmentsForDate(weekDate.toString())[0]?.nama" class="sched-micro-badge">Tugas</Badge>
+                    :title="getExamsForDate(weekDate.toString())[0]?.event_title || 'Ujian'" class="sched-micro-badge">{{ getExamBadgeText(weekDate.toString()) }}</Badge>
                   <Badge v-if="getDateMarkers(weekDate.toString()).isActivity" variant="outline" showDot pulse
                     class="sched-micro-badge bg-amber-500/10 text-amber-600 dark:text-amber-400 border-none font-bold">
                     Kegiatan</Badge>

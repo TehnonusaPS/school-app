@@ -84,8 +84,15 @@ const hasNoEvents = computed(() => {
           </div>
 
           <div v-if="selectedDateDetails.exams.length > 0" class="space-y-2.5">
-            <ScheduleEventCard v-for="exam in selectedDateDetails.exams" :key="exam.id" type="exam" :title="exam.nama"
-              :subtitle="exam.mapel" :time="exam.waktu" :location="exam.ruang" />
+            <ScheduleEventCard 
+              v-for="exam in selectedDateDetails.exams" 
+              :key="exam.id" 
+              type="exam" 
+              :title="`Ujian ${exam.nama}`"
+              :subtitle="exam.event_title ? `${exam.event_title} (${exam.mapel})` : exam.mapel" 
+              :time="exam.waktu" 
+              :location="exam.ruang" 
+            />
           </div>
 
           <div v-if="selectedDateDetails.assignments.length > 0" class="space-y-2.5">

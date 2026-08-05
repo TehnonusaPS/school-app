@@ -88,7 +88,10 @@ function getColorClasses(colorName) {
             getColorClasses(color).bg
           ]"
         >
-          <component :is="icon" :class="['size-4 drop-shadow-md', getColorClasses(color).color]" />
+          <component
+            :is="icon"
+            :class="['size-4 drop-shadow-md', getColorClasses(color).color]"
+          />
         </div>
       </slot>
     </template>
@@ -97,17 +100,24 @@ function getColorClasses(colorName) {
 
     <!-- Chart Content -->
     <div class="relative z-10">
-      <ChartContainer :config="config" class="w-full opacity-90 drop-shadow-sm" :style="{ height: typeof height === 'number' ? `${height}px` : height }">
+      <ChartContainer
+        :config="config"
+        class="w-full opacity-90 drop-shadow-sm"
+        :style="{ height: typeof height === 'number' ? `${height}px` : height }"
+      >
         <VisXYContainer :data="data">
           <!-- Render multiple lines based on categories -->
-          <template v-for="category in categories" :key="category">
+          <template
+            v-for="category in categories"
+            :key="category"
+          >
             <VisLine
               :x="(d, i) => i"
               :y="d => d[category]"
               :color="`var(--color-${category})`"
             />
           </template>
-          
+
           <VisAxis
             type="x"
             :tickFormat="i => data[i]?.[index]"
@@ -116,7 +126,12 @@ function getColorClasses(colorName) {
             :tick-line="false"
             :domain-line="false"
           />
-          <VisAxis type="y" :tick-line="false" :domain-line="false" :grid-line="true" />
+          <VisAxis
+            type="y"
+            :tick-line="false"
+            :domain-line="false"
+            :grid-line="true"
+          />
           <ChartTooltip />
           <ChartCrosshair
             :template="
@@ -134,10 +149,16 @@ function getColorClasses(colorName) {
     </div>
 
     <!-- Footer slot passthrough -->
-    <template v-if="$slots.footer || footerTitle || footerSubtext" #footer>
+    <template
+      v-if="$slots.footer || footerTitle || footerSubtext"
+      #footer
+    >
       <slot name="footer">
         <div class="flex flex-col gap-1 w-full text-left">
-          <div v-if="footerTitle" class="flex gap-2 font-medium leading-none items-center drop-shadow-sm">
+          <div
+            v-if="footerTitle"
+            class="flex gap-2 font-medium leading-none items-center drop-shadow-sm"
+          >
             {{ footerTitle }}
             <component
               v-if="footerTrend === 'up'"
@@ -150,7 +171,10 @@ function getColorClasses(colorName) {
               class="h-4 w-4 text-rose-500"
             />
           </div>
-          <div v-if="footerSubtext" class="leading-none text-muted-foreground text-xs mt-1">
+          <div
+            v-if="footerSubtext"
+            class="leading-none text-muted-foreground text-xs mt-1"
+          >
             {{ footerSubtext }}
           </div>
         </div>

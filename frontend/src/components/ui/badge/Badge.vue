@@ -21,12 +21,15 @@ const delegatedProps = reactiveOmit(props, ['class', 'showDot', 'pulse'])
 
 <template>
   <Primitive
-    data-slot='badge'
+    data-slot="badge"
     :data-variant="variant"
     :class="cn(badgeVariants({ variant }), props.class)"
     v-bind="delegatedProps"
   >
-    <span v-if="showDot" class="relative flex h-1.5 w-1.5 shrink-0">
+    <span
+      v-if="showDot"
+      class="relative flex h-1.5 w-1.5 shrink-0"
+    >
       <span
         v-if="pulse"
         class="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"

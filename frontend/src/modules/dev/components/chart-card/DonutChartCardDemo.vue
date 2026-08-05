@@ -5,7 +5,7 @@ import { studentStatusData } from './data/chartCardDemos'
 
 const studentStatusConfig = {
   aktif: { label: 'Siswa Aktif', color: 'var(--primary)' },
-  lulus: { label: 'Lulus', color: '#10b981' },     // Emerald
+  lulus: { label: 'Lulus', color: '#10b981' }, // Emerald
   keluar: { label: 'Pindah/Keluar', color: '#ef4444' } // Red
 }
 </script>

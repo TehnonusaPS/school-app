@@ -72,7 +72,10 @@ const radioValue = ref('comfortable')
 <template>
   <div class="space-y-12">
     <!-- 31. LABEL -->
-    <section v-show="match('label')" class="space-y-4">
+    <section
+      v-show="match('label')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">31. Label</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -88,7 +91,10 @@ const radioValue = ref('comfortable')
     </section>
 
     <!-- 32. MENUBAR -->
-    <section v-show="match('menubar')" class="space-y-4">
+    <section
+      v-show="match('menubar')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">32. Menubar</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -128,7 +134,10 @@ const radioValue = ref('comfortable')
     </section>
 
     <!-- 33. NATIVE SELECT -->
-    <section v-show="match('native select')" class="space-y-4">
+    <section
+      v-show="match('native select')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">33. Native Select</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -138,7 +147,13 @@ const radioValue = ref('comfortable')
       </div>
       <div class="p-6 border rounded-xl bg-card flex justify-center">
         <NativeSelect class="w-[200px]">
-          <option value="" disabled selected>Pilih kota...</option>
+          <option
+            value=""
+            disabled
+            selected
+          >
+            Pilih kota...
+          </option>
           <option value="jakarta">Jakarta</option>
           <option value="bandung">Bandung</option>
           <option value="surabaya">Surabaya</option>
@@ -147,7 +162,10 @@ const radioValue = ref('comfortable')
     </section>
 
     <!-- 34. NAVIGATION MENU -->
-    <section v-show="match('navigation menu')" class="space-y-4">
+    <section
+      v-show="match('navigation menu')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">34. Navigation Menu</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -191,7 +209,10 @@ const radioValue = ref('comfortable')
               </NavigationMenuContent>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <NavigationMenuLink href="/docs" :class="navigationMenuTriggerStyle()">
+              <NavigationMenuLink
+                href="/docs"
+                :class="navigationMenuTriggerStyle()"
+              >
                 Documentation
               </NavigationMenuLink>
             </NavigationMenuItem>
@@ -201,7 +222,10 @@ const radioValue = ref('comfortable')
     </section>
 
     <!-- 35. NUMBER FIELD -->
-    <section v-show="match('number field')" class="space-y-4">
+    <section
+      v-show="match('number field')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">35. Number Field</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -209,8 +233,18 @@ const radioValue = ref('comfortable')
         </p>
       </div>
       <div class="p-6 border rounded-xl bg-card flex justify-center">
-        <NumberField id="age" :default-value="18" :min="0" :max="100" class="w-40">
-          <Label for="age" class="sr-only">Age</Label>
+        <NumberField
+          id="age"
+          :default-value="18"
+          :min="0"
+          :max="100"
+          class="w-40"
+        >
+          <Label
+            for="age"
+            class="sr-only"
+            >Age</Label
+          >
           <NumberFieldContent>
             <NumberFieldDecrement />
             <NumberFieldInput />
@@ -221,7 +255,10 @@ const radioValue = ref('comfortable')
     </section>
 
     <!-- 36. PAGINATION -->
-    <section v-show="match('pagination')" class="space-y-4">
+    <section
+      v-show="match('pagination')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">36. Pagination</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -229,15 +266,30 @@ const radioValue = ref('comfortable')
         </p>
       </div>
       <div class="p-6 border rounded-xl bg-card flex justify-center">
-        <Pagination v-slot="{ page }" :total="100" :sibling-count="1" show-edges :default-page="2">
+        <Pagination
+          v-slot="{ page }"
+          :total="100"
+          :sibling-count="1"
+          show-edges
+          :default-page="2"
+        >
           <PaginationContent v-slot="{ items }">
             <PaginationFirst />
             <PaginationPrevious />
             <template v-for="(item, index) in items">
-              <PaginationItem v-if="item.type === 'page'" :key="index" :value="item.value" :is-active="item.value === page">
+              <PaginationItem
+                v-if="item.type === 'page'"
+                :key="index"
+                :value="item.value"
+                :is-active="item.value === page"
+              >
                 {{ item.value }}
               </PaginationItem>
-              <PaginationEllipsis v-else :key="item.type" :index="index" />
+              <PaginationEllipsis
+                v-else
+                :key="item.type"
+                :index="index"
+              />
             </template>
             <PaginationNext />
             <PaginationLast />
@@ -247,7 +299,10 @@ const radioValue = ref('comfortable')
     </section>
 
     <!-- 37. PIN INPUT -->
-    <section v-show="match('pin input')" class="space-y-4">
+    <section
+      v-show="match('pin input')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">37. Pin Input</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -255,16 +310,28 @@ const radioValue = ref('comfortable')
         </p>
       </div>
       <div class="p-6 border rounded-xl bg-card flex justify-center">
-        <PinInput id="pin-input" v-model="pinValue" placeholder="○" mask>
+        <PinInput
+          id="pin-input"
+          v-model="pinValue"
+          placeholder="○"
+          mask
+        >
           <PinInputGroup>
-            <PinInputSlot v-for="(id, index) in 5" :key="id" :index="index" />
+            <PinInputSlot
+              v-for="(id, index) in 5"
+              :key="id"
+              :index="index"
+            />
           </PinInputGroup>
         </PinInput>
       </div>
     </section>
 
     <!-- 38. POPOVER -->
-    <section v-show="match('popover')" class="space-y-4">
+    <section
+      v-show="match('popover')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">38. Popover</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -286,11 +353,19 @@ const radioValue = ref('comfortable')
               <div class="grid gap-2">
                 <div class="grid grid-cols-3 items-center gap-4">
                   <Label for="width">Lebar</Label>
-                  <Input id="width" default-value="100%" class="col-span-2 h-8" />
+                  <Input
+                    id="width"
+                    default-value="100%"
+                    class="col-span-2 h-8"
+                  />
                 </div>
                 <div class="grid grid-cols-3 items-center gap-4">
                   <Label for="maxWidth">Maks. Lebar</Label>
-                  <Input id="maxWidth" default-value="300px" class="col-span-2 h-8" />
+                  <Input
+                    id="maxWidth"
+                    default-value="300px"
+                    class="col-span-2 h-8"
+                  />
                 </div>
               </div>
             </div>
@@ -300,7 +375,10 @@ const radioValue = ref('comfortable')
     </section>
 
     <!-- 39. PROGRESS -->
-    <section v-show="match('progress')" class="space-y-4">
+    <section
+      v-show="match('progress')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">39. Progress</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -309,7 +387,10 @@ const radioValue = ref('comfortable')
         </p>
       </div>
       <div class="p-6 border rounded-xl bg-card flex flex-col items-center gap-4">
-        <Progress v-model="progressValue" class="w-[60%]" />
+        <Progress
+          v-model="progressValue"
+          class="w-[60%]"
+        />
         <Button
           variant="outline"
           size="sm"
@@ -321,7 +402,10 @@ const radioValue = ref('comfortable')
     </section>
 
     <!-- 40. RADIO GROUP -->
-    <section v-show="match('radio group')" class="space-y-4">
+    <section
+      v-show="match('radio group')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">40. Radio Group</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -329,17 +413,29 @@ const radioValue = ref('comfortable')
         </p>
       </div>
       <div class="p-6 border rounded-xl bg-card flex justify-center">
-        <RadioGroup v-model="radioValue" class="space-y-2">
+        <RadioGroup
+          v-model="radioValue"
+          class="space-y-2"
+        >
           <div class="flex items-center space-x-2">
-            <RadioGroupItem id="r1" value="default" />
+            <RadioGroupItem
+              id="r1"
+              value="default"
+            />
             <Label for="r1">Default (Bawaan)</Label>
           </div>
           <div class="flex items-center space-x-2">
-            <RadioGroupItem id="r2" value="comfortable" />
+            <RadioGroupItem
+              id="r2"
+              value="comfortable"
+            />
             <Label for="r2">Comfortable (Nyaman)</Label>
           </div>
           <div class="flex items-center space-x-2">
-            <RadioGroupItem id="r3" value="compact" />
+            <RadioGroupItem
+              id="r3"
+              value="compact"
+            />
             <Label for="r3">Compact (Padat)</Label>
           </div>
         </RadioGroup>

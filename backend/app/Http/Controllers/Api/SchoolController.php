@@ -22,18 +22,7 @@ class SchoolController extends Controller
         $user = $request->user();
 
         if ($user->isSuperAdmin()) {
-            $query = School::select('schools.*')
-                ->with(['foundation:id,name,code', 'users' => function ($q) {
-                    $q->whereIn('role_id', function ($sq) {
-                        $sq->select('id')->from('roles')->where('name', 'admin_sekolah');
-                    });
-                }])
-                ->addSelect(['students_count' => User::selectRaw('count(*)')
-                    ->whereColumn('users.school_id', 'schools.id')
-                    ->whereIn('users.role_id', function ($sq) {
-                        $sq->select('id')->from('roles')->where('name', 'siswa');
-                    })
-                ]);
+            $query = School::with('foundation:id,name,code')->withCount('students');
 
             if ($request->has('search')) {
                 $search = $request->input('search');
@@ -63,30 +52,14 @@ class SchoolController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'data'   => $query->latest('schools.created_at')->paginate(15),
-                'stats'  => [
-                    'total' => $total,
-                    'active' => $active,
-                    'trial' => $trial,
-                    'inactive' => $inactive,
-                ]
+                'data'   => $query->latest()->paginate($request->input('per_page', 15)),
             ]);
         }
 
         if ($user->hasRole('admin_yayasan')) {
-            $query = School::select('schools.*')
-                ->with(['foundation:id,name,code', 'users' => function ($q) {
-                    $q->whereIn('role_id', function ($sq) {
-                        $sq->select('id')->from('roles')->where('name', 'admin_sekolah');
-                    });
-                }])
-                ->where('foundation_id', $user->foundation_id)
-                ->addSelect(['students_count' => User::selectRaw('count(*)')
-                    ->whereColumn('users.school_id', 'schools.id')
-                    ->whereIn('users.role_id', function ($sq) {
-                        $sq->select('id')->from('roles')->where('name', 'siswa');
-                    })
-                ]);
+            $query = School::with('foundation:id,name,code')
+                ->withCount('students')
+                ->where('foundation_id', $user->foundation_id);
 
             if ($request->has('search')) {
                 $search = $request->input('search');
@@ -112,27 +85,12 @@ class SchoolController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'data'   => $query->latest('schools.created_at')->paginate(15),
-                'stats'  => [
-                    'total' => $total,
-                    'active' => $active,
-                    'trial' => $trial,
-                    'inactive' => $inactive,
-                ]
+                'data'   => $query->latest()->paginate($request->input('per_page', 15)),
             ]);
         }
 
-        if ($user->hasRole('admin_sekolah')) {
-            $school = School::select('schools.*')
-                ->with('foundation:id,name,code')
-                ->addSelect(['students_count' => User::selectRaw('count(*)')
-                    ->whereColumn('users.school_id', 'schools.id')
-                    ->whereIn('users.role_id', function ($sq) {
-                        $sq->select('id')->from('roles')->where('name', 'siswa');
-                    })
-                ])
-                ->find($user->school_id);
-
+        if ($user->school_id) { // admin_sekolah, kepala_sekolah, tata_usaha, wali_kelas
+            $school = School::with('foundation:id,name,code')->withCount('students')->find($user->school_id);
             if (!$school) {
                 return response()->json([
                     'status'  => 'error',

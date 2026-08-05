@@ -4,56 +4,66 @@ import PageHeader from '@/components/page-header/PageHeader.vue'
 import { columns, filters, actions } from './data/guruStaff.js'
 import StatCard from '@/components/stat-card/StatCard.vue'
 import { useAuthStore } from '@/stores/authStore'
-import { computed, ref, watch, onMounted } from 'vue'
 import { usePagination } from '@/composables/usePagination'
+import { computed, ref, watch, onMounted } from 'vue'
 import { toast } from 'vue-sonner'
 import DataSheet from '@/components/data-sheet/DataSheet.vue'
-import { guruStaffSheetSections, rawGuruStaffItem } from './data/dataSheetDetail.js'
+import { guruStaffSheetSections } from './data/dataSheetDetail.js'
 import { getTeachers, deleteTeacher } from '@/services/managementService'
 import { School, BookCheck, GraduationCap, BookX } from 'lucide-vue-next'
-
-const stats = ref([
-  {
-    label: 'TOTAL PEGAWAI',
-    value: '0',
-    trend: 'Pegawai',
-    trendDirection: 'up',
-    icon: School,
-    illustration: 'globe',
-    variant: 'primary'
-  },
-  {
-    label: 'PEGAWAI AKTIF',
-    value: '0',
-    trend: 'Aktif',
-    trendDirection: 'up',
-    icon: BookCheck,
-    illustration: 'school_bell',
-    variant: 'emerald'
-  },
-  {
-    label: 'TOTAL GURU',
-    value: '0',
-    sub: 'Guru Pendidik',
-    icon: GraduationCap,
-    illustration: 'open_book',
-    variant: 'amber'
-  },
-  {
-    label: 'TOTAL STAFF',
-    value: '0',
-    sub: 'Tenaga Kependidikan',
-    icon: BookX,
-    illustration: 'abc_board',
-    variant: 'violet'
-  }
-])
 
 const auth = useAuthStore()
 const isAdminYayasan = computed(() => auth.user?.role === 'admin_yayasan')
 const perPage = ref(5)
 const tableItems = ref([])
 const isLoading = ref(false)
+
+const stats = computed(() => {
+  const list = items.value || []
+  const totalVal = list.length
+  const aktifVal = list.filter(item => item.status_aktif === 'Aktif').length
+  const guruVal = list.filter(item => ['guru', 'wali_kelas', 'kepala_sekolah'].includes(item.role)).length
+  const staffVal = list.filter(item => ['tata_usaha', 'admin_sekolah', 'admin_yayasan'].includes(item.role)).length
+
+  return [
+    {
+      label: 'TOTAL PEGAWAI',
+      value: String(totalVal),
+      trend: '+8.4% bln ini',
+      trendDirection: 'up',
+      icon: School,
+      illustration: 'globe',
+      variant: 'primary'
+    },
+    {
+      label: 'PEGAWAI AKTIF',
+      value: String(aktifVal),
+      trend: '+12 Baru',
+      trendDirection: 'up',
+      icon: BookCheck,
+      illustration: 'school_bell',
+      variant: 'emerald'
+    },
+    {
+      label: 'TOTAL GURU',
+      value: String(guruVal),
+      sub: 'Kehadiran',
+      progress: 98,
+      icon: GraduationCap,
+      illustration: 'open_book',
+      variant: 'amber'
+    },
+    {
+      label: 'TOTAL STAFF',
+      value: String(staffVal),
+      sub: 'Kehadiran',
+      progress: 90,
+      icon: BookX,
+      illustration: 'abc_board',
+      variant: 'violet'
+    }
+  ]
+})
 
 const filterValues = ref({
   search: '',
@@ -95,10 +105,6 @@ onMounted(() => {
   fetchTeachers()
 })
 
-const items = computed(() => {
-  return tableItems.value
-})
-
 const deleteItem = async (id, item) => {
   try {
     await deleteTeacher(id)
@@ -107,7 +113,7 @@ const deleteItem = async (id, item) => {
     })
     fetchTeachers()
   } catch (err) {
-    toast.error('Gagal menghapus pegawai')
+    toast.error('Gagal menghapus guru/staff')
   }
 }
 
@@ -191,7 +197,7 @@ const handleViewDetail = id => {
       description-key="nip_nuptk"
       description-prefix="NIP/NUPTK: "
       avatar-key="foto"
-      badge-key="status_kepegawaian"
+      badge-key="status"
       :sections="guruStaffSheetSections"
     />
   </div>

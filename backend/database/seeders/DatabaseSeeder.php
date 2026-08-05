@@ -55,16 +55,16 @@ class DatabaseSeeder extends Seeder
 
         $foundationB = Foundation::create([
             'code'             => 'Y0002',
-            'name'             => 'Yayasan Cendekia Mulia',
-            'established_date' => '2015-05-20',
+            'name'             => 'Yayasan Harapan Bangsa',
+            'established_date' => '2015-05-10',
             'status'           => 'active',
-            'address'          => 'Jl. Merdeka No. 45, Bandung',
-            'email'            => 'info@cendekiamulia.id',
-            'phone'            => '022-98765432',
-            'website'          => 'https://cendekiamulia.id',
-            'deed_number'      => 'AHU-67890.AH.01.04',
-            'deed_date'        => '2015-05-20',
-            'decree_number'    => 'SK-002/YCM/2015',
+            'address'          => 'Jl. Harapan No. 88, Jakarta Selatan',
+            'email'            => 'info@harapanbangsa.or.id',
+            'phone'            => '021-87650000',
+            'website'          => 'https://harapanbangsa.or.id',
+            'deed_number'      => 'AHU-54321.AH.01.04',
+            'deed_date'        => '2015-05-10',
+            'decree_number'    => 'SK-002/YHB/2015',
             'decree_date'      => '2015-06-01',
         ]);
 
@@ -92,22 +92,93 @@ class DatabaseSeeder extends Seeder
             'accreditation_number' => 'AKR-2023-0001',
         ]);
 
-        // School 2 (Yayasan A - SMP)
-        $school2 = School::create([
-            'foundation_id'        => $foundationA->id,
-            'name'                 => 'SMP Nusantara Pintar Jakarta',
+        $school1B = School::create([
+            'foundation_id'        => $foundationB->id,
+            'name'                 => 'SMP Nusantara Pintar Bekasi',
             'npsn'                 => '20100002',
             'level'                => 'SMP',
             'established_date'     => '2014-07-01',
             'status'               => 'active',
-            'address'              => 'Jl. Pemuda No. 88, Jakarta Timur',
-            'email'                => 'info@smpnpjakarta.sch.id',
-            'phone'                => '021-44556677',
-            'website'              => 'https://smpnpjakarta.sch.id',
+            'address'              => 'Jl. Raya Bekasi No. 46, Bekasi',
+            'email'                => 'info@smpnpbekasi.sch.id',
+            'phone'                => '021-87654322',
+            'website'              => 'https://smpnpbekasi.sch.id',
             'decree_number'        => 'SK-003/SMPNP/2014',
             'decree_date'          => '2014-06-15',
             'permit_number'        => 'IZIN-002/2014',
             'permit_date'          => '2014-06-01',
+            'accreditation'        => 'A',
+            'accreditation_date'   => '2023-05-10',
+            'accreditation_number' => 'AKR-2023-0002',
+        ]);
+
+        // ─────────────────────────────────────────────
+        //  4. Academic Year (Tahun Ajaran) & 5. Subjects (Mata Pelajaran) for all schools
+        // ─────────────────────────────────────────────
+        $academicYear = null;
+        $academicYearOdd = null;
+
+        $subjectsData = [
+            ['code' => 'MTK', 'name' => 'Matematika'],
+            ['code' => 'BIN', 'name' => 'Bahasa Indonesia'],
+            ['code' => 'IPA', 'name' => 'Ilmu Pengetahuan Alam'],
+            ['code' => 'IPS', 'name' => 'Ilmu Pengetahuan Sosial'],
+            ['code' => 'BIG', 'name' => 'Bahasa Inggris'],
+            ['code' => 'PAI', 'name' => 'Pendidikan Agama Islam'],
+            ['code' => 'PJK', 'name' => 'Pendidikan Jasmani'],
+            ['code' => 'SBD', 'name' => 'Seni Budaya'],
+        ];
+
+        $schools = [$school1, $school1B];
+        foreach ($schools as $sch) {
+            $ayEven = AcademicYear::create([
+                'school_id'  => $sch->id,
+                'name'       => '2024/2025',
+                'semester'   => 'even',
+                'start_date' => '2025-01-06',
+                'end_date'   => '2025-06-30',
+                'is_active'  => true,
+            ]);
+
+            $ayOdd = AcademicYear::create([
+                'school_id'  => $sch->id,
+                'name'       => '2024/2025',
+                'semester'   => 'odd',
+                'start_date' => '2024-07-15',
+                'end_date'   => '2024-12-20',
+                'is_active'  => false,
+            ]);
+
+            if ($sch->id === $school1->id) {
+                $academicYear = $ayEven;
+                $academicYearOdd = $ayOdd;
+            }
+
+            foreach ($subjectsData as $subj) {
+                Subject::create([
+                    'school_id'   => $sch->id,
+                    'code'        => $subj['code'],
+                    'name'        => $subj['name'],
+                    'is_active'   => true,
+                ]);
+            }
+        }
+        
+        $school2 = School::create([
+            'foundation_id'        => $foundationB->id,
+            'name'                 => 'SMP Harapan Bangsa Jakarta',
+            'npsn'                 => '20200001',
+            'level'                => 'SMP',
+            'established_date'     => '2016-07-01',
+            'status'               => 'active',
+            'address'              => 'Jl. Harapan No. 89, Jakarta Selatan',
+            'email'                => 'info@smphbjakarta.sch.id',
+            'phone'                => '021-87650001',
+            'website'              => 'https://smphbjakarta.sch.id',
+            'decree_number'        => 'SK-004/SMPHB/2016',
+            'decree_date'          => '2016-06-15',
+            'permit_number'        => 'IZIN-003/2016',
+            'permit_date'          => '2016-06-01',
             'accreditation'        => 'A',
             'accreditation_date'   => '2023-08-15',
             'accreditation_number' => 'AKR-2023-0002',
@@ -155,7 +226,7 @@ class DatabaseSeeder extends Seeder
             'accreditation_number' => 'AKR-2024-0004',
         ]);
 
-        $allSchools = [$school1, $school2, $school3, $school4];
+        $allSchools = [$school1, $school1B, $school3, $school4];
 
         // ─────────────────────────────────────────────
         //  4. Core System Users (Superadmin & Foundation Admins)
@@ -662,5 +733,6 @@ class DatabaseSeeder extends Seeder
         $this->call(StudentWarningCertificateSeeder::class);
         $this->call(ActivityNewsSeeder::class);
         $this->call(SppSeeder::class);
+
     }
 }

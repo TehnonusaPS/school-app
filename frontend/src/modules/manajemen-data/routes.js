@@ -197,5 +197,5 @@ export default [
       parent: 'Manajemen Data',
       description: 'Daftar data jadwal pelajaran kelas dan guru pengajar.'
     }
-  },
+  }
 ]

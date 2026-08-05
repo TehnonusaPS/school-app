@@ -70,6 +70,16 @@ class School extends Model
     }
 
     /**
+     * Get all students in this school.
+     */
+    public function students(): HasMany
+    {
+        return $this->hasMany(User::class)->whereHas('role', function ($q) {
+            $q->where('name', 'siswa');
+        });
+    }
+
+    /**
      * Get all academic years for this school.
      */
     public function academicYears(): HasMany

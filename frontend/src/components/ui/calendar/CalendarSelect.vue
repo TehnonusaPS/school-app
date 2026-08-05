@@ -14,8 +14,8 @@ const emit = defineEmits<{
 const open = ref(false)
 const listRef = ref<HTMLElement | null>(null)
 
-const selectedLabel = computed(() =>
-  props.options.find(o => o.value === props.modelValue)?.label ?? props.modelValue
+const selectedLabel = computed(
+  () => props.options.find(o => o.value === props.modelValue)?.label ?? props.modelValue
 )
 
 function select(value: string) {
@@ -32,7 +32,7 @@ function scrollToSelected() {
   }
 }
 
-watch(open, (val) => {
+watch(open, val => {
   if (val) nextTick(() => scrollToSelected())
 })
 </script>
@@ -72,9 +72,11 @@ watch(open, (val) => {
           type="button"
           :data-selected="opt.value === modelValue"
           class="w-full whitespace-nowrap px-4 py-1.5 text-sm text-center transition-colors hover:bg-muted/60 focus-visible:outline-none"
-          :class="opt.value === modelValue
-            ? 'font-semibold text-primary bg-primary/10 hover:bg-primary/15'
-            : 'text-foreground'"
+          :class="
+            opt.value === modelValue
+              ? 'font-semibold text-primary bg-primary/10 hover:bg-primary/15'
+              : 'text-foreground'
+          "
           @click="select(opt.value)"
         >
           {{ opt.label }}
@@ -83,6 +85,10 @@ watch(open, (val) => {
     </Transition>
 
     <!-- Overlay to close when clicking outside -->
-    <div v-if="open" class="fixed inset-0 z-[59]" @click="open = false" />
+    <div
+      v-if="open"
+      class="fixed inset-0 z-[59]"
+      @click="open = false"
+    />
   </div>
 </template>

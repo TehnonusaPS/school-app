@@ -30,17 +30,49 @@ export const classMetadata = {
 
 // Generate some sample students for each class
 const namesL = [
-  'Ahmad Wibowo', 'Budi Santoso', 'Candra Wijaya', 'Dedi Kurniawan', 'Eko Prasetyo',
-  'Fajar Nugroho', 'Gilang Ramadhan', 'Hendra Saputra', 'Indra Lesmana', 'Joko Susilo',
-  'Kurniawan Dwi', 'Luthfi Hakim', 'Muhammad Rizky', 'Noval Ardiansyah', 'Oki Setiawan',
-  'Pratama Putra', 'Rian Hidayat', 'Setyo Budiman', 'Taufik Hidayat', 'Utomo Putra'
+  'Ahmad Wibowo',
+  'Budi Santoso',
+  'Candra Wijaya',
+  'Dedi Kurniawan',
+  'Eko Prasetyo',
+  'Fajar Nugroho',
+  'Gilang Ramadhan',
+  'Hendra Saputra',
+  'Indra Lesmana',
+  'Joko Susilo',
+  'Kurniawan Dwi',
+  'Luthfi Hakim',
+  'Muhammad Rizky',
+  'Noval Ardiansyah',
+  'Oki Setiawan',
+  'Pratama Putra',
+  'Rian Hidayat',
+  'Setyo Budiman',
+  'Taufik Hidayat',
+  'Utomo Putra'
 ]
 
 const namesP = [
-  'Adelia Putri', 'Bella Safira', 'Citra Lestari', 'Dian Sastrowardoyo', 'Elsa Mayori',
-  'Fitri Handayani', 'Gita Gutawa', 'Hesti Purwadinata', 'Indah Permatasari', 'Julia Perez',
-  'Kartika Sari', 'Larasati Putri', 'Megawati Sukarno', 'Nabila Syakieb', 'Olivia Zalianty',
-  'Putri Marino', 'Ririn Dwi', 'Siti Aminah', 'Tia Ariestya', 'Wulan Guritno'
+  'Adelia Putri',
+  'Bella Safira',
+  'Citra Lestari',
+  'Dian Sastrowardoyo',
+  'Elsa Mayori',
+  'Fitri Handayani',
+  'Gita Gutawa',
+  'Hesti Purwadinata',
+  'Indah Permatasari',
+  'Julia Perez',
+  'Kartika Sari',
+  'Larasati Putri',
+  'Megawati Sukarno',
+  'Nabila Syakieb',
+  'Olivia Zalianty',
+  'Putri Marino',
+  'Ririn Dwi',
+  'Siti Aminah',
+  'Tia Ariestya',
+  'Wulan Guritno'
 ]
 
 function generateStudents() {
@@ -54,17 +86,17 @@ function generateStudents() {
     classes.forEach(cls => {
       const meta = classMetadata[yr][cls]
       const count = meta.siswaCount
-      
+
       for (let i = 0; i < count; i++) {
         const isL = i % 2 === 0
         const namePool = isL ? namesL : namesP
         const baseName = namePool[i % namePool.length]
         const nama = baseName
-        
+
         const nis = String(10000 + globalId)
         const nisn = '00' + String(12345600 + globalId)
         const gender = isL ? 'L' : 'P'
-        
+
         list.push({
           id: String(globalId++),
           nama,
@@ -84,9 +116,30 @@ function generateStudents() {
 export const initialSiswaTahunAjaran = generateStudents()
 
 export const initialTahunAjaranList = [
-  { id: '1', tahun: '2024/2025', tanggalMulai: '2024-07-15', tanggalSelesai: '2025-06-20', status: 'nonaktif', keterangan: 'Tahun ajaran lalu' },
-  { id: '2', tahun: '2025/2026', tanggalMulai: '2025-07-15', tanggalSelesai: '2026-06-20', status: 'aktif', keterangan: 'Tahun ajaran berjalan' },
-  { id: '3', tahun: '2026/2027', tanggalMulai: '2026-07-15', tanggalSelesai: '2027-06-20', status: 'nonaktif', keterangan: 'Tahun ajaran mendatang' }
+  {
+    id: '1',
+    tahun: '2024/2025',
+    tanggalMulai: '2024-07-15',
+    tanggalSelesai: '2025-06-20',
+    status: 'nonaktif',
+    keterangan: 'Tahun ajaran lalu'
+  },
+  {
+    id: '2',
+    tahun: '2025/2026',
+    tanggalMulai: '2025-07-15',
+    tanggalSelesai: '2026-06-20',
+    status: 'aktif',
+    keterangan: 'Tahun ajaran berjalan'
+  },
+  {
+    id: '3',
+    tahun: '2026/2027',
+    tanggalMulai: '2026-07-15',
+    tanggalSelesai: '2027-06-20',
+    status: 'nonaktif',
+    keterangan: 'Tahun ajaran mendatang'
+  }
 ]
 
 const TAHUN_AJARAN_LIST_KEY = 'crud_tahun_ajaran_db_v1'

@@ -3,18 +3,15 @@ import type { ProgressRootProps } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
 import { ref, onMounted, watch } from 'vue'
 import { reactiveOmit } from '@vueuse/core'
-import {
-  ProgressIndicator,
-  ProgressRoot,
-} from 'reka-ui'
+import { ProgressIndicator, ProgressRoot } from 'reka-ui'
 import { cn } from '@/lib/utils'
 
 const props = withDefaults(
   defineProps<ProgressRootProps & { class?: HTMLAttributes['class']; delay?: number }>(),
   {
     modelValue: 0,
-    delay: 0,
-  },
+    delay: 0
+  }
 )
 
 const delegatedProps = reactiveOmit(props, 'class')
@@ -29,9 +26,12 @@ onMounted(() => {
   }, props.delay || 80)
 })
 
-watch(() => props.modelValue, (newVal) => {
-  widthPercent.value = newVal ?? 0
-})
+watch(
+  () => props.modelValue,
+  newVal => {
+    widthPercent.value = newVal ?? 0
+  }
+)
 </script>
 
 <template>
@@ -41,7 +41,7 @@ watch(() => props.modelValue, (newVal) => {
     :class="
       cn(
         'bg-muted h-1 rounded-full relative flex w-full items-center overflow-x-hidden',
-        props.class,
+        props.class
       )
     "
   >

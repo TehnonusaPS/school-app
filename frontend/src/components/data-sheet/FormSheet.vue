@@ -1,10 +1,21 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription
+} from '@/components/ui/sheet'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '@/components/ui/accordion'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import {
   Select,
@@ -78,7 +89,7 @@ const fileInput = ref(null)
 
 watch(
   () => props.open,
-  (newOpen) => {
+  newOpen => {
     if (newOpen) {
       const form = {}
       props.sections.forEach(section => {
@@ -86,7 +97,9 @@ watch(
           if (field.key) {
             form[field.key] = props.item ? (props.item[field.key] ?? '') : ''
             if (field.type === 'file' || field.file) {
-              form[field.key + '_fileName'] = props.item ? (props.item[field.key + '_fileName'] ?? props.item[field.key] ?? '') : ''
+              form[field.key + '_fileName'] = props.item
+                ? (props.item[field.key + '_fileName'] ?? props.item[field.key] ?? '')
+                : ''
             }
           }
         })
@@ -104,14 +117,18 @@ watch(
 )
 
 // Sync localForm changes back to parent
-watch(localForm, (newVal) => {
-  emit('change', { ...newVal })
-}, { deep: true })
+watch(
+  localForm,
+  newVal => {
+    emit('change', { ...newVal })
+  },
+  { deep: true }
+)
 
 // Sync prop item updates to localForm (e.g. parent dynamically updating fields like grades or file names)
 watch(
   () => props.item,
-  (newItem) => {
+  newItem => {
     if (newItem && props.open) {
       props.sections.forEach(section => {
         section.fields.forEach(field => {
@@ -126,7 +143,11 @@ watch(
           }
         })
       })
-      if (props.avatarKey && typeof props.avatarKey === 'string' && newItem[props.avatarKey] !== undefined) {
+      if (
+        props.avatarKey &&
+        typeof props.avatarKey === 'string' &&
+        newItem[props.avatarKey] !== undefined
+      ) {
         localForm.value[props.avatarKey] = newItem[props.avatarKey]
       }
     }
@@ -154,7 +175,7 @@ const triggerFileInput = () => {
   }
 }
 
-const handleFileChange = (event) => {
+const handleFileChange = event => {
   const file = event.target.files?.[0]
   if (file) {
     const previewUrl = URL.createObjectURL(file)
@@ -175,7 +196,10 @@ const handleSubmit = () => {
 
 <template>
   <Sheet v-model:open="isOpen">
-    <SheetContent :show-close-button="false" class="gap-2 h-full flex flex-col">
+    <SheetContent
+      :show-close-button="false"
+      class="gap-2 h-full flex flex-col"
+    >
       <slot name="header">
         <SheetHeader class="border-b border-border pb-3 shrink-0">
           <div class="flex items-center gap-4">
@@ -216,7 +240,10 @@ const handleSubmit = () => {
               <SheetTitle class="text-base font-bold text-foreground truncate">
                 {{ title }}
               </SheetTitle>
-              <SheetDescription v-if="description" class="text-xs text-muted-foreground">
+              <SheetDescription
+                v-if="description"
+                class="text-xs text-muted-foreground"
+              >
                 {{ description }}
               </SheetDescription>
             </div>
@@ -227,7 +254,11 @@ const handleSubmit = () => {
       <!-- Scrollable Form Body -->
       <div class="overflow-y-auto pr-1 flex-1 no-scrollbar space-y-6 py-2">
         <slot :form="localForm">
-          <Accordion type="multiple" class="w-full" :default-value="sections.map(s => s.id)">
+          <Accordion
+            type="multiple"
+            class="w-full"
+            :default-value="sections.map(s => s.id)"
+          >
             <AccordionItem
               v-for="section in sections"
               :key="section.id"
@@ -237,13 +268,21 @@ const handleSubmit = () => {
                 {{ section.title }}
               </AccordionTrigger>
               <AccordionContent class="space-y-4 pt-3">
-                <slot :name="`section-${section.id}`" :section="section" :form="localForm">
+                <slot
+                  :name="`section-${section.id}`"
+                  :section="section"
+                  :form="localForm"
+                >
                   <div
                     v-for="field in section.fields"
                     :key="field.label"
                     class="grid gap-1.5"
                   >
-                    <slot :name="`field-${field.key || field.label.toLowerCase().replace(/\s+/g, '-')}`" :field="field" :form="localForm">
+                    <slot
+                      :name="`field-${field.key || field.label.toLowerCase().replace(/\s+/g, '-')}`"
+                      :field="field"
+                      :form="localForm"
+                    >
                       <div class="flex items-center gap-1.5">
                         <component
                           v-if="field.icon"
@@ -259,15 +298,17 @@ const handleSubmit = () => {
                         v-model="localForm[field.key]"
                         :disabled="disabled || field.disabled"
                         class="min-h-16 bg-background border-input focus-visible:ring-1 focus-visible:ring-ring text-sm"
-                        :placeholder="field.placeholder || ('Masukkan ' + field.label)"
+                        :placeholder="field.placeholder || 'Masukkan ' + field.label"
                       />
                       <Select
                         v-else-if="field.type === 'select' || field.select || field.options"
                         v-model="localForm[field.key]"
                         :disabled="disabled || field.disabled"
                       >
-                        <SelectTrigger class="h-8 bg-background border-input focus-visible:ring-1 focus-visible:ring-ring text-sm w-full">
-                          <SelectValue :placeholder="field.placeholder || ('Pilih ' + field.label)" />
+                        <SelectTrigger
+                          class="h-8 bg-background border-input focus-visible:ring-1 focus-visible:ring-ring text-sm w-full"
+                        >
+                          <SelectValue :placeholder="field.placeholder || 'Pilih ' + field.label" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem
@@ -286,8 +327,16 @@ const handleSubmit = () => {
                         @click="!(disabled || field.disabled) && $refs['fileInput_' + field.key]?.[0]?.click()"
                       >
                         <UploadCloud class="size-6 text-muted-foreground animate-bounce" />
-                        <span class="text-xs font-semibold text-foreground text-center line-clamp-2 px-2">
-                          {{ localForm[field.key + '_fileName'] || localForm[field.key]?.name || localForm[field.key] || field.placeholder || 'Pilih file (PDF, DOCX, PPTX atau Gambar)' }}
+                        <span
+                          class="text-xs font-semibold text-foreground text-center line-clamp-2 px-2"
+                        >
+                          {{
+                            localForm[field.key + '_fileName'] ||
+                            localForm[field.key]?.name ||
+                            localForm[field.key] ||
+                            field.placeholder ||
+                            'Pilih file (PDF, DOCX, PPTX atau Gambar)'
+                          }}
                         </span>
                         <input
                           v-if="!(disabled || field.disabled)"
@@ -295,13 +344,15 @@ const handleSubmit = () => {
                           type="file"
                           :accept="field.accept || '*/*'"
                           class="hidden"
-                          @change="(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              localForm[field.key] = file;
-                              localForm[field.key + '_fileName'] = file.name;
+                          @change="
+                            e => {
+                              const file = e.target.files?.[0]
+                              if (file) {
+                                localForm[field.key] = file
+                                localForm[field.key + '_fileName'] = file.name
+                              }
                             }
-                          }"
+                          "
                         />
                       </div>
                       <Input
@@ -309,7 +360,7 @@ const handleSubmit = () => {
                         v-model="localForm[field.key]"
                         :disabled="disabled || field.disabled"
                         class="h-8 bg-background border-input focus-visible:ring-1 focus-visible:ring-ring text-sm"
-                        :placeholder="field.placeholder || ('Masukkan ' + field.label)"
+                        :placeholder="field.placeholder || 'Masukkan ' + field.label"
                       />
                     </slot>
                   </div>
@@ -321,8 +372,15 @@ const handleSubmit = () => {
       </div>
 
       <!-- Footer Action Buttons -->
-      <div class="border-t border-border/80 px-6 py-4 flex items-center justify-end gap-3 shrink-0 bg-card/40 dark:bg-card/25 backdrop-blur-md -mx-6 -mb-6 mt-auto">
-        <slot name="actions" :form="localForm" :submit="handleSubmit" :cancel="handleCancel">
+      <div
+        class="border-t border-border/80 px-6 py-4 flex items-center justify-end gap-3 shrink-0 bg-card/40 dark:bg-card/25 backdrop-blur-md -mx-6 -mb-6 mt-auto"
+      >
+        <slot
+          name="actions"
+          :form="localForm"
+          :submit="handleSubmit"
+          :cancel="handleCancel"
+        >
           <Button
             variant="outline"
             size="sm"

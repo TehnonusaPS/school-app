@@ -16,17 +16,29 @@ import {
   RangeCalendarGridBody,
   RangeCalendarGridHead,
   RangeCalendarGridRow,
-  RangeCalendarHeadCell,
+  RangeCalendarHeadCell
 } from '.'
 
-const props = withDefaults(defineProps<RangeCalendarRootProps & { class?: HTMLAttributes['class'], yearRange?: DateValue[] }>(), {
-  placeholder: undefined,
-})
+const props = withDefaults(
+  defineProps<
+    RangeCalendarRootProps & { class?: HTMLAttributes['class']; yearRange?: DateValue[] }
+  >(),
+  {
+    placeholder: undefined
+  }
+)
 
 const emits = defineEmits<RangeCalendarRootEmits>()
 
 // Strip props handled manually so each root doesn't double-process them
-const sharedProps = reactiveOmit(props, 'class', 'placeholder', 'defaultPlaceholder', 'numberOfMonths', 'yearRange')
+const sharedProps = reactiveOmit(
+  props,
+  'class',
+  'placeholder',
+  'defaultPlaceholder',
+  'numberOfMonths',
+  'yearRange'
+)
 
 const formatter = useDateFormatter(props.locale ?? 'id-ID')
 
@@ -39,17 +51,30 @@ const toDate = (date: any): Date => {
 
 // Get initial displays from modelValue or fallback to today
 const initialLeft = (() => {
-  if (props.modelValue && typeof props.modelValue === 'object' && 'start' in props.modelValue && props.modelValue.start) {
+  if (
+    props.modelValue &&
+    typeof props.modelValue === 'object' &&
+    'start' in props.modelValue &&
+    props.modelValue.start
+  ) {
     return props.modelValue.start
   }
   return props.defaultPlaceholder ?? todayDate
 })()
 
 const initialRight = (() => {
-  if (props.modelValue && typeof props.modelValue === 'object' && 'end' in props.modelValue && props.modelValue.end) {
+  if (
+    props.modelValue &&
+    typeof props.modelValue === 'object' &&
+    'end' in props.modelValue &&
+    props.modelValue.end
+  ) {
     const endVal = props.modelValue.end
     // Ensure right month is strictly greater than left month
-    if (endVal.year > initialLeft.year || (endVal.year === initialLeft.year && endVal.month > initialLeft.month)) {
+    if (
+      endVal.year > initialLeft.year ||
+      (endVal.year === initialLeft.year && endVal.month > initialLeft.month)
+    ) {
       return endVal
     }
   }
@@ -86,25 +111,35 @@ watch([() => props.modelValue, () => props.placeholder], ([newModel, newPlacehol
 }, { deep: true, immediate: true })
 
 // ── Shared year range ────────────────────────────────────────────
-const yearRange = computed(() =>
-  props.yearRange ?? createYearRange({
-    start: props?.minValue ?? leftDisplay.value.cycle('year', -100),
-    end: props?.maxValue ?? rightDisplay.value.cycle('year', 10),
-  })
+const yearRange = computed(
+  () =>
+    props.yearRange ??
+    createYearRange({
+      start: props?.minValue ?? leftDisplay.value.cycle('year', -100),
+      end: props?.maxValue ?? rightDisplay.value.cycle('year', 10)
+    })
 )
 
 // ── Navigation constraints ───────────────────────────────────────
-const canLeftNext = computed(() =>
-  toDate(leftDisplay.value.add({ months: 1 })) < toDate(rightDisplay.value)
+const canLeftNext = computed(
+  () => toDate(leftDisplay.value.add({ months: 1 })) < toDate(rightDisplay.value)
 )
-const canRightPrev = computed(() =>
-  toDate(rightDisplay.value.subtract({ months: 1 })) > toDate(leftDisplay.value)
+const canRightPrev = computed(
+  () => toDate(rightDisplay.value.subtract({ months: 1 })) > toDate(leftDisplay.value)
 )
 
-function leftPrev() { leftDisplay.value = leftDisplay.value.subtract({ months: 1 }) }
-function leftNext() { if (canLeftNext.value) leftDisplay.value = leftDisplay.value.add({ months: 1 }) }
-function rightPrev() { if (canRightPrev.value) rightDisplay.value = rightDisplay.value.subtract({ months: 1 }) }
-function rightNext() { rightDisplay.value = rightDisplay.value.add({ months: 1 }) }
+function leftPrev() {
+  leftDisplay.value = leftDisplay.value.subtract({ months: 1 })
+}
+function leftNext() {
+  if (canLeftNext.value) leftDisplay.value = leftDisplay.value.add({ months: 1 })
+}
+function rightPrev() {
+  if (canRightPrev.value) rightDisplay.value = rightDisplay.value.subtract({ months: 1 })
+}
+function rightNext() {
+  rightDisplay.value = rightDisplay.value.add({ months: 1 })
+}
 
 // ── Month/year options — only valid options shown ────────────────
 function monthOptions(display: any, isLeft: boolean) {
@@ -120,7 +155,7 @@ function monthOptions(display: any, isLeft: boolean) {
     })
     .map(m => ({
       value: String(m.month),
-      label: formatter.custom(toDate(m), { month: 'short' }),
+      label: formatter.custom(toDate(m), { month: 'short' })
     }))
 }
 
@@ -161,8 +196,14 @@ function updateRightYear(val: string) {
 </script>
 
 <template>
-  <div :class="cn('p-3 flex flex-col gap-4 sm:flex-row justify-center items-stretch bg-background', props.class)">
-
+  <div
+    :class="
+      cn(
+        'p-3 flex flex-col gap-4 sm:flex-row justify-center items-stretch bg-background',
+        props.class
+      )
+    "
+  >
     <!-- ── LEFT CARD ─────────────────────────────────────────────── -->
     <div class="flex flex-col gap-3 p-2 w-fit">
       <!-- Header -->
@@ -209,17 +250,22 @@ function updateRightYear(val: string) {
         locale="id-ID"
         data-slot="range-calendar"
         class="w-full"
-        @update:model-value="(val) => emits('update:modelValue', val as any)"
+        @update:model-value="val => emits('update:modelValue', val as any)"
       >
         <template #default="{ grid, weekDays }">
-          <RangeCalendarGrid v-for="month in grid" :key="month.value.toString()" class="w-full">
+          <RangeCalendarGrid
+            v-for="month in grid"
+            :key="month.value.toString()"
+            class="w-full"
+          >
             <RangeCalendarGridHead>
               <RangeCalendarGridRow>
                 <RangeCalendarHeadCell
                   v-for="day in weekDays"
                   :key="day"
                   class="text-xs font-semibold text-muted-foreground/80"
-                >{{ day }}</RangeCalendarHeadCell>
+                  >{{ day }}</RangeCalendarHeadCell
+                >
               </RangeCalendarGridRow>
             </RangeCalendarGridHead>
             <RangeCalendarGridBody>
@@ -228,8 +274,15 @@ function updateRightYear(val: string) {
                 :key="`L-week-${idx}`"
                 class="mt-1 w-full"
               >
-                <RangeCalendarCell v-for="d in weekDates" :key="d.toString()" :date="d">
-                  <RangeCalendarCellTrigger :day="d" :month="month.value" />
+                <RangeCalendarCell
+                  v-for="d in weekDates"
+                  :key="d.toString()"
+                  :date="d"
+                >
+                  <RangeCalendarCellTrigger
+                    :day="d"
+                    :month="month.value"
+                  />
                 </RangeCalendarCell>
               </RangeCalendarGridRow>
             </RangeCalendarGridBody>
@@ -284,17 +337,22 @@ function updateRightYear(val: string) {
         locale="id-ID"
         data-slot="range-calendar"
         class="w-full"
-        @update:model-value="(val) => emits('update:modelValue', val as any)"
+        @update:model-value="val => emits('update:modelValue', val as any)"
       >
         <template #default="{ grid, weekDays }">
-          <RangeCalendarGrid v-for="month in grid" :key="month.value.toString()" class="w-full">
+          <RangeCalendarGrid
+            v-for="month in grid"
+            :key="month.value.toString()"
+            class="w-full"
+          >
             <RangeCalendarGridHead>
               <RangeCalendarGridRow>
                 <RangeCalendarHeadCell
                   v-for="day in weekDays"
                   :key="day"
                   class="text-xs font-semibold text-muted-foreground/80"
-                >{{ day }}</RangeCalendarHeadCell>
+                  >{{ day }}</RangeCalendarHeadCell
+                >
               </RangeCalendarGridRow>
             </RangeCalendarGridHead>
             <RangeCalendarGridBody>
@@ -303,8 +361,15 @@ function updateRightYear(val: string) {
                 :key="`R-week-${idx}`"
                 class="mt-1 w-full"
               >
-                <RangeCalendarCell v-for="d in weekDates" :key="d.toString()" :date="d">
-                  <RangeCalendarCellTrigger :day="d" :month="month.value" />
+                <RangeCalendarCell
+                  v-for="d in weekDates"
+                  :key="d.toString()"
+                  :date="d"
+                >
+                  <RangeCalendarCellTrigger
+                    :day="d"
+                    :month="month.value"
+                  />
                 </RangeCalendarCell>
               </RangeCalendarGridRow>
             </RangeCalendarGridBody>
@@ -312,6 +377,5 @@ function updateRightYear(val: string) {
         </template>
       </RangeCalendarRoot>
     </div>
-
   </div>
 </template>

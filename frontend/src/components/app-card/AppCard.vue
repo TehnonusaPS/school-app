@@ -49,26 +49,50 @@ defineProps({
 </script>
 
 <template>
-  <Card :size="size" :class="cardClass">
+  <Card
+    :size="size"
+    :class="cardClass"
+  >
     <!--
       Header ditampilkan jika ada:
       title/description (prop atau slot), icon, slot #action, atau slot #header
     -->
     <CardHeader
-      v-if="title || description || icon || $slots.title || $slots.description || $slots.action || $slots.header"
+      v-if="
+        title ||
+        description ||
+        icon ||
+        $slots.title ||
+        $slots.description ||
+        $slots.action ||
+        $slots.header
+      "
       :class="headerClass"
     >
       <!-- Slot #header untuk override seluruh isi header -->
-      <slot v-if="$slots.header" name="header" />
+      <slot
+        v-if="$slots.header"
+        name="header"
+      />
 
       <template v-else>
         <!-- Title -->
         <CardTitle v-if="title || $slots.title">
-          <div v-if="icon" class="flex items-center gap-2">
-            <component :is="icon" class="size-4 text-primary" />
+          <div
+            v-if="icon"
+            class="flex items-center gap-2"
+          >
+            <component
+              :is="icon"
+              class="size-4 text-primary"
+            />
             <slot name="title">{{ title }}</slot>
           </div>
-          <slot v-else name="title">{{ title }}</slot>
+          <slot
+            v-else
+            name="title"
+            >{{ title }}</slot
+          >
         </CardTitle>
 
         <!-- Description -->
@@ -84,7 +108,10 @@ defineProps({
     </CardHeader>
 
     <!-- Content (default slot) -->
-    <CardContent v-if="$slots.default" :class="contentClass">
+    <CardContent
+      v-if="$slots.default"
+      :class="contentClass"
+    >
       <slot />
     </CardContent>
 

@@ -30,9 +30,13 @@ const page = ref(1)
 const perPage = ref(5)
 
 // Reset page to 1 whenever filters change
-watch(filterValues, () => {
-  page.value = 1
-}, { deep: true })
+watch(
+  filterValues,
+  () => {
+    page.value = 1
+  },
+  { deep: true }
+)
 
 const schoolList = computed(() => {
   const schools = [...new Set(props.items.map(i => i.school_name).filter(Boolean))]
@@ -47,9 +51,7 @@ const filters = computed(() => {
       key: 'school',
       type: 'select',
       placeholder: 'Semua Sekolah',
-      options: [
-        ...schoolList.value.map(s => ({ label: s, value: s }))
-      ]
+      options: [...schoolList.value.map(s => ({ label: s, value: s }))]
     })
   }
 
@@ -90,7 +92,7 @@ const filters = computed(() => {
 
 const actions = computed(() => {
   const list = []
-  
+
   if (props.isYayasan || props.readonly) {
     list.push({
       label: 'Export Excel',
@@ -143,18 +145,19 @@ const filteredItems = computed(() => {
     const fStatus = filterValues.value.status || 'all'
     const fSchool = filterValues.value.school || 'all'
 
-    const matchesSearch = !fSearch || 
+    const matchesSearch =
+      !fSearch ||
       aset.name?.toLowerCase().includes(fSearch) ||
       aset.code?.toLowerCase().includes(fSearch)
-      
+
     const matchesCategory = fCategory === 'all' || aset.category === fCategory
     const matchesStatus = fStatus === 'all' || aset.condition === fStatus
-    
+
     let matchesSchool = true
     if (props.isYayasan && fSchool !== 'all') {
       matchesSchool = aset.school_name === fSchool
     }
-    
+
     return matchesSearch && matchesCategory && matchesStatus && matchesSchool
   })
 })
@@ -164,7 +167,7 @@ const paginatedItems = computed(() => {
   return filteredItems.value.slice(start, start + perPage.value)
 })
 
-const categoryBadgeClass = (category) => {
+const categoryBadgeClass = category => {
   switch (category) {
     case 'Elektronik':
       return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shadow-xs'
@@ -179,7 +182,7 @@ const categoryBadgeClass = (category) => {
   }
 }
 
-const conditionBadgeClass = (condition) => {
+const conditionBadgeClass = condition => {
   switch (condition) {
     case 'Baik':
       return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs'
@@ -193,15 +196,15 @@ const conditionBadgeClass = (condition) => {
 }
 
 // Handlers for Row Actions
-const handleEdit = (item) => {
+const handleEdit = item => {
   router.push(`/lainnya/aset/edit/${item.id}`)
 }
 
-const handleDelete = (id) => {
+const handleDelete = id => {
   emit('delete', id)
 }
 
-const handleView = (id) => {
+const handleView = id => {
   emit('view', id)
 }
 </script>
@@ -232,14 +235,20 @@ const handleView = (id) => {
 
     <!-- Custom Render untuk Kolom Kategori -->
     <template #cell-category="{ item }">
-      <Badge :class="categoryBadgeClass(item.category)" class="rounded-full px-2.5 py-0.5 font-bold uppercase tracking-wider text-[10px]">
+      <Badge
+        :class="categoryBadgeClass(item.category)"
+        class="rounded-full px-2.5 py-0.5 font-bold uppercase tracking-wider text-[10px]"
+      >
         {{ item.category }}
       </Badge>
     </template>
 
     <!-- Custom Render untuk Badge Status -->
     <template #cell-condition="{ item }">
-      <Badge :class="conditionBadgeClass(item.condition)" class="rounded-full px-2.5 py-0.5 font-bold uppercase tracking-wider text-[10px]">
+      <Badge
+        :class="conditionBadgeClass(item.condition)"
+        class="rounded-full px-2.5 py-0.5 font-bold uppercase tracking-wider text-[10px]"
+      >
         {{ item.condition }}
       </Badge>
     </template>

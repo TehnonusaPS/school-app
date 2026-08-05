@@ -128,7 +128,7 @@ export async function deleteClassroom(id) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-//  Guru & Staff (Teachers) API
+//  Guru & Staff (Teachers & Staff) API
 // ─────────────────────────────────────────────────────────────────────────
 
 export async function getTeachers(params) {
@@ -155,3 +155,4 @@ export async function deleteTeacher(id) {
   const response = await api.delete(`/management/teachers/${id}`)
   return response.data
 }
+

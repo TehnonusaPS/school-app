@@ -19,28 +19,36 @@ export const filters = [
       {
         label: 'Nonaktif',
         value: 'Nonaktif'
-      },
+      }
     ]
   }
 ]
 
 export const columns = [
-  { key: 'selected', label: '', type: 'checkbox'},
-  { key: 'nama', label: 'Nama Siswa',avatar: true, avatarKey: 'foto' },
+  { key: 'selected', label: '', type: 'checkbox' },
+  { key: 'nama', label: 'Nama Siswa', avatar: true, avatarKey: 'foto' },
   { key: 'nisn', label: 'NISN', type: 'code' },
-  { key: 'kelas', label: 'Kelas Saat Ini'},
-  { key: 'jenisKelamin', label: 'Jenis Kelamin', badge: true,
+  { key: 'kelas', label: 'Kelas Saat Ini' },
+  {
+    key: 'jenisKelamin',
+    label: 'Jenis Kelamin',
+    badge: true,
     badgeVariant: {
       Perempuan: 'pink',
       'Laki-laki': 'blue'
-    }  },
-  { key: 'kehadiran', label: 'Kehadiran'},
+    }
+  },
+  { key: 'kehadiran', label: 'Kehadiran' },
   { key: 'tahunMasuk', label: 'Tahun Masuk', type: 'number' },
-  { key: 'status', label: 'Status', badge: true,
+  {
+    key: 'status',
+    label: 'Status',
+    badge: true,
     badgeVariant: {
       Aktif: 'green',
-      Nonaktif: 'amber',
-    } },
+      Nonaktif: 'amber'
+    }
+  }
 ]
 
 export const allItems = computed(() => [
@@ -256,30 +264,30 @@ export const allItems = computed(() => [
 ])
 
 export const classes = [
-    {
-        label: '1-A',
-        value: '1-A'
-    },
-    {
-        label: '1-B',
-        value: '1-B'
-    },
-    {
-        label: '2-A',
-        value: '2-A'
-    },
-    {
-        label: '2-B',
-        value: '2-B'
-    },
-    {
-        label: '3-A',
-        value: '3-A'
-    },
-    {
-        label: '3-B',
-        value: '3-B'
-    },
+  {
+    label: '1-A',
+    value: '1-A'
+  },
+  {
+    label: '1-B',
+    value: '1-B'
+  },
+  {
+    label: '2-A',
+    value: '2-A'
+  },
+  {
+    label: '2-B',
+    value: '2-B'
+  },
+  {
+    label: '3-A',
+    value: '3-A'
+  },
+  {
+    label: '3-B',
+    value: '3-B'
+  }
 ]
 
 export const guruOptions = [

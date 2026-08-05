@@ -1,19 +1,13 @@
 <script setup>
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 defineProps({
   title: String,
   description: String,
   icon: {
     type: [Object, Function],
-    default: null,
-  },
+    default: null
+  }
 })
 </script>
 

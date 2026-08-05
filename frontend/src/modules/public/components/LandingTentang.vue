@@ -8,12 +8,15 @@ const whyUs = [
   'Manajemen hak akses per unit sekolah berbasis peran (RBAC)',
   'Laporan otomatis per sekolah & rekap yayasan siap cetak',
   'Aman dan terenkripsi — data tiap sekolah terlindungi',
-  'Dukungan teknis responsif untuk semua yayasan mitra',
+  'Dukungan teknis responsif untuk semua yayasan mitra'
 ]
 </script>
 
 <template>
-  <section id="tentang" class="py-20 bg-gradient-to-br from-blue-700 to-blue-950 text-white">
+  <section
+    id="tentang"
+    class="py-20 bg-gradient-to-br from-blue-700 to-blue-950 text-white"
+  >
     <div class="max-w-7xl mx-auto px-6">
       <div class="grid lg:grid-cols-2 gap-14 items-center">
         <!-- Image -->

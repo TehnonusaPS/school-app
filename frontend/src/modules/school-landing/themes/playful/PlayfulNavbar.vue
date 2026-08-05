@@ -52,16 +52,12 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
         @click.prevent="scrollTo('hero')"
         class="flex items-center gap-3 group"
       >
-        <div
+        <img
           v-if="branding.logo"
-          class="w-12 h-12 rounded-2xl overflow-hidden shadow-md border-3 border-accent/20 group-hover:scale-110 transition-transform"
-        >
-          <img
-            :src="branding.logo"
-            alt="Logo"
-            class="w-full h-full object-cover"
-          />
-        </div>
+          :src="branding.logo"
+          alt="Logo"
+          class="w-12 h-12 object-contain group-hover:scale-110 transition-transform"
+        />
         <div
           v-else
           class="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md font-bold text-white text-xl bg-gradient-to-br from-primary via-secondary to-accent/50 group-hover:scale-110 transition-transform"

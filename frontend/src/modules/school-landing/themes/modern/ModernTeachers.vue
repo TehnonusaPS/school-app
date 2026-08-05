@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { getDefaultImage } from '../../composables/useDefaultImages'
 
 const props = defineProps({
   section: Object,
@@ -48,12 +49,12 @@ onMounted(() => {
       </div>
 
       <!-- Teacher Cards -->
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div class="flex flex-wrap justify-center gap-8">
         <div
           v-for="(item, i) in section.items"
           :key="item.id"
           :class="[
-            'group text-center transition-all duration-500',
+            'w-full sm:w-[calc(50%-1rem)] lg:w-[calc(25%-1.5rem)] group text-center transition-all duration-500',
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           ]"
           :style="{ transitionDelay: `${i * 80}ms` }"
@@ -69,12 +70,17 @@ onMounted(() => {
             />
             <div
               v-else
-              class="w-full h-full flex items-center justify-center text-white text-4xl font-bold"
-              :style="{
-                background: `linear-gradient(135deg, ${branding.primaryColor}, ${branding.accentColor})`
-              }"
+              class="relative w-full h-full overflow-hidden"
             >
-              {{ (item.title || 'T')[0] }}
+              <img
+                :src="getDefaultImage('teacher', i)"
+                :alt="item.title"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div
+                class="absolute bottom-0 inset-x-0 h-1/3"
+                :style="{ background: `linear-gradient(to top, ${branding.primaryColor}60, transparent)` }"
+              />
             </div>
           </div>
           <h4 class="font-bold text-gray-900">{{ item.title }}</h4>

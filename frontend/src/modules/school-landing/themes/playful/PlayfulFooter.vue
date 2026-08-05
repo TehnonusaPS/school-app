@@ -25,17 +25,14 @@ const props = defineProps({ branding: Object, contact: Object, social: Object, d
       <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
         <div class="lg:col-span-2">
           <div class="flex items-center gap-3 mb-6">
-            <div
+            <img
               v-if="branding.logo"
-              class="w-12 h-12 rounded-2xl overflow-hidden border-3 border-accent/20"
-            >
-              <img
-                :src="branding.logo"
-                alt="Logo"
-                class="w-full h-full object-cover"
-              />
-            </div>
+              :src="branding.logo"
+              alt="Logo"
+              class="w-12 h-12 object-contain"
+            />
             <div
+              v-else
               class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center font-bold text-xl text-white border-2 border-white/20"
             >
               {{ (data?.meta_title || 'S')[0] }}
@@ -45,39 +42,39 @@ const props = defineProps({ branding: Object, contact: Object, social: Object, d
               <p class="text-accent text-xs font-bold">{{ data?.hero_subtitle || '' }}</p>
             </div>
           </div>
-          <p class="text-gray-400 leading-relaxed max-w-md text-sm">
+          <p class="text-white/90 font-medium leading-relaxed max-w-md text-sm">
             {{ data?.meta_description || '' }}
           </p>
         </div>
 
         <div>
-          <h4 class="font-extrabold text-sm uppercase tracking-widest text-white/50 mb-6">
+          <h4 class="font-extrabold text-sm uppercase tracking-widest text-white mb-6">
             Kontak
           </h4>
           <div class="space-y-4 text-sm">
             <a
               v-if="contact.email"
               :href="`mailto:${contact.email}`"
-              class="flex items-center gap-3 text-gray-300 hover:text-accent transition-colors"
-              ><Mail class="w-4 h-4 text-accent" />{{ contact.email }}</a
+              class="flex items-center gap-3 text-white font-semibold hover:text-white/80 transition-colors"
+              ><Mail class="w-4 h-4 text-white" />{{ contact.email }}</a
             >
             <a
               v-if="contact.phone"
               :href="`tel:${contact.phone}`"
-              class="flex items-center gap-3 text-gray-300 hover:text-accent transition-colors"
-              ><Phone class="w-4 h-4 text-accent" />{{ contact.phone }}</a
+              class="flex items-center gap-3 text-white font-semibold hover:text-white/80 transition-colors"
+              ><Phone class="w-4 h-4 text-white" />{{ contact.phone }}</a
             >
             <div
               v-if="contact.address"
-              class="flex items-start gap-3 text-gray-300"
+              class="flex items-start gap-3 text-white font-semibold"
             >
-              <MapPin class="w-4 h-4 text-accent mt-0.5" />{{ contact.address }}
+              <MapPin class="w-4 h-4 text-white mt-0.5" />{{ contact.address }}
             </div>
           </div>
         </div>
 
         <div>
-          <h4 class="font-extrabold text-sm uppercase tracking-widest text-white/50 mb-6">
+          <h4 class="font-extrabold text-sm uppercase tracking-widest text-white mb-6">
             Sosial Media
           </h4>
           <div class="flex gap-3">
@@ -117,12 +114,12 @@ const props = defineProps({ branding: Object, contact: Object, social: Object, d
         ></iframe>
       </div>
 
-      <div class="border-t border-primary/20 pt-8">
+      <div class="border-t border-white/20 pt-8">
         <div
-          class="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500"
+          class="flex flex-col md:flex-row items-center justify-between gap-4 text-sm font-semibold text-white/90"
         >
           <p>&copy; {{ new Date().getFullYear() }} {{ data?.meta_title || (branding?.entityName || 'Instansi') }}. All rights reserved.</p>
-          <p>Powered by <span class="text-white/80 font-bold">App School Tehnonusa</span></p>
+          <p>Powered by <span class="text-white font-extrabold underline decoration-2">App School Tehnonusa</span></p>
         </div>
       </div>
     </div>

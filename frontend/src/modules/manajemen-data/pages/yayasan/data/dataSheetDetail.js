@@ -17,7 +17,7 @@ export const rawYayasanItem = {
   emailLogin: 'admin@yayasancerdasbangsa.id',
   noHpLogin: '081234567890',
 
-  logo: 'https://picsum.photos/200'
+  logo: '/defaults/sd/logo.png'
 }
 
 export const yayasanSheetSections = [

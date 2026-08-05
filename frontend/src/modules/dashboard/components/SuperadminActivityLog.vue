@@ -17,16 +17,26 @@ interface ActivityItem {
 const asActivity = (item: unknown) => item as ActivityItem
 
 const getInitials = (title: string) => {
-  return title.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()
+  return title
+    .split(' ')
+    .map(w => w[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase()
 }
 
 const getActivityConfig = (type: string) => {
   switch (type) {
-    case 'add': return { icon: PlusCircle, color: 'text-emerald-500' }
-    case 'update': return { icon: Settings, color: 'text-blue-500' }
-    case 'success': return { icon: CheckCircle2, color: 'text-emerald-500' }
-    case 'warning': return { icon: AlertCircle, color: 'text-amber-500' }
-    default: return { icon: CheckCircle2, color: 'text-muted-foreground' }
+    case 'add':
+      return { icon: PlusCircle, color: 'text-emerald-500' }
+    case 'update':
+      return { icon: Settings, color: 'text-blue-500' }
+    case 'success':
+      return { icon: CheckCircle2, color: 'text-emerald-500' }
+    case 'warning':
+      return { icon: AlertCircle, color: 'text-amber-500' }
+    default:
+      return { icon: CheckCircle2, color: 'text-muted-foreground' }
   }
 }
 </script>
@@ -43,7 +53,9 @@ const getActivityConfig = (type: string) => {
   >
     <template #item="{ item }">
       <!-- Avatar -->
-      <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/20 backdrop-blur-md border border-primary/20 text-[10px] font-bold text-primary drop-shadow-sm">
+      <div
+        class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/20 backdrop-blur-md border border-primary/20 text-[10px] font-bold text-primary drop-shadow-sm"
+      >
         {{ getInitials(asActivity(item).title) }}
       </div>
       <!-- Content -->
@@ -52,7 +64,10 @@ const getActivityConfig = (type: string) => {
           <p class="truncate text-sm font-medium">{{ asActivity(item).title }}</p>
           <component
             :is="getActivityConfig(asActivity(item).type).icon"
-            :class="['size-3.5 shrink-0 drop-shadow-sm', getActivityConfig(asActivity(item).type).color]"
+            :class="[
+              'size-3.5 shrink-0 drop-shadow-sm',
+              getActivityConfig(asActivity(item).type).color
+            ]"
           />
         </div>
         <p class="mt-0.5 truncate text-xs text-muted-foreground">{{ asActivity(item).desc }}</p>

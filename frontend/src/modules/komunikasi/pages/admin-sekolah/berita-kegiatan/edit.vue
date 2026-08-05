@@ -43,7 +43,7 @@ onMounted(() => {
     router.push('/komunikasi/berita-kegiatan')
     return
   }
-  
+
   originalItem.value = item
   formData.value = {
     judul: item.judul,
@@ -116,11 +116,16 @@ function handleCancel() {
 }
 
 function handleSave() {
-  if (!formData.value.judul || !formData.value.kategori || !formData.value.tanggal || !formData.value.isi) {
+  if (
+    !formData.value.judul ||
+    !formData.value.kategori ||
+    !formData.value.tanggal ||
+    !formData.value.isi
+  ) {
     toast.error('Mohon lengkapi semua field yang wajib diisi.')
     return
   }
-  
+
   store.update(route.params.id, {
     judul: formData.value.judul,
     kategori: formData.value.kategori,
@@ -128,7 +133,7 @@ function handleSave() {
     isi: formData.value.isi,
     gambar: previewImage.value
   })
-  
+
   toast.success('Berita kegiatan berhasil diperbarui!')
   router.push('/komunikasi/berita-kegiatan')
 }
@@ -152,16 +157,18 @@ function handleSave() {
     <!-- Form Container -->
     <Card class="rounded-2xl border-border bg-card shadow-xs overflow-hidden">
       <CardContent class="p-6 sm:p-8 space-y-8">
-        
         <!-- Judul Berita -->
         <div class="space-y-2.5">
-          <Label for="judul" class="text-sm font-semibold flex gap-1">
+          <Label
+            for="judul"
+            class="text-sm font-semibold flex gap-1"
+          >
             Judul Berita <span class="text-rose-500">*</span>
           </Label>
-          <Input 
-            id="judul" 
-            v-model="formData.judul" 
-            placeholder="Masukkan judul berita kegiatan..." 
+          <Input
+            id="judul"
+            v-model="formData.judul"
+            placeholder="Masukkan judul berita kegiatan..."
             class="h-12 bg-muted/30 border-border rounded-xl focus-visible:ring-primary/20 focus-visible:border-primary px-4 transition-all"
           />
         </div>
@@ -169,11 +176,17 @@ function handleSave() {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Kategori -->
           <div class="space-y-2.5">
-            <Label for="kategori" class="text-sm font-semibold flex gap-1">
+            <Label
+              for="kategori"
+              class="text-sm font-semibold flex gap-1"
+            >
               Kategori <span class="text-rose-500">*</span>
             </Label>
             <Select v-model="formData.kategori">
-              <SelectTrigger id="kategori" class="w-full !h-12 bg-muted/30 border-border rounded-xl focus-visible:ring-primary/20 focus-visible:border-primary px-4 transition-all">
+              <SelectTrigger
+                id="kategori"
+                class="w-full !h-12 bg-muted/30 border-border rounded-xl focus-visible:ring-primary/20 focus-visible:border-primary px-4 transition-all"
+              >
                 <SelectValue placeholder="Pilih Kategori" />
               </SelectTrigger>
               <SelectContent class="rounded-xl border-border">
@@ -186,13 +199,16 @@ function handleSave() {
 
           <!-- Tanggal Publikasi -->
           <div class="space-y-2.5">
-            <Label for="tanggal" class="text-sm font-semibold flex gap-1">
+            <Label
+              for="tanggal"
+              class="text-sm font-semibold flex gap-1"
+            >
               Tanggal Publikasi <span class="text-rose-500">*</span>
             </Label>
-            <Input 
-              id="tanggal" 
+            <Input
+              id="tanggal"
               type="date"
-              v-model="formData.tanggal" 
+              v-model="formData.tanggal"
               @click="$event.target.showPicker()"
               class="h-12 bg-muted/30 border-border rounded-xl focus-visible:ring-primary/20 focus-visible:border-primary px-4 transition-all cursor-pointer font-medium"
             />
@@ -201,10 +217,13 @@ function handleSave() {
 
         <!-- Isi Berita -->
         <div class="space-y-2.5">
-          <Label for="isi" class="text-sm font-semibold flex gap-1">
+          <Label
+            for="isi"
+            class="text-sm font-semibold flex gap-1"
+          >
             Isi Berita <span class="text-rose-500">*</span>
           </Label>
-          <Textarea 
+          <Textarea
             id="isi"
             v-model="formData.isi"
             placeholder="Ketik isi berita kegiatan di sini..."
@@ -214,14 +233,14 @@ function handleSave() {
 
         <!-- Gambar / Foto Kegiatan Utama -->
         <div class="space-y-2.5">
-          <Label class="text-sm font-semibold flex gap-1">
-            Gambar / Foto Kegiatan Utama
-          </Label>
-          
-          <div 
+          <Label class="text-sm font-semibold flex gap-1"> Gambar / Foto Kegiatan Utama </Label>
+
+          <div
             class="relative border-2 border-dashed rounded-2xl transition-all duration-200 overflow-hidden cursor-pointer"
             :class="[
-              isDragging ? 'border-primary bg-primary/5' : 'border-border bg-muted/30 hover:bg-muted/50 hover:border-primary/50',
+              isDragging
+                ? 'border-primary bg-primary/5'
+                : 'border-border bg-muted/30 hover:bg-muted/50 hover:border-primary/50',
               previewImage ? 'border-solid p-1 border-border bg-card' : 'py-8 px-4'
             ]"
             @dragover="onDragOver"
@@ -230,19 +249,23 @@ function handleSave() {
             @click="triggerFileInput"
           >
             <!-- Hidden Input -->
-            <input 
-              type="file" 
-              ref="fileInput" 
-              class="hidden" 
+            <input
+              type="file"
+              ref="fileInput"
+              class="hidden"
               accept="image/jpeg, image/png, image/webp"
               @change="handleFileSelect"
             />
 
             <!-- Empty State -->
-            <div v-if="!previewImage" class="flex flex-col items-center justify-center text-center gap-2">
+            <div
+              v-if="!previewImage"
+              class="flex flex-col items-center justify-center text-center gap-2"
+            >
               <UploadCloud class="size-9 text-slate-800 dark:text-slate-200" />
               <div class="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                <span class="font-bold text-foreground">Klik untuk mengunggah</span> atau seret dan lepas file kesini
+                <span class="font-bold text-foreground">Klik untuk mengunggah</span> atau seret dan
+                lepas file kesini
               </div>
               <div class="text-[10px] sm:text-xs text-muted-foreground/80">
                 PNG, JPG, atau WEBP (Maks 5MB)
@@ -250,16 +273,25 @@ function handleSave() {
             </div>
 
             <!-- Preview State -->
-            <div v-else class="relative group rounded-xl overflow-hidden aspect-video max-h-[300px] w-full bg-black/5 flex items-center justify-center">
-              <img :src="previewImage" alt="Preview" class="object-cover w-full h-full" />
-              
+            <div
+              v-else
+              class="relative group rounded-xl overflow-hidden aspect-video max-h-[300px] w-full bg-black/5 flex items-center justify-center"
+            >
+              <img
+                :src="previewImage"
+                alt="Preview"
+                class="object-cover w-full h-full"
+              />
+
               <!-- Hover Overlay for Removal -->
-              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <Button 
+              <div
+                class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+              >
+                <Button
                   type="button"
-                  @click="removeImage" 
-                  variant="destructive" 
-                  size="sm" 
+                  @click="removeImage"
+                  variant="destructive"
+                  size="sm"
                   class="gap-2 rounded-xl font-semibold shadow-lg"
                 >
                   <Trash2 class="size-4" />
@@ -269,22 +301,21 @@ function handleSave() {
             </div>
           </div>
         </div>
-
       </CardContent>
     </Card>
 
     <!-- Bottom Action Buttons -->
     <div class="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-2 w-full">
-      <Button 
-        variant="outline" 
-        size="lg" 
+      <Button
+        variant="outline"
+        size="lg"
         @click="handleCancel"
         class="rounded-xl px-6 h-11 sm:h-12 text-sm font-semibold border-border hover:bg-muted hover:text-foreground w-full sm:w-auto"
       >
         Batal
       </Button>
-      <Button 
-        size="lg" 
+      <Button
+        size="lg"
         @click="handleSave"
         class="rounded-xl px-8 h-11 sm:h-12 text-sm font-bold shadow-md hover:shadow-lg transition-shadow w-full sm:w-auto"
       >

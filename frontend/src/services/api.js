@@ -3,17 +3,17 @@ import axios from 'axios'
 const api = axios.create({
 
   baseURL: 'http://127.0.0.1:8000/api',
-  // baseURL: 'https://school-app-ewoy.onrender.com/api',
+  //baseURL: 'https://school-app-ewoy.onrender.com/api',
 
   headers: {
-    'Accept': 'application/json',
+    Accept: 'application/json',
     'Content-Type': 'application/json'
   }
 })
 
 
 // Request interceptor — sisipkan Bearer token secara otomatis jika ada
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(config => {
   const token = localStorage.getItem('token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
@@ -29,8 +29,8 @@ api.interceptors.request.use((config) => {
 
 // Response interceptor — tangani 401 Unauthorized secaraß global
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
+  response => response,
+  error => {
     if (error.response && error.response.status === 401) {
       // Token expired atau tidak valid, bersihkan data auth
       localStorage.removeItem('token')

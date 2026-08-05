@@ -5,7 +5,8 @@ export const initialSubjects = [
     id: '1',
     kode: 'MAT',
     nama: 'Matematika',
-    deskripsi: 'Mata pelajaran matematika dasar mencakup berhitung, logika, geometri, dan pemecahan masalah sederhana.',
+    deskripsi:
+      'Mata pelajaran matematika dasar mencakup berhitung, logika, geometri, dan pemecahan masalah sederhana.',
     status: 'approved',
     rejectedReason: ''
   },
@@ -13,7 +14,8 @@ export const initialSubjects = [
     id: '2',
     kode: 'IND',
     nama: 'Bahasa Indonesia',
-    deskripsi: 'Pengembangan keterampilan berbahasa (membaca, menulis, mendengarkan, berbicara) dan apresiasi sastra Indonesia sejak dini.',
+    deskripsi:
+      'Pengembangan keterampilan berbahasa (membaca, menulis, mendengarkan, berbicara) dan apresiasi sastra Indonesia sejak dini.',
     status: 'approved',
     rejectedReason: ''
   },
@@ -21,7 +23,8 @@ export const initialSubjects = [
     id: '3',
     kode: 'IPA',
     nama: 'Ilmu Pengetahuan Alam (IPA)',
-    deskripsi: 'Pembelajaran dasar tentang makhluk hidup, lingkungan sekitar, energi, dan gejala-gejala alam sederhana.',
+    deskripsi:
+      'Pembelajaran dasar tentang makhluk hidup, lingkungan sekitar, energi, dan gejala-gejala alam sederhana.',
     status: 'pending',
     rejectedReason: ''
   },
@@ -29,7 +32,8 @@ export const initialSubjects = [
     id: '4',
     kode: 'IPS',
     nama: 'Ilmu Pengetahuan Sosial (IPS)',
-    deskripsi: 'Pengenalan lingkungan sosial, sejarah perjuangan bangsa, geografi dasar, dan hubungan kemasyarakatan.',
+    deskripsi:
+      'Pengenalan lingkungan sosial, sejarah perjuangan bangsa, geografi dasar, dan hubungan kemasyarakatan.',
     status: 'draft',
     rejectedReason: ''
   },
@@ -37,7 +41,8 @@ export const initialSubjects = [
     id: '5',
     kode: 'PJOK',
     nama: 'Pendidikan Jasmani, Olahraga, dan Kesehatan',
-    deskripsi: 'Pembinaan kebugaran jasmani, keterampilan motorik, dan pemahaman tentang gaya hidup sehat.',
+    deskripsi:
+      'Pembinaan kebugaran jasmani, keterampilan motorik, dan pemahaman tentang gaya hidup sehat.',
     status: 'rejected',
     rejectedReason: 'Harap deskripsi dilengkapi dengan cakupan materi senam dan atletik dasar.'
   },
@@ -45,7 +50,8 @@ export const initialSubjects = [
     id: '6',
     kode: 'PANC',
     nama: 'Pendidikan Pancasila dan Kewarganegaraan',
-    deskripsi: 'Penanaman nilai-nilai karakter bangsa, pemahaman Pancasila, UUD 1945, dan norma bermasyarakat.',
+    deskripsi:
+      'Penanaman nilai-nilai karakter bangsa, pemahaman Pancasila, UUD 1945, dan norma bermasyarakat.',
     status: 'draft',
     rejectedReason: ''
   }
@@ -92,16 +98,16 @@ export const columns = [
   { key: 'nama', label: 'Nama Mapel' },
   { key: 'grades', label: 'Tingkat Kelas' },
   { key: 'deskripsi', label: 'Keterangan', truncate: true },
-  { 
-    key: 'status', 
-    label: 'Status', 
+  {
+    key: 'status',
+    label: 'Status',
     badge: true,
     badgeVariant: {
       approved: 'green',
       pending: 'amber',
       rejected: 'red',
       draft: 'gray'
-    } 
+    }
   },
   { key: 'actions', label: 'Aksi' }
 ]

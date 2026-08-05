@@ -110,15 +110,15 @@ const handleCreate = () => {
   router.push('/akademik/admin-sekolah/kalender/create')
 }
 
-const handleShow = (year) => {
+const handleShow = year => {
   router.push(`/akademik/admin-sekolah/kalender/show/${year.replace('/', '-')}`)
 }
 
-const handleEdit = (year) => {
+const handleEdit = year => {
   router.push(`/akademik/admin-sekolah/kalender/edit/${year.replace('/', '-')}`)
 }
 
-const openRequestConfirm = (year) => {
+const openRequestConfirm = year => {
   const statusInfo = yearStatuses.value[year] || { status: 'draft' }
   if (isLocked(statusInfo.status)) return
   selectedYearToRequest.value = year
@@ -146,7 +146,7 @@ const confirmRequest = async () => {
   }
 }
 
-const openDeleteConfirm = (year) => {
+const openDeleteConfirm = year => {
   const statusInfo = yearStatuses.value[year] || { status: 'draft' }
   if (isLocked(statusInfo.status)) {
     toast.error('Gagal', { description: 'Kalender sedang dikunci dan tidak bisa dihapus.' })
@@ -201,22 +201,35 @@ const handleReset = async () => {
 // --- Helper Functions for PDF Export ---
 function formatDateRange(startStr, endStr) {
   if (!startStr) return '-'
-  const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
-  
+  const months = [
+    'Januari',
+    'Februari',
+    'Maret',
+    'April',
+    'Mei',
+    'Juni',
+    'Juli',
+    'Agustus',
+    'September',
+    'Oktober',
+    'November',
+    'Desember'
+  ]
+
   const start = new Date(startStr)
   const startDay = start.getDate()
   const startMonth = months[start.getMonth()]
   const startYear = start.getFullYear()
-  
+
   if (!endStr || startStr === endStr) {
     return `${startDay} ${startMonth} ${startYear}`
   }
-  
+
   const end = new Date(endStr)
   const endDay = end.getDate()
   const endMonth = months[end.getMonth()]
   const endYear = end.getFullYear()
-  
+
   if (startYear === endYear) {
     if (startMonth === endMonth) {
       return `${startDay} - ${endDay} ${startMonth} ${startYear}`
@@ -279,7 +292,7 @@ const handleDownloadPdf = async (year) => {
     // Build grid cells
     let gridHtml = ''
     let day = 1
-    
+
     // Max 6 weeks/rows per month
     for (let r = 0; r < 6; r++) {
       let rowHtml = ''
@@ -327,7 +340,7 @@ const handleDownloadPdf = async (year) => {
         } else if (ev.type === 'ujian') {
           textClass = 'event-text-yellow'
         }
-        
+
         // Format day single or range
         const startDay = new Date(ev.startDate).getDate()
         let dateRangeLabel = `${startDay}`
@@ -335,7 +348,7 @@ const handleDownloadPdf = async (year) => {
           const endDay = new Date(ev.endDate).getDate()
           dateRangeLabel = `${startDay}-${endDay}`
         }
-        
+
         eventsListHtml += `<p class="${textClass}"><strong>${dateRangeLabel} ${month.name}:</strong> ${ev.title}</p>`
       })
       eventsListHtml += '</div>'
@@ -733,13 +746,25 @@ const handleDownloadPdf = async (year) => {
           <Table>
             <TableHeader class="bg-muted/30 border-b">
               <TableRow>
-                <TableHead class="font-bold text-foreground py-4 px-6 text-xs uppercase tracking-wider text-left w-[80px]">No</TableHead>
-                <TableHead class="font-bold text-foreground py-4 px-4 text-xs uppercase tracking-wider text-left">Tahun Akademik</TableHead>
-                <TableHead class="font-bold text-foreground py-4 px-4 text-xs uppercase tracking-wider text-left w-[200px]">Status Persetujuan</TableHead>
-                <TableHead class="font-bold text-foreground py-4 px-6 text-xs uppercase tracking-wider text-center w-[320px]">Aksi</TableHead>
+                <TableHead
+                  class="font-bold text-foreground py-4 px-6 text-xs uppercase tracking-wider text-left w-[80px]"
+                  >No</TableHead
+                >
+                <TableHead
+                  class="font-bold text-foreground py-4 px-4 text-xs uppercase tracking-wider text-left"
+                  >Tahun Akademik</TableHead
+                >
+                <TableHead
+                  class="font-bold text-foreground py-4 px-4 text-xs uppercase tracking-wider text-left w-[200px]"
+                  >Status Persetujuan</TableHead
+                >
+                <TableHead
+                  class="font-bold text-foreground py-4 px-6 text-xs uppercase tracking-wider text-center w-[320px]"
+                  >Aksi</TableHead
+                >
               </TableRow>
             </TableHeader>
-            
+
             <TableBody>
               <TableRow
                 v-for="(year, index) in displayedTahunList"
@@ -750,16 +775,23 @@ const handleDownloadPdf = async (year) => {
                 <TableCell class="py-4 px-6 font-mono text-xs font-bold text-muted-foreground">
                   {{ index + 1 }}
                 </TableCell>
-                
+
                 <!-- Tahun Akademik -->
                 <TableCell class="py-4 px-4">
                   <div class="flex items-center gap-2.5">
-                    <div class="h-8 w-8 rounded-lg bg-primary/5 text-primary flex items-center justify-center shrink-0 border border-primary/10">
+                    <div
+                      class="h-8 w-8 rounded-lg bg-primary/5 text-primary flex items-center justify-center shrink-0 border border-primary/10"
+                    >
                       <CalendarDays class="h-4 w-4" />
                     </div>
                     <div>
-                      <span class="text-xs font-extrabold text-foreground">Tahun Pelajaran {{ year }}</span>
-                      <p v-if="yearStatuses[year]?.status === 'rejected'" class="text-[9px] text-rose-500 font-bold mt-0.5 flex items-center gap-1">
+                      <span class="text-xs font-extrabold text-foreground"
+                        >Tahun Pelajaran {{ year }}</span
+                      >
+                      <p
+                        v-if="yearStatuses[year]?.status === 'rejected'"
+                        class="text-[9px] text-rose-500 font-bold mt-0.5 flex items-center gap-1"
+                      >
                         <AlertCircle class="h-3 w-3" />
                         Ditolak: "{{ yearStatuses[year]?.rejectedReason }}"
                       </p>
@@ -769,7 +801,10 @@ const handleDownloadPdf = async (year) => {
 
                 <!-- Status Persetujuan -->
                 <TableCell class="py-4 px-4">
-                  <Badge class="text-[9px] font-extrabold px-2.5 py-0.5 rounded-full uppercase" :class="getYearStatusBadgeClass(yearStatuses[year]?.status)">
+                  <Badge
+                    class="text-[9px] font-extrabold px-2.5 py-0.5 rounded-full uppercase"
+                    :class="getYearStatusBadgeClass(yearStatuses[year]?.status)"
+                  >
                     {{ getYearStatusLabel(yearStatuses[year]?.status) }}
                   </Badge>
                 </TableCell>
@@ -844,7 +879,9 @@ const handleDownloadPdf = async (year) => {
             Ajukan Kalender Akademik
           </DialogTitle>
           <DialogDescription class="text-[10px] text-muted-foreground leading-relaxed mt-2">
-            Apakah Anda yakin ingin mengajukan Kalender Akademik Tahun Pelajaran {{ selectedYearToRequest }} ke Kepala Sekolah untuk ditinjau? Kalender ini tidak dapat diubah setelah diajukan.
+            Apakah Anda yakin ingin mengajukan Kalender Akademik Tahun Pelajaran
+            {{ selectedYearToRequest }} ke Kepala Sekolah untuk ditinjau? Kalender ini tidak dapat
+            diubah setelah diajukan.
           </DialogDescription>
         </DialogHeader>
 
@@ -877,7 +914,9 @@ const handleDownloadPdf = async (year) => {
             Hapus Kalender Akademik
           </DialogTitle>
           <DialogDescription class="text-[10px] text-muted-foreground leading-relaxed mt-2">
-            Apakah Anda yakin ingin menghapus seluruh agenda Kalender Akademik Tahun Pelajaran {{ selectedYearToDelete }}? Semua kegiatan yang telah terdaftar akan dibersihkan secara permanen dan tindakan ini tidak dapat dibatalkan.
+            Apakah Anda yakin ingin menghapus seluruh agenda Kalender Akademik Tahun Pelajaran
+            {{ selectedYearToDelete }}? Semua kegiatan yang telah terdaftar akan dibersihkan secara
+            permanen dan tindakan ini tidak dapat dibatalkan.
           </DialogDescription>
         </DialogHeader>
 
@@ -900,6 +939,5 @@ const handleDownloadPdf = async (year) => {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-
   </div>
 </template>

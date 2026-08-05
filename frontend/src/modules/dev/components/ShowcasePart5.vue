@@ -80,7 +80,10 @@ const rangeCalendarValue = ref({
 <template>
   <div class="space-y-12">
     <!-- 41. RANGE CALENDAR -->
-    <section v-show="match('range calendar')" class="space-y-4">
+    <section
+      v-show="match('range calendar')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">41. Range Calendar</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -89,12 +92,18 @@ const rangeCalendarValue = ref({
         </p>
       </div>
       <div class="p-6 border rounded-xl bg-card flex justify-center">
-        <RangeCalendar v-model="rangeCalendarValue" class="rounded-md border shadow-sm" />
+        <RangeCalendar
+          v-model="rangeCalendarValue"
+          class="rounded-md border shadow-sm"
+        />
       </div>
     </section>
 
     <!-- 42. RESIZABLE -->
-    <section v-show="match('resizable')" class="space-y-4">
+    <section
+      v-show="match('resizable')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">42. Resizable</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -123,7 +132,10 @@ const rangeCalendarValue = ref({
     </section>
 
     <!-- 43. SCROLL AREA -->
-    <section v-show="match('scroll area')" class="space-y-4">
+    <section
+      v-show="match('scroll area')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">43. Scroll Area</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -134,7 +146,11 @@ const rangeCalendarValue = ref({
         <ScrollArea class="h-[200px] w-[350px] rounded-md border p-4">
           <div class="pr-4">
             <h4 class="mb-4 text-sm font-medium leading-none">Tags</h4>
-            <div v-for="tag in 50" :key="tag" class="text-sm">
+            <div
+              v-for="tag in 50"
+              :key="tag"
+              class="text-sm"
+            >
               Tag {{ tag }}
               <Separator class="my-2" />
             </div>
@@ -144,7 +160,10 @@ const rangeCalendarValue = ref({
     </section>
 
     <!-- 44. SELECT -->
-    <section v-show="match('select')" class="space-y-4">
+    <section
+      v-show="match('select')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">44. Select</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -172,7 +191,10 @@ const rangeCalendarValue = ref({
     </section>
 
     <!-- 45. SEPARATOR -->
-    <section v-show="match('separator')" class="space-y-4">
+    <section
+      v-show="match('separator')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">45. Separator</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -198,7 +220,10 @@ const rangeCalendarValue = ref({
     </section>
 
     <!-- 46. SHEET -->
-    <section v-show="match('sheet')" class="space-y-4">
+    <section
+      v-show="match('sheet')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">46. Sheet</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -209,9 +234,7 @@ const rangeCalendarValue = ref({
       <div class="p-6 border rounded-xl bg-card flex justify-center">
         <Sheet>
           <SheetTrigger as-child>
-            <Button variant="outline">
-              Open
-            </Button>
+            <Button variant="outline"> Open </Button>
           </SheetTrigger>
           <SheetContent>
             <SheetHeader>
@@ -223,21 +246,23 @@ const rangeCalendarValue = ref({
             <div class="grid flex-1 auto-rows-min gap-6 px-4 py-6">
               <div class="grid gap-3">
                 <Label for="sheet-demo-name">Name</Label>
-                <Input id="sheet-demo-name" default-value="Pedro Duarte" />
+                <Input
+                  id="sheet-demo-name"
+                  default-value="Pedro Duarte"
+                />
               </div>
               <div class="grid gap-3">
                 <Label for="sheet-demo-username">Username</Label>
-                <Input id="sheet-demo-username" default-value="@peduarte" />
+                <Input
+                  id="sheet-demo-username"
+                  default-value="@peduarte"
+                />
               </div>
             </div>
             <SheetFooter>
-              <Button type="submit">
-                Save changes
-              </Button>
+              <Button type="submit"> Save changes </Button>
               <SheetClose as-child>
-                <Button variant="outline">
-                  Close
-                </Button>
+                <Button variant="outline"> Close </Button>
               </SheetClose>
             </SheetFooter>
           </SheetContent>
@@ -246,7 +271,10 @@ const rangeCalendarValue = ref({
     </section>
 
     <!-- 47. SIDEBAR -->
-    <section v-show="match('sidebar')" class="space-y-4">
+    <section
+      v-show="match('sidebar')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">47. Sidebar</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -255,7 +283,10 @@ const rangeCalendarValue = ref({
       </div>
       <div class="p-6 border rounded-xl bg-card flex h-[400px]">
         <div class="flex h-full w-full overflow-hidden border rounded-md relative">
-          <Sidebar collapsible="none" class="border-r w-64 bg-sidebar">
+          <Sidebar
+            collapsible="none"
+            class="border-r w-64 bg-sidebar"
+          >
             <SidebarHeader class="sidebar-brand-header">
               <SidebarMenu>
                 <SidebarMenuItem>
@@ -349,7 +380,10 @@ const rangeCalendarValue = ref({
     </section>
 
     <!-- 48. SKELETON -->
-    <section v-show="match('skeleton')" class="space-y-4">
+    <section
+      v-show="match('skeleton')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">48. Skeleton</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -367,7 +401,10 @@ const rangeCalendarValue = ref({
     </section>
 
     <!-- 49. SLIDER -->
-    <section v-show="match('slider')" class="space-y-4">
+    <section
+      v-show="match('slider')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">49. Slider</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -376,13 +413,21 @@ const rangeCalendarValue = ref({
         </p>
       </div>
       <div class="p-6 border rounded-xl bg-card flex flex-col gap-6 items-center">
-        <Slider v-model="sliderValue" :max="100" :step="1" class="w-[60%]" />
+        <Slider
+          v-model="sliderValue"
+          :max="100"
+          :step="1"
+          class="w-[60%]"
+        />
         <div class="text-sm font-medium">Nilai Terpilih: {{ sliderValue[0] }}</div>
       </div>
     </section>
 
     <!-- 50. SONNER -->
-    <section v-show="match('sonner')" class="space-y-4">
+    <section
+      v-show="match('sonner')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">50. Sonner</h2>
         <p class="text-sm text-muted-foreground mt-1">

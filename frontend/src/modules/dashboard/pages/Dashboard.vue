@@ -31,7 +31,10 @@ const auth = useAuthStore()
 
 <template>
   <!-- ── Superadmin Dashboard ── -->
-  <div v-if="auth.user?.role === 'superadmin'" class="space-y-6 relative">
+  <div
+    v-if="auth.user?.role === 'superadmin'"
+    class="space-y-6 relative"
+  >
     <SuperadminStatCards />
     <div class="grid gap-4 lg:grid-cols-5">
       <SuperadminGrowthChart :delay="700" />
@@ -40,14 +43,20 @@ const auth = useAuthStore()
   </div>
 
   <!-- ── Admin Yayasan Dashboard ── -->
-  <div v-else-if="auth.user?.role === 'admin_yayasan'" class="space-y-6">
+  <div
+    v-else-if="auth.user?.role === 'admin_yayasan'"
+    class="space-y-6"
+  >
     <YayasanStatCards />
     <YayasanSekolahSDM :delay="550" />
     <YayasanFinanceChart :delay="700" />
   </div>
 
   <!-- ── Kepala Sekolah Dashboard ── -->
-  <div v-else-if="auth.user?.role === 'kepala_sekolah'" class="space-y-6">
+  <div
+    v-else-if="auth.user?.role === 'kepala_sekolah'"
+    class="space-y-6"
+  >
     <KepsekStatCards />
     <div class="grid gap-4 lg:grid-cols-5">
       <KepsekKehadiran :delay="700" />
@@ -57,7 +66,10 @@ const auth = useAuthStore()
   </div>
 
   <!-- ── Admin Sekolah & TU Dashboard ── -->
-  <div v-else-if="auth.user?.role === 'admin_sekolah' || auth.user?.role === 'tata_usaha'" class="space-y-6">
+  <div
+    v-else-if="auth.user?.role === 'admin_sekolah' || auth.user?.role === 'tata_usaha'"
+    class="space-y-6"
+  >
     <AdminSekolahStatCards />
     <div class="grid gap-4 lg:grid-cols-5">
       <AdminSekolahAbsensi :delay="700" />
@@ -66,7 +78,10 @@ const auth = useAuthStore()
   </div>
 
   <!-- ── Guru & Wali Kelas Dashboard ── -->
-  <div v-else-if="auth.user?.role === 'guru' || auth.user?.role === 'wali_kelas'" class="space-y-6">
+  <div
+    v-else-if="auth.user?.role === 'guru' || auth.user?.role === 'wali_kelas'"
+    class="space-y-6"
+  >
     <GuruTopSection />
     <div class="grid gap-4 lg:grid-cols-5">
       <GuruJadwal :delay="550" />
@@ -76,7 +91,10 @@ const auth = useAuthStore()
   </div>
 
   <!-- ── Siswa Dashboard ── -->
-  <div v-else-if="auth.user?.role === 'siswa'" class="space-y-6">
+  <div
+    v-else-if="auth.user?.role === 'siswa'"
+    class="space-y-6"
+  >
     <SiswaStatCards />
     <div class="grid gap-4 lg:grid-cols-5">
       <SiswaAkademik :delay="550" />
@@ -86,7 +104,10 @@ const auth = useAuthStore()
   </div>
 
   <!-- ── Orang Tua Dashboard ── -->
-  <div v-else-if="auth.user?.role === 'orang_tua'" class="space-y-6">
+  <div
+    v-else-if="auth.user?.role === 'orang_tua'"
+    class="space-y-6"
+  >
     <div class="grid gap-4 lg:grid-cols-[3fr_2fr]">
       <OrangTuaStudentCard :delay="100" />
       <OrangTuaSPP :delay="250" />
@@ -96,5 +117,4 @@ const auth = useAuthStore()
       <OrangTuaKehadiran :delay="550" />
     </div>
   </div>
-
 </template>

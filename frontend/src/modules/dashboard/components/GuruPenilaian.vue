@@ -10,7 +10,7 @@ const props = defineProps({
   delay: { type: Number, default: 0 }
 })
 
-const statusVariant = (s: string) => s === 'Selesai' ? 'default' : 'secondary'
+const statusVariant = (s: string) => (s === 'Selesai' ? 'default' : 'secondary')
 </script>
 
 <template>
@@ -23,7 +23,11 @@ const statusVariant = (s: string) => s === 'Selesai' ? 'default' : 'secondary'
     illustration="graded_paper"
   >
     <template #header-action>
-      <Button variant="ghost" size="sm" class="h-8 text-xs gap-1 text-muted-foreground hover:text-foreground">
+      <Button
+        variant="ghost"
+        size="sm"
+        class="h-8 text-xs gap-1 text-muted-foreground hover:text-foreground"
+      >
         Lihat Semua Tugas
         <ChevronRight class="size-3.5" />
       </Button>
@@ -69,21 +73,37 @@ const statusVariant = (s: string) => s === 'Selesai' ? 'default' : 'secondary'
             <p class="text-[11px] text-muted-foreground mt-0.5">{{ t.sub }}</p>
           </td>
           <td class="py-3 text-center">
-            <Badge variant="outline" class="text-xs font-bold">{{ t.kelas }}</Badge>
+            <Badge
+              variant="outline"
+              class="text-xs font-bold"
+              >{{ t.kelas }}</Badge
+            >
           </td>
           <td class="py-3 pr-4">
             <div class="flex items-center gap-2">
-              <Progress :model-value="t.terkumpul" class="h-2 flex-1" />
-              <span class="text-xs text-muted-foreground tabular-nums w-8 shrink-0">{{ t.terkumpul }}%</span>
+              <Progress
+                :model-value="t.terkumpul"
+                class="h-2 flex-1"
+              />
+              <span class="text-xs text-muted-foreground tabular-nums w-8 shrink-0"
+                >{{ t.terkumpul }}%</span
+              >
             </div>
           </td>
           <td class="py-3 text-center">
-            <Badge :variant="statusVariant(t.status)" class="text-xs">
+            <Badge
+              :variant="statusVariant(t.status)"
+              class="text-xs"
+            >
               {{ t.status }}
             </Badge>
           </td>
           <td class="pr-6 py-3 text-right">
-            <Button size="sm" class="h-7 text-xs">Buka Penilaian</Button>
+            <Button
+              size="sm"
+              class="h-7 text-xs"
+              >Buka Penilaian</Button
+            >
           </td>
         </tr>
       </tbody>

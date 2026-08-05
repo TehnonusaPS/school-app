@@ -1,12 +1,6 @@
 <script setup>
 import { defineProps, ref } from 'vue'
-import {
-  FolderOpen,
-  Search,
-  Settings,
-  User,
-  CalendarDays
-} from 'lucide-vue-next'
+import { FolderOpen, Search, Settings, User, CalendarDays } from 'lucide-vue-next'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -106,7 +100,10 @@ const otpValue = ref('')
 <template>
   <div class="space-y-12">
     <!-- 21. DROPDOWN MENU -->
-    <section v-show="match('dropdown menu')" class="space-y-4">
+    <section
+      v-show="match('dropdown menu')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">21. Dropdown Menu</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -168,7 +165,10 @@ const otpValue = ref('')
     </section>
 
     <!-- 22. EMPTY -->
-    <section v-show="match('empty')" class="space-y-4">
+    <section
+      v-show="match('empty')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">22. Empty State</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -189,14 +189,22 @@ const otpValue = ref('')
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button variant="default" size="sm"> Upload Berkas </Button>
+            <Button
+              variant="default"
+              size="sm"
+            >
+              Upload Berkas
+            </Button>
           </EmptyContent>
         </Empty>
       </div>
     </section>
 
     <!-- 23. FIELD -->
-    <section v-show="match('field')" class="space-y-4">
+    <section
+      v-show="match('field')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">23. Field / Form Control</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -217,7 +225,10 @@ const otpValue = ref('')
             <Field>
               <FieldLabel for="fullname">Nama Lengkap</FieldLabel>
               <FieldContent>
-                <Input id="fullname" placeholder="Cth: John Doe" />
+                <Input
+                  id="fullname"
+                  placeholder="Cth: John Doe"
+                />
               </FieldContent>
             </Field>
 
@@ -240,7 +251,10 @@ const otpValue = ref('')
       </div>
     </section>
     <!-- 24. FORM -->
-    <section v-show="match('form')" class="space-y-4">
+    <section
+      v-show="match('form')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">24. Form</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -259,11 +273,18 @@ const otpValue = ref('')
             class="w-full max-w-sm space-y-6 border p-6 rounded-lg bg-background"
             @submit="handleSubmit($event, onSubmitForm)"
           >
-            <FormField v-slot="{ componentField }" name="username">
+            <FormField
+              v-slot="{ componentField }"
+              name="username"
+            >
               <FormItem>
                 <FormLabel>Username</FormLabel>
                 <FormControl>
-                  <Input type="text" placeholder="shadcn" v-bind="componentField" />
+                  <Input
+                    type="text"
+                    placeholder="shadcn"
+                    v-bind="componentField"
+                  />
                 </FormControl>
                 <FormDescription> This is your public display name. </FormDescription>
                 <FormMessage />
@@ -276,7 +297,10 @@ const otpValue = ref('')
     </section>
 
     <!-- 25. HOVER CARD -->
-    <section v-show="match('hover card')" class="space-y-4">
+    <section
+      v-show="match('hover card')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">25. Hover Card</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -311,7 +335,10 @@ const otpValue = ref('')
     </section>
 
     <!-- 26. INPUT -->
-    <section v-show="match('input')" class="space-y-4">
+    <section
+      v-show="match('input')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">26. Input</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -321,21 +348,34 @@ const otpValue = ref('')
       </div>
 
       <div class="p-6 border rounded-xl bg-card grid gap-4 max-w-sm">
-        <Input type="email" placeholder="Email" />
-        <Input disabled type="email" placeholder="Email (Disabled)" />
+        <Input
+          type="email"
+          placeholder="Email"
+        />
+        <Input
+          disabled
+          type="email"
+          placeholder="Email (Disabled)"
+        />
         <div class="grid w-full max-w-sm items-center gap-1.5">
           <label
             for="picture"
             class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >Picture</label
           >
-          <Input id="picture" type="file" />
+          <Input
+            id="picture"
+            type="file"
+          />
         </div>
       </div>
     </section>
 
     <!-- 27. INPUT GROUP -->
-    <section v-show="match('input group')" class="space-y-4">
+    <section
+      v-show="match('input group')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">27. Input Group</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -367,7 +407,10 @@ const otpValue = ref('')
     </section>
 
     <!-- 28. INPUT OTP -->
-    <section v-show="match('input otp')" class="space-y-4">
+    <section
+      v-show="match('input otp')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">28. Input OTP</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -377,7 +420,10 @@ const otpValue = ref('')
       </div>
 
       <div class="p-6 border rounded-xl bg-card flex justify-center">
-        <InputOTP v-model="otpValue" maxlength="6">
+        <InputOTP
+          v-model="otpValue"
+          maxlength="6"
+        >
           <InputOTPGroup>
             <InputOTPSlot :index="0" />
             <InputOTPSlot :index="1" />
@@ -394,7 +440,10 @@ const otpValue = ref('')
     </section>
 
     <!-- 29. ITEM -->
-    <section v-show="match('item')" class="space-y-4">
+    <section
+      v-show="match('item')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">29. Item</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -406,7 +455,10 @@ const otpValue = ref('')
         <ItemGroup class="max-w-md mx-auto space-y-2">
           <Item>
             <ItemMedia variant="image">
-              <img src="https://ui.shadcn.com/avatars/01.png" alt="Avatar" />
+              <img
+                src="https://ui.shadcn.com/avatars/01.png"
+                alt="Avatar"
+              />
             </ItemMedia>
             <ItemContent>
               <ItemHeader>
@@ -415,12 +467,19 @@ const otpValue = ref('')
               <ItemDescription>olivia.martin@email.com</ItemDescription>
             </ItemContent>
             <ItemActions>
-              <Button variant="outline" size="sm">Invite</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                >Invite</Button
+              >
             </ItemActions>
           </Item>
           <Item>
             <ItemMedia variant="image">
-              <img src="https://ui.shadcn.com/avatars/02.png" alt="Avatar" />
+              <img
+                src="https://ui.shadcn.com/avatars/02.png"
+                alt="Avatar"
+              />
             </ItemMedia>
             <ItemContent>
               <ItemHeader>
@@ -429,7 +488,11 @@ const otpValue = ref('')
               <ItemDescription>jackson.lee@email.com</ItemDescription>
             </ItemContent>
             <ItemActions>
-              <Button variant="outline" size="sm">Invite</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                >Invite</Button
+              >
             </ItemActions>
           </Item>
         </ItemGroup>
@@ -437,7 +500,10 @@ const otpValue = ref('')
     </section>
 
     <!-- 30. KBD -->
-    <section v-show="match('kbd')" class="space-y-4">
+    <section
+      v-show="match('kbd')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">30. Kbd</h2>
         <p class="text-sm text-muted-foreground mt-1">

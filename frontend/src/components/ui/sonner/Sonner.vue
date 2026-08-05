@@ -7,7 +7,7 @@ import {
   Loader2Icon,
   OctagonXIcon,
   TriangleAlertIcon,
-  XIcon,
+  XIcon
 } from 'lucide-vue-next'
 import { Toaster as Sonner } from 'vue-sonner'
 import { cn } from '@/lib/utils'
@@ -22,7 +22,7 @@ const props = defineProps<ToasterProps>()
       '--normal-bg': 'color-mix(in oklch, var(--primary) 85%, transparent)',
       '--normal-text': 'var(--primary-foreground)',
       '--normal-border': 'transparent',
-      '--border-radius': '12px',
+      '--border-radius': '12px'
     }"
     :close-button="true"
     :toast-options="{
@@ -30,18 +30,18 @@ const props = defineProps<ToasterProps>()
         toast:
           'group toast shadow-xl rounded-xl border p-4 text-sm font-medium transition-all duration-300 flex items-center gap-3',
         description: '!text-primary-foreground opacity-90 text-xs',
-        actionButton:
-          'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
-        cancelButton:
-          'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
+        actionButton: 'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
+        cancelButton: 'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
         closeButton:
-          'group-[.toast]:!bg-background group-[.toast]:!border group-[.toast]:!text-muted-foreground group-[.toast]:hover:!text-foreground group-[.toast]:hover:!border-foreground/30',
-      },
+          'group-[.toast]:!bg-background group-[.toast]:!border group-[.toast]:!text-muted-foreground group-[.toast]:hover:!text-foreground group-[.toast]:hover:!border-foreground/30'
+      }
     }"
     v-bind="props"
   >
     <template #success-icon>
-      <CircleCheckIcon class="size-5 text-emerald-500 dark:text-emerald-400 shrink-0 dynamic-icon" />
+      <CircleCheckIcon
+        class="size-5 text-emerald-500 dark:text-emerald-400 shrink-0 dynamic-icon"
+      />
     </template>
     <template #info-icon>
       <InfoIcon class="size-5 text-blue-500 dark:text-blue-400 shrink-0 dynamic-icon" />
@@ -94,7 +94,7 @@ const props = defineProps<ToasterProps>()
   --error-bg: rgba(244, 63, 94, 0.07) !important;
   --error-text: #be123c !important;
   --error-border: rgba(244, 63, 94, 0.2) !important;
-  
+
   --info-bg: rgba(59, 130, 246, 0.07) !important;
   --info-text: #1d4ed8 !important;
   --info-border: rgba(59, 130, 246, 0.2) !important;
@@ -105,13 +105,15 @@ const props = defineProps<ToasterProps>()
 }
 
 .toaster .toast.success {
-  box-shadow: 0 10px 30px -5px rgba(16, 185, 129, 0.12),
-              0 0 15px -3px rgba(16, 185, 129, 0.05) !important;
+  box-shadow:
+    0 10px 30px -5px rgba(16, 185, 129, 0.12),
+    0 0 15px -3px rgba(16, 185, 129, 0.05) !important;
 }
 
 .toaster .toast.error {
-  box-shadow: 0 10px 30px -5px rgba(244, 63, 94, 0.12),
-              0 0 15px -3px rgba(244, 63, 94, 0.05) !important;
+  box-shadow:
+    0 10px 30px -5px rgba(244, 63, 94, 0.12),
+    0 0 15px -3px rgba(244, 63, 94, 0.05) !important;
 }
 
 /* Dark mode overrides */
@@ -134,13 +136,15 @@ const props = defineProps<ToasterProps>()
 }
 
 .dark .toaster .toast.success {
-  box-shadow: 0 12px 30px -5px rgba(16, 185, 129, 0.2),
-              0 0 20px 2px rgba(16, 185, 129, 0.05) !important;
+  box-shadow:
+    0 12px 30px -5px rgba(16, 185, 129, 0.2),
+    0 0 20px 2px rgba(16, 185, 129, 0.05) !important;
 }
 
 .dark .toaster .toast.error {
-  box-shadow: 0 12px 30px -5px rgba(244, 63, 94, 0.2),
-              0 0 20px 2px rgba(244, 63, 94, 0.05) !important;
+  box-shadow:
+    0 12px 30px -5px rgba(244, 63, 94, 0.2),
+    0 0 20px 2px rgba(244, 63, 94, 0.05) !important;
 }
 
 /* Subtle icon entrance animation */

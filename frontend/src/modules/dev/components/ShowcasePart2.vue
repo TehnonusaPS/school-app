@@ -148,7 +148,10 @@ const goal = ref(350)
 <template>
   <div class="space-y-12">
     <!-- 11. CARD -->
-    <section v-show="match('card')" class="space-y-4">
+    <section
+      v-show="match('card')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">11. Card</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -180,7 +183,10 @@ const goal = ref(350)
     </section>
 
     <!-- 12. CAROUSEL -->
-    <section v-show="match('carousel')" class="space-y-4">
+    <section
+      v-show="match('carousel')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">12. Carousel</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -190,9 +196,16 @@ const goal = ref(350)
       </div>
 
       <div class="p-12 border rounded-xl bg-card flex justify-center overflow-hidden">
-        <Carousel class="w-full max-w-xs" :opts="{ align: 'start' }">
+        <Carousel
+          class="w-full max-w-xs"
+          :opts="{ align: 'start' }"
+        >
           <CarouselContent>
-            <CarouselItem v-for="index in 5" :key="index" class="md:basis-1/2 lg:basis-1/3">
+            <CarouselItem
+              v-for="index in 5"
+              :key="index"
+              class="md:basis-1/2 lg:basis-1/3"
+            >
               <div class="p-1">
                 <Card>
                   <CardContent class="flex aspect-square items-center justify-center p-6">
@@ -209,7 +222,10 @@ const goal = ref(350)
     </section>
 
     <!-- 13. CHECKBOX -->
-    <section v-show="match('checkbox')" class="space-y-4">
+    <section
+      v-show="match('checkbox')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">13. Checkbox</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -229,7 +245,10 @@ const goal = ref(350)
         </div>
 
         <div class="flex items-center space-x-2">
-          <Checkbox id="marketing" disabled />
+          <Checkbox
+            id="marketing"
+            disabled
+          />
           <label
             for="marketing"
             class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -241,7 +260,10 @@ const goal = ref(350)
     </section>
 
     <!-- 14. COLLAPSIBLE -->
-    <section v-show="match('collapsible')" class="space-y-4">
+    <section
+      v-show="match('collapsible')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">14. Collapsible</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -251,11 +273,18 @@ const goal = ref(350)
       </div>
 
       <div class="p-6 border rounded-xl bg-card flex justify-center">
-        <Collapsible v-model:open="isCollapsibleOpen" class="w-full max-w-sm space-y-2">
+        <Collapsible
+          v-model:open="isCollapsibleOpen"
+          class="w-full max-w-sm space-y-2"
+        >
           <div class="flex items-center justify-between space-x-4 px-4">
             <h4 class="text-sm font-semibold">@SekolahHebat repositories</h4>
             <CollapsibleTrigger as-child>
-              <Button variant="ghost" size="sm" class="w-9 p-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                class="w-9 p-0"
+              >
                 <ChevronsUpDown class="h-4 w-4" />
                 <span class="sr-only">Toggle</span>
               </Button>
@@ -277,7 +306,10 @@ const goal = ref(350)
     </section>
 
     <!-- 15. CONTEXT MENU -->
-    <section v-show="match('context menu')" class="space-y-4">
+    <section
+      v-show="match('context menu')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">15. Context Menu</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -297,7 +329,10 @@ const goal = ref(350)
               Back
               <ContextMenuShortcut>⌘[</ContextMenuShortcut>
             </ContextMenuItem>
-            <ContextMenuItem inset disabled>
+            <ContextMenuItem
+              inset
+              disabled
+            >
               Forward
               <ContextMenuShortcut>⌘]</ContextMenuShortcut>
             </ContextMenuItem>
@@ -336,7 +371,10 @@ const goal = ref(350)
       </div>
     </section>
     <!-- 16. CHART -->
-    <section v-show="match('chart')" class="space-y-4">
+    <section
+      v-show="match('chart')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">16. Chart</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -352,11 +390,26 @@ const goal = ref(350)
           <p class="text-xs text-muted-foreground mb-4">
             Arahkan kursor untuk melihat tooltip informasi lengkap
           </p>
-          <ChartContainer :config="chartConfig" class="h-[220px] w-full">
+          <ChartContainer
+            :config="chartConfig"
+            class="h-[220px] w-full"
+          >
             <VisXYContainer :data="chartData">
-              <VisLine :x="(d, i) => i" :y="d => d.data1" color="var(--color-data1)" />
-              <VisLine :x="(d, i) => i" :y="d => d.data2" color="var(--color-data2)" />
-              <VisLine :x="(d, i) => i" :y="d => d.data3" color="var(--color-data3)" />
+              <VisLine
+                :x="(d, i) => i"
+                :y="d => d.data1"
+                color="var(--color-data1)"
+              />
+              <VisLine
+                :x="(d, i) => i"
+                :y="d => d.data2"
+                color="var(--color-data2)"
+              />
+              <VisLine
+                :x="(d, i) => i"
+                :y="d => d.data3"
+                color="var(--color-data3)"
+              />
               <VisAxis
                 type="x"
                 :tickFormat="i => chartData[i]?.month"
@@ -364,7 +417,12 @@ const goal = ref(350)
                 :grid-line="false"
                 :tick-line="false"
               />
-              <VisAxis type="y" :tick-line="false" :domain-line="false" :grid-line="true" />
+              <VisAxis
+                type="y"
+                :tick-line="false"
+                :domain-line="false"
+                :grid-line="true"
+              />
               <ChartTooltip />
               <ChartCrosshair
                 :template="
@@ -387,8 +445,14 @@ const goal = ref(350)
           <p class="text-xs text-muted-foreground mb-4">
             Arahkan kursor untuk melihat perbandingan data
           </p>
-          <ChartContainer :config="chartConfig" class="h-[220px] w-full bar-chart-container">
-            <VisXYContainer :data="chartData" :xDomain="[-0.5, chartData.length - 0.5]">
+          <ChartContainer
+            :config="chartConfig"
+            class="h-[220px] w-full bar-chart-container"
+          >
+            <VisXYContainer
+              :data="chartData"
+              :xDomain="[-0.5, chartData.length - 0.5]"
+            >
               <VisGroupedBar
                 :x="(d, i) => i"
                 :y="[d => d.data1, d => d.data2, d => d.data3]"
@@ -402,7 +466,12 @@ const goal = ref(350)
                 :grid-line="false"
                 :tick-line="false"
               />
-              <VisAxis type="y" :tick-line="false" :domain-line="false" :grid-line="true" />
+              <VisAxis
+                type="y"
+                :tick-line="false"
+                :domain-line="false"
+                :grid-line="true"
+              />
               <ChartTooltip />
               <ChartCrosshair
                 :template="
@@ -422,7 +491,10 @@ const goal = ref(350)
     </section>
 
     <!-- 17. COMBOBOX -->
-    <section v-show="match('combobox')" class="space-y-4">
+    <section
+      v-show="match('combobox')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">17. Combobox</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -431,10 +503,18 @@ const goal = ref(350)
       </div>
 
       <div class="p-6 border rounded-xl bg-card flex justify-center h-[350px] items-start">
-        <Combobox v-model="comboboxValue" :options="comboboxFrameworks" class="w-[200px]">
+        <Combobox
+          v-model="comboboxValue"
+          :options="comboboxFrameworks"
+          class="w-[200px]"
+        >
           <ComboboxAnchor class="w-[200px]">
             <ComboboxTrigger as-child>
-              <Button variant="outline" role="combobox" class="w-[200px] justify-between">
+              <Button
+                variant="outline"
+                role="combobox"
+                class="w-[200px] justify-between"
+              >
                 <span class="truncate">
                   {{
                     comboboxValue
@@ -477,7 +557,10 @@ const goal = ref(350)
     </section>
 
     <!-- 18. COMMAND -->
-    <section v-show="match('command')" class="space-y-4">
+    <section
+      v-show="match('command')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">18. Command</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -486,7 +569,10 @@ const goal = ref(350)
       </div>
 
       <div class="p-6 border rounded-xl bg-card flex justify-center">
-        <Button variant="outline" @click="commandOpen = true">
+        <Button
+          variant="outline"
+          @click="commandOpen = true"
+        >
           Buka Command Palette
           <kbd
             class="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 ml-2"
@@ -526,7 +612,10 @@ const goal = ref(350)
       </div>
     </section>
     <!-- 19. DIALOG -->
-    <section v-show="match('dialog')" class="space-y-4">
+    <section
+      v-show="match('dialog')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">19. Dialog</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -549,16 +638,36 @@ const goal = ref(350)
             </DialogHeader>
             <div class="grid gap-4 py-4">
               <div class="grid grid-cols-4 items-center gap-4">
-                <label for="name" class="text-right text-sm">Name</label>
-                <Input id="name" value="Pedro Duarte" class="col-span-3" />
+                <label
+                  for="name"
+                  class="text-right text-sm"
+                  >Name</label
+                >
+                <Input
+                  id="name"
+                  value="Pedro Duarte"
+                  class="col-span-3"
+                />
               </div>
               <div class="grid grid-cols-4 items-center gap-4">
-                <label for="username" class="text-right text-sm">Username</label>
-                <Input id="username" value="@peduarte" class="col-span-3" />
+                <label
+                  for="username"
+                  class="text-right text-sm"
+                  >Username</label
+                >
+                <Input
+                  id="username"
+                  value="@peduarte"
+                  class="col-span-3"
+                />
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" @click="dialogOpen = false">Save changes</Button>
+              <Button
+                type="button"
+                @click="dialogOpen = false"
+                >Save changes</Button
+              >
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -566,7 +675,10 @@ const goal = ref(350)
     </section>
 
     <!-- 20. DRAWER -->
-    <section v-show="match('drawer')" class="space-y-4">
+    <section
+      v-show="match('drawer')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">20. Drawer</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -587,7 +699,13 @@ const goal = ref(350)
                 <DrawerDescription>Set your daily activity goal.</DrawerDescription>
               </DrawerHeader>
               <div class="p-4 pb-0 flex items-center justify-center space-x-2">
-                <Button variant="outline" size="icon" class="h-8 w-8 shrink-0 rounded-full" @click="goal = Math.max(200, goal - 10)" :disabled="goal <= 200">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  class="h-8 w-8 shrink-0 rounded-full"
+                  @click="goal = Math.max(200, goal - 10)"
+                  :disabled="goal <= 200"
+                >
                   <span class="sr-only">Decrease</span>
                   -
                 </Button>
@@ -595,7 +713,13 @@ const goal = ref(350)
                   <div class="text-7xl font-bold tracking-tighter">{{ goal }}</div>
                   <div class="text-[0.70rem] uppercase text-muted-foreground">Calories/day</div>
                 </div>
-                <Button variant="outline" size="icon" class="h-8 w-8 shrink-0 rounded-full" @click="goal = Math.min(500, goal + 10)" :disabled="goal >= 500">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  class="h-8 w-8 shrink-0 rounded-full"
+                  @click="goal = Math.min(500, goal + 10)"
+                  :disabled="goal >= 500"
+                >
                   <span class="sr-only">Increase</span>
                   +
                 </Button>
@@ -613,5 +737,3 @@ const goal = ref(350)
     </section>
   </div>
 </template>
-
-

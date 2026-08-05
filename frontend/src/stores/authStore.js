@@ -17,7 +17,7 @@ const _notificationCallbacks = []
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: JSON.parse(localStorage.getItem('user')) || null,
+    user: null,
     token: initialToken || null,
     isJustLoggedIn: false,
     isLoggingOut: false,
@@ -29,6 +29,20 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   actions: {
+    /**
+     * Inisialisasi: refresh profil user dari server agar role & data terbaru termuat.
+     */
+    async initUser() {
+      if (!this.token) return
+      try {
+        const response = await authService.getUser()
+        if (response.user) {
+          this.user = response.user
+        }
+      } catch (error) {
+        console.error('Gagal memuat ulang data user:', error)
+      }
+    },
     /**
      * Fetch total unread chats count from the server.
      */
@@ -152,7 +166,6 @@ export const useAuthStore = defineStore('auth', {
         this.isJustLoggedIn = true
 
         localStorage.setItem('token', data.access_token)
-        localStorage.setItem('user', JSON.stringify(data.user))
 
         // Connect WebSocket Echo
         connectEcho(data.access_token)
@@ -212,7 +225,6 @@ export const useAuthStore = defineStore('auth', {
         _messageCallbacks.length = 0
         _notificationCallbacks.length = 0
         localStorage.removeItem('token')
-        localStorage.removeItem('user')
       }
     }
   }

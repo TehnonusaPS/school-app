@@ -50,7 +50,10 @@ const match = keywords => {
 <template>
   <div class="space-y-12">
     <!-- 1. ACCORDION -->
-    <section v-show="match('accordion')" class="space-y-4">
+    <section
+      v-show="match('accordion')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">1. Accordion</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -60,7 +63,11 @@ const match = keywords => {
       </div>
 
       <div class="p-6 border rounded-xl bg-card max-w-3xl">
-        <Accordion type="single" collapsible class="w-full">
+        <Accordion
+          type="single"
+          collapsible
+          class="w-full"
+        >
           <AccordionItem value="item-1">
             <AccordionTrigger>Apakah desain ini responsif?</AccordionTrigger>
             <AccordionContent>
@@ -87,7 +94,10 @@ const match = keywords => {
     </section>
 
     <!-- 2. ALERT -->
-    <section v-show="match('alert')" class="space-y-4">
+    <section
+      v-show="match('alert')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">2. Alert</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -129,7 +139,10 @@ const match = keywords => {
     </section>
 
     <!-- 3. ALERT DIALOG -->
-    <section v-show="match('alert dialog')" class="space-y-4">
+    <section
+      v-show="match('alert dialog')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">3. Alert Dialog (Modal)</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -184,7 +197,10 @@ const match = keywords => {
     </section>
 
     <!-- 4. ASPECT RATIO -->
-    <section v-show="match('aspect ratio')" class="space-y-4">
+    <section
+      v-show="match('aspect ratio')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">4. Aspect Ratio</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -196,7 +212,10 @@ const match = keywords => {
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div class="p-4 border rounded-xl bg-card">
           <p class="mb-4 text-sm font-semibold">Rasio 16:9 (Video/Banner)</p>
-          <AspectRatio :ratio="16 / 9" class="bg-muted rounded-md overflow-hidden">
+          <AspectRatio
+            :ratio="16 / 9"
+            class="bg-muted rounded-md overflow-hidden"
+          >
             <img
               src="https://images.unsplash.com/photo-1588345921523-c2dcdb7f1dcd?w=800&dpr=2&q=80"
               alt="Photo by Drew Beamer"
@@ -208,7 +227,10 @@ const match = keywords => {
         <div class="p-4 border rounded-xl bg-card">
           <p class="mb-4 text-sm font-semibold">Rasio 1:1 (Square Profile)</p>
           <div class="w-[200px] mx-auto">
-            <AspectRatio :ratio="1 / 1" class="bg-muted rounded-md overflow-hidden">
+            <AspectRatio
+              :ratio="1 / 1"
+              class="bg-muted rounded-md overflow-hidden"
+            >
               <img
                 src="https://images.unsplash.com/photo-1588345921523-c2dcdb7f1dcd?w=400&dpr=2&q=80"
                 alt="Photo by Drew Beamer"
@@ -221,7 +243,10 @@ const match = keywords => {
     </section>
 
     <!-- 5. AVATAR -->
-    <section v-show="match('avatar')" class="space-y-4">
+    <section
+      v-show="match('avatar')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">5. Avatar</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -232,7 +257,10 @@ const match = keywords => {
       <div class="flex flex-wrap gap-8 items-center p-6 border rounded-xl bg-card">
         <div class="flex flex-col items-center gap-2">
           <Avatar class="w-12 h-12">
-            <AvatarImage src="https://i.pravatar.cc/150?u=44" alt="@shadcn" />
+            <AvatarImage
+              src="https://i.pravatar.cc/150?u=44"
+              alt="@shadcn"
+            />
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
           <span class="text-xs text-muted-foreground">Normal (Image)</span>
@@ -240,7 +268,10 @@ const match = keywords => {
 
         <div class="flex flex-col items-center gap-2">
           <Avatar class="w-16 h-16">
-            <AvatarImage src="https://github.com/nonexistent.png" alt="@broken" />
+            <AvatarImage
+              src="https://github.com/nonexistent.png"
+              alt="@broken"
+            />
             <AvatarFallback class="bg-primary text-primary-foreground">BS</AvatarFallback>
           </Avatar>
           <span class="text-xs text-muted-foreground">Fallback (Inisial)</span>
@@ -248,7 +279,10 @@ const match = keywords => {
 
         <div class="flex flex-col items-center gap-2">
           <Avatar class="w-10 h-10 rounded-sm">
-            <AvatarImage src="https://i.pravatar.cc/150?u=12" alt="@square" />
+            <AvatarImage
+              src="https://i.pravatar.cc/150?u=12"
+              alt="@square"
+            />
             <AvatarFallback>SQ</AvatarFallback>
           </Avatar>
           <span class="text-xs text-muted-foreground">Square Radius</span>
@@ -256,7 +290,10 @@ const match = keywords => {
 
         <div class="flex flex-col items-center gap-2">
           <Avatar class="w-24 h-24 border-4 border-primary">
-            <AvatarImage src="https://i.pravatar.cc/150?u=77" alt="@large" />
+            <AvatarImage
+              src="https://i.pravatar.cc/150?u=77"
+              alt="@large"
+            />
             <AvatarFallback><User class="w-10 h-10" /></AvatarFallback>
           </Avatar>
           <span class="text-xs text-muted-foreground">X-Large & Border</span>
@@ -265,7 +302,10 @@ const match = keywords => {
     </section>
 
     <!-- 6. BADGE -->
-    <section v-show="match('badge')" class="space-y-4">
+    <section
+      v-show="match('badge')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">6. Badge</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -287,30 +327,105 @@ const match = keywords => {
       </div>
 
       <div class="flex flex-wrap gap-4 p-6 border rounded-xl bg-card">
-        <Badge variant="gray" show-dot>Badge</Badge>
-        <Badge variant="red" show-dot>Badge</Badge>
-        <Badge variant="amber" show-dot>Badge</Badge>
-        <Badge variant="green" show-dot>Badge</Badge>
-        <Badge variant="blue" show-dot>Badge</Badge>
-        <Badge variant="indigo" show-dot>Badge</Badge>
-        <Badge variant="purple" show-dot>Badge</Badge>
-        <Badge variant="pink" show-dot>Badge</Badge>
+        <Badge
+          variant="gray"
+          show-dot
+          >Badge</Badge
+        >
+        <Badge
+          variant="red"
+          show-dot
+          >Badge</Badge
+        >
+        <Badge
+          variant="amber"
+          show-dot
+          >Badge</Badge
+        >
+        <Badge
+          variant="green"
+          show-dot
+          >Badge</Badge
+        >
+        <Badge
+          variant="blue"
+          show-dot
+          >Badge</Badge
+        >
+        <Badge
+          variant="indigo"
+          show-dot
+          >Badge</Badge
+        >
+        <Badge
+          variant="purple"
+          show-dot
+          >Badge</Badge
+        >
+        <Badge
+          variant="pink"
+          show-dot
+          >Badge</Badge
+        >
       </div>
 
       <div class="flex flex-wrap gap-4 p-6 border rounded-xl bg-card">
-        <Badge variant="gray" show-dot pulse>Badge</Badge>
-        <Badge variant="red" show-dot pulse>Badge</Badge>
-        <Badge variant="amber" show-dot pulse>Badge</Badge>
-        <Badge variant="green" show-dot pulse>Badge</Badge>
-        <Badge variant="blue" show-dot pulse>Badge</Badge>
-        <Badge variant="indigo" show-dot pulse>Badge</Badge>
-        <Badge variant="purple" show-dot pulse>Badge</Badge>
-        <Badge variant="pink" show-dot pulse>Badge</Badge>
+        <Badge
+          variant="gray"
+          show-dot
+          pulse
+          >Badge</Badge
+        >
+        <Badge
+          variant="red"
+          show-dot
+          pulse
+          >Badge</Badge
+        >
+        <Badge
+          variant="amber"
+          show-dot
+          pulse
+          >Badge</Badge
+        >
+        <Badge
+          variant="green"
+          show-dot
+          pulse
+          >Badge</Badge
+        >
+        <Badge
+          variant="blue"
+          show-dot
+          pulse
+          >Badge</Badge
+        >
+        <Badge
+          variant="indigo"
+          show-dot
+          pulse
+          >Badge</Badge
+        >
+        <Badge
+          variant="purple"
+          show-dot
+          pulse
+          >Badge</Badge
+        >
+        <Badge
+          variant="pink"
+          show-dot
+          pulse
+          >Badge</Badge
+        >
       </div>
     </section>
 
     <!-- 7. BREADCRUMB -->
-    <section v-show="match('breadcrumb')" class="space-y-4">
+    <section
+      v-show="match('breadcrumb')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">7. Breadcrumb</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -338,7 +453,10 @@ const match = keywords => {
     </section>
 
     <!-- 8. BUTTON -->
-    <section v-show="match('button')" class="space-y-4">
+    <section
+      v-show="match('button')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">8. Button</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -360,14 +478,20 @@ const match = keywords => {
           <User class="w-4 h-4 mr-2" />
           With Icon
         </Button>
-        <Button size="icon" variant="outline">
+        <Button
+          size="icon"
+          variant="outline"
+        >
           <Settings class="w-4 h-4" />
         </Button>
       </div>
     </section>
 
     <!-- 9. BUTTON GROUP -->
-    <section v-show="match('button group')" class="space-y-4">
+    <section
+      v-show="match('button group')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">9. Button Group</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -388,7 +512,10 @@ const match = keywords => {
     </section>
 
     <!-- 10. CALENDAR -->
-    <section v-show="match('calendar')" class="space-y-4">
+    <section
+      v-show="match('calendar')"
+      class="space-y-4"
+    >
       <div class="border-b pb-2">
         <h2 class="text-2xl font-semibold text-primary">10. Calendar</h2>
         <p class="text-sm text-muted-foreground mt-1">
@@ -397,7 +524,10 @@ const match = keywords => {
       </div>
 
       <div class="p-6 border rounded-xl bg-card inline-block">
-        <Calendar locale="id-ID" class="border rounded-md shadow" />
+        <Calendar
+          locale="id-ID"
+          class="border rounded-md shadow"
+        />
       </div>
     </section>
   </div>

@@ -23,7 +23,11 @@ defineEmits(['update:modelValue'])
   <Field :data-invalid="!!error">
     <FieldLabel v-if="label">
       {{ label }}
-      <span v-if="required" class="text-destructive">*</span>
+      <span
+        v-if="required"
+        class="text-destructive"
+        >*</span
+      >
     </FieldLabel>
 
     <FieldContent>

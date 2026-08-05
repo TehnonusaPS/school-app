@@ -18,10 +18,23 @@ import StatCard from '@/components/stat-card/StatCard.vue'
 
 import { useRouter } from 'vue-router'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
 import { toast } from 'vue-sonner'
 import * as financeService from '@/services/superAdminFinanceService'
 
@@ -78,7 +91,7 @@ const subscriptions = ref([])
 const activities = ref([])
 const isLoading = ref(false)
 
-const formatCurrency = (val) => {
+const formatCurrency = val => {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
@@ -100,12 +113,13 @@ const loadData = async () => {
 
       // Map recent activities/logs
       const tempActivities = []
-      
+
       // Process recent subscriptions
       if (dashRes.data.recent_subscriptions) {
         dashRes.data.recent_subscriptions.forEach(sub => {
           const createdAt = new Date(sub.created_at)
-          const timeStr = createdAt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB'
+          const timeStr =
+            createdAt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB'
           tempActivities.push({
             id: 'sub-' + sub.id,
             time: timeStr,
@@ -124,9 +138,10 @@ const loadData = async () => {
       if (dashRes.data.recent_payments) {
         dashRes.data.recent_payments.forEach(pay => {
           const payDate = new Date(pay.created_at)
-          const timeStr = payDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB'
+          const timeStr =
+            payDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB'
           const isPaid = pay.status === 'paid'
-          
+
           tempActivities.push({
             id: 'pay-' + pay.id,
             time: timeStr,
@@ -135,8 +150,8 @@ const loadData = async () => {
             amount: isPaid ? `+ ${formatCurrency(pay.amount)}` : formatCurrency(pay.amount),
             amountClass: isPaid ? 'text-emerald-600' : 'text-amber-600',
             badge: pay.status.toUpperCase(),
-            badgeClass: isPaid 
-              ? 'bg-emerald-100 hover:bg-emerald-100 text-emerald-700' 
+            badgeClass: isPaid
+              ? 'bg-emerald-100 hover:bg-emerald-100 text-emerald-700'
               : pay.status === 'pending'
                 ? 'bg-amber-100 hover:bg-amber-100 text-amber-700'
                 : 'bg-red-100 hover:bg-red-100 text-red-700',
@@ -155,23 +170,31 @@ const loadData = async () => {
     const subRes = await financeService.getSubscriptions()
     if (subRes.status === 'success' && subRes.data) {
       // Map API subscriptions to table rows structure
-      const items = Array.isArray(subRes.data) ? subRes.data : (subRes.data.data || [])
+      const items = Array.isArray(subRes.data) ? subRes.data : subRes.data.data || []
       subscriptions.value = items.map(sub => {
         const startsAt = new Date(sub.starts_at)
         const endsAt = new Date(sub.ends_at)
-        
+
         const option = { day: 'numeric', month: 'short', year: 'numeric' }
         const startsAtStr = startsAt.toLocaleDateString('id-ID', option)
         const endsAtStr = endsAt.toLocaleDateString('id-ID', option)
 
         const name = sub.foundation?.name || 'Yayasan Tanpa Nama'
-        const avatar = name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'N'
+        const avatar =
+          name
+            .split(' ')
+            .filter(Boolean)
+            .map(w => w[0])
+            .join('')
+            .slice(0, 2)
+            .toUpperCase() || 'N'
 
         return {
           id: sub.id,
           name: name,
           paket: sub.plan?.name || 'Custom',
-          status: sub.status === 'active' ? 'aktif' : sub.status === 'trial' ? 'trialing' : sub.status,
+          status:
+            sub.status === 'active' ? 'aktif' : sub.status === 'trial' ? 'trialing' : sub.status,
           tglAktivasi: startsAtStr,
           jatuhTempo: endsAtStr,
           nilaiKontrak: parseFloat(sub.plan?.price || 0),
@@ -197,17 +220,21 @@ onMounted(() => {
 
 const filteredSubscriptions = computed(() => {
   return subscriptions.value.filter(sub => {
-    const matchPaket = selectedPaket.value === 'semua' || sub.paket.toLowerCase() === selectedPaket.value.toLowerCase()
-    const matchStatus = selectedStatus.value === 'semua' || sub.status.toLowerCase() === selectedStatus.value.toLowerCase()
+    const matchPaket =
+      selectedPaket.value === 'semua' ||
+      sub.paket.toLowerCase() === selectedPaket.value.toLowerCase()
+    const matchStatus =
+      selectedStatus.value === 'semua' ||
+      sub.status.toLowerCase() === selectedStatus.value.toLowerCase()
     return matchPaket && matchStatus
   })
 })
 
-const editSubscription = (id) => {
+const editSubscription = id => {
   router.push(`/keuangan/subscription/tambah?id=${id}`)
 }
 
-const deleteSubscription = async (id) => {
+const deleteSubscription = async id => {
   if (confirm('Apakah Anda yakin ingin menghapus data langganan ini?')) {
     try {
       await financeService.deleteSubscription(id)
@@ -222,12 +249,12 @@ const deleteSubscription = async (id) => {
   }
 }
 
-const formatContractValue = (val) => {
+const formatContractValue = val => {
   if (val === 0) return 'Rp 0 (Trial)'
   return formatCurrency(val)
 }
 
-const formatDateWithBr = (dateStr) => {
+const formatDateWithBr = dateStr => {
   if (!dateStr) return ''
   const parts = dateStr.split(' ')
   if (parts.length >= 3) {
@@ -236,7 +263,7 @@ const formatDateWithBr = (dateStr) => {
   return dateStr
 }
 
-const getAvatarClass = (avatar) => {
+const getAvatarClass = avatar => {
   if (avatar === 'ST') {
     return 'bg-primary text-primary-foreground'
   } else if (avatar === 'MP') {
@@ -267,10 +294,12 @@ const getAvatarClass = (avatar) => {
         valueClass="text-base sm:text-xl md:text-2xl"
       />
     </div>
-    
+
     <!-- Table Card -->
     <Card>
-      <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b gap-4">
+      <div
+        class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b gap-4"
+      >
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-2">
             <span class="text-sm font-medium text-muted-foreground">Filter Paket:</span>
@@ -302,40 +331,68 @@ const getAvatarClass = (avatar) => {
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <Button @click="formLangganan" class="h-8">
+          <Button
+            @click="formLangganan"
+            class="h-8"
+          >
             <Plus class="w-4 h-4 mr-1" /> Tambah Langganan Baru
           </Button>
-          <Button variant="outline" class="h-8">
+          <Button
+            variant="outline"
+            class="h-8"
+          >
             <Download class="w-4 h-4 mr-1" /> Ekspor Data
           </Button>
         </div>
       </div>
-      
+
       <!-- Subscriptions Table -->
       <Table>
         <TableHeader class="bg-muted/50">
           <TableRow>
-            <TableHead class="font-semibold text-xs uppercase text-muted-foreground text-center w-[50px]">NO</TableHead>
-            <TableHead class="font-semibold text-xs uppercase text-muted-foreground">INSTITUSI (TENANT)</TableHead>
-            <TableHead class="font-semibold text-xs uppercase text-muted-foreground">PAKET</TableHead>
-            <TableHead class="font-semibold text-xs uppercase text-muted-foreground">STATUS</TableHead>
-            <TableHead class="font-semibold text-xs uppercase text-muted-foreground text-center">TGL AKTIVASI</TableHead>
-            <TableHead class="font-semibold text-xs uppercase text-muted-foreground text-center">JATUH TEMPO</TableHead>
-            <TableHead class="font-semibold text-xs uppercase text-muted-foreground">NILAI KONTRAK</TableHead>
-            <TableHead class="font-semibold text-xs uppercase text-muted-foreground">AKSI</TableHead>
+            <TableHead
+              class="font-semibold text-xs uppercase text-muted-foreground text-center w-[50px]"
+              >NO</TableHead
+            >
+            <TableHead class="font-semibold text-xs uppercase text-muted-foreground"
+              >INSTITUSI (TENANT)</TableHead
+            >
+            <TableHead class="font-semibold text-xs uppercase text-muted-foreground"
+              >PAKET</TableHead
+            >
+            <TableHead class="font-semibold text-xs uppercase text-muted-foreground"
+              >STATUS</TableHead
+            >
+            <TableHead class="font-semibold text-xs uppercase text-muted-foreground text-center"
+              >TGL AKTIVASI</TableHead
+            >
+            <TableHead class="font-semibold text-xs uppercase text-muted-foreground text-center"
+              >JATUH TEMPO</TableHead
+            >
+            <TableHead class="font-semibold text-xs uppercase text-muted-foreground"
+              >NILAI KONTRAK</TableHead
+            >
+            <TableHead class="font-semibold text-xs uppercase text-muted-foreground"
+              >AKSI</TableHead
+            >
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow v-for="(sub, index) in filteredSubscriptions" :key="sub.id">
+          <TableRow
+            v-for="(sub, index) in filteredSubscriptions"
+            :key="sub.id"
+          >
             <TableCell class="text-center font-medium text-muted-foreground">
               {{ index + 1 }}
             </TableCell>
             <TableCell>
               <div class="flex items-center gap-3">
-                <div :class="[
-                  'w-10 h-10 rounded flex items-center justify-center font-bold text-xs shrink-0',
-                  getAvatarClass(sub.avatar)
-                ]">
+                <div
+                  :class="[
+                    'w-10 h-10 rounded flex items-center justify-center font-bold text-xs shrink-0',
+                    getAvatarClass(sub.avatar)
+                  ]"
+                >
                   {{ sub.avatar }}
                 </div>
                 <div>
@@ -345,54 +402,120 @@ const getAvatarClass = (avatar) => {
               </div>
             </TableCell>
             <TableCell>
-              <Badge :variant="sub.paket.toLowerCase() === 'enterprise' ? 'default' : sub.paket.toLowerCase() === 'professional' ? 'secondary' : 'outline'" :class="[
-                sub.paket.toLowerCase() === 'enterprise' ? 'bg-primary hover:bg-primary/90 text-primary-foreground' : '',
-                'rounded-[4px] text-[10px] px-2 py-0.5 uppercase'
-              ]">{{ sub.paket }}</Badge>
+              <Badge
+                :variant="
+                  sub.paket.toLowerCase() === 'enterprise'
+                    ? 'default'
+                    : sub.paket.toLowerCase() === 'professional'
+                      ? 'secondary'
+                      : 'outline'
+                "
+                :class="[
+                  sub.paket.toLowerCase() === 'enterprise'
+                    ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                    : '',
+                  'rounded-[4px] text-[10px] px-2 py-0.5 uppercase'
+                ]"
+                >{{ sub.paket }}</Badge
+              >
             </TableCell>
             <TableCell>
-              <Badge variant="outline" :class="[
-                sub.status === 'aktif' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' :
-                sub.status === 'overdue' ? 'text-red-500 bg-red-50 border-red-100' :
-                'text-blue-600 bg-blue-50 border-blue-100',
-                'px-2 py-0.5 font-medium'
-              ]" showDot>{{ sub.status === 'aktif' ? 'Aktif' : sub.status === 'overdue' ? 'Overdue' : 'Trialing' }}</Badge>
+              <Badge
+                variant="outline"
+                :class="[
+                  sub.status === 'aktif'
+                    ? 'text-emerald-600 bg-emerald-50 border-emerald-100'
+                    : sub.status === 'overdue'
+                      ? 'text-red-500 bg-red-50 border-red-100'
+                      : 'text-blue-600 bg-blue-50 border-blue-100',
+                  'px-2 py-0.5 font-medium'
+                ]"
+                showDot
+                >{{
+                  sub.status === 'aktif'
+                    ? 'Aktif'
+                    : sub.status === 'overdue'
+                      ? 'Overdue'
+                      : 'Trialing'
+                }}</Badge
+              >
             </TableCell>
             <TableCell>
-              <div class="text-sm text-muted-foreground text-center" v-html="formatDateWithBr(sub.tglAktivasi)"></div>
+              <div
+                class="text-sm text-muted-foreground text-center"
+                v-html="formatDateWithBr(sub.tglAktivasi)"
+              ></div>
             </TableCell>
             <TableCell>
-              <div :class="[
-                sub.status === 'overdue' ? 'text-red-500 font-bold' : 'text-muted-foreground',
-                'text-sm text-center'
-              ]" v-html="formatDateWithBr(sub.jatuhTempo)"></div>
+              <div
+                :class="[
+                  sub.status === 'overdue' ? 'text-red-500 font-bold' : 'text-muted-foreground',
+                  'text-sm text-center'
+                ]"
+                v-html="formatDateWithBr(sub.jatuhTempo)"
+              ></div>
             </TableCell>
             <TableCell>
-              <div class="font-bold text-foreground">{{ formatContractValue(sub.nilaiKontrak) }}</div>
+              <div class="font-bold text-foreground">
+                {{ formatContractValue(sub.nilaiKontrak) }}
+              </div>
             </TableCell>
             <TableCell>
               <div class="flex items-center gap-3 text-muted-foreground">
-                <button @click="editSubscription(sub.id)" class="hover:text-foreground"><Pencil class="w-4 h-4" /></button>
-                <button @click="deleteSubscription(sub.id)" class="hover:text-destructive"><Trash2 class="w-4 h-4" /></button>
+                <button
+                  @click="editSubscription(sub.id)"
+                  class="hover:text-foreground"
+                >
+                  <Pencil class="w-4 h-4" />
+                </button>
+                <button
+                  @click="deleteSubscription(sub.id)"
+                  class="hover:text-destructive"
+                >
+                  <Trash2 class="w-4 h-4" />
+                </button>
                 <button class="hover:text-foreground"><MoreVertical class="w-4 h-4" /></button>
               </div>
             </TableCell>
           </TableRow>
-          
+
           <TableRow v-if="filteredSubscriptions.length === 0">
-            <TableCell colspan="8" class="text-center py-8 text-muted-foreground font-medium">
-              {{ isLoading ? 'Memuat data dari server...' : 'Tidak ada data langganan yang cocok dengan filter.' }}
+            <TableCell
+              colspan="8"
+              class="text-center py-8 text-muted-foreground font-medium"
+            >
+              {{
+                isLoading
+                  ? 'Memuat data dari server...'
+                  : 'Tidak ada data langganan yang cocok dengan filter.'
+              }}
             </TableCell>
           </TableRow>
         </TableBody>
       </Table>
-      
+
       <div class="p-4 border-t flex justify-between items-center text-sm text-muted-foreground">
-        <div>Menampilkan {{ filteredSubscriptions.length }} dari {{ subscriptions.length }} Institusi</div>
+        <div>
+          Menampilkan {{ filteredSubscriptions.length }} dari {{ subscriptions.length }} Institusi
+        </div>
         <div class="flex items-center gap-1">
-          <Button variant="outline" class="w-8 h-8 p-0" :disabled="isLoading">&lt;</Button>
-          <Button class="w-8 h-8 p-0" :disabled="isLoading">1</Button>
-          <Button variant="outline" class="w-8 h-8 p-0" :disabled="isLoading">&gt;</Button>
+          <Button
+            variant="outline"
+            class="w-8 h-8 p-0"
+            :disabled="isLoading"
+            >&lt;</Button
+          >
+          <Button
+            class="w-8 h-8 p-0"
+            :disabled="isLoading"
+            >1</Button
+          >
+          <Button
+            variant="outline"
+            class="w-8 h-8 p-0"
+            :disabled="isLoading"
+            >&gt;</Button
+          >
         </div>
       </div>
     </Card>
@@ -404,7 +527,11 @@ const getAvatarClass = (avatar) => {
       </CardHeader>
       <CardContent class="p-0">
         <div class="divide-y text-sm border-border">
-          <div v-for="act in activities" :key="act.id" class="flex items-center justify-between p-5">
+          <div
+            v-for="act in activities"
+            :key="act.id"
+            class="flex items-center justify-between p-5"
+          >
             <div class="flex items-center gap-8">
               <div class="text-muted-foreground w-24">{{ act.time }}</div>
               <div>
@@ -413,13 +540,25 @@ const getAvatarClass = (avatar) => {
               </div>
             </div>
             <div class="flex items-center gap-4">
-              <span v-if="act.amount" :class="[act.amountClass, 'font-medium']">{{ act.amount }}</span>
-              <Badge :class="[act.badgeClass, 'border-none font-semibold px-2 text-[10px]']">{{ act.badge }}</Badge>
-              <component :is="act.icon" :class="['w-5 h-5', act.iconClass]" />
+              <span
+                v-if="act.amount"
+                :class="[act.amountClass, 'font-medium']"
+                >{{ act.amount }}</span
+              >
+              <Badge :class="[act.badgeClass, 'border-none font-semibold px-2 text-[10px]']">{{
+                act.badge
+              }}</Badge>
+              <component
+                :is="act.icon"
+                :class="['w-5 h-5', act.iconClass]"
+              />
             </div>
           </div>
-          
-          <div v-if="activities.length === 0" class="p-8 text-center text-muted-foreground font-medium">
+
+          <div
+            v-if="activities.length === 0"
+            class="p-8 text-center text-muted-foreground font-medium"
+          >
             {{ isLoading ? 'Memuat aktivitas...' : 'Belum ada aktivitas terbaru.' }}
           </div>
         </div>

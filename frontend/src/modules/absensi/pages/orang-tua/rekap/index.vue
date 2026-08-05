@@ -15,18 +15,14 @@ import StatCardGrid from '@/components/stat-card/StatCardGrid.vue'
 import { glassSlide, glassFade } from '@/config/motion'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from '@/components/ui/table'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -35,7 +31,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select'
 import { useAuthStore } from '@/stores/authStore'
 import { academicMonths, tahunList } from '../../../data/mockAbsensi'
@@ -121,38 +117,46 @@ const nextMonth = () => {
   }
 }
 
-watch(selectedTahun, (newTahun) => {
-  selectedKelas.value = studentHistory[newTahun] || '2 D'
-}, { immediate: true })
+watch(
+  selectedTahun,
+  newTahun => {
+    selectedKelas.value = studentHistory[newTahun] || '2 D'
+  },
+  { immediate: true }
+)
 
-watch([selectedTahun, activeMonthIdx], () => {
-  const year = currentCalendarYear.value
-  const monthVal = selectedMonthVal.value
-  const lastDay = new Date(year, monthVal + 1, 0).getDate()
-  
-  try {
-    startDate.value = new CalendarDate(year, monthVal + 1, 1)
-    endDate.value = new CalendarDate(year, monthVal + 1, lastDay)
-  } catch (e) {
-    startDate.value = new Date(year, monthVal, 1)
-    endDate.value = new Date(year, monthVal, lastDay)
-  }
-}, { immediate: true })
+watch(
+  [selectedTahun, activeMonthIdx],
+  () => {
+    const year = currentCalendarYear.value
+    const monthVal = selectedMonthVal.value
+    const lastDay = new Date(year, monthVal + 1, 0).getDate()
+
+    try {
+      startDate.value = new CalendarDate(year, monthVal + 1, 1)
+      endDate.value = new CalendarDate(year, monthVal + 1, lastDay)
+    } catch (e) {
+      startDate.value = new Date(year, monthVal, 1)
+      endDate.value = new Date(year, monthVal, lastDay)
+    }
+  },
+  { immediate: true }
+)
 
 onMounted(() => {
   try {
     const currentMonth = new Date().getMonth()
     const currentYear = new Date().getFullYear()
-    
+
     let startYear = currentMonth >= 6 ? currentYear : currentYear - 1
     const academicYearStr = `${startYear}/${startYear + 1}`
-    
+
     if (tahunList.includes(academicYearStr)) {
       selectedTahun.value = academicYearStr
     } else {
       selectedTahun.value = '2026/2027'
     }
-    
+
     const monthIdx = academicMonths.findIndex(m => m.val === currentMonth)
     activeMonthIdx.value = monthIdx !== -1 ? monthIdx : 11
   } catch (e) {
@@ -169,11 +173,11 @@ watch([startDate, endDate], () => {
 function getAcademicInfo(dateObj) {
   const year = dateObj.getFullYear()
   const monthVal = dateObj.getMonth() // 0-11
-  
+
   let startYear = monthVal >= 6 ? year : year - 1
   const academicYearStr = `${startYear}/${startYear + 1}`
   const monthIdx = academicMonths.findIndex(m => m.val === monthVal)
-  
+
   return {
     tahun: academicYearStr,
     monthIdx: monthIdx !== -1 ? monthIdx : 11
@@ -196,45 +200,45 @@ function getDeterministicMockStatus(dateStr, studentId) {
 
 const studentLogs = computed(() => {
   if (!startDate.value || !endDate.value) return []
-  
+
   const startStr = formatDateStr(startDate.value)
   const endStr = formatDateStr(endDate.value)
-  
+
   const start = new Date(startStr)
   const end = new Date(endStr)
-  
+
   const logs = []
   const saved = localStorage.getItem('attendance_map_db')
   const map = saved ? JSON.parse(saved) : {}
-  
+
   const studentId = 1 // Ahmad Wibowo's mock ID
   const kelas = selectedKelas.value
-  
+
   let curr = new Date(start)
   let safetyCounter = 0
-  
+
   while (curr <= end && safetyCounter < 366) {
     safetyCounter++
     const dayOfWeek = curr.getDay()
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
-    
+
     if (!isWeekend) {
       const dayNum = curr.getDate()
       const { tahun, monthIdx } = getAcademicInfo(curr)
       const key = `${kelas}_${tahun}_${monthIdx}_${studentId}_${dayNum}`
-      
+
       let statusVal = map[key]
       const dateStr = curr.toISOString().split('T')[0]
-      
+
       if (statusVal === undefined) {
         statusVal = getDeterministicMockStatus(dateStr, studentId)
       }
-      
+
       if (statusVal) {
         let status = 'hadir'
         let jamMasuk = '07:05:10'
         let jamKeluar = '14:00:00'
-        
+
         if (statusVal === 'H') {
           status = 'hadir'
           const min = (dayNum % 12) + 1
@@ -256,10 +260,10 @@ const studentLogs = computed(() => {
           jamMasuk = '-'
           jamKeluar = '-'
         }
-        
+
         const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
         const formattedDate = `${dayNames[dayOfWeek]}, ${dayNum} ${academicMonths[monthIdx].name} ${curr.getFullYear()}`
-        
+
         logs.push({
           id: key,
           tanggal: formattedDate,
@@ -272,10 +276,10 @@ const studentLogs = computed(() => {
         })
       }
     }
-    
+
     curr.setDate(curr.getDate() + 1)
   }
-  
+
   return logs.sort((a, b) => b.dateStr.localeCompare(a.dateStr))
 })
 
@@ -310,24 +314,26 @@ const calendarCells = computed(() => {
   const monthVal = selectedMonthVal.value
   const firstDayOffset = new Date(year, monthVal, 1).getDay()
   const totalDays = new Date(year, monthVal + 1, 0).getDate()
-  
+
   const cells = []
-  
+
   for (let i = 0; i < firstDayOffset; i++) {
     cells.push({ isPadding: true })
   }
-  
+
   const logs = studentLogs.value
   for (let d = 1; d <= totalDays; d++) {
     const dateObj = new Date(year, monthVal, d)
     const dayOfWeek = dateObj.getDay()
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
-    
+
     const log = logs.find(l => {
       const dObj = l.rawDate
-      return dObj && dObj.getDate() === d && dObj.getMonth() === monthVal && dObj.getFullYear() === year
+      return (
+        dObj && dObj.getDate() === d && dObj.getMonth() === monthVal && dObj.getFullYear() === year
+      )
     })
-    
+
     cells.push({
       isPadding: false,
       dateNum: d,
@@ -339,7 +345,7 @@ const calendarCells = computed(() => {
       tanggal: log?.tanggal || ''
     })
   }
-  
+
   return cells
 })
 
@@ -366,27 +372,44 @@ function getStatusLabel(status) {
     />
 
     <!-- Student Profile Card & Filters row -->
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto] items-center gap-4 bg-muted/30 p-4 rounded-2xl border border-border">
+    <div
+      class="grid grid-cols-1 lg:grid-cols-[1fr_auto] items-center gap-4 bg-muted/30 p-4 rounded-2xl border border-border"
+    >
       <!-- Profile info -->
       <div class="flex items-center gap-3 text-left pl-1">
-        <div class="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0 border border-primary/20 uppercase">
+        <div
+          class="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0 border border-primary/20 uppercase"
+        >
           AW
         </div>
         <div>
           <div class="font-bold text-foreground text-sm flex items-center gap-2">
             <span>Ahmad Wibowo</span>
-            <Badge variant="outline" class="text-[9px] uppercase tracking-wider font-extrabold bg-primary/5 text-primary border-primary/20">
+            <Badge
+              variant="outline"
+              class="text-[9px] uppercase tracking-wider font-extrabold bg-primary/5 text-primary border-primary/20"
+            >
               Wali Murid
             </Badge>
-            <Badge v-if="selectedTahun === '2026/2027'" variant="default" class="text-[8px] uppercase font-extrabold bg-emerald-500 text-white hover:bg-emerald-600 border-none px-1.5 py-0.5 rounded leading-none">
+            <Badge
+              v-if="selectedTahun === '2026/2027'"
+              variant="default"
+              class="text-[8px] uppercase font-extrabold bg-emerald-500 text-white hover:bg-emerald-600 border-none px-1.5 py-0.5 rounded leading-none"
+            >
               Aktif
             </Badge>
-            <Badge v-else variant="secondary" class="text-[8px] uppercase font-extrabold bg-muted text-muted-foreground px-1.5 py-0.5 rounded border leading-none">
+            <Badge
+              v-else
+              variant="secondary"
+              class="text-[8px] uppercase font-extrabold bg-muted text-muted-foreground px-1.5 py-0.5 rounded border leading-none"
+            >
               Riwayat Kelas
             </Badge>
           </div>
           <div class="text-xs text-muted-foreground font-semibold mt-0.5">
-            Nama Anak: <span class="text-foreground/95 font-bold">Ahmad Wibowo</span> • NIS: <span class="text-foreground/85 font-mono">0051234561</span> • Kelas: <span class="text-foreground/85 font-bold">{{ selectedKelas }}</span>
+            Nama Anak: <span class="text-foreground/95 font-bold">Ahmad Wibowo</span> • NIS:
+            <span class="text-foreground/85 font-mono">0051234561</span> • Kelas:
+            <span class="text-foreground/85 font-bold">{{ selectedKelas }}</span>
           </div>
         </div>
       </div>
@@ -395,13 +418,19 @@ function getStatusLabel(status) {
       <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
         <!-- Select Tahun Pelajaran (History) -->
         <div class="flex flex-col gap-1 text-left w-[150px]">
-          <span class="text-[9px] uppercase font-bold tracking-wider text-muted-foreground">Tahun Pelajaran</span>
+          <span class="text-[9px] uppercase font-bold tracking-wider text-muted-foreground"
+            >Tahun Pelajaran</span
+          >
           <Select v-model="selectedTahun">
             <SelectTrigger class="w-full rounded-xl h-10 shadow-xs text-xs cursor-pointer">
               <SelectValue placeholder="Pilih Tahun" />
             </SelectTrigger>
             <SelectContent class="rounded-xl border-border bg-card">
-              <SelectItem v-for="t in tahunList" :key="t" :value="t">
+              <SelectItem
+                v-for="t in tahunList"
+                :key="t"
+                :value="t"
+              >
                 {{ t }} ({{ studentHistory[t] }})
               </SelectItem>
             </SelectContent>
@@ -410,8 +439,12 @@ function getStatusLabel(status) {
 
         <!-- Slide Bulan (Pager Slider) -->
         <div class="flex flex-col gap-1 text-left w-[185px]">
-          <span class="text-[9px] uppercase font-bold tracking-wider text-muted-foreground">Slide Bulan</span>
-          <div class="flex items-center bg-card p-0.5 rounded-xl border border-border h-10 shadow-xs w-full">
+          <span class="text-[9px] uppercase font-bold tracking-wider text-muted-foreground"
+            >Slide Bulan</span
+          >
+          <div
+            class="flex items-center bg-card p-0.5 rounded-xl border border-border h-10 shadow-xs w-full"
+          >
             <Button
               variant="ghost"
               size="icon"
@@ -420,7 +453,9 @@ function getStatusLabel(status) {
             >
               <ChevronLeft class="size-4 text-muted-foreground" />
             </Button>
-            <div class="px-2 flex-1 text-center font-bold text-xs text-foreground uppercase tracking-wide truncate">
+            <div
+              class="px-2 flex-1 text-center font-bold text-xs text-foreground uppercase tracking-wide truncate"
+            >
               {{ academicMonths[activeMonthIdx].name }} {{ currentCalendarYear }}
             </div>
             <Button
@@ -436,7 +471,9 @@ function getStatusLabel(status) {
 
         <!-- Select Status -->
         <div class="flex flex-col gap-1 text-left w-[135px]">
-          <span class="text-[9px] uppercase font-bold tracking-wider text-muted-foreground">Status Presensi</span>
+          <span class="text-[9px] uppercase font-bold tracking-wider text-muted-foreground"
+            >Status Presensi</span
+          >
           <Select v-model="selectedStatus">
             <SelectTrigger class="w-full rounded-xl h-10 shadow-xs text-xs cursor-pointer">
               <SelectValue placeholder="Semua Status" />
@@ -498,7 +535,9 @@ function getStatusLabel(status) {
             @click="activeTab = 'calendar'"
             :class="[
               'px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer border',
-              activeTab === 'calendar' ? 'bg-card text-foreground shadow-xs border-border/40' : 'text-muted-foreground hover:text-foreground border-transparent'
+              activeTab === 'calendar'
+                ? 'bg-card text-foreground shadow-xs border-border/40'
+                : 'text-muted-foreground hover:text-foreground border-transparent'
             ]"
           >
             Tampilan Kalender
@@ -507,25 +546,35 @@ function getStatusLabel(status) {
             @click="activeTab = 'list'"
             :class="[
               'px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer border',
-              activeTab === 'list' ? 'bg-card text-foreground shadow-xs border-border/40' : 'text-muted-foreground hover:text-foreground border-transparent'
+              activeTab === 'list'
+                ? 'bg-card text-foreground shadow-xs border-border/40'
+                : 'text-muted-foreground hover:text-foreground border-transparent'
             ]"
           >
             Tampilan List
           </button>
         </div>
-        <Badge variant="secondary" class="font-semibold text-xs rounded-lg px-2.5 py-0.5">
-          {{ activeTab === 'calendar' ? calendarCells.filter(c => !c.isPadding && !c.isWeekend).length + ' Hari Sekolah' : filteredStudentData.length + ' Hari Terdata' }}
+        <Badge
+          variant="secondary"
+          class="font-semibold text-xs rounded-lg px-2.5 py-0.5"
+        >
+          {{
+            activeTab === 'calendar'
+              ? calendarCells.filter(c => !c.isPadding && !c.isWeekend).length + ' Hari Sekolah'
+              : filteredStudentData.length + ' Hari Terdata'
+          }}
         </Badge>
       </div>
 
       <!-- Main Card Container -->
       <Card class="rounded-2xl border border-border bg-card shadow-xs overflow-hidden">
-        
         <!-- 1. CALENDAR VIEW -->
         <div v-show="activeTab === 'calendar'">
           <div class="overflow-x-auto">
             <!-- Calendar Header (Days) -->
-            <div class="grid grid-cols-7 gap-2 text-center font-bold text-[10px] uppercase tracking-wider text-muted-foreground py-3 border-b border-border/60 bg-muted/20 min-w-[700px]">
+            <div
+              class="grid grid-cols-7 gap-2 text-center font-bold text-[10px] uppercase tracking-wider text-muted-foreground py-3 border-b border-border/60 bg-muted/20 min-w-[700px]"
+            >
               <div class="text-rose-500/80">Minggu</div>
               <div>Senin</div>
               <div>Selasa</div>
@@ -534,79 +583,135 @@ function getStatusLabel(status) {
               <div>Jumat</div>
               <div class="text-rose-500/80">Sabtu</div>
             </div>
-            
+
             <!-- Calendar Loading Skeleton -->
-            <div v-if="isLoading" class="grid grid-cols-7 gap-3 p-4 min-w-[700px]">
-              <div v-for="i in 35" :key="`student-cal-skel-${i}`" class="aspect-square rounded-xl border border-border/40 flex items-center justify-center p-2">
+            <div
+              v-if="isLoading"
+              class="grid grid-cols-7 gap-3 p-4 min-w-[700px]"
+            >
+              <div
+                v-for="i in 35"
+                :key="`student-cal-skel-${i}`"
+                class="aspect-square rounded-xl border border-border/40 flex items-center justify-center p-2"
+              >
                 <Skeleton class="h-8 w-8 rounded-full" />
               </div>
             </div>
-            
+
             <!-- Calendar Real Grid -->
-            <div v-else class="grid grid-cols-7 gap-3 p-4 min-w-[700px]">
+            <div
+              v-else
+              class="grid grid-cols-7 gap-3 p-4 min-w-[700px]"
+            >
               <div
                 v-for="(cell, idx) in calendarCells"
                 :key="`student-cell-${idx}`"
                 class="relative aspect-square rounded-xl border flex flex-col justify-between p-2.5 transition-all"
                 :class="[
-                  cell.isPadding ? 'border-transparent bg-transparent pointer-events-none' : (
-                    cell.isWeekend ? 'bg-muted/40 border-border/30 text-muted-foreground/40 opacity-70' : 'bg-card border-border/80 hover:shadow-xs hover:border-foreground/20'
-                  )
+                  cell.isPadding
+                    ? 'border-transparent bg-transparent pointer-events-none'
+                    : cell.isWeekend
+                      ? 'bg-muted/40 border-border/30 text-muted-foreground/40 opacity-70'
+                      : 'bg-card border-border/80 hover:shadow-xs hover:border-foreground/20'
                 ]"
               >
                 <template v-if="!cell.isPadding">
                   <!-- Date Number -->
-                  <span class="text-xs font-bold font-mono" :class="cell.isWeekend ? 'text-rose-500/80' : 'text-foreground/80'">
+                  <span
+                    class="text-xs font-bold font-mono"
+                    :class="cell.isWeekend ? 'text-rose-500/80' : 'text-foreground/80'"
+                  >
                     {{ cell.dateNum }}
                   </span>
 
                   <!-- Status Display -->
-                  <div v-if="!cell.isWeekend" class="flex flex-col items-center justify-center flex-1">
+                  <div
+                    v-if="!cell.isWeekend"
+                    class="flex flex-col items-center justify-center flex-1"
+                  >
                     <Popover>
                       <PopoverTrigger as-child>
                         <button
                           class="h-8.5 w-8.5 rounded-full flex items-center justify-center text-[10px] font-extrabold shadow-xs transition-all hover:scale-115 active:scale-95 cursor-pointer uppercase border border-black/5"
                           :class="[
-                            (cell.status === 'hadir' || cell.status === 'terlambat') ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-emerald-500/15' : '',
-                            cell.status === 'sakit' ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-blue-500/15' : '',
-                            cell.status === 'izin' ? 'bg-indigo-500 text-white hover:bg-indigo-600 shadow-indigo-500/15' : '',
-                            cell.status === 'alpa' ? 'bg-red-500 text-white hover:bg-red-600 shadow-red-500/15' : '',
+                            cell.status === 'hadir' || cell.status === 'terlambat'
+                              ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-emerald-500/15'
+                              : '',
+                            cell.status === 'sakit'
+                              ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-blue-500/15'
+                              : '',
+                            cell.status === 'izin'
+                              ? 'bg-indigo-500 text-white hover:bg-indigo-600 shadow-indigo-500/15'
+                              : '',
+                            cell.status === 'alpa'
+                              ? 'bg-red-500 text-white hover:bg-red-600 shadow-red-500/15'
+                              : '',
                             !cell.status ? 'bg-muted text-muted-foreground/60' : ''
                           ]"
                         >
-                          {{ cell.status ? ((cell.status === 'hadir' || cell.status === 'terlambat') ? 'H' : cell.status.substring(0, 1).toUpperCase()) : '-' }}
+                          {{
+                            cell.status
+                              ? cell.status === 'hadir' || cell.status === 'terlambat'
+                                ? 'H'
+                                : cell.status.substring(0, 1).toUpperCase()
+                              : '-'
+                          }}
                         </button>
                       </PopoverTrigger>
-                      <PopoverContent class="w-56 p-3 rounded-xl border border-border shadow-md bg-card text-left z-50">
+                      <PopoverContent
+                        class="w-56 p-3 rounded-xl border border-border shadow-md bg-card text-left z-50"
+                      >
                         <div class="space-y-2">
-                          <div class="font-bold text-[9px] text-muted-foreground uppercase tracking-wider">
+                          <div
+                            class="font-bold text-[9px] text-muted-foreground uppercase tracking-wider"
+                          >
                             Detail Kehadiran
                           </div>
                           <div class="text-xs font-bold text-foreground">
-                            {{ cell.tanggal || `${cell.dateNum} ${academicMonths[activeMonthIdx].name} ${currentCalendarYear}` }}
+                            {{
+                              cell.tanggal ||
+                              `${cell.dateNum} ${academicMonths[activeMonthIdx].name} ${currentCalendarYear}`
+                            }}
                           </div>
                           <div class="flex items-center gap-2 mt-1">
-                            <span class="text-[9px] font-extrabold uppercase px-2.5 py-0.5 rounded-full"
+                            <span
+                              class="text-[9px] font-extrabold uppercase px-2.5 py-0.5 rounded-full"
                               :class="[
-                                cell.status === 'hadir' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : '',
-                                cell.status === 'terlambat' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20' : '',
-                                cell.status === 'sakit' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20' : '',
-                                cell.status === 'izin' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20' : '',
-                                cell.status === 'alpa' ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20' : '',
+                                cell.status === 'hadir'
+                                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                                  : '',
+                                cell.status === 'terlambat'
+                                  ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                                  : '',
+                                cell.status === 'sakit'
+                                  ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20'
+                                  : '',
+                                cell.status === 'izin'
+                                  ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'
+                                  : '',
+                                cell.status === 'alpa'
+                                  ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
+                                  : '',
                                 !cell.status ? 'bg-muted text-muted-foreground' : ''
                               ]"
                             >
                               {{ getStatusLabel(cell.status) }}
                             </span>
                           </div>
-                          <div class="text-[10px] text-muted-foreground space-y-1 pt-1.5 border-t border-border/60">
+                          <div
+                            class="text-[10px] text-muted-foreground space-y-1 pt-1.5 border-t border-border/60"
+                          >
                             <div class="flex justify-between">
                               <span>Jam Masuk:</span>
-                              <span class="font-mono text-foreground font-bold">{{ cell.jamMasuk }}</span>
+                              <span class="font-mono text-foreground font-bold">{{
+                                cell.jamMasuk
+                              }}</span>
                             </div>
                             <div class="flex justify-between">
                               <span>Jam Keluar:</span>
-                              <span class="font-mono text-foreground font-bold">{{ cell.jamKeluar }}</span>
+                              <span class="font-mono text-foreground font-bold">{{
+                                cell.jamKeluar
+                              }}</span>
                             </div>
                           </div>
                         </div>
@@ -615,7 +720,10 @@ function getStatusLabel(status) {
                   </div>
 
                   <!-- Weekend Display -->
-                  <span v-else class="text-[9px] font-bold text-rose-500/35 uppercase self-center pb-2.5">
+                  <span
+                    v-else
+                    class="text-[9px] font-bold text-rose-500/35 uppercase self-center pb-2.5"
+                  >
                     Libur
                   </span>
                 </template>
@@ -624,21 +732,35 @@ function getStatusLabel(status) {
           </div>
 
           <!-- Calendar Legend -->
-          <div class="px-6 py-4 border-t border-border bg-muted/10 flex flex-wrap items-center justify-center gap-6 text-[10px] font-bold text-muted-foreground/80">
+          <div
+            class="px-6 py-4 border-t border-border bg-muted/10 flex flex-wrap items-center justify-center gap-6 text-[10px] font-bold text-muted-foreground/80"
+          >
             <div class="flex items-center gap-1.5">
-              <span class="w-4.5 h-4.5 rounded-full bg-emerald-500 flex items-center justify-center text-[9px] font-extrabold text-white">H</span>
+              <span
+                class="w-4.5 h-4.5 rounded-full bg-emerald-500 flex items-center justify-center text-[9px] font-extrabold text-white"
+                >H</span
+              >
               <span>Hadir</span>
             </div>
             <div class="flex items-center gap-1.5">
-              <span class="w-4.5 h-4.5 rounded-full bg-indigo-500 flex items-center justify-center text-[9px] font-extrabold text-white">I</span>
+              <span
+                class="w-4.5 h-4.5 rounded-full bg-indigo-500 flex items-center justify-center text-[9px] font-extrabold text-white"
+                >I</span
+              >
               <span>Izin</span>
             </div>
             <div class="flex items-center gap-1.5">
-              <span class="w-4.5 h-4.5 rounded-full bg-blue-500 flex items-center justify-center text-[9px] font-extrabold text-white">S</span>
+              <span
+                class="w-4.5 h-4.5 rounded-full bg-blue-500 flex items-center justify-center text-[9px] font-extrabold text-white"
+                >S</span
+              >
               <span>Sakit</span>
             </div>
             <div class="flex items-center gap-1.5">
-              <span class="w-4.5 h-4.5 rounded-full bg-red-500 flex items-center justify-center text-[9px] font-extrabold text-white">A</span>
+              <span
+                class="w-4.5 h-4.5 rounded-full bg-red-500 flex items-center justify-center text-[9px] font-extrabold text-white"
+                >A</span
+              >
               <span>Alpha</span>
             </div>
           </div>
@@ -650,19 +772,37 @@ function getStatusLabel(status) {
             <Table>
               <TableHeader class="bg-muted/40 border-b border-border/60">
                 <TableRow>
-                  <TableHead class="font-bold text-foreground py-4 px-6 text-xs uppercase tracking-wider text-left">Hari &amp; Tanggal</TableHead>
-                  <TableHead class="font-bold text-foreground py-4 px-4 text-xs uppercase tracking-wider text-center w-[150px]">Jam Masuk</TableHead>
-                  <TableHead class="font-bold text-foreground py-4 px-4 text-xs uppercase tracking-wider text-center w-[150px]">Jam Keluar</TableHead>
-                  <TableHead class="font-bold text-foreground py-4 px-6 text-xs uppercase tracking-wider text-center w-[150px]">Status</TableHead>
+                  <TableHead
+                    class="font-bold text-foreground py-4 px-6 text-xs uppercase tracking-wider text-left"
+                    >Hari &amp; Tanggal</TableHead
+                  >
+                  <TableHead
+                    class="font-bold text-foreground py-4 px-4 text-xs uppercase tracking-wider text-center w-[150px]"
+                    >Jam Masuk</TableHead
+                  >
+                  <TableHead
+                    class="font-bold text-foreground py-4 px-4 text-xs uppercase tracking-wider text-center w-[150px]"
+                    >Jam Keluar</TableHead
+                  >
+                  <TableHead
+                    class="font-bold text-foreground py-4 px-6 text-xs uppercase tracking-wider text-center w-[150px]"
+                    >Status</TableHead
+                  >
                 </TableRow>
               </TableHeader>
               <TableBody>
                 <template v-if="isLoading">
-                  <TableRow v-for="i in 5" :key="`student-skel-${i}`" class="border-b border-border/50">
+                  <TableRow
+                    v-for="i in 5"
+                    :key="`student-skel-${i}`"
+                    class="border-b border-border/50"
+                  >
                     <TableCell class="py-4 px-6"><Skeleton class="h-5 w-40" /></TableCell>
                     <TableCell class="py-4 px-4"><Skeleton class="h-5 w-16 mx-auto" /></TableCell>
                     <TableCell class="py-4 px-4"><Skeleton class="h-5 w-16 mx-auto" /></TableCell>
-                    <TableCell class="py-4 px-6"><Skeleton class="h-6 w-20 rounded-full mx-auto" /></TableCell>
+                    <TableCell class="py-4 px-6"
+                      ><Skeleton class="h-6 w-20 rounded-full mx-auto"
+                    /></TableCell>
                   </TableRow>
                 </template>
                 <template v-else>
@@ -674,21 +814,35 @@ function getStatusLabel(status) {
                     <TableCell class="py-4 px-6 font-bold text-foreground text-sm text-left">
                       {{ log.tanggal }}
                     </TableCell>
-                    <TableCell class="py-4 px-4 text-center font-mono text-xs text-muted-foreground">
+                    <TableCell
+                      class="py-4 px-4 text-center font-mono text-xs text-muted-foreground"
+                    >
                       {{ log.jamMasuk }}
                     </TableCell>
-                    <TableCell class="py-4 px-4 text-center font-mono text-xs text-muted-foreground">
+                    <TableCell
+                      class="py-4 px-4 text-center font-mono text-xs text-muted-foreground"
+                    >
                       {{ log.jamKeluar }}
                     </TableCell>
                     <TableCell class="py-4 px-6 text-center flex justify-center py-3">
                       <Badge
                         :class="[
                           'rounded-full px-2.5 py-0.5 font-bold uppercase tracking-wider text-[9px]',
-                          log.status === 'hadir' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : '',
-                          log.status === 'terlambat' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20' : '',
-                          log.status === 'sakit' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20' : '',
-                          log.status === 'izin' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20' : '',
-                          log.status === 'alpa' ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20' : ''
+                          log.status === 'hadir'
+                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                            : '',
+                          log.status === 'terlambat'
+                            ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                            : '',
+                          log.status === 'sakit'
+                            ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20'
+                            : '',
+                          log.status === 'izin'
+                            ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'
+                            : '',
+                          log.status === 'alpa'
+                            ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
+                            : ''
                         ]"
                         class="mx-auto"
                       >
@@ -698,12 +852,16 @@ function getStatusLabel(status) {
                   </TableRow>
 
                   <TableRow v-if="paginatedStudentData.length === 0">
-                    <TableCell colspan="4" class="py-16 text-center text-muted-foreground">
+                    <TableCell
+                      colspan="4"
+                      class="py-16 text-center text-muted-foreground"
+                    >
                       <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
                         <CalendarIcon class="size-8 text-muted-foreground/60 animate-pulse" />
                         <p class="font-bold text-base text-foreground/80">Tidak Ada Data</p>
                         <p class="text-xs text-muted-foreground/80 leading-relaxed">
-                          Tidak ditemukan riwayat kehadiran untuk filter rentang waktu atau status yang dipilih.
+                          Tidak ditemukan riwayat kehadiran untuk filter rentang waktu atau status
+                          yang dipilih.
                         </p>
                       </div>
                     </TableCell>
@@ -716,8 +874,14 @@ function getStatusLabel(status) {
       </Card>
 
       <!-- Pagination (Only shown in List View) -->
-      <div class="flex items-center justify-between text-sm text-muted-foreground" v-if="filteredStudentData.length > 0 && activeTab === 'list'">
-        <span>Menampilkan {{ paginatedStudentData.length }} dari {{ filteredStudentData.length }} data</span>
+      <div
+        class="flex items-center justify-between text-sm text-muted-foreground"
+        v-if="filteredStudentData.length > 0 && activeTab === 'list'"
+      >
+        <span
+          >Menampilkan {{ paginatedStudentData.length }} dari
+          {{ filteredStudentData.length }} data</span
+        >
         <div class="flex items-center gap-1">
           <Button
             variant="outline"

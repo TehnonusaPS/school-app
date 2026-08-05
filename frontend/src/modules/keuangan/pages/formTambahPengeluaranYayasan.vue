@@ -4,7 +4,13 @@ import { useRouter } from 'vue-router'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'vue-sonner'
 import PageHeader from '@/components/page-header/PageHeader.vue'
@@ -12,17 +18,8 @@ import DatePicker from '@/components/date-picker/DatePicker.vue'
 import { getLocalTimeZone, today } from '@internationalized/date'
 import { formatDate } from '@/utils/formatDate'
 import { glassFade } from '@/config/motion'
-import {
-  Field,
-  FieldContent,
-  FieldDescription,
-  FieldLabel,
-} from '@/components/ui/field'
-import {
-  InputGroup,
-  InputGroupText,
-  InputGroupInput,
-} from '@/components/ui/input-group'
+import { Field, FieldContent, FieldDescription, FieldLabel } from '@/components/ui/field'
+import { InputGroup, InputGroupText, InputGroupInput } from '@/components/ui/input-group'
 import {
   Building2,
   Banknote,
@@ -49,7 +46,7 @@ const form = ref({
   catatan: ''
 })
 
-const formatCurrency = (val) => {
+const formatCurrency = val => {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
@@ -135,7 +132,7 @@ const handleSubmit = () => {
 
     // Update the "Dana Terpakai" calculations locally if they exist
     // (Since we are using standard localStorage, we can keep the sum updated or let it load dynamically)
-    
+
     toast.success('Pengeluaran Yayasan Berhasil Diinput!')
     isSubmitting.value = false
     router.push('/keuangan/kelola-dana-yayasan')
@@ -162,19 +159,28 @@ const handleSubmit = () => {
     <div class="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6 items-start">
       <!-- Left Column: Form -->
       <Card class="shadow-sm border-border bg-card/60 backdrop-blur-md overflow-hidden rounded-xl">
-        <div class="px-6 py-5 border-b border-border/80 flex justify-between items-center bg-muted/20">
+        <div
+          class="px-6 py-5 border-b border-border/80 flex justify-between items-center bg-muted/20"
+        >
           <div class="flex items-center gap-2.5">
             <div class="p-1.5 bg-primary/10 rounded-lg text-primary">
               <Layers class="w-4.5 h-4.5" />
             </div>
             <div>
-              <h2 class="font-bold text-sm tracking-wide text-foreground uppercase">FORMULIR PENGELUARAN YAYASAN</h2>
-              <p class="text-[10px] text-muted-foreground mt-0.5">Entri data alokasi dana secara resmi</p>
+              <h2 class="font-bold text-sm tracking-wide text-foreground uppercase">
+                FORMULIR PENGELUARAN YAYASAN
+              </h2>
+              <p class="text-[10px] text-muted-foreground mt-0.5">
+                Entri data alokasi dana secara resmi
+              </p>
             </div>
           </div>
         </div>
 
-        <form @submit.prevent="handleSubmit" class="p-6 sm:p-8 space-y-6">
+        <form
+          @submit.prevent="handleSubmit"
+          class="p-6 sm:p-8 space-y-6"
+        >
           <!-- Tanggal & Kategori -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Tanggal -->
@@ -206,7 +212,9 @@ const handleSubmit = () => {
 
           <!-- Deskripsi Pengeluaran -->
           <Field>
-            <FieldLabel>Deskripsi / Nama Pengeluaran <span class="text-destructive">*</span></FieldLabel>
+            <FieldLabel
+              >Deskripsi / Nama Pengeluaran <span class="text-destructive">*</span></FieldLabel
+            >
             <FieldContent>
               <InputGroup>
                 <InputGroupText>
@@ -264,17 +272,25 @@ const handleSubmit = () => {
             >
               Batal
             </Button>
-            
+
             <Button
               type="submit"
               class="px-6 h-11 rounded-lg font-bold shadow-md bg-primary text-primary-foreground hover:bg-primary/90 transition-all hover:-translate-y-0.5 flex items-center gap-2"
               :disabled="isSubmitting"
             >
-              <span v-if="isSubmitting" class="flex items-center gap-1.5">
-                <span class="w-4 h-4 border-2 border-primary-foreground border-t-transparent animate-spin rounded-full"></span>
+              <span
+                v-if="isSubmitting"
+                class="flex items-center gap-1.5"
+              >
+                <span
+                  class="w-4 h-4 border-2 border-primary-foreground border-t-transparent animate-spin rounded-full"
+                ></span>
                 Menyimpan...
               </span>
-              <span v-else class="flex items-center gap-2">
+              <span
+                v-else
+                class="flex items-center gap-2"
+              >
                 Simpan Pengeluaran
                 <CheckCircle2 class="w-4.5 h-4.5" />
               </span>
@@ -286,25 +302,36 @@ const handleSubmit = () => {
       <!-- Right Column: Premium Live Preview -->
       <div class="space-y-6">
         <!-- Live Card Preview -->
-        <div 
+        <div
           class="relative overflow-hidden rounded-2xl shadow-xl border border-primary/20 bg-gradient-to-br from-primary via-primary/90 to-primary/75 p-6 text-primary-foreground transition-all duration-300 hover:scale-[1.02]"
         >
-          <div class="absolute -right-16 -top-16 w-40 h-40 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
-          <div class="absolute -left-12 -bottom-12 w-36 h-36 rounded-full bg-black/10 blur-xl pointer-events-none"></div>
+          <div
+            class="absolute -right-16 -top-16 w-40 h-40 rounded-full bg-white/10 blur-2xl pointer-events-none"
+          ></div>
+          <div
+            class="absolute -left-12 -bottom-12 w-36 h-36 rounded-full bg-black/10 blur-xl pointer-events-none"
+          ></div>
 
           <div class="relative z-10 space-y-6 flex flex-col justify-between min-h-[260px]">
             <!-- Top Section -->
             <div class="flex justify-between items-start gap-4">
               <div class="space-y-1.5 flex-1 min-w-0 pr-2">
-                <span class="text-[9px] tracking-widest font-black uppercase text-primary-foreground/70">KUITANSI PENGELUARAN DANA YAYASAN</span>
+                <span
+                  class="text-[9px] tracking-widest font-black uppercase text-primary-foreground/70"
+                  >KUITANSI PENGELUARAN DANA YAYASAN</span
+                >
                 <h3 class="text-xl font-extrabold tracking-tight leading-tight truncate">
                   {{ form.deskripsi || 'Nama/Deskripsi Pengeluaran' }}
                 </h3>
-                <div class="inline-flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded text-[10px] font-mono border border-white/15">
+                <div
+                  class="inline-flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded text-[10px] font-mono border border-white/15"
+                >
                   UNIT: SMA Unggul Bangsa
                 </div>
               </div>
-              <div class="w-11 h-11 rounded-xl bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner shrink-0">
+              <div
+                class="w-11 h-11 rounded-xl bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner shrink-0"
+              >
                 <Banknote class="w-5.5 h-5.5 text-primary-foreground" />
               </div>
             </div>
@@ -312,15 +339,25 @@ const handleSubmit = () => {
             <!-- Middle Section: Kategori & Nominal -->
             <div class="py-4 border-y border-white/10 flex justify-between items-center">
               <div>
-                <p class="text-[9px] uppercase tracking-wider text-primary-foreground/75 font-semibold">Kategori</p>
+                <p
+                  class="text-[9px] uppercase tracking-wider text-primary-foreground/75 font-semibold"
+                >
+                  Kategori
+                </p>
                 <div class="mt-1">
-                  <Badge class="bg-white/20 text-white border border-white/30 text-[10px] px-2.5 py-0.5 font-semibold tracking-wider uppercase">
+                  <Badge
+                    class="bg-white/20 text-white border border-white/30 text-[10px] px-2.5 py-0.5 font-semibold tracking-wider uppercase"
+                  >
                     {{ form.kategori }}
                   </Badge>
                 </div>
               </div>
               <div class="text-right">
-                <p class="text-[9px] uppercase tracking-wider text-primary-foreground/75 font-semibold">Nominal Bersih</p>
+                <p
+                  class="text-[9px] uppercase tracking-wider text-primary-foreground/75 font-semibold"
+                >
+                  Nominal Bersih
+                </p>
                 <p class="text-xl font-black mt-0.5 tracking-tight">
                   {{ formatCurrency(form.jumlah || 0) }}
                 </p>
@@ -331,14 +368,18 @@ const handleSubmit = () => {
             <div class="flex justify-between items-end gap-4">
               <div class="space-y-3">
                 <div>
-                  <span class="text-[8px] uppercase text-primary-foreground/60 block">Tanggal Transaksi</span>
+                  <span class="text-[8px] uppercase text-primary-foreground/60 block"
+                    >Tanggal Transaksi</span
+                  >
                   <span class="text-[11px] font-bold text-white/95 flex items-center gap-1 mt-0.5">
                     <Calendar class="w-3 h-3 text-white/50" />
                     {{ formatDate(activeDate) }}
                   </span>
                 </div>
               </div>
-              <Badge class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0 mb-0.5 shadow-sm text-[10px] px-2 py-0.5">
+              <Badge
+                class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0 mb-0.5 shadow-sm text-[10px] px-2 py-0.5"
+              >
                 ● APPROVED
               </Badge>
             </div>
@@ -350,7 +391,7 @@ const handleSubmit = () => {
 </template>
 
 <style scoped>
-:deep([data-slot=select-trigger]) {
+:deep([data-slot='select-trigger']) {
   width: 100% !important;
   height: 2.75rem !important; /* matches h-11 */
   background-color: var(--background);

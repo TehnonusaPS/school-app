@@ -1,14 +1,14 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { 
-  BookOpen, 
-  FileText, 
-  Phone, 
-  Send, 
-  Smile, 
-  Star, 
-  MessageSquare, 
-  Paperclip, 
+import {
+  BookOpen,
+  FileText,
+  Phone,
+  Send,
+  Smile,
+  Star,
+  MessageSquare,
+  Paperclip,
   CheckCircle,
   MessageCircle,
   ClipboardList,
@@ -30,9 +30,21 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem
+} from '@/components/ui/select'
 import { ProgressCircle } from '@/components/ui/progress-circle'
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious
+} from '@/components/ui/carousel'
 
 // Mock Profile
 import { siswaProfile } from '../data/mockSiswaRaport'
@@ -63,7 +75,13 @@ const monitoringData = {
       catatanGuruMapel: 'Guru Matematika',
       subjects: [
         { name: 'Matematika', teacher: 'Ibu Sri Wahyuni', score: 92, kkm: 75, status: 'Tuntas' },
-        { name: 'Bahasa Inggris', teacher: 'Mr. James Wilson', score: 88, kkm: 75, status: 'Tuntas' },
+        {
+          name: 'Bahasa Inggris',
+          teacher: 'Mr. James Wilson',
+          score: 88,
+          kkm: 75,
+          status: 'Tuntas'
+        },
         { name: 'Fisika', teacher: 'Bpk. Heru Susanto', score: 79, kkm: 70, status: 'Tuntas' }
       ]
     },
@@ -85,7 +103,13 @@ const monitoringData = {
       catatanGuruMapel: 'Guru Fisika',
       subjects: [
         { name: 'Matematika', teacher: 'Ibu Sri Wahyuni', score: 95, kkm: 75, status: 'Tuntas' },
-        { name: 'Bahasa Inggris', teacher: 'Mr. James Wilson', score: 90, kkm: 75, status: 'Tuntas' },
+        {
+          name: 'Bahasa Inggris',
+          teacher: 'Mr. James Wilson',
+          score: 90,
+          kkm: 75,
+          status: 'Tuntas'
+        },
         { name: 'Fisika', teacher: 'Bpk. Heru Susanto', score: 85, kkm: 70, status: 'Tuntas' }
       ]
     }
@@ -109,7 +133,13 @@ const monitoringData = {
       catatanGuruMapel: 'Guru Fisika',
       subjects: [
         { name: 'Matematika', teacher: 'Ibu Sri Wahyuni', score: 85, kkm: 75, status: 'Tuntas' },
-        { name: 'Bahasa Inggris', teacher: 'Mr. James Wilson', score: 80, kkm: 75, status: 'Tuntas' },
+        {
+          name: 'Bahasa Inggris',
+          teacher: 'Mr. James Wilson',
+          score: 80,
+          kkm: 75,
+          status: 'Tuntas'
+        },
         { name: 'Fisika', teacher: 'Bpk. Heru Susanto', score: 70, kkm: 75, status: 'Remedial' }
       ]
     },
@@ -117,7 +147,7 @@ const monitoringData = {
       avgKelas: 83.8,
       avgKelasTrend: '1.7% dari bulan lalu',
       avgKelasTrendDir: 'up',
-      ip: 3.70,
+      ip: 3.7,
       predikat: 'Sangat Baik',
       tugasPct: 97,
       tugasRatio: '41/42 Tugas',
@@ -131,7 +161,13 @@ const monitoringData = {
       catatanGuruMapel: 'Guru Wali Kelas',
       subjects: [
         { name: 'Matematika', teacher: 'Ibu Sri Wahyuni', score: 88, kkm: 75, status: 'Tuntas' },
-        { name: 'Bahasa Inggris', teacher: 'Mr. James Wilson', score: 85, kkm: 75, status: 'Tuntas' },
+        {
+          name: 'Bahasa Inggris',
+          teacher: 'Mr. James Wilson',
+          score: 85,
+          kkm: 75,
+          status: 'Tuntas'
+        },
         { name: 'Fisika', teacher: 'Bpk. Heru Susanto', score: 79, kkm: 75, status: 'Tuntas' }
       ]
     }
@@ -139,24 +175,66 @@ const monitoringData = {
 }
 
 const activeData = computed(() => {
-  return monitoringData[selectedKelas.value]?.[selectedSemester.value] || monitoringData['11-A IPA']['Semester Ganjil']
+  return (
+    monitoringData[selectedKelas.value]?.[selectedSemester.value] ||
+    monitoringData['11-A IPA']['Semester Ganjil']
+  )
 })
 
 // --- Carousel Recent Activities ---
 const aktivitasTerkini = [
-  { title: 'Analisis Puisi Modern', desc: 'B. Indonesia • Tenggat: Besok', icon: PenLine, variant: 'purple' },
-  { title: 'Hukum Newton II', desc: 'Fisika • Nilai Keluar: 85', icon: ClipboardList, variant: 'green' },
-  { title: 'Libur Semester Ganjil', desc: 'Admin • 18 Des - 2 Jan', icon: Megaphone, variant: 'amber' },
-  { title: 'Latihan Basket Sore Ini', desc: 'Pembina • 15:30 - Selesai', icon: Trophy, variant: 'green' },
-  { title: 'Latihan Soal Matriks', desc: 'Matematika • Tenggat: 3 hari lagi', icon: PenLine, variant: 'blue' },
-  { title: 'Rapat Orang Tua Murid', desc: 'Kepsek • Sabtu, 09:00', icon: Megaphone, variant: 'purple' }
+  {
+    title: 'Analisis Puisi Modern',
+    desc: 'B. Indonesia • Tenggat: Besok',
+    icon: PenLine,
+    variant: 'purple'
+  },
+  {
+    title: 'Hukum Newton II',
+    desc: 'Fisika • Nilai Keluar: 85',
+    icon: ClipboardList,
+    variant: 'green'
+  },
+  {
+    title: 'Libur Semester Ganjil',
+    desc: 'Admin • 18 Des - 2 Jan',
+    icon: Megaphone,
+    variant: 'amber'
+  },
+  {
+    title: 'Latihan Basket Sore Ini',
+    desc: 'Pembina • 15:30 - Selesai',
+    icon: Trophy,
+    variant: 'green'
+  },
+  {
+    title: 'Latihan Soal Matriks',
+    desc: 'Matematika • Tenggat: 3 hari lagi',
+    icon: PenLine,
+    variant: 'blue'
+  },
+  {
+    title: 'Rapat Orang Tua Murid',
+    desc: 'Kepsek • Sabtu, 09:00',
+    icon: Megaphone,
+    variant: 'purple'
+  }
 ]
 
-const getSubjectStyle = (subject) => {
+const getSubjectStyle = subject => {
   const styles = {
-    'Matematika': { color: 'text-blue-500 dark:text-blue-400', bg: 'bg-blue-500/10 dark:bg-blue-500/20' },
-    'Fisika': { color: 'text-emerald-500 dark:text-emerald-400', bg: 'bg-emerald-500/10 dark:bg-emerald-500/20' },
-    'Bahasa Inggris': { color: 'text-indigo-500 dark:text-indigo-400', bg: 'bg-indigo-500/10 dark:bg-indigo-500/20' }
+    Matematika: {
+      color: 'text-blue-500 dark:text-blue-400',
+      bg: 'bg-blue-500/10 dark:bg-blue-500/20'
+    },
+    Fisika: {
+      color: 'text-emerald-500 dark:text-emerald-400',
+      bg: 'bg-emerald-500/10 dark:bg-emerald-500/20'
+    },
+    'Bahasa Inggris': {
+      color: 'text-indigo-500 dark:text-indigo-400',
+      bg: 'bg-indigo-500/10 dark:bg-indigo-500/20'
+    }
   }
   return styles[subject] || { color: 'text-primary', bg: 'bg-primary/10' }
 }
@@ -164,7 +242,7 @@ const getSubjectStyle = (subject) => {
 // --- Action Handlers ---
 const handleDownloadReport = () => {
   const fileName = `Raport_Monitoring_${siswaProfile.name.replace(/\s+/g, '_')}_${selectedKelas.value.replace(/\s+/g, '_')}_${selectedSemester.value.replace(/\s+/g, '_')}.pdf`
-  
+
   // Dynamic mock PDF content
   const mockContent = `%PDF-1.4
 1 0 obj
@@ -271,7 +349,9 @@ const pageHeaderActions = computed(() => [
     />
 
     <!-- Filter Selection Bar -->
-    <div class="flex flex-wrap items-center gap-4 glass-ui p-4 rounded-2xl border border-white/10 dark:border-white/5 shadow-sm">
+    <div
+      class="flex flex-wrap items-center gap-4 glass-ui p-4 rounded-2xl border border-white/10 dark:border-white/5 shadow-sm"
+    >
       <div class="flex flex-wrap items-center gap-3">
         <span class="text-sm font-semibold text-foreground">Filter</span>
         <Select v-model="selectedKelas">
@@ -300,7 +380,6 @@ const pageHeaderActions = computed(() => [
     <div class="grid gap-6 grid-cols-1 lg:grid-cols-3">
       <!-- Left Column (Stats & Subjects List & Messages) -->
       <div class="lg:col-span-2 space-y-6">
-        
         <!-- Score Card Summary -->
         <!-- Stats Cards -->
         <StatCardGrid cols="3">
@@ -333,29 +412,38 @@ const pageHeaderActions = computed(() => [
 
         <!-- Score Card Summary -->
         <Card class="glass-ui p-6 rounded-2xl border border-white/10 dark:border-white/5 shadow-sm">
-          <CardHeader class="p-0 pb-4 mb-4 border-b border-white/5 flex flex-row items-center justify-between">
+          <CardHeader
+            class="p-0 pb-4 mb-4 border-b border-white/5 flex flex-row items-center justify-between"
+          >
             <div class="flex items-center gap-2">
               <BookOpen class="size-5 text-muted-foreground" />
-              <CardTitle class="text-base font-bold text-foreground">Ringkasan Nilai {{ selectedSemester }}</CardTitle>
+              <CardTitle class="text-base font-bold text-foreground"
+                >Ringkasan Nilai {{ selectedSemester }}</CardTitle
+              >
             </div>
-            <Badge variant="blue" class="font-bold text-[10px] tracking-wide uppercase px-2 py-0.5 rounded-full">
+            <Badge
+              variant="blue"
+              class="font-bold text-[10px] tracking-wide uppercase px-2 py-0.5 rounded-full"
+            >
               Ranking: {{ selectedKelas === '11-A IPA' ? '3 / 32' : '5 / 30' }}
             </Badge>
           </CardHeader>
-          
-          <CardContent class="p-0 space-y-6">
 
+          <CardContent class="p-0 space-y-6">
             <!-- Subject Detail Rows -->
             <div class="space-y-3">
-              <span class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Detail Nilai Mata Pelajaran Utama</span>
-              
-              <div 
-                v-for="sub in activeData.subjects" 
+              <span
+                class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block"
+                >Detail Nilai Mata Pelajaran Utama</span
+              >
+
+              <div
+                v-for="sub in activeData.subjects"
                 :key="sub.name"
                 class="flex items-center justify-between p-3.5 rounded-xl border border-white/5 bg-background/20 backdrop-blur-sm hover:bg-background/40 transition-colors"
               >
                 <div class="flex items-center gap-3 text-left">
-                  <div 
+                  <div
                     :class="[
                       'rounded-xl p-2.5 shrink-0 border border-white/5 shadow-sm',
                       getSubjectStyle(sub.name).bg,
@@ -371,13 +459,15 @@ const pageHeaderActions = computed(() => [
                 </div>
 
                 <div class="text-right space-y-0.5 shrink-0">
-                  <div class="font-black text-base text-foreground tabular-nums">{{ sub.score }}</div>
-                  <Badge 
-                    variant="outline" 
+                  <div class="font-black text-base text-foreground tabular-nums">
+                    {{ sub.score }}
+                  </div>
+                  <Badge
+                    variant="outline"
                     :class="[
                       'text-[9px] font-bold px-1.5 py-0 border-none rounded-full h-4 leading-none',
-                      sub.status === 'Tuntas' 
-                        ? 'bg-emerald-500/10 text-emerald-500' 
+                      sub.status === 'Tuntas'
+                        ? 'bg-emerald-500/10 text-emerald-500'
                         : 'bg-red-500/10 text-red-500'
                     ]"
                   >
@@ -391,17 +481,28 @@ const pageHeaderActions = computed(() => [
 
         <!-- Messages / Notes Card -->
         <Card class="glass-ui p-6 rounded-2xl border border-white/10 dark:border-white/5 shadow-sm">
-          <CardHeader class="p-0 pb-4 mb-4 border-b border-white/5 flex flex-row items-center gap-2">
+          <CardHeader
+            class="p-0 pb-4 mb-4 border-b border-white/5 flex flex-row items-center gap-2"
+          >
             <MessageSquare class="size-5 text-muted-foreground" />
-            <CardTitle class="text-base font-bold text-foreground">Catatan Orang Tua & Guru</CardTitle>
+            <CardTitle class="text-base font-bold text-foreground"
+              >Catatan Orang Tua & Guru</CardTitle
+            >
           </CardHeader>
           <CardContent class="p-0 grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Left Message History -->
             <div class="space-y-3">
-              <span class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Saluran komunikasi dua arah</span>
-              <div class="bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/10 p-4 rounded-xl space-y-2 relative overflow-hidden">
+              <span
+                class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block"
+                >Saluran komunikasi dua arah</span
+              >
+              <div
+                class="bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/10 p-4 rounded-xl space-y-2 relative overflow-hidden"
+              >
                 <div class="flex items-center justify-between text-[10px] font-bold">
-                  <span class="text-blue-500 dark:text-blue-400">{{ activeData.catatanGuruMapel }}</span>
+                  <span class="text-blue-500 dark:text-blue-400">{{
+                    activeData.catatanGuruMapel
+                  }}</span>
                   <span class="text-muted-foreground">{{ activeData.catatanTime }}</span>
                 </div>
                 <p class="text-xs text-foreground italic leading-relaxed">
@@ -412,23 +513,40 @@ const pageHeaderActions = computed(() => [
 
             <!-- Right Message Form -->
             <div class="space-y-3">
-              <span class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Kirim Catatan atau Pertanyaan ke Sekolah</span>
+              <span
+                class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block"
+                >Kirim Catatan atau Pertanyaan ke Sekolah</span
+              >
               <div class="space-y-2">
-                <Textarea 
+                <Textarea
                   v-model="messageText"
-                  placeholder="Tuliskan pesan Anda di sini... (Misal: Mohon info jadwal remedial, Aditya sedang kurang sehat)" 
+                  placeholder="Tuliskan pesan Anda di sini... (Misal: Mohon info jadwal remedial, Aditya sedang kurang sehat)"
                   class="min-h-[90px] text-xs bg-background/50 dark:bg-background/20 border-white/10 dark:border-white/5 rounded-xl resize-none placeholder-muted-foreground/50"
                 />
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-2 text-muted-foreground">
-                    <Button variant="ghost" size="icon" class="h-7 w-7" title="Lampiran">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      class="h-7 w-7"
+                      title="Lampiran"
+                    >
                       <Paperclip class="size-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon" class="h-7 w-7" title="Emoji">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      class="h-7 w-7"
+                      title="Emoji"
+                    >
                       <Smile class="size-3.5" />
                     </Button>
                   </div>
-                  <Button size="sm" class="px-4 py-1.5 h-8 font-semibold flex items-center gap-1.5 rounded-lg" @click="handleSendMessage">
+                  <Button
+                    size="sm"
+                    class="px-4 py-1.5 h-8 font-semibold flex items-center gap-1.5 rounded-lg"
+                    @click="handleSendMessage"
+                  >
                     <Send class="size-3" />
                     Kirim Pesan
                   </Button>
@@ -442,24 +560,33 @@ const pageHeaderActions = computed(() => [
       <!-- Right Column (Attendance & Wali Kelas) -->
       <div class="space-y-6">
         <!-- Attendance Ring Card -->
-        <Card class="glass-ui p-6 rounded-2xl border border-white/10 dark:border-white/5 shadow-sm flex flex-col items-center justify-center">
-          <CardHeader class="p-0 pb-4 mb-4 border-b border-white/5 w-full flex flex-row items-center gap-2">
+        <Card
+          class="glass-ui p-6 rounded-2xl border border-white/10 dark:border-white/5 shadow-sm flex flex-col items-center justify-center"
+        >
+          <CardHeader
+            class="p-0 pb-4 mb-4 border-b border-white/5 w-full flex flex-row items-center gap-2"
+          >
             <CheckCircle class="size-5 text-muted-foreground" />
             <CardTitle class="text-base font-bold text-foreground">Presensi Kehadiran</CardTitle>
           </CardHeader>
           <CardContent class="p-0 flex flex-col items-center w-full">
             <div class="my-3">
-              <ProgressCircle 
-                :percentage="activeData.kehadiranPct" 
-                :size="150" 
-                :stroke-width="12" 
+              <ProgressCircle
+                :percentage="activeData.kehadiranPct"
+                :size="150"
+                :stroke-width="12"
                 variant="blue"
               >
-                <span class="text-3xl font-black text-foreground tabular-nums">{{ activeData.kehadiranPct }}%</span>
-                <span class="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Kehadiran</span>
+                <span class="text-3xl font-black text-foreground tabular-nums"
+                  >{{ activeData.kehadiranPct }}%</span
+                >
+                <span
+                  class="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider"
+                  >Kehadiran</span
+                >
               </ProgressCircle>
             </div>
-            
+
             <div class="w-full space-y-2 mt-4 text-xs font-semibold">
               <div class="flex items-center justify-between pb-1 border-b border-white/5">
                 <div class="flex items-center gap-2">
@@ -487,17 +614,25 @@ const pageHeaderActions = computed(() => [
         </Card>
 
         <!-- Wali Kelas Card -->
-        <Card class="bg-gradient-to-br from-[#0c1a30] to-[#122849] dark:from-slate-900 dark:to-slate-800 text-white p-6 rounded-2xl border border-white/10 shadow-lg relative overflow-hidden group">
+        <Card
+          class="bg-gradient-to-br from-[#0c1a30] to-[#122849] dark:from-slate-900 dark:to-slate-800 text-white p-6 rounded-2xl border border-white/10 shadow-lg relative overflow-hidden group"
+        >
           <!-- Watermark icon background -->
-          <MessageCircle class="absolute -right-6 -bottom-6 size-24 opacity-10 rotate-12 transition-transform duration-300 group-hover:scale-110" />
-          
+          <MessageCircle
+            class="absolute -right-6 -bottom-6 size-24 opacity-10 rotate-12 transition-transform duration-300 group-hover:scale-110"
+          />
+
           <CardContent class="p-0 space-y-4 relative z-10 flex flex-col justify-between h-full">
             <div class="space-y-1 text-left">
-              <span class="text-[10px] font-bold text-white/60 uppercase tracking-wider block">Wali Kelas</span>
-              <h4 class="text-lg font-black tracking-tight text-white">{{ activeData.waliKelas }}</h4>
+              <span class="text-[10px] font-bold text-white/60 uppercase tracking-wider block"
+                >Wali Kelas</span
+              >
+              <h4 class="text-lg font-black tracking-tight text-white">
+                {{ activeData.waliKelas }}
+              </h4>
             </div>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               class="w-full font-semibold border-white/20 bg-white text-slate-900 hover:bg-white/95 rounded-xl h-10 mt-2 shadow-sm transition-all flex items-center justify-center gap-2"
               @click="handleContactWhatsApp"
             >
@@ -516,11 +651,14 @@ const pageHeaderActions = computed(() => [
       </div>
 
       <!-- Embla Carousel wrapper -->
-      <Carousel class="w-full relative" :opts="{ align: 'start' }">
+      <Carousel
+        class="w-full relative"
+        :opts="{ align: 'start' }"
+      >
         <CarouselContent class="-ml-4">
-          <CarouselItem 
-            v-for="(act, idx) in aktivitasTerkini" 
-            :key="idx" 
+          <CarouselItem
+            v-for="(act, idx) in aktivitasTerkini"
+            :key="idx"
             class="pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4"
           >
             <ActivityCard
@@ -533,8 +671,12 @@ const pageHeaderActions = computed(() => [
         </CarouselContent>
         <!-- Custom absolute navigation arrows -->
         <div class="absolute -top-10 right-0 flex gap-2">
-          <CarouselPrevious class="static translate-y-0 translate-x-0 h-8 w-8 rounded-lg bg-background/50 dark:bg-background/20 border border-white/10 hover:bg-background transition-colors" />
-          <CarouselNext class="static translate-y-0 translate-x-0 h-8 w-8 rounded-lg bg-background/50 dark:bg-background/20 border border-white/10 hover:bg-background transition-colors" />
+          <CarouselPrevious
+            class="static translate-y-0 translate-x-0 h-8 w-8 rounded-lg bg-background/50 dark:bg-background/20 border border-white/10 hover:bg-background transition-colors"
+          />
+          <CarouselNext
+            class="static translate-y-0 translate-x-0 h-8 w-8 rounded-lg bg-background/50 dark:bg-background/20 border border-white/10 hover:bg-background transition-colors"
+          />
         </div>
       </Carousel>
     </div>

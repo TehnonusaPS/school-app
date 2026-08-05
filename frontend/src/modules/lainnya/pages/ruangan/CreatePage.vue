@@ -21,11 +21,14 @@ function handleCancel() {
 
 <template>
   <div class="space-y-6">
-    <PageHeader 
-      title="Tambah Ruangan Sekolah" 
+    <PageHeader
+      title="Tambah Ruangan Sekolah"
       description="Lengkapi formulir dibawah ini untuk menambahkan data ruangan baru"
       back
     />
-    <RuanganForm @submit="handleSubmit" @cancel="handleCancel" />
+    <RuanganForm
+      @submit="handleSubmit"
+      @cancel="handleCancel"
+    />
   </div>
 </template>

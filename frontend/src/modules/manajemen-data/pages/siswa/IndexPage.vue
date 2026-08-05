@@ -13,6 +13,7 @@ import { rawSiswaItem, siswaSheetSections} from './data/dataSheetDetail.js'
 import { useRouter } from 'vue-router'
 import { fetchAllSiswa, deleteSiswa, getSiswaDetail } from '@/services/siswaService'
 import { getClassrooms } from '@/services/managementService'
+import { getPhotoUrl } from '@/utils/getPhotoUrl.js'
 import { Users, UserCheck, UserRound, UserRoundCheck } from 'lucide-vue-next'
 
 const stats = ref([
@@ -84,13 +85,6 @@ const fetchSiswa = async () => {
       params.kelasId = filterValues.value.kelasId
     }
     const res = await fetchAllSiswa(params)
-    const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api').replace(/\/api$/, '')
-    const getPhotoUrl = (path) => {
-      if (!path) return null
-      if (path.startsWith('http')) return path
-      return `${baseUrl}/storage/${path}`
-    }
-
     tableItems.value = res.data.map(item => ({
       ...item,
       foto: getPhotoUrl(item.foto)

@@ -58,9 +58,12 @@ class SchoolController extends Controller
             $trial = (clone $statsQuery)->where('status', 'trial')->count();
             $inactive = (clone $statsQuery)->where('status', 'inactive')->count();
 
+            $perPage = (int) $request->input('per_page', 15);
+            $page    = (int) $request->input('page', 1);
+
             return response()->json([
                 'status' => 'success',
-                'data'   => $query->latest('schools.created_at')->paginate(15),
+                'data'   => $query->latest('schools.created_at')->paginate($perPage, ['*'], 'page', $page),
                 'stats'  => [
                     'total' => $total,
                     'active' => $active,
@@ -107,9 +110,12 @@ class SchoolController extends Controller
             $trial = (clone $statsQuery)->where('status', 'trial')->count();
             $inactive = (clone $statsQuery)->where('status', 'inactive')->count();
 
+            $perPage = (int) $request->input('per_page', 15);
+            $page    = (int) $request->input('page', 1);
+
             return response()->json([
                 'status' => 'success',
-                'data'   => $query->latest('schools.created_at')->paginate(15),
+                'data'   => $query->latest('schools.created_at')->paginate($perPage, ['*'], 'page', $page),
                 'stats'  => [
                     'total' => $total,
                     'active' => $active,

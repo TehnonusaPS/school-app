@@ -10,6 +10,7 @@ import { Save } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { getClassrooms } from '@/services/managementService'
 import { getSiswaDetail, updateSiswa } from '@/services/siswaService'
+import { getPhotoUrl } from '@/utils/getPhotoUrl'
 
 const auth = useAuthStore()
 const isWaliKelas = computed(() => auth.user?.role === 'wali_kelas')
@@ -37,10 +38,7 @@ onMounted(async () => {
         tahun_masuk: res.data.tahun_masuk || ''
       }
       if (res.data.foto) {
-        const photo = res.data.foto
-        imagePreview.value = photo.startsWith('http')
-          ? photo
-          : `http://127.0.0.1:8000/${photo.startsWith('/') ? photo.slice(1) : photo}`
+        imagePreview.value = getPhotoUrl(res.data.foto)
       }
     } catch (err) {
       toast.error('Gagal memuat data detail siswa')
@@ -123,6 +121,7 @@ const customActions = computed(() => [
       title="Edit Siswa"
       description="Lengkapi formulir berikut untuk mengedit data siswa"
       :actions="customActions"
+      @back="goToList"
     /> 
 
     <!-- Form Siswa -->

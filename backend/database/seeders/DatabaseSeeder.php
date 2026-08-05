@@ -163,7 +163,23 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
         }
-
+        
+        $school2 = School::create([
+            'foundation_id'        => $foundation2->id,
+            'name'                 => 'SMP Harapan Bangsa Jakarta',
+            'npsn'                 => '20200001',
+            'level'                => 'SMP',
+            'established_date'     => '2016-07-01',
+            'status'               => 'active',
+            'address'              => 'Jl. Harapan No. 89, Jakarta Selatan',
+            'email'                => 'info@smphbjakarta.sch.id',
+            'phone'                => '021-87650001',
+            'website'              => 'https://smphbjakarta.sch.id',
+            'decree_number'        => 'SK-004/SMPHB/2016',
+            'decree_date'          => '2016-06-15',
+            'permit_number'        => 'IZIN-003/2016',
+            'permit_date'          => '2016-06-01',
+            'accreditation'        => 'A',
             'accreditation_date'   => '2023-08-15',
             'accreditation_number' => 'AKR-2023-0002',
         ]);

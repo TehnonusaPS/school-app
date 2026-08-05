@@ -53,7 +53,7 @@ class DatabaseSeeder extends Seeder
             'decree_date'      => '2010-02-01',
         ]);
 
-        $foundation2 = Foundation::create([
+        $foundationB = Foundation::create([
             'code'             => 'Y0002',
             'name'             => 'Yayasan Harapan Bangsa',
             'established_date' => '2015-05-10',
@@ -93,7 +93,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $school1B = School::create([
-            'foundation_id'        => $foundation->id,
+            'foundation_id'        => $foundationB->id,
             'name'                 => 'SMP Nusantara Pintar Bekasi',
             'npsn'                 => '20100002',
             'level'                => 'SMP',
@@ -129,7 +129,7 @@ class DatabaseSeeder extends Seeder
             ['code' => 'SBD', 'name' => 'Seni Budaya'],
         ];
 
-        $schools = [$school, $school1B, $school2];
+        $schools = [$school1, $school1B];
         foreach ($schools as $sch) {
             $ayEven = AcademicYear::create([
                 'school_id'  => $sch->id,
@@ -149,7 +149,7 @@ class DatabaseSeeder extends Seeder
                 'is_active'  => false,
             ]);
 
-            if ($sch->id === $school->id) {
+            if ($sch->id === $school1->id) {
                 $academicYear = $ayEven;
                 $academicYearOdd = $ayOdd;
             }
@@ -165,7 +165,7 @@ class DatabaseSeeder extends Seeder
         }
         
         $school2 = School::create([
-            'foundation_id'        => $foundation2->id,
+            'foundation_id'        => $foundationB->id,
             'name'                 => 'SMP Harapan Bangsa Jakarta',
             'npsn'                 => '20200001',
             'level'                => 'SMP',

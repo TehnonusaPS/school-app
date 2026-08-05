@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { Image as ImageIcon, Search } from 'lucide-vue-next'
 import ImageLightbox from '../../components/ImageLightbox.vue'
+import { getDefaultImage } from '../../composables/useDefaultImages'
 const props = defineProps({ section: Object, branding: Object })
 const el = ref(null)
 const isVisible = ref(false)
@@ -49,12 +50,12 @@ function openLightbox(i) {
         </h2>
       </div>
 
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="flex flex-wrap justify-center gap-6">
         <div
           v-for="(item, i) in section.items"
           :key="item.id"
           :class="[
-            'group cursor-pointer transition-all duration-500',
+            'w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] group cursor-pointer transition-all duration-500',
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           ]"
           :style="{ transitionDelay: `${i * 60}ms` }"
@@ -72,9 +73,14 @@ function openLightbox(i) {
               />
               <div
                 v-else
-                class="w-full h-full bg-primary/5 flex items-center justify-center text-primary/30"
+                class="relative w-full h-full overflow-hidden"
               >
-                <ImageIcon class="w-12 h-12" />
+                <img
+                  :src="getDefaultImage('gallery', i)"
+                  :alt="item.title || 'Kegiatan Sekolah'"
+                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+                <div class="absolute inset-0 bg-gradient-to-br from-primary/15 to-secondary/10" />
               </div>
               <div
                 class="absolute inset-0 bg-primary/50 opacity-0 group-hover:opacity-100 transition-colors flex items-center justify-center backdrop-blur-sm"

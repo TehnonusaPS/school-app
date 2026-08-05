@@ -129,7 +129,7 @@ const fetchFoundations = async () => {
       tanggal_akta: item.deed_date ? item.deed_date.split('T')[0] : '-',
       no_sk: item.decree_number,
       tanggal_sk: item.decree_date ? item.decree_date.split('T')[0] : '-',
-      logo: item.logo || 'https://picsum.photos/200',
+      logo: item.logo || '/defaults/sd/logo.png',
       status: item.status === 'active' ? 'Aktif' : (item.status === 'inactive' ? 'Nonaktif' : 'Trial'),
       // Mapped fields
       jmlSekolah: item.schools_count || 0,

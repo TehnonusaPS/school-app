@@ -1,5 +1,14 @@
 import { ref, computed } from 'vue'
 import { getPublicLandingPage } from '@/services/landingPageService'
+import { getDefaultImage, GALLERY_DEFAULT_IMAGES, PROGRAM_DEFAULT_IMAGES, TEACHER_DEFAULT_IMAGES, ABOUT_DEFAULT_IMAGES, DEFAULT_SCHOOL_LOGO } from './useDefaultImages'
+
+function sanitizeImage(url, fallback) {
+  if (!url || typeof url !== 'string') return fallback
+  if (url.includes('unsplash.com') || url.includes('pexels.com') || url.includes('picsum.photos')) {
+    return fallback
+  }
+  return url
+}
 
 export function useLandingPage(slug) {
   const data = ref(null) // Tanpa mock data
@@ -9,21 +18,36 @@ export function useLandingPage(slug) {
   const theme = computed(() => data.value?.theme || 'modern')
   const entityName = computed(() => data.value?.type === 'Yayasan' ? 'Yayasan Kami' : 'Sekolah Kami')
   
-  const heroData = computed(() => ({
-    badgeText: data.value?.hero_badge_text || '',
-    title: data.value?.hero_title || '',
-    subtitle: data.value?.hero_subtitle || '',
-    description: data.value?.hero_description || '',
-    image: data.value?.hero_image || '',
-    images: data.value?.hero_images?.length ? data.value.hero_images : [],
-    ctaText: data.value?.hero_cta_text || '',
-    ctaLink: data.value?.hero_cta_link || ''
-  }))
+  const heroData = computed(() => {
+    const rawImages = data.value?.hero_images?.length
+      ? data.value.hero_images.map((h, idx) => ({
+          ...h,
+          url: sanitizeImage(h.url, getDefaultImage('about', idx))
+        }))
+      : (data.value?.hero_image
+          ? [{ url: sanitizeImage(data.value.hero_image, '/defaults/sd/building.png') }]
+          : [
+              { url: '/defaults/sd/building.png', caption: 'Gedung Sekolah Utama' },
+              { url: '/defaults/sd/classroom.png', caption: 'Fasilitas Terpadu' },
+              { url: '/defaults/sd/science.png', caption: 'Kenyamanan Belajar' }
+            ])
+
+    return {
+      badgeText: data.value?.hero_badge_text || '',
+      title: data.value?.hero_title || '',
+      subtitle: data.value?.hero_subtitle || '',
+      description: data.value?.hero_description || '',
+      image: sanitizeImage(data.value?.hero_image, '/defaults/sd/building.png'),
+      images: rawImages,
+      ctaText: data.value?.hero_cta_text || '',
+      ctaLink: data.value?.hero_cta_link || ''
+    }
+  })
 
   const aboutData = computed(() => ({
     title: data.value?.about_title || '',
     description: data.value?.about_description || '',
-    image: data.value?.about_image || '',
+    image: sanitizeImage(data.value?.about_image, '/defaults/sd/building.png'),
     vision: data.value?.about_vision || '',
     mission: data.value?.about_mission?.length ? data.value.about_mission : []
   }))
@@ -32,7 +56,7 @@ export function useLandingPage(slug) {
     primaryColor: data.value?.primary_color || '#1e40af',
     secondaryColor: data.value?.secondary_color || '#f59e0b',
     accentColor: data.value?.accent_color || '#06b6d4',
-    logo: data.value?.logo || '',
+    logo: sanitizeImage(data.value?.logo, DEFAULT_SCHOOL_LOGO),
     entityName: entityName.value
   }))
 
@@ -56,7 +80,25 @@ export function useLandingPage(slug) {
     tiktok: data.value?.social_tiktok || ''
   }))
 
-  const sections = computed(() => (data.value?.sections?.length ? data.value.sections : []))
+  const sections = computed(() => {
+    const raw = data.value?.sections || []
+    return raw.map(sec => {
+      if (!sec.items || !Array.isArray(sec.items)) return sec
+      const items = sec.items.map((item, idx) => {
+        let type = 'gallery'
+        if (sec.type === 'programs') type = 'program'
+        else if (sec.type === 'teachers') type = 'teacher'
+        else if (sec.type === 'about') type = 'about'
+
+        const fallback = getDefaultImage(type, idx)
+        return {
+          ...item,
+          image: sanitizeImage(item.image, fallback)
+        }
+      })
+      return { ...sec, items }
+    })
+  })
 
   function getSectionByType(type) {
     return sections.value.find(s => s.type === type) || null

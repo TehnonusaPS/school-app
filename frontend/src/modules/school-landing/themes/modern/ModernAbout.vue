@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { Eye, Target, CheckCircle } from 'lucide-vue-next'
+import { getDefaultImage } from '../../composables/useDefaultImages'
 
 const props = defineProps({
   about: Object,
@@ -90,12 +91,17 @@ onMounted(() => {
             />
             <div
               v-else
-              class="relative rounded-3xl w-full h-full min-h-[400px] flex items-center justify-center shadow-2xl"
-              :style="{
-                background: `linear-gradient(135deg, ${branding.primaryColor}20, ${branding.accentColor}20)`
-              }"
+              class="relative rounded-3xl w-full h-full min-h-[400px] overflow-hidden shadow-2xl"
             >
-              <span class="text-6xl">🏫</span>
+              <img
+                :src="getDefaultImage('about', 0)"
+                alt="Tentang Sekolah"
+                class="w-full h-full min-h-[400px] object-cover"
+              />
+              <div
+                class="absolute inset-0 rounded-3xl"
+                :style="{ background: `linear-gradient(135deg, ${branding.primaryColor}30, ${branding.accentColor}20)` }"
+              />
             </div>
           </div>
         </div>

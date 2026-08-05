@@ -132,8 +132,8 @@ const fetchSchools = async () => {
       tanggal_akreditasi: item.accreditation_date ? item.accreditation_date.split('T')[0] : '-',
       no_akreditasi: item.accreditation_number,
       status: item.status === 'active' ? 'Aktif' : (item.status === 'inactive' ? 'Nonaktif' : 'Trial'),
-      foto: item.logo || 'https://picsum.photos/200',
-      logo: item.logo || 'https://picsum.photos/200',
+      foto: item.logo || '/defaults/sd/logo.png',
+      logo: item.logo || '/defaults/sd/logo.png',
       jmlSiswa: item.students_count || 0
     }))
     total.value = res.data.total

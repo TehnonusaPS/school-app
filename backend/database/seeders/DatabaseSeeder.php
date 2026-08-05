@@ -92,10 +92,9 @@ class DatabaseSeeder extends Seeder
             'accreditation_number' => 'AKR-2023-0001',
         ]);
 
-        // School 2 (Yayasan A - SMP)
-        $school2 = School::create([
+        $school1B = School::create([
             'foundation_id'        => $foundationA->id,
-            'name'                 => 'SMP Nusantara Pintar Jakarta',
+            'name'                 => 'SMP Nusantara Pintar Bekasi',
             'npsn'                 => '20100002',
             'level'                => 'SMP',
             'established_date'     => '2014-07-01',
@@ -109,7 +108,7 @@ class DatabaseSeeder extends Seeder
             'permit_number'        => 'IZIN-002/2014',
             'permit_date'          => '2014-06-01',
             'accreditation'        => 'A',
-            'accreditation_date'   => '2023-08-15',
+            'accreditation_date'   => '2023-05-10',
             'accreditation_number' => 'AKR-2023-0002',
         ]);
 
@@ -155,7 +154,7 @@ class DatabaseSeeder extends Seeder
             'accreditation_number' => 'AKR-2024-0004',
         ]);
 
-        $allSchools = [$school1, $school2, $school3, $school4];
+        $allSchools = [$school1, $school1B, $school3, $school4];
 
         // ─────────────────────────────────────────────
         //  4. Core System Users (Superadmin & Foundation Admins)

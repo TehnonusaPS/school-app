@@ -10,7 +10,46 @@ import { yayasanSheetSections } from './data/dataSheetDetail.js'
 import { getFoundations, deleteFoundation } from '@/services/managementService'
 import { Building2, ShieldCheck, ShieldAlert, ShieldX } from 'lucide-vue-next'
 
-const stats = ref([
+const perPage = ref(5)
+const currentPage = ref(1)
+const total = ref(0)
+const from = ref(1)
+const to = ref(1)
+const tableItems = ref([])
+const isLoading = ref(false)
+
+const statsData = ref({
+  total: 0,
+  aktif: 0,
+  trial: 0,
+  inactive: 0
+})
+
+const fetchStats = async () => {
+  try {
+    const res = await getFoundations({ per_page: 1000 })
+    if (res.stats) {
+      statsData.value = {
+        total: res.stats.total,
+        aktif: res.stats.active,
+        trial: res.stats.trial,
+        inactive: res.stats.inactive
+      }
+    } else {
+      const list = Array.isArray(res.data) ? res.data : (res.data.data || [])
+      statsData.value = {
+        total: list.length,
+        aktif: list.filter(item => item.status === 'active').length,
+        trial: list.filter(item => item.status === 'trial').length,
+        inactive: list.filter(item => item.status === 'inactive').length
+      }
+    }
+  } catch (err) {
+    console.error('Gagal mengambil data statistik yayasan', err)
+  }
+}
+
+const stats = computed(() => [
   {
     label: 'TOTAL YAYASAN',
     value: '0',
@@ -49,13 +88,7 @@ const stats = ref([
   }
 ])
 
-const perPage = ref(5)
-const currentPage = ref(1)
-const total = ref(0)
-const from = ref(1)
-const to = ref(1)
-const tableItems = ref([])
-const isLoading = ref(false)
+
 
 const filterValues = ref({
   search: '',
@@ -112,10 +145,12 @@ const fetchFoundations = async () => {
     to.value = res.data.to || 1
 
     if (res.stats) {
-      stats.value[0].value = String(res.stats.total)
-      stats.value[1].value = String(res.stats.active)
-      stats.value[2].value = String(res.stats.trial)
-      stats.value[3].value = String(res.stats.inactive)
+      statsData.value = {
+        total: res.stats.total,
+        aktif: res.stats.active,
+        trial: res.stats.trial,
+        inactive: res.stats.inactive
+      }
     }
   } catch (error) {
     toast.error('Gagal mengambil data yayasan')

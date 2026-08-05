@@ -60,6 +60,11 @@ class FoundationController extends Controller
             $trial = (clone $statsQuery)->where('status', 'trial')->count();
             $inactive = (clone $statsQuery)->where('status', 'inactive')->count();
 
+            $total = Foundation::count();
+            $active = Foundation::where('status', 'active')->count();
+            $trial = Foundation::where('status', 'trial')->count();
+            $inactive = Foundation::where('status', 'inactive')->count();
+
             return response()->json([
                 'status' => 'success',
                 'data'   => $foundations,
@@ -80,6 +85,13 @@ class FoundationController extends Controller
                     'message' => 'Foundation not found for your account.',
                 ], 404);
             }
+
+            $stats = [
+                'total' => 1,
+                'active' => $foundation->status === 'active' ? 1 : 0,
+                'trial' => $foundation->status === 'trial' ? 1 : 0,
+                'inactive' => $foundation->status === 'inactive' ? 1 : 0,
+            ];
 
             $stats = [
                 'total' => 1,

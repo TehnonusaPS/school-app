@@ -16,7 +16,7 @@ return new class extends Migration
             $table->text('calendar_rejected_reason')->nullable();
             $table->timestamp('calendar_submitted_at')->nullable();
             $table->timestamp('calendar_reviewed_at')->nullable();
-            $table->foreignId('calendar_reviewed_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignUuid('calendar_reviewed_by')->nullable()->constrained('users')->onDelete('set null');
         });
     }
 

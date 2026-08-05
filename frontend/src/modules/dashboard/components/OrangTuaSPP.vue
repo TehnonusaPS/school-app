@@ -27,13 +27,20 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.de
     illustration="bag"
   >
     <template #header-action>
-      <Badge variant="destructive" class="text-xs">{{ sppData.status }}</Badge>
+      <Badge
+        variant="destructive"
+        class="text-xs"
+        >{{ sppData.status }}</Badge
+      >
     </template>
 
     <!-- Nominal -->
     <div>
       <p class="text-3xl font-bold tracking-tight">
-        <RollingNumber :value="sppData.nominal" :delay="computedDelay" />
+        <RollingNumber
+          :value="sppData.nominal"
+          :delay="computedDelay"
+        />
       </p>
       <p class="text-xs text-muted-foreground mt-1">
         Jatuh tempo: <span class="text-rose-500 font-semibold">{{ sppData.jatuhTempo }}</span>
@@ -46,7 +53,10 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.de
         <Wallet class="size-4" />
         Bayar Sekarang
       </Button>
-      <Button variant="ghost" class="w-full gap-1.5 text-xs text-muted-foreground hover:text-foreground h-8">
+      <Button
+        variant="ghost"
+        class="w-full gap-1.5 text-xs text-muted-foreground hover:text-foreground h-8"
+      >
         <History class="size-3.5" />
         Lihat Riwayat Pembayaran
       </Button>

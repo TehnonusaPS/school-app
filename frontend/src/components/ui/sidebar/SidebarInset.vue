@@ -10,10 +10,12 @@ const props = defineProps<{
 <template>
   <main
     data-slot="sidebar-inset"
-    :class="cn(
-      'bg-transparent md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2 relative flex w-full flex-1 flex-col min-w-0',
-      props.class,
-    )"
+    :class="
+      cn(
+        'bg-transparent md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2 relative flex w-full flex-1 flex-col min-w-0',
+        props.class
+      )
+    "
   >
     <slot />
   </main>

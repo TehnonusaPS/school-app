@@ -7,7 +7,16 @@ import {
   MessageSquare,
   FileBarChart,
   MoreHorizontal,
-  Palette
+  Palette,
+  LayoutTemplate,
+  Settings,
+  Image,
+  BookOpen,
+  Building,
+  HeartHandshake,
+  Layers,
+  PhoneCall,
+  Users
 } from 'lucide-vue-next'
 
 export const navMain = [
@@ -350,11 +359,6 @@ export const navMain = [
         title: 'Kepegawaian',
         url: '/laporan/kepegawaian',
         roles: ['kepala_sekolah', 'admin_sekolah']
-      },
-      {
-        title: 'LPJ',
-        url: '/laporan/pertanggung-jawaban',
-        roles: ['kepala_sekolah']
       }
     ]
   },
@@ -397,5 +401,68 @@ export const navMain = [
     url: '/components',
     icon: Palette,
     roles: ['superadmin']
+  },
+  {
+    title: 'Website Builder',
+    url: '/landing-editor',
+    icon: LayoutTemplate,
+    roles: ['admin_yayasan', 'admin_sekolah', 'kepala_sekolah'],
+    requiresLandingPageEnabled: true,
+    items: [
+      {
+        title: 'Pengaturan Umum',
+        url: '/landing-editor/general',
+        icon: Settings,
+        roles: ['admin_yayasan', 'admin_sekolah', 'kepala_sekolah']
+      },
+      {
+        title: 'Hero Banner',
+        url: '/landing-editor/hero',
+        icon: Image,
+        roles: ['admin_yayasan', 'admin_sekolah', 'kepala_sekolah']
+      },
+      {
+        title: 'Profil Yayasan',
+        url: '/landing-editor/about',
+        icon: BookOpen,
+        roles: ['admin_yayasan']
+      },
+      {
+        title: 'Profil Akademik',
+        url: '/landing-editor/about',
+        icon: BookOpen,
+        roles: ['admin_sekolah', 'kepala_sekolah']
+      },
+      {
+        title: 'Informasi PPDB',
+        url: '/landing-editor/ppdb',
+        icon: Users,
+        roles: ['admin_sekolah', 'kepala_sekolah']
+      },
+      {
+        title: 'Lembaga Naungan',
+        url: '/landing-editor/institutions',
+        icon: Building,
+        roles: ['admin_yayasan']
+      },
+      {
+        title: 'Rekening Donasi',
+        url: '/landing-editor/donasi',
+        icon: HeartHandshake,
+        roles: ['admin_yayasan']
+      },
+      {
+        title: 'Kelola Section',
+        url: '/landing-editor/sections',
+        icon: Layers,
+        roles: ['admin_yayasan', 'admin_sekolah', 'kepala_sekolah']
+      },
+      {
+        title: 'Kontak & Sosmed',
+        url: '/landing-editor/contact',
+        icon: PhoneCall,
+        roles: ['admin_yayasan', 'admin_sekolah', 'kepala_sekolah']
+      }
+    ]
   }
 ]

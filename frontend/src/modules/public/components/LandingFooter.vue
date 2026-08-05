@@ -88,8 +88,16 @@ const navLinks = [
       >
         <div>&copy; {{ new Date().getFullYear() }} CerdasBangsa. Semua hak cipta dilindungi.</div>
         <div class="flex gap-4">
-          <a href="#" class="hover:text-white transition-colors">Kebijakan Privasi</a>
-          <a href="#" class="hover:text-white transition-colors">Syarat & Ketentuan</a>
+          <a
+            href="#"
+            class="hover:text-white transition-colors"
+            >Kebijakan Privasi</a
+          >
+          <a
+            href="#"
+            class="hover:text-white transition-colors"
+            >Syarat & Ketentuan</a
+          >
         </div>
       </div>
     </div>

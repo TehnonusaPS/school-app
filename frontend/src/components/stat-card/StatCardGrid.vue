@@ -38,7 +38,11 @@ const isMoreThanTwo = computed(() => {
 
 <template>
   <div
-    :class="['grid gap-4 sm:gap-6 w-full stat-card-grid', gridColsClass, { 'cols-gt-2': isMoreThanTwo }]"
+    :class="[
+      'grid gap-4 sm:gap-6 w-full stat-card-grid',
+      gridColsClass,
+      { 'cols-gt-2': isMoreThanTwo }
+    ]"
     :style="{ '--stagger-delay': `${delay}ms` }"
   >
     <slot />
@@ -47,16 +51,36 @@ const isMoreThanTwo = computed(() => {
 
 <style scoped>
 /* Inject staggered delay indexes from 0 to 9 */
-.stat-card-grid > :deep(*:nth-child(1)) { --delay-index: 0; }
-.stat-card-grid > :deep(*:nth-child(2)) { --delay-index: 1; }
-.stat-card-grid > :deep(*:nth-child(3)) { --delay-index: 2; }
-.stat-card-grid > :deep(*:nth-child(4)) { --delay-index: 3; }
-.stat-card-grid > :deep(*:nth-child(5)) { --delay-index: 4; }
-.stat-card-grid > :deep(*:nth-child(6)) { --delay-index: 5; }
-.stat-card-grid > :deep(*:nth-child(7)) { --delay-index: 6; }
-.stat-card-grid > :deep(*:nth-child(8)) { --delay-index: 7; }
-.stat-card-grid > :deep(*:nth-child(9)) { --delay-index: 8; }
-.stat-card-grid > :deep(*:nth-child(10)) { --delay-index: 9; }
+.stat-card-grid > :deep(*:nth-child(1)) {
+  --delay-index: 0;
+}
+.stat-card-grid > :deep(*:nth-child(2)) {
+  --delay-index: 1;
+}
+.stat-card-grid > :deep(*:nth-child(3)) {
+  --delay-index: 2;
+}
+.stat-card-grid > :deep(*:nth-child(4)) {
+  --delay-index: 3;
+}
+.stat-card-grid > :deep(*:nth-child(5)) {
+  --delay-index: 4;
+}
+.stat-card-grid > :deep(*:nth-child(6)) {
+  --delay-index: 5;
+}
+.stat-card-grid > :deep(*:nth-child(7)) {
+  --delay-index: 6;
+}
+.stat-card-grid > :deep(*:nth-child(8)) {
+  --delay-index: 7;
+}
+.stat-card-grid > :deep(*:nth-child(9)) {
+  --delay-index: 8;
+}
+.stat-card-grid > :deep(*:nth-child(10)) {
+  --delay-index: 9;
+}
 
 @media (max-width: 1023px) {
   /* On mobile and tablet, if grid has 3 or 5 columns on desktop, 

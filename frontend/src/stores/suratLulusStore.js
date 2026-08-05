@@ -16,14 +16,14 @@ export const useSuratLulusStore = defineStore('suratLulus', () => {
   function add(data) {
     const newId = items.value.length > 0 ? Math.max(...items.value.map(i => i.id)) + 1 : 1
     const hariIni = new Date().toISOString().split('T')[0]
-    
+
     const newItem = {
       id: newId,
       tanggalDibuat: hariIni,
       status: 'Selesai',
       ...data
     }
-    
+
     // Add to the beginning of the list
     items.value.unshift(newItem)
     return newItem

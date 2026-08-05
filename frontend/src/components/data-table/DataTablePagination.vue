@@ -7,7 +7,13 @@ import {
   PaginationNext,
   PaginationPrevious
 } from '@/components/ui/pagination'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
 
 const props = defineProps({
   total: Number,
@@ -71,12 +77,19 @@ const emit = defineEmits(['update:page', 'update:perPage'])
       <PaginationContent v-slot="{ items }">
         <PaginationPrevious />
 
-        <template v-for="(item, index) in items" :key="index">
+        <template
+          v-for="(item, index) in items"
+          :key="index"
+        >
           <PaginationItem
             v-if="item.type === 'page'"
             :value="item.value"
             :is-active="item.value === rootPage"
-            :class="item.value === rootPage ? 'bg-primary! text-primary-foreground! hover:bg-primary/90!' : ''"
+            :class="
+              item.value === rootPage
+                ? 'bg-primary! text-primary-foreground! hover:bg-primary/90!'
+                : ''
+            "
           >
             {{ item.value }}
           </PaginationItem>

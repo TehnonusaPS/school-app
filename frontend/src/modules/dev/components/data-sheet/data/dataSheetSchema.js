@@ -23,14 +23,18 @@ export const guruSheetSections = [
     id: 'mapel',
     title: 'Mata Pelajaran',
     fields: [
-      { label: 'Mata Pelajaran', key: 'mapel', icon: Briefcase, select: true, options: ['balala', 'yayaya'] }
+      {
+        label: 'Mata Pelajaran',
+        key: 'mapel',
+        icon: Briefcase,
+        select: true,
+        options: ['balala', 'yayaya']
+      }
     ]
   },
   {
     id: 'dokumens',
     title: 'Dokumen',
-    fields: [
-      { label: 'Dokumen', key: 'dokumen', icon: File, file: true }
-    ]
+    fields: [{ label: 'Dokumen', key: 'dokumen', icon: File, file: true }]
   }
 ]

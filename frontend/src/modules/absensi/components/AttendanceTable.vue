@@ -62,7 +62,9 @@ const handleCellClick = (studentId, dateNum) => {
           >
             <div class="flex flex-col items-center justify-center py-1">
               <span class="font-mono">{{ d.dateNum.toString().padStart(2, '0') }}</span>
-              <span class="text-[8px] text-muted-foreground uppercase font-bold">{{ d.dayName }}</span>
+              <span class="text-[8px] text-muted-foreground uppercase font-bold">{{
+                d.dayName
+              }}</span>
             </div>
           </TableHead>
           <!-- Rekap Labels (H, T, I, S, A) -->
@@ -81,16 +83,26 @@ const handleCellClick = (studentId, dateNum) => {
           class="hover:bg-muted/10 transition-colors border-b border-border/60"
         >
           <!-- No -->
-          <TableCell class="text-center font-medium text-xs border-r border-border/60 py-3">{{ index + 1 }}</TableCell>
-          
+          <TableCell class="text-center font-medium text-xs border-r border-border/60 py-3">{{
+            index + 1
+          }}</TableCell>
+
           <!-- Nama Siswa -->
-          <TableCell class="text-left font-bold text-foreground text-xs border-r border-border/60 py-3">{{ student.nama }}</TableCell>
-          
+          <TableCell
+            class="text-left font-bold text-foreground text-xs border-r border-border/60 py-3"
+            >{{ student.nama }}</TableCell
+          >
+
           <!-- NIS -->
-          <TableCell class="text-center font-mono text-xs text-muted-foreground border-r border-border/60 py-3">{{ student.nis }}</TableCell>
-          
+          <TableCell
+            class="text-center font-mono text-xs text-muted-foreground border-r border-border/60 py-3"
+            >{{ student.nis }}</TableCell
+          >
+
           <!-- L/P -->
-          <TableCell class="text-center font-semibold text-xs border-r border-border/60 py-3">{{ student.gender }}</TableCell>
+          <TableCell class="text-center font-semibold text-xs border-r border-border/60 py-3">{{
+            student.gender
+          }}</TableCell>
 
           <!-- Dynamic Attendance Cells -->
           <TableCell
@@ -112,7 +124,9 @@ const handleCellClick = (studentId, dateNum) => {
                 getStatus(student.id, d.dateNum) === 'S' ? 'bg-blue-500 text-white shadow-xs' : '',
                 getStatus(student.id, d.dateNum) === 'I' ? 'bg-amber-500/80 text-white shadow-xs' : '',
                 getStatus(student.id, d.dateNum) === 'A' ? 'bg-red-500 text-white shadow-xs' : '',
-                !getStatus(student.id, d.dateNum) ? 'text-muted-foreground/40 hover:bg-muted/30' : ''
+                !getStatus(student.id, d.dateNum)
+                  ? 'text-muted-foreground/40 hover:bg-muted/30'
+                  : ''
               ]"
             >
               {{ getStatus(student.id, d.dateNum) || '?' }}

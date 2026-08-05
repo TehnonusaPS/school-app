@@ -1,11 +1,5 @@
 <script setup>
-import { 
-  Phone, 
-  Image,
-  SquareUserRound,
-  BriefcaseBusiness,
-  UserCog,
-} from 'lucide-vue-next'
+import { Phone, Image, SquareUserRound, BriefcaseBusiness, UserCog } from 'lucide-vue-next'
 import { Separator } from '@/components/ui/separator'
 import ImageUpload from '@/components/forms/ImageUpload.vue'
 import FormInput from '@/components/forms/FormInput.vue'
@@ -28,7 +22,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['image-change'])
 
-const handleImageChange = (file) => {
+const handleImageChange = file => {
   emit('image-change', file)
 }
 </script>
@@ -39,23 +33,23 @@ const handleImageChange = (file) => {
       <div class="space-y-6">
         <!-- Foto Profil -->
         <FormSection title="Foto Profil" description="Upload foto profil dari guru/staff disini" :icon="Image">
-            <ImageUpload :preview="imagePreview" @change="handleImageChange" note="Format: JPG atau PNG. Maksimal 2MB. Dimensi rasio 1:1"/>
+            <ImageUpload :preview="imagePreview" @change="handleImageChange" note="Format: JPG atau PNG. Maksimal 2MB. Dimensi rasio 1:1" :error="errors.foto"/>
         </FormSection>
 
         <!-- Informasi Kontak -->
-        <FormSection title="Kontak & Alamat Guru/Staff" description="Informasi kontak dari guru/staff">
-            <FormInput v-model="form.email" label="E-mail" placeholder="Contoh: nama@sekolah.com" :icon="Phone" :error="errors.email"/>
-            <FormInput v-model="form.no_hp" label="No. Telp" placeholder="Contoh: 081289170180" :error="errors.phone"/>
+<FormSection title="Kontak & Alamat Guru/Staff" description="Informasi kontak dari guru/staff" :icon="Phone">
+            <FormInput v-model="form.email" label="E-mail" placeholder="Contoh: nama@sekolah.com" :error="errors.email"/>
+            <FormInput v-model="form.no_hp" label="No. Telp" placeholder="Contoh: 081289170180" :error="errors.no_hp"/>
             <Separator class="my-4" />
-            <FormTextArea v-model="form.alamat" :rows="6" label="Alamat Lengkap" placeholder="Contoh: Nama Jalan, RT/RW, Kelurahan, Kecamatan, Kota" :error="errors.address"/>
+            <FormTextArea v-model="form.alamat" :rows="6" label="Alamat Lengkap" placeholder="Contoh: Nama Jalan, RT/RW, Kelurahan, Kecamatan, Kota" :error="errors.alamat"/>
         </FormSection>
       </div>
       <!-- Kolom Kanan: Informasi Pribadi (Lebar 2 Kolom) -->
       <div class="md:col-span-2 space-y-6">
         <FormSection title="Informasi Pribadi" description="Informasi dasar mengenai guru/staff" :icon="SquareUserRound">
           <div class="grid gap-4 md:grid-cols-2">
-              <FormInput v-model="form.nama_depan" label="Nama Depan" placeholder="Contoh: John" :error="errors.first_name"/>
-              <FormInput v-model="form.nama_belakang" label="Nama Belakang" placeholder="Contoh: Doe"/>
+<FormInput v-model="form.nama_depan" label="Nama Depan" placeholder="Contoh: John" :error="errors.nama_depan"/>
+              <FormInput v-model="form.nama_belakang" label="Nama Belakang" placeholder="Contoh: Doe" :error="errors.nama_belakang"/>
           </div>
           <div class="grid gap-4 md:grid-cols-2">
               <FormInput v-model="form.nik" label="NIK" placeholder="Contoh: 1234567890" :error="errors.nik"/>
@@ -74,8 +68,8 @@ const handleImageChange = (file) => {
               <FormSelect v-model="form.pendidikan_terakhir" label="Pendidikan Terakhir" placeholder="Pilih pendidikan terakhir" :options="pendidikanOptions" :error="errors.pendidikan_terakhir"/>
           </div>
           <div class="grid gap-4 md:grid-cols-2">
-              <FormInput v-model="form.gelar_depan" label="Gelar Depan" placeholder="Contoh: Drs."/>
-              <FormInput v-model="form.gelar_belakang" label="Gelar Belakang" placeholder="Contoh: S.Pd., M.Pd."/>
+              <FormInput v-model="form.gelar_depan" label="Gelar Depan" placeholder="Contoh: Drs." :error="errors.gelar_depan"/>
+              <FormInput v-model="form.gelar_belakang" label="Gelar Belakang" placeholder="Contoh: S.Pd., M.Pd." :error="errors.gelar_belakang"/>
           </div>
         </FormSection>
 
@@ -87,9 +81,9 @@ const handleImageChange = (file) => {
           <div class="grid gap-4 md:grid-cols-2">
             <FormSelect v-model="form.unit_kerja" label="Unit Kerja" placeholder="Pilih unit kerja" :options="unitKerjaOptions" :error="errors.unit_kerja"/>
             <FormSelect v-model="form.status_aktif" label="Status Aktif" placeholder="Pilih status" :options="statusOptions" :error="errors.status_aktif"/>
-          </div>
-          <div>
+<div>
             <FormDate v-model="form.join_date" label="Tanggal Bergabung" :error="errors.join_date"/>
+          </div>
           </div>
         </FormSection>
 

@@ -1,11 +1,4 @@
-import {
-  Plus,
-  Download,
-  School,
-  BookCheck,
-  BookAlert,
-  BookX
-} from 'lucide-vue-next'
+import { Plus, Download, School, BookCheck, BookAlert, BookX } from 'lucide-vue-next'
 import { ref, computed } from 'vue'
 import { toast } from 'vue-sonner'
 
@@ -102,16 +95,20 @@ export const actions = [
 ]
 
 export const columns = [
-  { key: 'nama', label: 'Nama Sekolah',avatar: true, avatarKey: 'foto' },
+  { key: 'nama', label: 'Nama Sekolah', avatar: true, avatarKey: 'foto' },
   { key: 'namaYayasan', label: 'Nama Yayasan' },
   { key: 'alamatSekolah', label: 'Alamat Sekolah', type: 'muted', truncate: true },
   { key: 'jmlSiswa', label: 'Jumlah Siswa', type: 'number' },
-  { key: 'status', label: 'Status', badge: true,
+  {
+    key: 'status',
+    label: 'Status',
+    badge: true,
     badgeVariant: {
       Aktif: 'green',
       Nonaktif: 'gray',
-      Trial: 'amber',
-    } },
+      Trial: 'amber'
+    }
+  },
   { key: 'actions', label: 'Aksi' }
 ]
 
@@ -123,9 +120,10 @@ export const allItems = computed(() => [
     code: 'loremipsum',
     namaYayasan: 'Yayasan Nusantara Pintar',
     yayasanId: 'Y0001',
-    alamatSekolah: 'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
+    alamatSekolah:
+      'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
     jmlSiswa: '134',
-    status: 'Aktif',
+    status: 'Aktif'
   },
   {
     id: 2,
@@ -134,9 +132,10 @@ export const allItems = computed(() => [
     code: 'loremipsum',
     yayasanId: 'Y0001',
     namaYayasan: 'Yayasan Nusantara Pintar',
-    alamatSekolah: 'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
+    alamatSekolah:
+      'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
     jmlSiswa: '144',
-    status: 'Aktif',
+    status: 'Aktif'
   },
   {
     id: 3,
@@ -145,9 +144,10 @@ export const allItems = computed(() => [
     code: 'loremipsum',
     yayasanId: 'Y0001',
     namaYayasan: 'Yayasan Nusantara Pintar',
-    alamatSekolah: 'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
+    alamatSekolah:
+      'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
     jmlSiswa: '136',
-    status: 'Nonaktif',
+    status: 'Nonaktif'
   },
   {
     id: 4,
@@ -156,9 +156,10 @@ export const allItems = computed(() => [
     code: 'loremipsum',
     yayasanId: 'Y0002',
     namaYayasan: 'Yayasan Harapan Bangsa',
-    alamatSekolah: 'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
+    alamatSekolah:
+      'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
     jmlSiswa: '166',
-    status: 'Aktif',
+    status: 'Aktif'
   },
   {
     id: 5,
@@ -167,9 +168,10 @@ export const allItems = computed(() => [
     code: 'loremipsum',
     yayasanId: 'Y0002',
     namaYayasan: 'Yayasan Harapan Bangsa',
-    alamatSekolah: 'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
+    alamatSekolah:
+      'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
     jmlSiswa: '122',
-    status: 'Aktif',
+    status: 'Aktif'
   },
   {
     id: 6,
@@ -178,9 +180,10 @@ export const allItems = computed(() => [
     code: 'loremipsum',
     yayasanId: 'Y0002',
     namaYayasan: 'Yayasan Harapan Bangsa',
-    alamatSekolah: 'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
+    alamatSekolah:
+      'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
     jmlSiswa: '76',
-    status: 'Trial',
+    status: 'Trial'
   },
   {
     id: 7,
@@ -189,9 +192,10 @@ export const allItems = computed(() => [
     code: 'loremipsum',
     yayasanId: 'Y0003',
     namaYayasan: 'Yayasan Sinar Ilmu',
-    alamatSekolah: 'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
+    alamatSekolah:
+      'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
     jmlSiswa: '76',
-    status: 'Aktif',
+    status: 'Aktif'
   },
   {
     id: 8,
@@ -200,9 +204,10 @@ export const allItems = computed(() => [
     code: 'loremipsum',
     yayasanId: 'Y0003',
     namaYayasan: 'Yayasan Sinar Ilmu',
-    alamatSekolah: 'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
+    alamatSekolah:
+      'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
     jmlSiswa: '76',
-    status: 'Aktif',
+    status: 'Aktif'
   },
   {
     id: 9,
@@ -211,9 +216,10 @@ export const allItems = computed(() => [
     code: 'loremipsum',
     yayasanId: 'Y0001',
     namaYayasan: 'Yayasan Nusantara Pintar',
-    alamatSekolah: 'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
+    alamatSekolah:
+      'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
     jmlSiswa: '122',
-    status: 'Aktif',
+    status: 'Aktif'
   },
   {
     id: 10,
@@ -222,9 +228,10 @@ export const allItems = computed(() => [
     code: 'loremipsum',
     yayasanId: 'Y0001',
     namaYayasan: 'Yayasan Nusantara Pintar',
-    alamatSekolah: 'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
+    alamatSekolah:
+      'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
     jmlSiswa: '76',
-    status: 'Trial',
+    status: 'Trial'
   },
   {
     id: 11,
@@ -233,10 +240,11 @@ export const allItems = computed(() => [
     code: 'loremipsum',
     yayasanId: 'Y0001',
     namaYayasan: 'Yayasan Nusantara Pintar',
-    alamatSekolah: 'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
+    alamatSekolah:
+      'Jl. Lorem Ipsum Dolor Sit No. 123, Kel. Lorem, Kec. Lorem Ipsum, Lorem Ipsum 123456',
     jmlSiswa: '76',
-    status: 'Aktif',
-  },
+    status: 'Aktif'
+  }
 ])
 
 export const statusOptions = [
@@ -300,5 +308,5 @@ export const akreditasi = [
   {
     label: 'Belum Akreditasi',
     value: '0'
-  },
+  }
 ]

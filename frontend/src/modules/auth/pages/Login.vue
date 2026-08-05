@@ -30,7 +30,7 @@ const toggleDemoDropdown = () => {
   isDemoDropdownOpen.value = !isDemoDropdownOpen.value
 }
 
-const selectDemoAccount = (acc) => {
+const selectDemoAccount = acc => {
   email.value = acc.email
   password.value = '123456'
   selectedDemoRole.value = acc.role
@@ -92,7 +92,17 @@ onMounted(async () => {
 
   // Bersihkan class tema/background yang mungkin terbawa dari halaman lain
   document.body.classList.forEach(cls => {
-    if (cls.startsWith('theme-') || ['bg-animated', 'bg-static_squares', 'bg-glass', 'bg-school', 'bg-solid', 'finish-solid'].includes(cls)) {
+    if (
+      cls.startsWith('theme-') ||
+      [
+        'bg-animated',
+        'bg-static_squares',
+        'bg-glass',
+        'bg-school',
+        'bg-solid',
+        'finish-solid'
+      ].includes(cls)
+    ) {
       document.body.classList.remove(cls)
     }
   })
@@ -106,7 +116,7 @@ onMounted(async () => {
   const savedBgStyle = localStorage.getItem('backgroundStyle') || 'animated'
   document.body.classList.add(`bg-${savedBgStyle}`)
 
-  handleOutsideClick = (e) => {
+  handleOutsideClick = e => {
     const dropdownContainer = document.getElementById('demo-dropdown-container')
     if (dropdownContainer && !dropdownContainer.contains(e.target)) {
       isDemoDropdownOpen.value = false
@@ -123,10 +133,12 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="grid min-h-screen w-full overflow-x-hidden lg:grid-cols-[450px_1fr] xl:grid-cols-[500px_1fr]">
+  <div
+    class="grid min-h-screen w-full overflow-x-hidden lg:grid-cols-[450px_1fr] xl:grid-cols-[500px_1fr]"
+  >
     <!-- Left panel (Glassmorphism on mobile/tablet, clean minimal on desktop) -->
     <div
-      style="view-transition-name: login-left;"
+      style="view-transition-name: login-left"
       :class="[
         'flex flex-col gap-4 p-4 sm:p-6 md:p-10 bg-background relative min-w-0 overflow-hidden justify-between',
         !isTransitioning ? 'login-left-entrance' : ''
@@ -146,7 +158,10 @@ onUnmounted(() => {
 
       <!-- Header Logo -->
       <div class="flex justify-center gap-2 md:justify-start z-10">
-        <a href="#" class="flex items-center gap-2 font-bold text-xl sm:text-2xl text-white lg:text-primary min-w-0 transition-colors">
+        <a
+          href="#"
+          class="flex items-center gap-2 font-bold text-xl sm:text-2xl text-white lg:text-primary min-w-0 transition-colors"
+        >
           <div
             class="bg-white/10 border border-white/20 lg:bg-primary lg:border-none text-white lg:text-primary-foreground flex size-8 sm:size-10 shrink-0 items-center justify-center rounded-lg shadow-lg"
           >
@@ -158,10 +173,19 @@ onUnmounted(() => {
 
       <!-- Main Login Card / Form Container -->
       <div class="flex flex-1 items-center justify-center min-w-0 py-6 sm:py-8 z-20">
-        <div class="w-full max-w-sm p-6 sm:p-8 rounded-2xl border border-white/10 bg-white/10 backdrop-blur-md shadow-2xl lg:border-none lg:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:p-0 transition-all duration-300">
-          <form @submit.prevent="handleLogin" class="flex flex-col gap-5 sm:gap-6">
+        <div
+          class="w-full max-w-sm p-6 sm:p-8 rounded-2xl border border-white/10 bg-white/10 backdrop-blur-md shadow-2xl lg:border-none lg:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:p-0 transition-all duration-300"
+        >
+          <form
+            @submit.prevent="handleLogin"
+            class="flex flex-col gap-5 sm:gap-6"
+          >
             <div class="flex flex-col items-center gap-2 text-center px-1 sm:px-2">
-              <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white lg:text-foreground">Sistem Informasi Sekolah</h1>
+              <h1
+                class="text-xl sm:text-2xl font-bold tracking-tight text-white lg:text-foreground"
+              >
+                Sistem Informasi Sekolah
+              </h1>
               <p class="text-primary-foreground/80 lg:text-muted-foreground text-xs sm:text-sm">
                 Silakan masukkan akun Anda untuk mengelola data sekolah.
               </p>
@@ -190,7 +214,10 @@ onUnmounted(() => {
                     class="text-sm font-medium leading-none text-white lg:text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >Password</label
                   >
-                  <a href="#" class="text-xs sm:text-sm text-primary-foreground/90 hover:text-white lg:text-primary lg:hover:underline shrink-0">
+                  <a
+                    href="#"
+                    class="text-xs sm:text-sm text-primary-foreground/90 hover:text-white lg:text-primary lg:hover:underline shrink-0"
+                  >
                     Lupa sandi?
                   </a>
                 </div>
@@ -208,15 +235,26 @@ onUnmounted(() => {
                     @click="togglePassword"
                     class="absolute cursor-pointer inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-800 lg:text-muted-foreground lg:hover:text-foreground transition-colors shrink-0"
                   >
-                    <Eye v-if="!showPassword" class="size-4" />
-                    <EyeOff v-else class="size-4" />
+                    <Eye
+                      v-if="!showPassword"
+                      class="size-4"
+                    />
+                    <EyeOff
+                      v-else
+                      class="size-4"
+                    />
                   </button>
                 </div>
               </div>
 
               <!-- Akun Demo Quick Fill -->
-              <div id="demo-dropdown-container" class="grid gap-2 text-left relative">
-                <label class="text-sm font-medium leading-none text-primary-foreground/90 lg:text-muted-foreground">
+              <div
+                id="demo-dropdown-container"
+                class="grid gap-2 text-left relative"
+              >
+                <label
+                  class="text-sm font-medium leading-none text-primary-foreground/90 lg:text-muted-foreground"
+                >
                   Uji Coba dengan Akun Demo
                 </label>
                 <div class="relative">
@@ -225,10 +263,12 @@ onUnmounted(() => {
                     @click="toggleDemoDropdown"
                     class="flex h-10 w-full items-center justify-between rounded-md border border-white/10 bg-white/95 text-slate-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50 lg:border-input lg:bg-background lg:text-foreground transition-all cursor-pointer shadow-sm"
                   >
-                    <span class="truncate font-medium">{{ selectedDemoRole || '-- Pilih Akun Demo --' }}</span>
+                    <span class="truncate font-medium">{{
+                      selectedDemoRole || '-- Pilih Akun Demo --'
+                    }}</span>
                     <span class="text-slate-500 pointer-events-none ml-2 text-xs">▼</span>
                   </button>
-                  
+
                   <!-- Custom Dropdown Options Menu -->
                   <div
                     v-if="isDemoDropdownOpen"
@@ -249,11 +289,18 @@ onUnmounted(() => {
                 </div>
               </div>
 
-              <p v-if="error" class="text-sm text-destructive lg:text-destructive font-medium break-words bg-destructive/10 px-2 py-1 rounded">
+              <p
+                v-if="error"
+                class="text-sm text-destructive lg:text-destructive font-medium break-words bg-destructive/10 px-2 py-1 rounded"
+              >
                 {{ error }}
               </p>
 
-              <Button type="submit" class="w-full h-10 sm:h-11 text-sm sm:text-md font-semibold mt-2 bg-primary hover:bg-primary/90 text-primary-foreground lg:bg-primary lg:hover:bg-primary/95 lg:text-primary-foreground" :disabled="isLoading">
+              <Button
+                type="submit"
+                class="w-full h-10 sm:h-11 text-sm sm:text-md font-semibold mt-2 bg-primary hover:bg-primary/90 text-primary-foreground lg:bg-primary lg:hover:bg-primary/95 lg:text-primary-foreground"
+                :disabled="isLoading"
+              >
                 {{ isLoading ? 'Memproses...' : 'Masuk Sekarang' }}
               </Button>
             </div>
@@ -262,14 +309,16 @@ onUnmounted(() => {
       </div>
 
       <!-- Footer Copyright -->
-      <div class="text-center text-[10px] sm:text-xs text-primary-foreground/70 lg:text-muted-foreground mt-auto px-4 z-10">
+      <div
+        class="text-center text-[10px] sm:text-xs text-primary-foreground/70 lg:text-muted-foreground mt-auto px-4 z-10"
+      >
         &copy; {{ new Date().getFullYear() }} CerdasBangsa - Sistem Manajemen Sekolah Terintegrasi
       </div>
     </div>
 
     <!-- Right panel for laptop/desktop screen (hidden on mobile/tablet) -->
     <div
-      style="view-transition-name: login-right;"
+      style="view-transition-name: login-right"
       :class="[
         'bg-muted relative hidden lg:block border-l overflow-hidden min-w-0',
         !isTransitioning ? 'login-right-entrance' : ''
@@ -283,13 +332,19 @@ onUnmounted(() => {
         decoding="sync"
         class="absolute inset-0 h-full w-full object-cover"
       />
-      <div class="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/70 to-transparent mix-blend-multiply"></div>
+      <div
+        class="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/70 to-transparent mix-blend-multiply"
+      ></div>
       <!-- Additional normal gradient for text readability -->
-      <div class="absolute inset-0 bg-gradient-to-t from-primary/60 via-primary/20 to-transparent"></div>
-      
+      <div
+        class="absolute inset-0 bg-gradient-to-t from-primary/60 via-primary/20 to-transparent"
+      ></div>
+
       <div class="absolute inset-0 flex items-end p-8 xl:p-12 z-10">
         <div class="text-white max-w-lg min-w-0">
-          <h2 class="text-3xl xl:text-4xl font-bold leading-tight drop-shadow-md">Membangun Masa Depan Melalui Teknologi</h2>
+          <h2 class="text-3xl xl:text-4xl font-bold leading-tight drop-shadow-md">
+            Membangun Masa Depan Melalui Teknologi
+          </h2>
           <p class="mt-4 text-lg xl:text-xl text-white/90 drop-shadow-sm">
             Platform manajemen sekolah modern yang dirancang khusus untuk pendidikan di Indonesia.
           </p>

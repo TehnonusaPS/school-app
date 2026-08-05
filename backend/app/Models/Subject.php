@@ -52,4 +52,12 @@ class Subject extends Model
     {
         return $this->hasMany(Schedule::class);
     }
+
+    /**
+     * Get grade levels mapped to this subject.
+     */
+    public function grades(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(SubjectGrade::class);
+    }
 }

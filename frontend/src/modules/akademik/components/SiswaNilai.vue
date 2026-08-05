@@ -24,17 +24,23 @@ const filterValues = ref({
 })
 
 // Auto-reset 'all' selections to maintain valid report contexts
-watch(() => filterValues.value.kelas, (newVal) => {
-  if (newVal === 'all') {
-    filterValues.value.kelas = '11-A IPA'
+watch(
+  () => filterValues.value.kelas,
+  newVal => {
+    if (newVal === 'all') {
+      filterValues.value.kelas = '11-A IPA'
+    }
   }
-})
+)
 
-watch(() => filterValues.value.semester, (newVal) => {
-  if (newVal === 'all') {
-    filterValues.value.semester = 'Semester Ganjil'
+watch(
+  () => filterValues.value.semester,
+  newVal => {
+    if (newVal === 'all') {
+      filterValues.value.semester = 'Semester Ganjil'
+    }
   }
-})
+)
 
 // --- Computed Values for Current Selection ---
 const currentKelas = computed(() => {
@@ -59,7 +65,7 @@ const averageGrade = computed(() => {
 const averageTrend = computed(() => {
   const k = currentKelas.value
   const s = currentSemester.value
-  
+
   if (k === '11-A IPA' && s === 'Semester Ganjil') {
     return { trend: '+2.4%', dir: 'up', sub: 'Naik dari 86.0 semester lalu' }
   } else if (k === '11-A IPA' && s === 'Semester Genap') {
@@ -76,7 +82,10 @@ const kkmAchievement = computed(() => {
   const total = currentGrades.value.length
   return {
     value: `${tuntas} / ${total}`,
-    sub: tuntas === total ? 'Seluruh mata pelajaran lulus KKM' : `${total - tuntas} mata pelajaran di bawah KKM`
+    sub:
+      tuntas === total
+        ? 'Seluruh mata pelajaran lulus KKM'
+        : `${total - tuntas} mata pelajaran di bawah KKM`
   }
 })
 
@@ -136,7 +145,7 @@ const page = ref(1)
 const perPage = ref(10)
 
 const total = computed(() => currentGrades.value.length)
-const from = computed(() => total.value === 0 ? 0 : (page.value - 1) * perPage.value + 1)
+const from = computed(() => (total.value === 0 ? 0 : (page.value - 1) * perPage.value + 1))
 const to = computed(() => Math.min(page.value * perPage.value, total.value))
 
 // --- PageHeader Actions ---
@@ -150,30 +159,54 @@ const pageHeaderActions = computed(() => [
 ])
 
 // --- Helpers ---
-const getInitials = (name) => {
+const getInitials = name => {
   if (!name) return '?'
   const parts = name.trim().split(/\s+/)
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
-const getSubjectStyle = (subject) => {
+const getSubjectStyle = subject => {
   const styles = {
-    'Matematika': { color: 'text-blue-500 dark:text-blue-400', bg: 'bg-blue-500/10 dark:bg-blue-500/20' },
-    'Fisika': { color: 'text-emerald-500 dark:text-emerald-400', bg: 'bg-emerald-500/10 dark:bg-emerald-500/20' },
-    'Bahasa Indonesia': { color: 'text-amber-500 dark:text-amber-400', bg: 'bg-amber-500/10 dark:bg-amber-500/20' },
-    'Kimia': { color: 'text-purple-500 dark:text-purple-400', bg: 'bg-purple-500/10 dark:bg-purple-500/20' },
-    'Biologi': { color: 'text-pink-500 dark:text-pink-400', bg: 'bg-pink-500/10 dark:bg-pink-500/20' },
-    'Bahasa Inggris': { color: 'text-indigo-500 dark:text-indigo-400', bg: 'bg-indigo-500/10 dark:bg-indigo-500/20' },
-    'Pendidikan Agama': { color: 'text-cyan-500 dark:text-cyan-400', bg: 'bg-cyan-500/10 dark:bg-cyan-500/20' },
-    'PJOK': { color: 'text-orange-500 dark:text-orange-400', bg: 'bg-orange-500/10 dark:bg-orange-500/20' }
+    Matematika: {
+      color: 'text-blue-500 dark:text-blue-400',
+      bg: 'bg-blue-500/10 dark:bg-blue-500/20'
+    },
+    Fisika: {
+      color: 'text-emerald-500 dark:text-emerald-400',
+      bg: 'bg-emerald-500/10 dark:bg-emerald-500/20'
+    },
+    'Bahasa Indonesia': {
+      color: 'text-amber-500 dark:text-amber-400',
+      bg: 'bg-amber-500/10 dark:bg-amber-500/20'
+    },
+    Kimia: {
+      color: 'text-purple-500 dark:text-purple-400',
+      bg: 'bg-purple-500/10 dark:bg-purple-500/20'
+    },
+    Biologi: {
+      color: 'text-pink-500 dark:text-pink-400',
+      bg: 'bg-pink-500/10 dark:bg-pink-500/20'
+    },
+    'Bahasa Inggris': {
+      color: 'text-indigo-500 dark:text-indigo-400',
+      bg: 'bg-indigo-500/10 dark:bg-indigo-500/20'
+    },
+    'Pendidikan Agama': {
+      color: 'text-cyan-500 dark:text-cyan-400',
+      bg: 'bg-cyan-500/10 dark:bg-cyan-500/20'
+    },
+    PJOK: {
+      color: 'text-orange-500 dark:text-orange-400',
+      bg: 'bg-orange-500/10 dark:bg-orange-500/20'
+    }
   }
   return styles[subject] || { color: 'text-primary', bg: 'bg-primary/10' }
 }
 
 const handleDownloadReport = () => {
   const fileName = `Raport_${siswaProfile.name.replace(/\s+/g, '_')}_${currentKelas.value.replace(/\s+/g, '_')}_${currentSemester.value.replace(/\s+/g, '_')}.pdf`
-  
+
   // PDF format structure
   const mockContent = `%PDF-1.4
 1 0 obj
@@ -250,28 +283,48 @@ startxref
     />
 
     <!-- Student Profile Card -->
-    <Card class="glass-ui relative overflow-hidden p-6 rounded-2xl border border-white/10 dark:border-white/5 shadow-lg">
+    <Card
+      class="glass-ui relative overflow-hidden p-6 rounded-2xl border border-white/10 dark:border-white/5 shadow-lg"
+    >
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div class="flex items-center gap-4.5">
-          <Avatar class="h-16 w-16 rounded-2xl border border-white/20 dark:border-white/10 shadow-inner shrink-0">
-            <AvatarImage :src="siswaProfile.avatar" :alt="siswaProfile.name" />
-            <AvatarFallback class="rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-xl">
+          <Avatar
+            class="h-16 w-16 rounded-2xl border border-white/20 dark:border-white/10 shadow-inner shrink-0"
+          >
+            <AvatarImage
+              :src="siswaProfile.avatar"
+              :alt="siswaProfile.name"
+            />
+            <AvatarFallback
+              class="rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-xl"
+            >
               {{ getInitials(siswaProfile.name) }}
             </AvatarFallback>
           </Avatar>
           <div class="space-y-1.5">
             <div class="flex items-center gap-2">
-              <h2 class="text-xl font-bold tracking-tight text-foreground">{{ siswaProfile.name }}</h2>
-              <span class="inline-flex items-center justify-center size-5 bg-emerald-500 text-white text-[10px] rounded-full font-bold">✓</span>
+              <h2 class="text-xl font-bold tracking-tight text-foreground">
+                {{ siswaProfile.name }}
+              </h2>
+              <span
+                class="inline-flex items-center justify-center size-5 bg-emerald-500 text-white text-[10px] rounded-full font-bold"
+                >✓</span
+              >
             </div>
             <p class="text-sm font-medium text-muted-foreground">
               Kelas {{ currentKelas }} &bull; {{ currentSemester }}
             </p>
             <div class="flex flex-wrap gap-2 mt-1">
-              <Badge variant="blue" class="font-semibold text-[10px] uppercase tracking-wider bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-blue-500/20">
+              <Badge
+                variant="blue"
+                class="font-semibold text-[10px] uppercase tracking-wider bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-blue-500/20"
+              >
                 Peringkat #{{ currentKelas === '11-A IPA' ? '3' : '5' }}
               </Badge>
-              <Badge variant="green" class="font-semibold text-[10px] uppercase tracking-wider bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 border-emerald-500/20">
+              <Badge
+                variant="green"
+                class="font-semibold text-[10px] uppercase tracking-wider bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 border-emerald-500/20"
+              >
                 Kehadiran {{ siswaProfile.kehadiran }}
               </Badge>
             </div>
@@ -332,7 +385,7 @@ startxref
         <!-- Custom cell override for mapel -->
         <template #cell-mapel="{ value }">
           <div class="flex items-center gap-3 text-left">
-            <div 
+            <div
               :class="[
                 'rounded-xl p-2 shrink-0 border border-white/5 shadow-sm',
                 getSubjectStyle(value).bg,
@@ -347,7 +400,7 @@ startxref
 
         <!-- Custom cell override for nilaiAkhir -->
         <template #cell-nilaiAkhir="{ value, item }">
-          <span 
+          <span
             :class="[
               'font-bold text-sm',
               value < item.kkm ? 'text-red-500 font-extrabold' : 'text-foreground'

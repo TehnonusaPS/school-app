@@ -50,7 +50,9 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
   </ShowcaseItem>
 
   <!-- Group of 3 Cards -->
-  <ShowcaseItem label="Varian Group - 3 Cards (2 Columns on Mobile & Tablet with bottom card full width, 3 Columns on Desktop - Kustom Stagger Delay 500ms)">
+  <ShowcaseItem
+    label="Varian Group - 3 Cards (2 Columns on Mobile & Tablet with bottom card full width, 3 Columns on Desktop - Kustom Stagger Delay 500ms)"
+  >
     <StatCardGrid
       cols="3"
       :delay="500"
@@ -91,7 +93,9 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
   </ShowcaseItem>
 
   <!-- Group of 4 Cards -->
-  <ShowcaseItem label="Varian Group - 4 Cards (2 Columns on Mobile & Tablet, 4 Columns on Desktop - Kustom Stagger Delay 300ms)">
+  <ShowcaseItem
+    label="Varian Group - 4 Cards (2 Columns on Mobile & Tablet, 4 Columns on Desktop - Kustom Stagger Delay 300ms)"
+  >
     <StatCardGrid
       cols="4"
       :delay="300"
@@ -144,7 +148,9 @@ import { Users, UserCheck, Wallet } from 'lucide-vue-next'
   </ShowcaseItem>
 
   <!-- Group of 5 Cards -->
-  <ShowcaseItem label="Varian Group - 5 Cards (2 Columns on Mobile & Tablet with bottom card full width, 5 Columns on Desktop)">
+  <ShowcaseItem
+    label="Varian Group - 5 Cards (2 Columns on Mobile & Tablet with bottom card full width, 5 Columns on Desktop)"
+  >
     <StatCardGrid cols="5">
       <StatCard
         label="Total Siswa"

@@ -45,9 +45,21 @@ const nilaiColor = (v: number) =>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="ganjil-2026" class="text-xs">Semester Ganjil 2026</SelectItem>
-          <SelectItem value="genap-2025"  class="text-xs">Semester Genap 2025</SelectItem>
-          <SelectItem value="ganjil-2025" class="text-xs">Semester Ganjil 2025</SelectItem>
+          <SelectItem
+            value="ganjil-2026"
+            class="text-xs"
+            >Semester Ganjil 2026</SelectItem
+          >
+          <SelectItem
+            value="genap-2025"
+            class="text-xs"
+            >Semester Genap 2025</SelectItem
+          >
+          <SelectItem
+            value="ganjil-2025"
+            class="text-xs"
+            >Semester Ganjil 2025</SelectItem
+          >
         </SelectContent>
       </Select>
     </template>
@@ -57,19 +69,29 @@ const nilaiColor = (v: number) =>
       :key="m.nama"
       v-motion
       :initial="tableRowFade.initial"
-      :visible-once="{ ...tableRowFade.visible, transition: { ...tableRowFade.visible.transition, delay: computedDelay + 100 + (index * 50) } }"
+      :visible-once="{
+        ...tableRowFade.visible,
+        transition: { ...tableRowFade.visible.transition, delay: computedDelay + 100 + index * 50 }
+      }"
       class="space-y-1.5 transition-all duration-300"
     >
       <div class="flex items-center justify-between text-sm">
         <span class="font-medium">{{ m.nama }}</span>
         <div class="flex items-center gap-2">
           <span :class="['font-bold tabular-nums text-xs', nilaiColor(m.nilai)]">
-            <RollingNumber :value="m.nilai + '%'" :delay="computedDelay + 150 + (index * 50)" />
+            <RollingNumber
+              :value="m.nilai + '%'"
+              :delay="computedDelay + 150 + index * 50"
+            />
           </span>
           <ChevronRight class="size-3.5 text-muted-foreground" />
         </div>
       </div>
-      <Progress :model-value="m.nilai" :delay="computedDelay + 250 + (index * 50)" class="h-2" />
+      <Progress
+        :model-value="m.nilai"
+        :delay="computedDelay + 250 + index * 50"
+        class="h-2"
+      />
     </div>
 
     <template #footer>

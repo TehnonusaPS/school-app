@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\HasCurriculumMappingTrait;
 use App\Models\Subject;
 use App\Models\School;
 use Illuminate\Http\JsonResponse;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 
 class SubjectController extends Controller
 {
+    use HasCurriculumMappingTrait;
     /**
      * Helper to get school scope for the current user.
      */
@@ -67,7 +69,7 @@ class SubjectController extends Controller
             $query->where('is_active', filter_var($request->input('is_active'), FILTER_VALIDATE_BOOLEAN));
         }
 
-        $subjects = $query->latest()->get();
+        $subjects = $query->with('grades')->latest()->get();
 
         return response()->json([
             'status' => 'success',
@@ -102,6 +104,7 @@ class SubjectController extends Controller
             'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
             'is_active'   => 'nullable|boolean',
+            'grades'      => 'nullable|array',
         ]);
 
         if ($validator->fails()) {
@@ -120,10 +123,14 @@ class SubjectController extends Controller
             'is_active'   => $request->input('is_active', true),
         ]);
 
+        if ($request->has('grades') && is_array($request->input('grades'))) {
+            $this->syncSubjectGrades($subject, $request->input('grades'));
+        }
+
         return response()->json([
             'status'  => 'success',
             'message' => 'Subject created successfully.',
-            'data'    => $subject,
+            'data'    => $subject->load('grades'),
         ], 201);
     }
 
@@ -194,6 +201,7 @@ class SubjectController extends Controller
             'name'        => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
             'is_active'   => 'nullable|boolean',
+            'grades'      => 'nullable|array',
         ]);
 
         if ($validator->fails()) {
@@ -206,10 +214,52 @@ class SubjectController extends Controller
 
         $subject->update($request->only(['code', 'name', 'description', 'is_active']));
 
+        if ($request->has('grades') && is_array($request->input('grades'))) {
+            $this->syncSubjectGrades($subject, $request->input('grades'));
+        }
+
         return response()->json([
             'status'  => 'success',
             'message' => 'Subject updated successfully.',
-            'data'    => $subject,
+            'data'    => $subject->load('grades'),
+        ]);
+    }
+
+    /**
+     * Toggle active/inactive status of a subject.
+     */
+    public function toggleStatus(Request $request, string $id): JsonResponse
+    {
+        $user = $request->user();
+        $subject = Subject::find($id);
+
+        if (!$subject) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Subject not found.',
+            ], 404);
+        }
+
+        // Scope check
+        if (!$user->isSuperAdmin()) {
+            if ($user->hasRole('admin_yayasan')) {
+                if ($subject->school->foundation_id != $user->foundation_id) {
+                    return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
+                }
+            } else {
+                if ($subject->school_id != $user->school_id) {
+                    return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
+                }
+            }
+        }
+
+        $subject->is_active = !$subject->is_active;
+        $subject->save();
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Status mata pelajaran berhasil diperbarui.',
+            'data'    => $subject->load('grades'),
         ]);
     }
 

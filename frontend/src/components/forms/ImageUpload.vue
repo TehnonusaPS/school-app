@@ -27,7 +27,7 @@ defineProps({
 
 const emit = defineEmits(['change'])
 
-const handleFileChange = (event) => {
+const handleFileChange = event => {
   const file = event.target.files?.[0]
   if (!file) return
   emit('change', file)
@@ -125,7 +125,11 @@ const capturePhoto = () => {
       ]"
     >
       <template v-if="preview">
-        <img :src="preview" alt="Preview" class="w-full h-full object-cover"/>
+        <img
+          :src="preview"
+          alt="Preview"
+          class="w-full h-full object-cover"
+        />
       </template>
 
       <template v-else>

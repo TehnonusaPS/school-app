@@ -14,7 +14,7 @@ export function useSiswa() {
   const loadData = async () => {
     isLoading.value = true
     errorMessage.value = null
-    
+
     try {
       // Memanggil Service
       const result = await fetchAllSiswa()

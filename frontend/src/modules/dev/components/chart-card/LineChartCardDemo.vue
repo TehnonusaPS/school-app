@@ -5,7 +5,7 @@ import { financeData } from './data/chartCardDemos'
 
 const financeConfig = {
   pendapatan: { label: 'Pendapatan (Juta)', color: '#10b981' }, // Emerald
-  pengeluaran: { label: 'Pengeluaran (Juta)', color: '#f59e0b' }  // Amber
+  pengeluaran: { label: 'Pengeluaran (Juta)', color: '#f59e0b' } // Amber
 }
 </script>
 

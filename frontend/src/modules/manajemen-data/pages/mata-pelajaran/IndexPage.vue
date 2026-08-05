@@ -72,7 +72,8 @@ async function fetchSubjectsData() {
       nama: item.name,
       deskripsi: item.description,
       status: item.is_active ? 'approved' : 'draft',
-      isActive: item.is_active
+      isActive: item.is_active,
+      grades: item.grades ? item.grades.map(g => g.grade) : []
     }))
   } catch (err) {
     toast.error('Gagal mengambil data mata pelajaran')
@@ -140,11 +141,13 @@ function getStatusBadgeVariant(status, item) {
 // --- Form Sheet State & Methods (Inline Create/Edit) ---
 const isFormSheetOpen = ref(false)
 const isEditMode = ref(false)
+const isSaveConfirmOpen = ref(false)
 const formItem = ref({
   id: '',
   kode: '',
   nama: '',
-  deskripsi: ''
+  deskripsi: '',
+  grades: [1, 2, 3, 4, 5, 6]
 })
 
 const handleCreate = () => {
@@ -154,7 +157,8 @@ const handleCreate = () => {
     kode: '',
     nama: '',
     deskripsi: '',
-    status: 'draft'
+    grades: [1, 2, 3, 4, 5, 6],
+    status: 'approved'
   }
   isFormSheetOpen.value = true
 }
@@ -166,15 +170,15 @@ const handleEdit = (item) => {
     kode: item.kode,
     nama: item.nama,
     deskripsi: item.deskripsi || '',
+    grades: [...(item.grades || [])],
     status: item.status
   }
   isFormSheetOpen.value = true
 }
 
-const handleSave = async () => {
+const handleSavePrompt = () => {
   const code = formItem.value.kode?.trim().toUpperCase()
   const name = formItem.value.nama?.trim()
-  const desc = formItem.value.deskripsi?.trim()
 
   if (!code || !name) {
     toast.error('Gagal Menyimpan', {
@@ -199,11 +203,20 @@ const handleSave = async () => {
     return
   }
 
+  isSaveConfirmOpen.value = true
+}
+
+const executeSave = async () => {
+  const code = formItem.value.kode?.trim().toUpperCase()
+  const name = formItem.value.nama?.trim()
+  const desc = formItem.value.deskripsi?.trim()
+
   const payload = {
     code: code,
     name: name,
     description: desc,
-    is_active: isEditMode.value ? formItem.value.status === 'approved' : true
+    grades: formItem.value.grades || [],
+    is_active: isEditMode.value ? (formItem.value.status === 'approved' || formItem.value.status === 'draft') : true
   }
 
   try {
@@ -218,8 +231,9 @@ const handleSave = async () => {
         description: `Mata pelajaran "${name}" telah ditambahkan.`
       })
     }
-    fetchSubjectsData()
+    isSaveConfirmOpen.value = false
     isFormSheetOpen.value = false
+    fetchSubjectsData()
   } catch (err) {
     toast.error('Gagal menyimpan mata pelajaran')
   }
@@ -487,6 +501,21 @@ const toggleActiveState = async (item) => {
       :page="currentPage"
       @update:page="currentPage = $event"
     >
+      <!-- Custom Grades Render -->
+      <template #cell-grades="{ value }">
+        <div class="flex flex-wrap gap-1 max-w-[140px]">
+          <Badge
+            v-for="g in (value || [])"
+            :key="g"
+            variant="outline"
+            class="text-[10px] px-1.5 py-0 border-primary/20 bg-primary/5 text-primary font-semibold"
+          >
+            Kls {{ g }}
+          </Badge>
+          <span v-if="!value || value.length === 0" class="text-xs text-muted-foreground italic">Semua Kelas</span>
+        </div>
+      </template>
+
       <!-- Custom Badge Status Render -->
       <template #cell-status="{ value, item }">
         <div class="flex flex-col items-center gap-1">
@@ -519,21 +548,20 @@ const toggleActiveState = async (item) => {
 
           <!-- Aksi untuk Admin Sekolah -->
           <template v-if="isAdminSekolah">
-            <!-- Edit: Draft or Rejected only -->
+            <!-- Edit: Available for Admin Sekolah -->
             <button
-              v-if="item.status === 'draft' || item.status === 'rejected'"
-              class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-foreground transition-colors"
-              title="Edit"
+              class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-primary transition-colors"
+              title="Edit Mata Pelajaran"
               @click="handleEdit(item)"
             >
-              <Pencil class="size-4 transition-transform group-hover/btn:scale-110" />
+              <Pencil class="size-4 transition-transform group-hover/btn:scale-110 text-primary/80" />
               <span class="text-[9px] font-semibold leading-none">Edit</span>
             </button>
 
             <!-- Hapus: Draft or Rejected only -->
             <button
               v-if="item.status === 'draft' || item.status === 'rejected'"
-              class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-foreground transition-colors"
+              class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-rose-500 transition-colors"
               title="Hapus"
               @click="openDeleteConfirm(item)"
             >
@@ -631,12 +659,12 @@ const toggleActiveState = async (item) => {
             {{ isEditMode ? 'Edit Mata Pelajaran' : 'Tambah Mata Pelajaran' }}
           </SheetTitle>
           <SheetDescription class="text-xs text-muted-foreground">
-            {{ isEditMode ? 'Perbarui informasi mata pelajaran.' : 'Tambahkan mata pelajaran baru untuk Sekolah Dasar.' }}
+            {{ isEditMode ? 'Perbarui informasi dan alokasi tingkat kelas mata pelajaran.' : 'Tambahkan mata pelajaran baru untuk jenjang sekolah.' }}
           </SheetDescription>
         </SheetHeader>
 
         <div class="flex-1 overflow-y-auto py-6 pr-1 space-y-6 no-scrollbar">
-          <MataPelajaranForm :form="formItem" />
+          <MataPelajaranForm :form="formItem" :is-edit="isEditMode" />
         </div>
 
         <div class="border-t border-border pt-4 flex items-center justify-end gap-2 shrink-0">
@@ -651,7 +679,7 @@ const toggleActiveState = async (item) => {
           <Button
             type="button"
             class="text-xs font-bold rounded-xl cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 shadow-none border-none"
-            @click="handleSave"
+            @click="handleSavePrompt"
           >
             {{ isEditMode ? 'Simpan Perubahan' : 'Simpan' }}
           </Button>
@@ -799,6 +827,39 @@ const toggleActiveState = async (item) => {
             @click="confirmReject"
           >
             Tolak Mapel
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <!-- 5. SAVE CONFIRMATION DIALOG -->
+    <Dialog v-model:open="isSaveConfirmOpen">
+      <DialogContent class="sm:max-w-[400px] rounded-2xl p-6 text-left">
+        <DialogHeader>
+          <DialogTitle class="text-sm font-bold text-foreground flex items-center gap-2">
+            <BookCheck class="h-5 w-5 text-primary" />
+            Konfirmasi Simpan Data
+          </DialogTitle>
+          <DialogDescription class="text-xs text-muted-foreground leading-relaxed mt-2">
+            Apakah Anda yakin ingin menyimpan {{ isEditMode ? 'perubahan' : 'data baru' }} untuk Mata Pelajaran <strong class="text-foreground">"{{ formItem.nama }}"</strong> (Kode: {{ formItem.kode?.toUpperCase() }})?
+          </DialogDescription>
+        </DialogHeader>
+
+        <DialogFooter class="flex flex-row items-center justify-end gap-2 pt-4 border-t border-border mt-4">
+          <Button
+            type="button"
+            variant="ghost"
+            class="text-xs font-bold rounded-xl cursor-pointer"
+            @click="isSaveConfirmOpen = false"
+          >
+            Batal
+          </Button>
+          <Button
+            type="button"
+            class="text-xs font-bold rounded-xl cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90"
+            @click="executeSave"
+          >
+            Ya, Simpan
           </Button>
         </DialogFooter>
       </DialogContent>

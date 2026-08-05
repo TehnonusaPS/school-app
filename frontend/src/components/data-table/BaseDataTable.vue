@@ -11,13 +11,7 @@ import {
 } from '@/components/ui/table'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle
-} from '@/components/ui/empty'
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { tableRowFade } from '@/config/motion'
 import Checkbox from '@/components/ui/checkbox/Checkbox.vue'
 
@@ -151,14 +145,10 @@ const emptyRowsCount = computed(() => {
 
 // ── Checkbox / Combobox ───────────────────────────────────
 
-const emit = defineEmits([
-  'update:selectedRows'
-])
+const emit = defineEmits(['update:selectedRows'])
 
 const isSelected = item => {
-  return props.selectedRows.some(
-    row => row.id === item.id
-  )
+  return props.selectedRows.some(row => row.id === item.id)
 }
 
 const toggleRow = item => {
@@ -169,18 +159,10 @@ const toggleRow = item => {
   if (exists) {
     emit(
       'update:selectedRows',
-      props.selectedRows.filter(
-        row => row.id !== item.id
-      )
+      props.selectedRows.filter(row => row.id !== item.id)
     )
   } else {
-    emit(
-      'update:selectedRows',
-      [
-        ...props.selectedRows,
-        item
-      ]
-    )
+    emit('update:selectedRows', [...props.selectedRows, item])
   }
 }
 
@@ -189,226 +171,215 @@ const isDisabled = item => {
 }
 
 const selectableItems = computed(() => {
-  return props.items.filter(
-    item => !(props.rowDisabled?.(item))
-  )
+  return props.items.filter(item => !props.rowDisabled?.(item))
 })
 
 const allSelected = computed(() => {
   if (!selectableItems.value.length) return false
 
-  return selectableItems.value.every(
-    item =>
-      props.selectedRows.some(
-        row => row.id === item.id
-      )
-  )
+  return selectableItems.value.every(item => props.selectedRows.some(row => row.id === item.id))
 })
 
 const toggleAll = checked => {
   if (checked) {
-    emit(
-      'update:selectedRows',
-      [...selectableItems.value]
-    )
+    emit('update:selectedRows', [...selectableItems.value])
   } else {
-    emit(
-      'update:selectedRows',
-      []
-    )
+    emit('update:selectedRows', [])
   }
 }
-
-
 </script>
 
 <template>
-  <div class="relative w-full min-w-0" :style="items.length === 0 && !perPage ? { minHeight } : {}">
-  <Table>
-    <TableHeader class="bg-muted/50">
-      <TableRow>
-        <TableHead
-          v-if="selectable"
-          class="w-12 text-center"
-        >
-          <Checkbox
-            :model-value="allSelected"
-            @update:model-value="toggleAll"
-          />
-        </TableHead>
-        <!-- Kolom Nomor Urut -->
-        <TableHead
-          v-if="showRowNumber && !selectable"
-          class="font-semibold text-xs uppercase text-muted-foreground w-12 text-center"
-        >
-          No.
-        </TableHead>
-        <TableHead
-          v-for="column in columns"
-          :key="column.key"
-          :class="resolveHeaderClass(column)"
-        >
-          {{ column.label }}
-        </TableHead>
-      </TableRow>
-    </TableHeader>
-
-    <TableBody>
-      <!-- Data Rows -->
-      <TableRow
-        v-for="(item, rowIndex) in items"
-        :key="item.id || rowIndex"
-        class="h-[53px]"
-        v-motion
-        :initial="tableRowFade.initial"
-        :visible-once="{
-          ...tableRowFade.visible,
-          transition: {
-            ...tableRowFade.visible.transition,
-            delay: 80 + rowIndex * 70
-          }
-        }"
-      >
-        <!-- Sel Checkbox -->
-        <TableCell
-          v-if="selectable"
-          class="w-12 text-center"
-        >
-          <Checkbox
-            :disabled="isDisabled(item)"
-            :model-value="isSelected(item)"
-            @update:model-value="() => toggleRow(item)"
-          />
-        </TableCell>
-        <!-- Sel Nomor Urut -->
-        <TableCell
-          v-if="showRowNumber && !selectable"
-          class="w-12 text-center text-sm text-muted-foreground tabular-nums"
-        >
-          {{ rowNumberOffset + rowIndex + 1 }}
-        </TableCell>
-
-        <TableCell
-          v-for="column in columns"
-          :key="column.key"
-          :class="resolveCellClass(column)"
-        >
-          <slot
-            :name="`cell-${column.key}`"
-            :item="item"
-            :value="item[column.key]"
-            :index="rowIndex"
+  <div
+    class="relative w-full min-w-0"
+    :style="items.length === 0 && !perPage ? { minHeight } : {}"
+  >
+    <Table>
+      <TableHeader class="bg-muted/50">
+        <TableRow>
+          <TableHead
+            v-if="selectable"
+            class="w-12 text-center"
           >
-            <!-- AVATAR + TEKS -->
-            <template v-if="column.avatar">
-              <div class="flex items-center gap-2.5 min-w-0">
-                <Avatar
-                  data-size="sm"
-                  class="shrink-0"
-                >
-                  <!-- Tampilkan foto dari backend jika tersedia -->
-                  <AvatarImage
-                    v-if="column.avatarKey && item[column.avatarKey]"
-                    :src="item[column.avatarKey]"
-                    :alt="item[column.key]"
-                  />
-                  <!-- Fallback ke inisial jika tidak ada foto -->
-                  <AvatarFallback class="text-[11px] font-bold">
-                    {{ getInitials(item[column.key]) }}
-                  </AvatarFallback>
-                </Avatar>
-                <span class="truncate text-sm font-medium">{{ item[column.key] }}</span>
-              </div>
-            </template>
-
-            <!-- BADGE -->
-            <template v-else-if="column.badge">
-              <Badge :variant="resolveBadgeVariant(column, item[column.key])">
-                {{ item[column.key] }}
-              </Badge>
-            </template>
-
-            <!-- AKSI BARIS -->
-            <template v-else-if="column.key === 'actions' && rowActions && rowActions.length">
-              <div class="flex items-center justify-center gap-3">
-                <button
-                  v-for="action in rowActions"
-                  :key="action.label"
-                  class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-foreground transition-colors"
-                  :title="action.label"
-                  @click="action.click(item)"
-                >
-                  <component
-                    :is="action.icon"
-                    class="size-4 transition-transform group-hover/btn:scale-110"
-                  />
-                  <span class="text-[9px] font-semibold leading-none">{{ action.label }}</span>
-                </button>
-              </div>
-            </template>
-
-            <!-- TEKS BIASA -->
-            <template v-else>
-              <div :class="{ 'truncate max-w-xs': column.truncate }">
-                {{ item[column.key] }}
-              </div>
-            </template>
-          </slot>
-        </TableCell>
-      </TableRow>
-
-      <!-- Empty State / No Data Found -->
-      <TableRow v-if="items.length === 0" class="border-none hover:bg-transparent!">
-        <TableCell
-        :colspan="columns.length + (showRowNumber ? 1 : 0) +(selectable ? 1 : 0)"
-          class="p-0 border-none select-none pointer-events-none"
-        >
-          <div
-            class="flex flex-col items-center justify-center text-center p-6 w-full"
-            :style="{ height: `${(perPage || 5) * 53}px` }"
+            <Checkbox
+              :model-value="allSelected"
+              @update:model-value="toggleAll"
+            />
+          </TableHead>
+          <!-- Kolom Nomor Urut -->
+          <TableHead
+            v-if="showRowNumber && !selectable"
+            class="font-semibold text-xs uppercase text-muted-foreground w-12 text-center"
           >
-            <Empty class="border-none bg-transparent">
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <FolderOpen class="w-10 h-10 text-muted-foreground/30" />
-                </EmptyMedia>
-                <EmptyTitle class="text-sm font-semibold text-foreground/80 mt-2">Tidak Ada Data</EmptyTitle>
-                <EmptyDescription class="text-xs text-muted-foreground/50 max-w-xs mt-1">
-                  Tidak ada data yang ditemukan atau belum ditambahkan ke tabel ini.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          </div>
-        </TableCell>
-      </TableRow>
+            No.
+          </TableHead>
+          <TableHead
+            v-for="column in columns"
+            :key="column.key"
+            :class="resolveHeaderClass(column)"
+          >
+            {{ column.label }}
+          </TableHead>
+        </TableRow>
+      </TableHeader>
 
-      <!-- Filler Rows -->
-      <TableRow
-        v-for="i in emptyRowsCount"
-        :key="`empty-${i}`"
-        class="h-[53px] hover:bg-transparent! border-b border-transparent pointer-events-none"
-      >
-        <TableCell
-          v-if="selectable"
+      <TableBody>
+        <!-- Data Rows -->
+        <TableRow
+          v-for="(item, rowIndex) in items"
+          :key="item.id || rowIndex"
+          class="h-[53px]"
+          v-motion
+          :initial="tableRowFade.initial"
+          :visible-once="{
+            ...tableRowFade.visible,
+            transition: {
+              ...tableRowFade.visible.transition,
+              delay: 80 + rowIndex * 70
+            }
+          }"
         >
-          &nbsp;
-        </TableCell>
-        <!-- Sel Nomor Urut Kosong -->
-        <TableCell
-          v-if="showRowNumber"
-          class="w-12 text-center"
+          <!-- Sel Checkbox -->
+          <TableCell
+            v-if="selectable"
+            class="w-12 text-center"
+          >
+            <Checkbox
+              :disabled="isDisabled(item)"
+              :model-value="isSelected(item)"
+              @update:model-value="() => toggleRow(item)"
+            />
+          </TableCell>
+          <!-- Sel Nomor Urut -->
+          <TableCell
+            v-if="showRowNumber && !selectable"
+            class="w-12 text-center text-sm text-muted-foreground tabular-nums"
+          >
+            {{ rowNumberOffset + rowIndex + 1 }}
+          </TableCell>
+
+          <TableCell
+            v-for="column in columns"
+            :key="column.key"
+            :class="resolveCellClass(column)"
+          >
+            <slot
+              :name="`cell-${column.key}`"
+              :item="item"
+              :value="item[column.key]"
+              :index="rowIndex"
+            >
+              <!-- AVATAR + TEKS -->
+              <template v-if="column.avatar">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <Avatar
+                    data-size="sm"
+                    class="shrink-0"
+                  >
+                    <!-- Tampilkan foto dari backend jika tersedia -->
+                    <AvatarImage
+                      v-if="column.avatarKey && item[column.avatarKey]"
+                      :src="item[column.avatarKey]"
+                      :alt="item[column.key]"
+                    />
+                    <!-- Fallback ke inisial jika tidak ada foto -->
+                    <AvatarFallback class="text-[11px] font-bold">
+                      {{ getInitials(item[column.key]) }}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span class="truncate text-sm font-medium">{{ item[column.key] }}</span>
+                </div>
+              </template>
+
+              <!-- BADGE -->
+              <template v-else-if="column.badge">
+                <Badge :variant="resolveBadgeVariant(column, item[column.key])">
+                  {{ item[column.key] }}
+                </Badge>
+              </template>
+
+              <!-- AKSI BARIS -->
+              <template v-else-if="column.key === 'actions' && rowActions && rowActions.length">
+                <div class="flex items-center justify-center gap-3">
+                  <button
+                    v-for="action in rowActions"
+                    :key="action.label"
+                    class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-foreground transition-colors"
+                    :title="action.label"
+                    @click="action.click(item)"
+                  >
+                    <component
+                      :is="action.icon"
+                      class="size-4 transition-transform group-hover/btn:scale-110"
+                    />
+                    <span class="text-[9px] font-semibold leading-none">{{ action.label }}</span>
+                  </button>
+                </div>
+              </template>
+
+              <!-- TEKS BIASA -->
+              <template v-else>
+                <div :class="{ 'truncate max-w-xs': column.truncate }">
+                  {{ item[column.key] }}
+                </div>
+              </template>
+            </slot>
+          </TableCell>
+        </TableRow>
+
+        <!-- Empty State / No Data Found -->
+        <TableRow
+          v-if="items.length === 0"
+          class="border-none hover:bg-transparent!"
         >
-          &nbsp;
-        </TableCell>
-        <TableCell
-          v-for="column in columns"
-          :key="column.key"
-          :class="resolveCellClass(column)"
+          <TableCell
+            :colspan="columns.length + (showRowNumber ? 1 : 0) + (selectable ? 1 : 0)"
+            class="p-0 border-none select-none pointer-events-none"
+          >
+            <div
+              class="flex flex-col items-center justify-center text-center p-6 w-full"
+              :style="{ height: `${(perPage || 5) * 53}px` }"
+            >
+              <Empty class="border-none bg-transparent">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <FolderOpen class="w-10 h-10 text-muted-foreground/30" />
+                  </EmptyMedia>
+                  <EmptyTitle class="text-sm font-semibold text-foreground/80 mt-2"
+                    >Tidak Ada Data</EmptyTitle
+                  >
+                  <EmptyDescription class="text-xs text-muted-foreground/50 max-w-xs mt-1">
+                    Tidak ada data yang ditemukan atau belum ditambahkan ke tabel ini.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            </div>
+          </TableCell>
+        </TableRow>
+
+        <!-- Filler Rows -->
+        <TableRow
+          v-for="i in emptyRowsCount"
+          :key="`empty-${i}`"
+          class="h-[53px] hover:bg-transparent! border-b border-transparent pointer-events-none"
         >
-          &nbsp;
-        </TableCell>
-      </TableRow>
-    </TableBody>
-  </Table>
+          <TableCell v-if="selectable"> &nbsp; </TableCell>
+          <!-- Sel Nomor Urut Kosong -->
+          <TableCell
+            v-if="showRowNumber"
+            class="w-12 text-center"
+          >
+            &nbsp;
+          </TableCell>
+          <TableCell
+            v-for="column in columns"
+            :key="column.key"
+            :class="resolveCellClass(column)"
+          >
+            &nbsp;
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
   </div>
 </template>

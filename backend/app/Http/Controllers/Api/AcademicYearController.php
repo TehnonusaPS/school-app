@@ -95,6 +95,68 @@ class AcademicYearController extends Controller
             ], 400);
         }
 
+        // Check if creating full academic year (both odd and even semesters)
+        if ($request->has('odd_start_date') && $request->has('even_start_date')) {
+            $validator = Validator::make($request->all(), [
+                'name'            => 'required|string|max:100',
+                'odd_start_date'  => 'required|date',
+                'odd_end_date'    => 'required|date|after_or_equal:odd_start_date',
+                'even_start_date' => 'required|date',
+                'even_end_date'   => 'required|date|after_or_equal:even_start_date',
+                'active_semester' => 'nullable|in:odd,even,none',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Validation error.',
+                    'errors'  => $validator->errors(),
+                ], 422);
+            }
+
+            $activeSemester = $request->input('active_semester', 'odd');
+
+            DB::beginTransaction();
+            try {
+                if (in_array($activeSemester, ['odd', 'even'])) {
+                    AcademicYear::where('school_id', $schoolId)->update(['is_active' => false]);
+                }
+
+                $oddYear = AcademicYear::create([
+                    'school_id'  => $schoolId,
+                    'name'       => $request->input('name'),
+                    'semester'   => 'odd',
+                    'start_date' => $request->input('odd_start_date'),
+                    'end_date'   => $request->input('odd_end_date'),
+                    'is_active'  => ($activeSemester === 'odd'),
+                ]);
+
+                $evenYear = AcademicYear::create([
+                    'school_id'  => $schoolId,
+                    'name'       => $request->input('name'),
+                    'semester'   => 'even',
+                    'start_date' => $request->input('even_start_date'),
+                    'end_date'   => $request->input('even_end_date'),
+                    'is_active'  => ($activeSemester === 'even'),
+                ]);
+
+                DB::commit();
+
+                return response()->json([
+                    'status'  => 'success',
+                    'message' => 'Tahun ajaran semester ganjil & genap berhasil dibuat.',
+                    'data'    => [$oddYear, $evenYear],
+                ], 201);
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Transaction failed: ' . $e->getMessage(),
+                ], 500);
+            }
+        }
+
         $validator = Validator::make($request->all(), [
             'name'       => 'required|string|max:100',
             'semester'   => 'required|in:odd,even',

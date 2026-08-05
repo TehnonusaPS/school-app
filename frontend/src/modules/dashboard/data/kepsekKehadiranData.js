@@ -1,17 +1,17 @@
 export const kehadiranProgressData = [
-  { 
+  {
     id: 'siswa',
-    label: 'Siswa (Hadir/Total)', 
-    value: '400/402', 
-    progress: 99, 
+    label: 'Siswa (Hadir/Total)',
+    value: '400/402',
+    progress: 99,
     progressClass: 'bg-emerald-500',
     stats: { hadir_pct: 99, alpa_pct: 0, izin_pct: 1 }
   },
-  { 
+  {
     id: 'guru',
-    label: 'Staff & Guru (Hadir/Total)', 
-    value: '30/102', 
-    progress: 30, 
+    label: 'Staff & Guru (Hadir/Total)',
+    value: '30/102',
+    progress: 30,
     progressClass: 'bg-emerald-500',
     stats: { hadir_pct: 30, alpa_pct: 20, izin_pct: 50 }
   }

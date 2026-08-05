@@ -29,22 +29,40 @@ const computedDelay = computed(() => (auth.isJustLoggedIn ? 1400 : 0) + props.de
     :delay="delay"
     :illustration="illustration"
   >
-    <div v-for="(item, index) in items" :key="item.label || item.id" class="space-y-1.5">
+    <div
+      v-for="(item, index) in items"
+      :key="item.label || item.id"
+      class="space-y-1.5"
+    >
       <div class="flex items-center justify-between text-sm">
         <span class="font-medium">{{ item.label }}</span>
         <span class="text-muted-foreground text-xs">
-          <slot name="value" :item="item">
+          <slot
+            name="value"
+            :item="item"
+          >
             {{ item.value }} &bull; {{ item.progress }}%
           </slot>
         </span>
       </div>
-      <Progress :model-value="item.progress" :delay="computedDelay + 250 + (index * 60)" class="h-2" :class="item.progressClass" />
-      <slot name="item-footer" :item="item" />
+      <Progress
+        :model-value="item.progress"
+        :delay="computedDelay + 250 + index * 60"
+        class="h-2"
+        :class="item.progressClass"
+      />
+      <slot
+        name="item-footer"
+        :item="item"
+      />
     </div>
-    
+
     <slot />
-    
-    <template v-if="$slots.footer" #footer>
+
+    <template
+      v-if="$slots.footer"
+      #footer
+    >
       <slot name="footer" />
     </template>
   </WidgetCard>

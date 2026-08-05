@@ -6,7 +6,7 @@ import { attendanceData } from './data/chartCardDemos'
 const attendanceConfig = {
   kelas10: { label: 'Kelas 10', color: 'var(--primary)' },
   kelas11: { label: 'Kelas 11', color: '#8b5cf6' }, // Violet
-  kelas12: { label: 'Kelas 12', color: '#10b981' }  // Emerald
+  kelas12: { label: 'Kelas 12', color: '#10b981' } // Emerald
 }
 </script>
 

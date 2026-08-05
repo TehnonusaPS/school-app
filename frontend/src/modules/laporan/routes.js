@@ -99,15 +99,6 @@ export default [
     }
   },
   {
-    path: 'laporan/pertanggung-jawaban',
-    component: () => import('./pages/PertanggungJawabanLaporan.vue'),
-    meta: {
-      title: 'Laporan pertanggung Jawaban',
-      parent: 'Laporan',
-      description: 'Dokumen pelaporan pertanggungjawaban kegiatan operasional sekolah.'
-    }
-  },
-  {
     path: 'laporan/nilai',
     component: () => import('./pages/LaporanNilai.vue'),
     meta: {

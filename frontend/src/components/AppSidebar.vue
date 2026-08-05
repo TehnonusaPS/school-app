@@ -28,14 +28,28 @@ const currentUser = computed(() => ({
   avatar: ''
 }))
 
+const tenantName = computed(() => {
+  if (auth.user?.school?.name) return auth.user.school.name
+  if (auth.user?.foundation?.name) return auth.user.foundation.name
+  return 'CerdasBangsa'
+})
+
+const tenantLogo = computed(() => {
+  if (auth.user?.school?.logo) return auth.user.school.logo
+  if (auth.user?.foundation?.logo) return auth.user.foundation.logo
+  return null
+})
+
 // Struktur RBAC Dinamis
 const filteredNavMain = computed(() => {
   const currentRole = auth.user?.role
+  const isLandingPageEnabled = auth.user?.school?.landing_page_enabled || auth.user?.foundation?.landing_page_enabled || false
 
   return (
     navMain
       // 1. Filter parent menu
       .filter(item => {
+        if (item.requiresLandingPageEnabled && !isLandingPageEnabled) return false
         if (item.excludeRoles && item.excludeRoles.includes(currentRole)) return false
         if (!item.roles) return true // Terbuka untuk semua jika tidak ada pembatasan
         return item.roles.includes(currentRole)
@@ -46,6 +60,7 @@ const filteredNavMain = computed(() => {
           return {
             ...item,
             items: item.items.filter(sub => {
+              if (sub.requiresLandingPageEnabled && !isLandingPageEnabled) return false
               if (sub.excludeRoles && sub.excludeRoles.includes(currentRole)) return false
               if (!sub.roles) return true
               return sub.roles.includes(currentRole)
@@ -73,12 +88,13 @@ const filteredNavMain = computed(() => {
               <SidebarMenuButton size="lg"
                 class="glass-mini text-sidebar-accent-foreground cursor-default hover:bg-transparent active:bg-transparent data-[state=open]:bg-transparent transition-colors duration-300">
                 <Avatar class="h-8 w-8 rounded-lg">
-                  <AvatarFallback class="rounded-lg bg-primary text-primary-foreground">
+                  <img v-if="tenantLogo" :src="tenantLogo" alt="Logo" class="h-full w-full object-cover" />
+                  <AvatarFallback v-else class="rounded-lg bg-primary text-primary-foreground">
                     <School class="size-5" />
                   </AvatarFallback>
                 </Avatar>
                 <div class="grid flex-1 text-left text-sm leading-tight">
-                  <span class="truncate font-extrabold text-sidebar-foreground tracking-tight">CerdasBangsa</span>
+                  <span class="truncate font-extrabold text-sidebar-foreground tracking-tight">{{ tenantName }}</span>
                   <span class="truncate text-[10px] capitalize text-sidebar-foreground/70 font-medium">
                     {{ auth.user?.roleLabel || auth.user?.role || 'guest' }}
                   </span>

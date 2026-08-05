@@ -664,4 +664,103 @@ class SppController extends Controller
             'message' => 'Tariff and associated unpaid bills deleted successfully.'
         ]);
     }
+
+    /**
+     * Get a list of student payments (with search and date filters).
+     */
+    public function getPayments(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $roleName = $user->role->name;
+
+        $query = StudentPayment::with(['student.studentProfile.classroom', 'verifier', 'bills']);
+
+        if (in_array($roleName, ['siswa'])) {
+            $query->where('student_id', $user->id);
+        } elseif (in_array($roleName, ['orang_tua'])) {
+            $parentProfile = $user->parentProfile;
+            $studentIds = $parentProfile ? $parentProfile->children->pluck('user_id')->toArray() : [];
+            $query->whereIn('student_id', $studentIds);
+        } elseif (in_array($roleName, ['admin_sekolah', 'tata_usaha'])) {
+            $schoolId = $user->school_id;
+            $query->whereHas('student', function ($q) use ($schoolId) {
+                $q->where('school_id', $schoolId);
+            });
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Role not authorized for SPP Payments.'
+            ], 403);
+        }
+
+        // Apply filters
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('student', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhereHas('studentProfile', function ($sp) use ($search) {
+                      $sp->where('nisn', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('payment_date', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('payment_date', '<=', $request->end_date);
+        }
+
+        if ($request->filled('payment_method') && $request->payment_method !== 'semua') {
+            $query->where('payment_method', strtolower($request->payment_method));
+        }
+
+        $payments = $query->orderBy('payment_date', 'desc')->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $payments
+        ]);
+    }
+
+    /**
+     * Get details of a single student payment.
+     */
+    public function getPaymentDetails(Request $request, string $id): JsonResponse
+    {
+        $user = $request->user();
+        $roleName = $user->role->name;
+
+        $payment = StudentPayment::with([
+            'student.studentProfile.classroom',
+            'student.school',
+            'verifier',
+            'bills'
+        ])->findOrFail($id);
+
+        // Authorization check
+        if (in_array($roleName, ['siswa'])) {
+            if ($payment->student_id !== $user->id) {
+                return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+            }
+        } elseif (in_array($roleName, ['orang_tua'])) {
+            $parentProfile = $user->parentProfile;
+            $studentIds = $parentProfile ? $parentProfile->children->pluck('user_id')->toArray() : [];
+            if (!in_array($payment->student_id, $studentIds)) {
+                return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+            }
+        } elseif (in_array($roleName, ['admin_sekolah', 'tata_usaha'])) {
+            if ($payment->student->school_id !== $user->school_id) {
+                return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+            }
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized role'], 403);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $payment
+        ]);
+    }
 }

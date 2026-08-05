@@ -34,7 +34,7 @@ class AuthController extends Controller
 
         // 2. Normalize and retrieve user with role relationship
         $email = strtolower(trim($request->email));
-        $user = User::with('role')->where('email', $email)->first();
+        $user = User::with(['role', 'foundation', 'school'])->where('email', $email)->first();
 
         // 3. Verify credentials
         if (!$user || !Hash::check($request->password, $user->password)) {
@@ -65,6 +65,8 @@ class AuthController extends Controller
             'is_active'     => $user->is_active,
             'foundation_id' => $user->foundation_id,
             'school_id'     => $user->school_id,
+            'foundation'    => $user->foundation,
+            'school'        => $user->school,
         ];
 
         return response()->json([
@@ -83,7 +85,7 @@ class AuthController extends Controller
      */
     public function user(Request $request): JsonResponse
     {
-        $user = $request->user()->load('role');
+        $user = $request->user()->load(['role', 'foundation', 'school']);
 
         $mappedUser = [
             'id'            => $user->id,
@@ -96,6 +98,8 @@ class AuthController extends Controller
             'is_active'     => $user->is_active,
             'foundation_id' => $user->foundation_id,
             'school_id'     => $user->school_id,
+            'foundation'    => $user->foundation,
+            'school'        => $user->school,
         ];
 
         return response()->json([

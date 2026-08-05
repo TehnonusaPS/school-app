@@ -13,16 +13,7 @@ import {
   TableHead,
   TableCell
 } from '@/components/ui/table'
-import {
-  Check,
-  X,
-  Eye,
-  AlertCircle,
-  CalendarDays,
-  Lock,
-  Unlock,
-  FileDown
-} from 'lucide-vue-next'
+import { Check, X, Eye, AlertCircle, CalendarDays, Lock, Unlock, FileDown } from 'lucide-vue-next'
 import {
   Dialog,
   DialogContent,
@@ -38,19 +29,20 @@ import FormTextArea from '@/components/forms/FormTextArea.vue'
 
 // Import Mock Data
 import {
-  getYearStatuses,
-  saveYearStatuses,
-  getEvents,
-  tahunList,
-  academicMonths
-} from '../../../data/mockKalender'
+  fetchCalendarStatus,
+  approveCalendar,
+  rejectCalendar
+} from '@/services/academicCalendarService'
+import { fetchAllAcademicYears } from '@/services/academicYearService'
+import { academicMonths, getEventTypeInfo } from '../../../data/calendarConstants'
 import { glassFade } from '@/config/motion'
 
 const router = useRouter()
 
 // --- State ---
 const yearStatuses = ref({})
-const events = ref([])
+const academicYears = ref([])
+const isLoading = ref(false)
 
 // Approve State
 const isApproveConfirmOpen = ref(false)
@@ -62,9 +54,19 @@ const selectedYearToReject = ref('')
 const rejectReason = ref('')
 const rejectReasonError = ref('')
 
-onMounted(() => {
-  yearStatuses.value = getYearStatuses()
-  events.value = getEvents()
+onMounted(async () => {
+  isLoading.value = true
+  try {
+    const yearResponse = await fetchAllAcademicYears()
+    academicYears.value = yearResponse.data || []
+
+    const statusResponse = await fetchCalendarStatus()
+    yearStatuses.value = statusResponse.data || {}
+  } catch (err) {
+    console.error('Error loading calendar status:', err)
+  } finally {
+    isLoading.value = false
+  }
 })
 
 // --- Computed Stats ---
@@ -87,104 +89,119 @@ function getYearStatusBadgeClass(status) {
   return 'bg-secondary text-secondary-foreground'
 }
 
-// Count events in a year (used for filtering only, not displayed)
-function countEvents(year) {
-  const startYear = parseInt(year.split('/')[0])
-  const minDate = `${startYear}-07-01`
-  const maxDate = `${startYear + 1}-06-30`
-  return events.value.filter(e => e.startDate >= minDate && e.startDate <= maxDate).length
-}
-
 // --- Computed Displayed Years ---
 const displayedTahunList = computed(() => {
-  return tahunList.filter(year => {
-    const status = yearStatuses.value[year]?.status || 'draft'
-    const hasEvents = countEvents(year) > 0
-    // Show if not draft OR if it's a draft that already has events
-    return status !== 'draft' || hasEvents
-  })
+  const filtered = academicYears.value
+    .filter(ay => {
+      const statusInfo = yearStatuses.value[ay.name] || { status: 'draft' }
+      return statusInfo.status !== 'draft'
+    })
+    .map(ay => ay.name)
+  return [...new Set(filtered)]
 })
 
 // --- Actions ---
-const handleShow = (year) => {
+const handleShow = year => {
   router.push(`/akademik/kepala-sekolah/kalender/show/${year.replace('/', '-')}`)
 }
 
-const openApproveConfirm = (year) => {
+const openApproveConfirm = year => {
   selectedYearToApprove.value = year
   isApproveConfirmOpen.value = true
 }
 
-const confirmApprove = () => {
+const confirmApprove = async () => {
   const year = selectedYearToApprove.value
-  const updated = { ...yearStatuses.value }
-  updated[year] = { status: 'approved', rejectedReason: '' }
-  yearStatuses.value = updated
-  saveYearStatuses(updated)
-  isApproveConfirmOpen.value = false
-  
-  toast.success('Kalender Disetujui', {
-    description: `Kalender akademik Tahun Pelajaran ${year} telah berhasil disetujui dan aktif.`
-  })
+  const statusInfo = yearStatuses.value[year]
+  if (!statusInfo || !statusInfo.academic_year_id) return
+
+  isLoading.value = true
+  try {
+    await approveCalendar(statusInfo.academic_year_id)
+    isApproveConfirmOpen.value = false
+    
+    toast.success('Kalender Disetujui', {
+      description: `Kalender akademik Tahun Pelajaran ${year} telah berhasil disetujui dan aktif.`
+    })
+    // Refresh status
+    const statusResponse = await fetchCalendarStatus()
+    yearStatuses.value = statusResponse.data || {}
+  } catch (err) {
+    console.error('Error approving calendar:', err)
+    toast.error('Gagal menyetujui kalender.')
+  } finally {
+    isLoading.value = false
+  }
 }
 
-const openRejectDialog = (year) => {
+const openRejectDialog = year => {
   selectedYearToReject.value = year
   rejectReason.value = ''
   rejectReasonError.value = ''
   isRejectDialogOpen.value = true
 }
 
-const confirmReject = () => {
+const confirmReject = async () => {
   if (!rejectReason.value.trim()) {
     rejectReasonError.value = 'Alasan penolakan wajib diisi.'
     return
   }
   
-  const updated = { ...yearStatuses.value }
-  updated[selectedYearToReject.value] = {
-    status: 'rejected',
-    rejectedReason: rejectReason.value
-  }
-  yearStatuses.value = updated
-  saveYearStatuses(updated)
-  isRejectDialogOpen.value = false
-  
-  toast.success('Kalender Ditolak', {
-    description: `Kalender akademik Tahun Pelajaran ${selectedYearToReject.value} ditolak dengan alasan.`
-  })
-}
+  const year = selectedYearToReject.value
+  const statusInfo = yearStatuses.value[year]
+  if (!statusInfo || !statusInfo.academic_year_id) return
 
-const handleReset = () => {
-  if (confirm('Apakah Anda yakin ingin me-reset seluruh status dan agenda Kalender Akademik ke data bawaan?')) {
-    localStorage.removeItem('academic_calendar_events_db_v2')
-    localStorage.removeItem('academic_calendar_statuses_db_v2')
-    toast.success('Database Kalender Berhasil Direset')
-    setTimeout(() => {
-      window.location.reload()
-    }, 800)
+  isLoading.value = true
+  try {
+    await rejectCalendar(statusInfo.academic_year_id, rejectReason.value)
+    isRejectDialogOpen.value = false
+
+    toast.success('Kalender Ditolak', {
+      description: `Kalender akademik Tahun Pelajaran ${year} ditolak dengan alasan.`
+    })
+    // Refresh status
+    const statusResponse = await fetchCalendarStatus()
+    yearStatuses.value = statusResponse.data || {}
+  } catch (err) {
+    console.error('Error rejecting calendar:', err)
+    toast.error('Gagal menolak kalender.')
+  } finally {
+    isLoading.value = false
   }
 }
 
 // --- Helper Functions for PDF Export ---
 function formatDateRange(startStr, endStr) {
   if (!startStr) return '-'
-  const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
-  
+  const months = [
+    'Januari',
+    'Februari',
+    'Maret',
+    'April',
+    'Mei',
+    'Juni',
+    'Juli',
+    'Agustus',
+    'September',
+    'Oktober',
+    'November',
+    'Desember'
+  ]
+
   const start = new Date(startStr)
   const startDay = start.getDate()
   const startMonth = months[start.getMonth()]
   const startYear = start.getFullYear()
-  
+
   if (!endStr || startStr === endStr) {
     return `${startDay} ${startMonth} ${startYear}`
   }
-  
+
   const end = new Date(endStr)
   const endDay = end.getDate()
   const endMonth = months[end.getMonth()]
   const endYear = end.getFullYear()
-  
+
   if (startYear === endYear) {
     if (startMonth === endMonth) {
       return `${startDay} - ${endDay} ${startMonth} ${startYear}`
@@ -197,14 +214,10 @@ function formatDateRange(startStr, endStr) {
 }
 
 function getFriendlyTypeName(type) {
-  if (type === 'libur_nasional') return 'Hari Libur Nasional'
-  if (type === 'tanggal_merah') return 'Tanggal Merah'
-  if (type === 'ujian') return 'Ujian'
-  if (type === 'kegiatan') return 'Kegiatan Sekolah'
-  return type
+  return getEventTypeInfo(type).label
 }
 
-const handleDownloadPdf = (year) => {
+const handleDownloadPdf = year => {
   const startYear = parseInt(year.split('/')[0])
   const minDate = `${startYear}-07-01`
   const maxDate = `${startYear + 1}-06-30`
@@ -234,7 +247,7 @@ const handleDownloadPdf = (year) => {
     // Build grid cells
     let gridHtml = ''
     let day = 1
-    
+
     // Max 6 weeks/rows per month
     for (let r = 0; r < 6; r++) {
       let rowHtml = ''
@@ -282,7 +295,7 @@ const handleDownloadPdf = (year) => {
         } else if (ev.type === 'ujian') {
           textClass = 'event-text-yellow'
         }
-        
+
         // Format day single or range
         const startDay = new Date(ev.startDate).getDate()
         let dateRangeLabel = `${startDay}`
@@ -290,7 +303,7 @@ const handleDownloadPdf = (year) => {
           const endDay = new Date(ev.endDate).getDate()
           dateRangeLabel = `${startDay}-${endDay}`
         }
-        
+
         eventsListHtml += `<p class="${textClass}"><strong>${dateRangeLabel} ${month.name}:</strong> ${ev.title}</p>`
       })
       eventsListHtml += '</div>'
@@ -667,13 +680,6 @@ const handleDownloadPdf = (year) => {
         description="Tinjau, setujui, atau tolak pengajuan draf Kalender Akademik tahunan dari Admin Sekolah."
       />
       <div class="flex items-center gap-2.5 shrink-0 w-full sm:w-auto">
-        <Button
-          variant="outline"
-          class="w-full sm:w-auto text-xs font-bold rounded-xl cursor-pointer h-10 shadow-xs text-rose-500 border-rose-500/25 hover:bg-rose-500/5 hover:text-rose-600"
-          @click="handleReset"
-        >
-          Reset Kalender
-        </Button>
         <Badge v-if="pendingCount > 0" class="bg-orange-500 text-white font-extrabold text-[10px] px-3.5 py-1.5 rounded-full uppercase animate-pulse shrink-0">
           {{ pendingCount }} Pengajuan Butuh Tinjauan
         </Badge>
@@ -687,13 +693,25 @@ const handleDownloadPdf = (year) => {
           <Table>
             <TableHeader class="bg-muted/30 border-b">
               <TableRow>
-                <TableHead class="font-bold text-foreground py-4 px-6 text-xs uppercase tracking-wider text-left w-[80px]">No</TableHead>
-                <TableHead class="font-bold text-foreground py-4 px-4 text-xs uppercase tracking-wider text-left">Tahun Akademik</TableHead>
-                <TableHead class="font-bold text-foreground py-4 px-4 text-xs uppercase tracking-wider text-left w-[200px]">Status Persetujuan</TableHead>
-                <TableHead class="font-bold text-foreground py-4 px-6 text-xs uppercase tracking-wider text-center w-[280px]">Aksi</TableHead>
+                <TableHead
+                  class="font-bold text-foreground py-4 px-6 text-xs uppercase tracking-wider text-left w-[80px]"
+                  >No</TableHead
+                >
+                <TableHead
+                  class="font-bold text-foreground py-4 px-4 text-xs uppercase tracking-wider text-left"
+                  >Tahun Akademik</TableHead
+                >
+                <TableHead
+                  class="font-bold text-foreground py-4 px-4 text-xs uppercase tracking-wider text-left w-[200px]"
+                  >Status Persetujuan</TableHead
+                >
+                <TableHead
+                  class="font-bold text-foreground py-4 px-6 text-xs uppercase tracking-wider text-center w-[280px]"
+                  >Aksi</TableHead
+                >
               </TableRow>
             </TableHeader>
-            
+
             <TableBody>
               <TableRow
                 v-for="(year, index) in displayedTahunList"
@@ -704,16 +722,21 @@ const handleDownloadPdf = (year) => {
                 <TableCell class="py-4 px-6 font-mono text-xs font-bold text-muted-foreground">
                   {{ index + 1 }}
                 </TableCell>
-                
+
                 <!-- Tahun Akademik -->
                 <TableCell class="py-4 px-4 font-extrabold text-xs text-foreground">
                   <div class="flex items-center gap-2.5">
-                    <div class="h-8 w-8 rounded-lg bg-primary/5 text-primary flex items-center justify-center shrink-0 border border-primary/10">
+                    <div
+                      class="h-8 w-8 rounded-lg bg-primary/5 text-primary flex items-center justify-center shrink-0 border border-primary/10"
+                    >
                       <CalendarDays class="h-4 w-4" />
                     </div>
                     <div>
                       <span>Tahun Pelajaran {{ year }}</span>
-                      <p v-if="yearStatuses[year]?.status === 'rejected'" class="text-[9px] text-rose-500 font-bold mt-0.5 flex items-center gap-1">
+                      <p
+                        v-if="yearStatuses[year]?.status === 'rejected'"
+                        class="text-[9px] text-rose-500 font-bold mt-0.5 flex items-center gap-1"
+                      >
                         <AlertCircle class="h-3 w-3" />
                         Ditolak: "{{ yearStatuses[year]?.rejectedReason }}"
                       </p>
@@ -723,23 +746,26 @@ const handleDownloadPdf = (year) => {
 
                 <!-- Status Persetujuan -->
                 <TableCell class="py-4 px-4">
-                  <Badge class="text-[9px] font-extrabold px-2.5 py-0.5 rounded-full uppercase" :class="getYearStatusBadgeClass(yearStatuses[year]?.status)">
+                  <Badge
+                    class="text-[9px] font-extrabold px-2.5 py-0.5 rounded-full uppercase"
+                    :class="getYearStatusBadgeClass(yearStatuses[year]?.status)"
+                  >
                     {{ getYearStatusLabel(yearStatuses[year]?.status) }}
                   </Badge>
                 </TableCell>
 
-                <!-- Aksi -->
+                <!-- Aksi (Hanya Tombol Lihat & Download PDF) -->
                 <TableCell class="py-4 px-6 text-center">
                   <div class="flex items-center justify-center gap-3">
                     
-                    <!-- Show button -->
+                    <!-- Lihat button -->
                     <button
-                      class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-muted-foreground hover:text-foreground transition-colors"
-                      title="Show"
+                      class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-primary hover:text-primary/80 transition-colors"
+                      title="Lihat & Tinjau Kalender"
                       @click="handleShow(year)"
                     >
                       <Eye class="size-4 transition-transform group-hover/btn:scale-110" />
-                      <span class="text-[9px] font-semibold leading-none">Show</span>
+                      <span class="text-[9px] font-bold leading-none">Lihat</span>
                     </button>
 
                     <!-- Download button (only if approved) -->
@@ -752,33 +778,6 @@ const handleDownloadPdf = (year) => {
                       <FileDown class="size-4 transition-transform group-hover/btn:scale-110" />
                       <span class="text-[9px] font-semibold leading-none">Download</span>
                     </button>
-
-                    <!-- Approve/Reject buttons only if status is pending -->
-                    <template v-if="yearStatuses[year]?.status === 'pending'">
-                      <button
-                        class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-rose-500 hover:text-rose-600 transition-colors"
-                        title="Reject"
-                        @click="openRejectDialog(year)"
-                      >
-                        <X class="size-4 transition-transform group-hover/btn:scale-110" />
-                        <span class="text-[9px] font-semibold leading-none">Reject</span>
-                      </button>
-
-                      <button
-                        class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none text-emerald-500 hover:text-emerald-600 transition-colors"
-                        title="Approve"
-                        @click="openApproveConfirm(year)"
-                      >
-                        <Check class="size-4 transition-transform group-hover/btn:scale-110" />
-                        <span class="text-[9px] font-semibold leading-none">Approve</span>
-                      </button>
-                    </template>
-                    
-                    <div v-else class="flex flex-col items-center justify-center gap-0.5 text-muted-foreground/50">
-                      <Lock v-if="yearStatuses[year]?.status === 'approved'" class="size-4 text-muted-foreground/40" />
-                      <Unlock v-else class="size-4 text-muted-foreground/40" />
-                      <span class="text-[9px] font-semibold leading-none">{{ yearStatuses[year]?.status === 'approved' ? 'Aktif' : 'Draf' }}</span>
-                    </div>
                   </div>
                 </TableCell>
               </TableRow>
@@ -797,7 +796,9 @@ const handleDownloadPdf = (year) => {
             Setujui Kalender Akademik
           </DialogTitle>
           <DialogDescription class="text-[10px] text-muted-foreground leading-relaxed mt-2">
-            Apakah Anda yakin ingin menyetujui Kalender Akademik Tahun Pelajaran {{ selectedYearToApprove }}? Kalender ini akan dipublikasikan dan aktif untuk semua role.
+            Apakah Anda yakin ingin menyetujui Kalender Akademik Tahun Pelajaran
+            {{ selectedYearToApprove }}? Kalender ini akan dipublikasikan dan aktif untuk semua
+            role.
           </DialogDescription>
         </DialogHeader>
 
@@ -830,7 +831,8 @@ const handleDownloadPdf = (year) => {
             Tolak Kalender Akademik
           </DialogTitle>
           <DialogDescription class="text-[10px] text-muted-foreground leading-relaxed">
-            Apakah Anda yakin ingin menolak Kalender Akademik Tahun Pelajaran {{ selectedYearToReject }}? Silakan masukkan alasan penolakan di bawah ini.
+            Apakah Anda yakin ingin menolak Kalender Akademik Tahun Pelajaran
+            {{ selectedYearToReject }}? Silakan masukkan alasan penolakan di bawah ini.
           </DialogDescription>
         </DialogHeader>
 
@@ -865,6 +867,5 @@ const handleDownloadPdf = (year) => {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-
   </div>
 </template>

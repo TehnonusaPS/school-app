@@ -9,16 +9,11 @@ import {
   TrendingUp,
   Printer,
   RefreshCw,
-  Download,
+  Download
 } from 'lucide-vue-next'
 import { getSchoolAttendance } from '@/services/api/reports'
 import { Badge } from '@/components/ui/badge'
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'vue-sonner'
 
 // Common Components
@@ -33,14 +28,14 @@ const getStartAndEndOfMonth = () => {
   const d = new Date()
   const start = new Date(d.getFullYear(), d.getMonth(), 1)
   const end = new Date(d.getFullYear(), d.getMonth() + 1, 0)
-  
-  const formatDate = (date) => {
+
+  const formatDate = date => {
     const year = date.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, '0')
     const day = String(date.getDate()).padStart(2, '0')
     return `${year}-${month}-${day}`
   }
-  
+
   return {
     start: formatDate(start),
     end: formatDate(end)
@@ -120,7 +115,8 @@ const kelasList = computed(() => {
 
 const filteredDetailData = computed(() => {
   return recapData.value.filter(item => {
-    const matchStatus = filterValues.value.status === 'all' || item.status === filterValues.value.status
+    const matchStatus =
+      filterValues.value.status === 'all' || item.status === filterValues.value.status
     const matchKelas = filterValues.value.kelas === 'all' || item.kelas === filterValues.value.kelas
     const matchSearch =
       !filterValues.value.search ||
@@ -136,7 +132,9 @@ const paginatedDetailData = computed(() => {
 })
 
 const totalDetail = computed(() => filteredDetailData.value.length)
-const fromDetail = computed(() => totalDetail.value === 0 ? 0 : (pageDetail.value - 1) * perPageDetail.value + 1)
+const fromDetail = computed(() =>
+  totalDetail.value === 0 ? 0 : (pageDetail.value - 1) * perPageDetail.value + 1
+)
 const toDetail = computed(() => Math.min(pageDetail.value * perPageDetail.value, totalDetail.value))
 
 // Ringkasan per siswa
@@ -165,7 +163,8 @@ const ringkasanSiswa = computed(() => {
 
   // Filter client-side
   return Object.values(map).filter(siswa => {
-    const matchKelas = filterValues.value.kelas === 'all' || siswa.kelas === filterValues.value.kelas
+    const matchKelas =
+      filterValues.value.kelas === 'all' || siswa.kelas === filterValues.value.kelas
     const matchSearch =
       !filterValues.value.search ||
       siswa.nama.toLowerCase().includes(filterValues.value.search.toLowerCase())
@@ -179,13 +178,19 @@ const paginatedSummaryData = computed(() => {
 })
 
 const totalSummary = computed(() => ringkasanSiswa.value.length)
-const fromSummary = computed(() => totalSummary.value === 0 ? 0 : (pageSummary.value - 1) * perPageSummary.value + 1)
-const toSummary = computed(() => Math.min(pageSummary.value * perPageSummary.value, totalSummary.value))
+const fromSummary = computed(() =>
+  totalSummary.value === 0 ? 0 : (pageSummary.value - 1) * perPageSummary.value + 1
+)
+const toSummary = computed(() =>
+  Math.min(pageSummary.value * perPageSummary.value, totalSummary.value)
+)
 
 // Stats
 const totalHadir = computed(() => recapData.value.filter(d => d.status === 'hadir').length)
 const totalTerlambat = computed(() => recapData.value.filter(d => d.status === 'terlambat').length)
-const totalIzinSakit = computed(() => recapData.value.filter(d => ['izin', 'sakit'].includes(d.status)).length)
+const totalIzinSakit = computed(
+  () => recapData.value.filter(d => ['izin', 'sakit'].includes(d.status)).length
+)
 const totalAlpa = computed(() => recapData.value.filter(d => d.status === 'alpa').length)
 const persentaseKehadiran = computed(() => {
   const total = recapData.value.length
@@ -199,19 +204,24 @@ function getStatusLabel(status) {
     terlambat: 'Terlambat',
     izin: 'Izin',
     sakit: 'Sakit',
-    alpa: 'Alpa',
+    alpa: 'Alpa'
   }
   return labels[status] || 'Belum Absen'
 }
 
 function getStatusClass(status) {
-  return {
-    hadir: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 border-none font-medium',
-    terlambat: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400 border-none font-medium',
-    sakit: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 border-none font-medium',
-    izin: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400 border-none font-medium',
-    alpa: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border-none font-medium',
-  }[status] || 'bg-muted text-muted-foreground border-none'
+  return (
+    {
+      hadir:
+        'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 border-none font-medium',
+      terlambat:
+        'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400 border-none font-medium',
+      sakit:
+        'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 border-none font-medium',
+      izin: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400 border-none font-medium',
+      alpa: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border-none font-medium'
+    }[status] || 'bg-muted text-muted-foreground border-none'
+  )
 }
 
 function handlePrint() {
@@ -395,11 +405,17 @@ const summaryFiltersConfig = computed(() => [
       </TabsList>
 
       <!-- Detail Tab -->
-      <TabsContent value="detail" class="mt-0">
+      <TabsContent
+        value="detail"
+        class="mt-0"
+      >
         <div
           v-motion
           :initial="glassSlide.initial"
-          :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 200 } }"
+          :visible-once="{
+            ...glassSlide.visible,
+            transition: { ...glassSlide.visible.transition, delay: 200 }
+          }"
         >
           <DataTableCard
             :columns="detailColumns"
@@ -421,17 +437,24 @@ const summaryFiltersConfig = computed(() => [
             </template>
 
             <template #cell-kelas="{ item }">
-              <Badge variant="outline" class="text-xs font-normal border-white/10 dark:border-white/5 bg-background/50">
+              <Badge
+                variant="outline"
+                class="text-xs font-normal border-white/10 dark:border-white/5 bg-background/50"
+              >
                 {{ item.kelas }}
               </Badge>
             </template>
 
             <template #cell-jamMasuk="{ item }">
-              <span class="font-mono text-xs text-muted-foreground">{{ item.jamMasuk || '-' }}</span>
+              <span class="font-mono text-xs text-muted-foreground">{{
+                item.jamMasuk || '-'
+              }}</span>
             </template>
 
             <template #cell-jamKeluar="{ item }">
-              <span class="font-mono text-xs text-muted-foreground">{{ item.jamKeluar || '-' }}</span>
+              <span class="font-mono text-xs text-muted-foreground">{{
+                item.jamKeluar || '-'
+              }}</span>
             </template>
 
             <template #cell-status="{ item }">
@@ -444,11 +467,17 @@ const summaryFiltersConfig = computed(() => [
       </TabsContent>
 
       <!-- Ringkasan Tab -->
-      <TabsContent value="ringkasan" class="mt-0">
+      <TabsContent
+        value="ringkasan"
+        class="mt-0"
+      >
         <div
           v-motion
           :initial="glassSlide.initial"
-          :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 200 } }"
+          :visible-once="{
+            ...glassSlide.visible,
+            transition: { ...glassSlide.visible.transition, delay: 200 }
+          }"
         >
           <DataTableCard
             :columns="summaryColumns"
@@ -470,7 +499,10 @@ const summaryFiltersConfig = computed(() => [
             </template>
 
             <template #cell-kelas="{ item }">
-              <Badge variant="outline" class="text-xs font-normal border-white/10 dark:border-white/5 bg-background/50">
+              <Badge
+                variant="outline"
+                class="text-xs font-normal border-white/10 dark:border-white/5 bg-background/50"
+              >
                 {{ item.kelas }}
               </Badge>
             </template>
@@ -480,11 +512,15 @@ const summaryFiltersConfig = computed(() => [
             </template>
 
             <template #cell-terlambat="{ item }">
-              <span class="text-yellow-600 dark:text-yellow-400 font-semibold">{{ item.terlambat }}</span>
+              <span class="text-yellow-600 dark:text-yellow-400 font-semibold">{{
+                item.terlambat
+              }}</span>
             </template>
 
             <template #cell-izin="{ item }">
-              <span class="text-indigo-600 dark:text-indigo-400 font-semibold">{{ item.izin }}</span>
+              <span class="text-indigo-600 dark:text-indigo-400 font-semibold">{{
+                item.izin
+              }}</span>
             </template>
 
             <template #cell-sakit="{ item }">
@@ -498,7 +534,7 @@ const summaryFiltersConfig = computed(() => [
             <template #cell-persen="{ item }">
               <Badge
                 :class="[
-                  (((item.hadir + item.terlambat) / item.total) * 100) >= 80
+                  ((item.hadir + item.terlambat) / item.total) * 100 >= 80
                     ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 font-bold border-none'
                     : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 font-bold border-none'
                 ]"

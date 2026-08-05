@@ -1,9 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import {
-  Search,
-  Download
-} from 'lucide-vue-next'
+import { Search, Download } from 'lucide-vue-next'
 import PageHeader from '@/components/page-header/PageHeader.vue'
 import { glassFade } from '@/config/motion'
 import { getRecapData } from '@/services/api/absensi'
@@ -90,7 +87,8 @@ onMounted(() => {
 
 const filteredData = computed(() => {
   return recapData.value.filter(item => {
-    const matchStatus = filterValues.value.status === 'semua' || item.status === filterValues.value.status
+    const matchStatus =
+      filterValues.value.status === 'semua' || item.status === filterValues.value.status
     const matchSearch =
       !filterValues.value.search ||
       item.nama.toLowerCase().includes(filterValues.value.search.toLowerCase()) ||
@@ -99,7 +97,13 @@ const filteredData = computed(() => {
   })
 })
 
-const { currentPage, total, from, to, paginatedItems: paginatedData } = usePagination(filteredData, itemsPerPage)
+const {
+  currentPage,
+  total,
+  from,
+  to,
+  paginatedItems: paginatedData
+} = usePagination(filteredData, itemsPerPage)
 
 watch(filteredData, () => {
   currentPage.value = 1
@@ -164,20 +168,27 @@ const tableActions = computed(() => [
 
         <template #cell-nama="{ item }">
           <div class="font-semibold text-sm text-left">
-            {{ item.nama }} 
+            {{ item.nama }}
             <span class="text-muted-foreground font-normal">({{ item.kelas }})</span>
           </div>
         </template>
 
         <template #cell-status="{ value }">
           <Badge
-            :variant="value === 'hadir' ? 'default' : value === 'terlambat' ? 'destructive' : 'secondary'"
+            :variant="
+              value === 'hadir' ? 'default' : value === 'terlambat' ? 'destructive' : 'secondary'
+            "
             :class="{
-              'bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/40 dark:text-green-400': value === 'hadir',
-              'bg-yellow-100 text-yellow-700 hover:bg-yellow-100 dark:bg-yellow-900/40 dark:text-yellow-400': value === 'terlambat',
-              'bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/40 dark:text-blue-400': value === 'sakit',
-              'bg-indigo-100 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/40 dark:text-indigo-400': value === 'izin',
-              'bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-900/40 dark:text-red-400': value === 'alpa',
+              'bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/40 dark:text-green-400':
+                value === 'hadir',
+              'bg-yellow-100 text-yellow-700 hover:bg-yellow-100 dark:bg-yellow-900/40 dark:text-yellow-400':
+                value === 'terlambat',
+              'bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/40 dark:text-blue-400':
+                value === 'sakit',
+              'bg-indigo-100 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/40 dark:text-indigo-400':
+                value === 'izin',
+              'bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-900/40 dark:text-red-400':
+                value === 'alpa'
             }"
             class="mx-auto"
           >

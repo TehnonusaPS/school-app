@@ -4,9 +4,11 @@ import type { HTMLAttributes } from 'vue'
 import { Primitive } from 'reka-ui'
 import { cn } from '@/lib/utils'
 
-const props = defineProps<PrimitiveProps & {
-  class?: HTMLAttributes['class']
-}>()
+const props = defineProps<
+  PrimitiveProps & {
+    class?: HTMLAttributes['class']
+  }
+>()
 </script>
 
 <template>
@@ -15,9 +17,12 @@ const props = defineProps<PrimitiveProps & {
     data-sidebar="group-label"
     :as="as"
     :as-child="asChild"
-    :class="cn(
-      'text-sidebar-foreground/70 ring-sidebar-ring h-8 rounded-[var(--radius)] px-2 text-xs font-medium transition-[margin,opacity] duration-200 ease-linear group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0 [&>svg]:size-4 flex shrink-0 items-center outline-none [&>svg]:shrink-0',
-      props.class)"
+    :class="
+      cn(
+        'text-sidebar-foreground/70 ring-sidebar-ring h-8 rounded-[var(--radius)] px-2 text-xs font-medium transition-[margin,opacity] duration-200 ease-linear group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0 [&>svg]:size-4 flex shrink-0 items-center outline-none [&>svg]:shrink-0',
+        props.class
+      )
+    "
   >
     <slot />
   </Primitive>

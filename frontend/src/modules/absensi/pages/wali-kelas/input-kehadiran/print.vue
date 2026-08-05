@@ -35,7 +35,7 @@ const daysInMonth = computed(() => {
   const year = currentCalendarYear.value
   const month = selectedMonthVal.value
   const totalDays = new Date(year, month + 1, 0).getDate()
-  
+
   const days = []
   for (let d = 1; d <= totalDays; d++) {
     days.push({ dateNum: d })
@@ -50,7 +50,13 @@ const getAttendanceKey = (kelas, tahun, monthIdx, studentId, day) => {
 }
 
 const getStatus = (studentId, dayNum) => {
-  const key = getAttendanceKey(selectedKelas.value, selectedTahun.value, activeMonthIdx.value, studentId, dayNum)
+  const key = getAttendanceKey(
+    selectedKelas.value,
+    selectedTahun.value,
+    activeMonthIdx.value,
+    studentId,
+    dayNum
+  )
   return attendanceMap.value[key] || null
 }
 
@@ -60,7 +66,7 @@ const getStudentTotal = (studentId, statusType) => {
   const currentKelas = selectedKelas.value
   const currentTahun = selectedTahun.value
   const currentMonthIdx = activeMonthIdx.value
-  
+
   for (let d = 1; d <= daysCount; d++) {
     const key = getAttendanceKey(currentKelas, currentTahun, currentMonthIdx, studentId, d)
     if (attendanceMap.value[key] === statusType) {
@@ -77,7 +83,7 @@ onMounted(() => {
   if (saved) {
     attendanceMap.value = JSON.parse(saved)
   }
-  
+
   // Auto-trigger window.print() once rendered
   setTimeout(() => {
     window.focus()
@@ -96,7 +102,9 @@ onMounted(() => {
     <!-- Print-only Header Box (Exact Wireframe match) -->
     <div class="print-header-box text-left mb-6">
       <div class="print-header-line">Kelas : {{ selectedKelas }}</div>
-      <div class="print-header-line">Tahun Pelajaran : {{ selectedTahun }} - Semester {{ selectedSemester }}</div>
+      <div class="print-header-line">
+        Tahun Pelajaran : {{ selectedTahun }} - Semester {{ selectedSemester }}
+      </div>
       <div class="print-header-line">Bulan : {{ activeMonthName }} {{ currentCalendarYear }}</div>
     </div>
 
@@ -105,12 +113,42 @@ onMounted(() => {
       <table class="border-collapse w-full print-table">
         <thead>
           <tr>
-            <th rowspan="2" class="w-[50px]">No</th>
-            <th rowspan="2" class="w-[200px] text-left pl-2">Nama Siswa</th>
-            <th rowspan="2" class="w-[110px]">NIS</th>
-            <th rowspan="2" class="w-[60px]">L/P</th>
-            <th :colspan="daysInMonth.length" class="py-2">Tanggal</th>
-            <th colspan="4" class="py-2">Jumlah</th>
+            <th
+              rowspan="2"
+              class="w-[50px]"
+            >
+              No
+            </th>
+            <th
+              rowspan="2"
+              class="w-[200px] text-left pl-2"
+            >
+              Nama Siswa
+            </th>
+            <th
+              rowspan="2"
+              class="w-[110px]"
+            >
+              NIS
+            </th>
+            <th
+              rowspan="2"
+              class="w-[60px]"
+            >
+              L/P
+            </th>
+            <th
+              :colspan="daysInMonth.length"
+              class="py-2"
+            >
+              Tanggal
+            </th>
+            <th
+              colspan="4"
+              class="py-2"
+            >
+              Jumlah
+            </th>
           </tr>
           <tr>
             <th
@@ -127,7 +165,10 @@ onMounted(() => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(student, index) in students" :key="student.id">
+          <tr
+            v-for="(student, index) in students"
+            :key="student.id"
+          >
             <td>{{ index + 1 }}</td>
             <td class="text-left font-bold pl-2">{{ student.nama }}</td>
             <td class="font-mono text-xs">{{ student.nis }}</td>
@@ -182,7 +223,7 @@ onMounted(() => {
   border: 1.5px solid #000000 !important;
 }
 
-.print-table th, 
+.print-table th,
 .print-table td {
   border: 1.5px solid #000000 !important;
   color: #000000 !important;
@@ -203,7 +244,9 @@ onMounted(() => {
 }
 
 @media print {
-  body, html, .print-page {
+  body,
+  html,
+  .print-page {
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;

@@ -19,6 +19,7 @@ export const defaultForm = {
   akreditasi: '',
   tanggal_akreditasi: '',
   no_akreditasi: '',
+  curriculum_id: '',
   emailLogin: '',
   noHpLogin: ''
 }

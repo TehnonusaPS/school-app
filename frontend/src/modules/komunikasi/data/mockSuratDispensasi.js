@@ -16,8 +16,6 @@ export const mockSuratDispensasi = [
     tanggalAwal: '2026-05-19',
     tanggalAkhir: '2026-05-19',
     perihal: 'Kegiatan Pramuka di luar sekolah',
-    siswa: [
-      { nama: 'Najwa Shihab', nisn: '0987654321', kelas: 'XI-B' }
-    ]
+    siswa: [{ nama: 'Najwa Shihab', nisn: '0987654321', kelas: 'XI-B' }]
   }
 ]

@@ -6,22 +6,24 @@ import {
   AlertDialogContent,
   AlertDialogOverlay,
   AlertDialogPortal,
-  useForwardPropsEmits,
+  useForwardPropsEmits
 } from 'reka-ui'
 import { cn } from '@/lib/utils'
 
 defineOptions({
-  inheritAttrs: false,
+  inheritAttrs: false
 })
 
 const props = withDefaults(
-  defineProps<AlertDialogContentProps & {
-    class?: HTMLAttributes['class']
-    size?: 'default' | 'sm'
-  }>(),
+  defineProps<
+    AlertDialogContentProps & {
+      class?: HTMLAttributes['class']
+      size?: 'default' | 'sm'
+    }
+  >(),
   {
-    size: 'default',
-  },
+    size: 'default'
+  }
 )
 const emits = defineEmits<AlertDialogContentEmits>()
 
@@ -43,7 +45,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
       :class="
         cn(
           'data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 bg-popover/80 dark:bg-popover/70 backdrop-blur-lg text-popover-foreground border border-border/50 dark:border-white/10 gap-4 rounded-xl p-4 shadow-2xl duration-100 data-[size=default]:max-w-xs data-[size=sm]:max-w-xs data-[size=default]:sm:max-w-sm group/alert-dialog-content fixed top-1/2 left-1/2 z-50 grid w-full -translate-x-1/2 -translate-y-1/2 outline-none',
-          props.class,
+          props.class
         )
       "
     >

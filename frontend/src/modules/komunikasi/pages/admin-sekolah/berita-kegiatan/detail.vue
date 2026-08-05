@@ -26,14 +26,14 @@ onMounted(() => {
   item.value = result
 })
 
-const formatDate = (dateStr) => {
+const formatDate = dateStr => {
   if (!dateStr) return '-'
   const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0]
   const [year, month, day] = datePart.split('-')
   return `${day}/${month}/${year}`
 }
 
-const categoryBadgeClass = (kategori) => {
+const categoryBadgeClass = kategori => {
   switch (kategori) {
     case 'AKADEMIK':
       return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20'
@@ -70,13 +70,15 @@ function handleBack() {
     <!-- Details Container -->
     <Card class="rounded-2xl border-border bg-card shadow-xs overflow-hidden">
       <CardContent class="p-6 sm:p-8 space-y-6">
-        
         <!-- Metadata Header Area -->
         <div class="flex flex-wrap items-center gap-3 pb-5 border-b border-border/80">
-          <Badge :class="categoryBadgeClass(item.kategori)" class="rounded-full px-3 py-1 font-bold uppercase tracking-wider text-[10px]">
+          <Badge
+            :class="categoryBadgeClass(item.kategori)"
+            class="rounded-full px-3 py-1 font-bold uppercase tracking-wider text-[10px]"
+          >
             {{ item.kategori }}
           </Badge>
-          
+
           <div class="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
             <Calendar class="size-4" />
             <span>Diterbitkan: {{ formatDate(item.tanggal) }}</span>
@@ -94,21 +96,34 @@ function handleBack() {
         </h2>
 
         <!-- News Main Image -->
-        <div v-if="item.gambar" class="rounded-2xl overflow-hidden max-h-[400px] w-full bg-muted border border-border/40">
-          <img :src="item.gambar" alt="Berita Gambar" class="object-cover w-full h-full max-h-[400px]" />
+        <div
+          v-if="item.gambar"
+          class="rounded-2xl overflow-hidden max-h-[400px] w-full bg-muted border border-border/40"
+        >
+          <img
+            :src="item.gambar"
+            alt="Berita Gambar"
+            class="object-cover w-full h-full max-h-[400px]"
+          />
         </div>
-        <div v-else class="rounded-2xl border border-dashed border-border bg-muted/20 p-8 flex flex-col items-center justify-center text-center gap-2">
+        <div
+          v-else
+          class="rounded-2xl border border-dashed border-border bg-muted/20 p-8 flex flex-col items-center justify-center text-center gap-2"
+        >
           <Megaphone class="size-8 text-muted-foreground/40" />
-          <p class="text-xs text-muted-foreground">Tidak ada gambar utama yang diunggah untuk berita kegiatan ini.</p>
+          <p class="text-xs text-muted-foreground">
+            Tidak ada gambar utama yang diunggah untuk berita kegiatan ini.
+          </p>
         </div>
 
         <!-- News Body Text Content -->
         <div class="prose prose-slate max-w-none text-foreground dark:prose-invert">
-          <p class="text-sm sm:text-base leading-relaxed whitespace-pre-line text-slate-700 dark:text-slate-300">
+          <p
+            class="text-sm sm:text-base leading-relaxed whitespace-pre-line text-slate-700 dark:text-slate-300"
+          >
             {{ item.isi }}
           </p>
         </div>
-
       </CardContent>
     </Card>
   </div>

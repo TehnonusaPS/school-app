@@ -1,4 +1,12 @@
-import { Download, Plus, Settings, UserCheck, UserRound, UserRoundCheck, Users } from "lucide-vue-next";
+import {
+  Download,
+  Plus,
+  Settings,
+  UserCheck,
+  UserRound,
+  UserRoundCheck,
+  Users
+} from 'lucide-vue-next'
 import { ref, computed } from 'vue'
 import { toast } from 'vue-sonner'
 
@@ -21,7 +29,7 @@ export const filters = [
       {
         label: 'Nonaktif',
         value: 'Nonaktif'
-      },
+      }
     ]
   }
 ]
@@ -51,22 +59,30 @@ export const actions = [
 ]
 
 export const columns = [
-  { key: 'selected', label: '', type: 'checkbox'},
-  { key: 'nama', label: 'Nama Siswa',avatar: true, avatarKey: 'foto' },
+  { key: 'selected', label: '', type: 'checkbox' },
+  { key: 'nama', label: 'Nama Siswa', avatar: true, avatarKey: 'foto' },
   { key: 'nisn', label: 'NISN', type: 'code' },
-  { key: 'jenisKelamin', label: 'Jenis Kelamin', badge: true,
+  {
+    key: 'jenisKelamin',
+    label: 'Jenis Kelamin',
+    badge: true,
     badgeVariant: {
       Perempuan: 'pink',
       'Laki-laki': 'blue'
-    }  },
-  { key: 'kehadiran', label: 'Kehadiran'},
+    }
+  },
+  { key: 'kehadiran', label: 'Kehadiran' },
   { key: 'tahunMasuk', label: 'Tahun Masuk', type: 'number' },
-  { key: 'status', label: 'Status', badge: true,
+  {
+    key: 'status',
+    label: 'Status',
+    badge: true,
     badgeVariant: {
       Aktif: 'green',
-      Nonaktif: 'amber',
-    } },
-//   { key: 'actions', label: 'Aksi' }
+      Nonaktif: 'amber'
+    }
+  }
+  //   { key: 'actions', label: 'Aksi' }
 ]
 
 export const allItems = computed(() => [

@@ -4,10 +4,10 @@ import WidgetList from '@/components/dashboard-widget/WidgetList.vue'
 import { agendaData } from '../data/kepsekAgendaData'
 
 const typeColor: Record<string, string> = {
-  rapat:    'bg-blue-500',
-  tamu:     'bg-violet-500',
+  rapat: 'bg-blue-500',
+  tamu: 'bg-violet-500',
   evaluasi: 'bg-amber-500',
-  upacara:  'bg-emerald-500'
+  upacara: 'bg-emerald-500'
 }
 
 const props = defineProps({
@@ -41,9 +41,16 @@ const asAgendaItem = (item: unknown) => item as AgendaItem
   >
     <template #item="{ item }">
       <!-- Tanggal box -->
-      <div :class="['flex flex-col items-center justify-center rounded-lg text-white min-w-[44px] py-1.5', typeColor[asAgendaItem(item).type] ?? 'bg-primary']">
+      <div
+        :class="[
+          'flex flex-col items-center justify-center rounded-lg text-white min-w-[44px] py-1.5',
+          typeColor[asAgendaItem(item).type] ?? 'bg-primary'
+        ]"
+      >
         <span class="text-base font-bold leading-none">{{ asAgendaItem(item).tanggal }}</span>
-        <span class="text-[10px] font-medium leading-none mt-0.5">{{ asAgendaItem(item).bulan }}</span>
+        <span class="text-[10px] font-medium leading-none mt-0.5">{{
+          asAgendaItem(item).bulan
+        }}</span>
       </div>
       <!-- Detail -->
       <div class="min-w-0 flex-1 ml-2">

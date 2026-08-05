@@ -130,6 +130,16 @@ export default [
     }
   },
   {
+    path: 'akademik/kalender-akademik',
+    component: () => import('./pages/KalenderAkademikReadonly.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['guru', 'wali_kelas', 'orang_tua'],
+      title: 'Kalender Akademik',
+      parent: 'Akademik'
+    }
+  },
+  {
     path: 'akademik/kegiatan',
     component: () => import('./pages/KegiatanAkademik.vue'),
     meta: {

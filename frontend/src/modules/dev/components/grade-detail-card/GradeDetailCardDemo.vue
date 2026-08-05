@@ -29,18 +29,14 @@ const matematikaGradeDetails = [
     weight: 25,
     score: 78,
     maxScore: 100,
-    items: [
-      { label: 'Ujian Tertulis UTS', value: '78/100' }
-    ]
+    items: [{ label: 'Ujian Tertulis UTS', value: '78/100' }]
   },
   {
     label: 'Ujian Akhir Semester (UAS)',
     weight: 25,
     score: 88,
     maxScore: 100,
-    items: [
-      { label: 'Ujian Tertulis UAS', value: '88/100' }
-    ]
+    items: [{ label: 'Ujian Tertulis UAS', value: '88/100' }]
   }
 ]
 
@@ -60,18 +56,14 @@ const fisikaGradeDetails = [
     weight: 35,
     score: 82,
     maxScore: 100,
-    items: [
-      { label: 'UTS Fisika Dasar', value: '82/100' }
-    ]
+    items: [{ label: 'UTS Fisika Dasar', value: '82/100' }]
   },
   {
     label: 'Ujian Akhir Semester',
     weight: 35,
     score: 80,
     maxScore: 100,
-    items: [
-      { label: 'UAS Teori & Praktek', value: '80/100' }
-    ]
+    items: [{ label: 'UAS Teori & Praktek', value: '80/100' }]
   }
 ]
 </script>

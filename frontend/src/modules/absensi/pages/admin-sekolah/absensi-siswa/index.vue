@@ -57,7 +57,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import DataTableCard from '@/components/data-table/DataTableCard.vue'
 import { usePagination } from '@/composables/usePagination'

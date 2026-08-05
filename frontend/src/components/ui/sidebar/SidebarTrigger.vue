@@ -22,7 +22,10 @@ const { toggleSidebar, isMobile } = useSidebar()
     :class="cn('', props.class)"
     @click="toggleSidebar"
   >
-    <component :is="isMobile ? Menu : PanelLeftIcon" class="cn-rtl-flip" />
+    <component
+      :is="isMobile ? Menu : PanelLeftIcon"
+      class="cn-rtl-flip"
+    />
     <span class="sr-only">Toggle Sidebar</span>
   </Button>
 </template>

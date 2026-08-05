@@ -14,7 +14,7 @@ import {
   Wifi,
   ShieldCheck,
   LogIn,
-  LogOut,
+  LogOut
 } from 'lucide-vue-next'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -36,8 +36,17 @@ let clockInterval = null
 
 function updateClock() {
   const now = new Date()
-  currentTime.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-  currentDate.value = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  currentTime.value = now.toLocaleTimeString('id-ID', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
+  currentDate.value = now.toLocaleDateString('id-ID', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })
 }
 
 // ─── Scan State ─────────────────────────────────────────
@@ -56,10 +65,7 @@ let logPollInterval = null
 
 async function loadData() {
   try {
-    const [students, logs] = await Promise.all([
-      getStudents(),
-      getLogs()
-    ])
+    const [students, logs] = await Promise.all([getStudents(), getLogs()])
     absensiData.value = students
     scanResults.value = logs
   } catch (error) {
@@ -90,26 +96,31 @@ function startFaceScanSimulation() {
   if (faceScanInterval) clearInterval(faceScanInterval)
   faceScanInterval = setInterval(() => {
     if (activeMode.value !== 'kamera' || cameraStatus.value !== 'active') return
-    
-    let pool = [];
+
+    let pool = []
     if (scanType.value === 'Otomatis') {
-      pool = absensiData.value.filter(s => s.status === 'belum_absen' || (s.status !== 'belum_absen' && !s.jamKeluar));
+      pool = absensiData.value.filter(
+        s => s.status === 'belum_absen' || (s.status !== 'belum_absen' && !s.jamKeluar)
+      )
     } else if (scanType.value === 'Masuk') {
-      pool = absensiData.value.filter(s => s.status === 'belum_absen');
+      pool = absensiData.value.filter(s => s.status === 'belum_absen')
     } else if (scanType.value === 'Keluar') {
-      pool = absensiData.value.filter(s => s.status !== 'belum_absen' && !s.jamKeluar);
+      pool = absensiData.value.filter(s => s.status !== 'belum_absen' && !s.jamKeluar)
     }
-    
+
     if (pool.length === 0) return
     const randomSiswa = pool[Math.floor(Math.random() * pool.length)]
-    
+
     // Attempt scan for random student
     executeSuccessfulScan(randomSiswa.id, 'kamera')
   }, 8000)
 }
 
 function stopFaceScanSimulation() {
-  if (faceScanInterval) { clearInterval(faceScanInterval); faceScanInterval = null }
+  if (faceScanInterval) {
+    clearInterval(faceScanInterval)
+    faceScanInterval = null
+  }
 }
 
 // ─── Camera Handler ──────────────────────────────────────
@@ -120,7 +131,7 @@ async function startCamera() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
-      audio: false,
+      audio: false
     })
     mediaStream.value = stream
     cameraStatus.value = 'active'
@@ -165,14 +176,14 @@ async function triggerSensorScan(siswaId, type) {
 }
 
 function executeSuccessfulScan(siswaId, type) {
-  const student = absensiData.value.find(s => s.id === siswaId);
-  let actualScanType = scanType.value;
-  
+  const student = absensiData.value.find(s => s.id === siswaId)
+  let actualScanType = scanType.value
+
   if (actualScanType === 'Otomatis') {
     if (!student || student.status === 'belum_absen') {
-      actualScanType = 'Masuk';
+      actualScanType = 'Masuk'
     } else {
-      actualScanType = 'Keluar';
+      actualScanType = 'Keluar'
     }
   }
 
@@ -183,14 +194,14 @@ function executeSuccessfulScan(siswaId, type) {
         nama: newLog.nama,
         kelas: newLog.kelas,
         nisn: newLog.nisn,
-        jamMasuk: actualScanType === 'Masuk' ? newLog.waktu : (student?.jamMasuk || '-'),
+        jamMasuk: actualScanType === 'Masuk' ? newLog.waktu : student?.jamMasuk || '-',
         jamKeluar: actualScanType === 'Keluar' ? newLog.waktu : null
       }
       scanSuccessMsg.value = `Absen ${actualScanType} Berhasil!`
       scanResults.value.unshift(newLog)
       // refresh absensiData behind the scenes
-      getStudents().then(data => absensiData.value = data)
-      
+      getStudents().then(data => (absensiData.value = data))
+
       setTimeout(() => {
         if (activeScannedSiswa.value?.nama === newLog.nama) activeScannedSiswa.value = null
       }, 3500)
@@ -248,10 +259,12 @@ const filteredStudents = computed(() => absensiData.value)
 
 <template>
   <div class="kiosk-root">
-
     <!-- ══ TOP HEADER BAR ══ -->
     <header class="kiosk-header">
-      <button class="back-btn" @click="router.push('/absensi/siswa')">
+      <button
+        class="back-btn"
+        @click="router.push('/absensi/siswa')"
+      >
         <ArrowLeft class="size-4" />
         Kembali
       </button>
@@ -262,32 +275,45 @@ const filteredStudents = computed(() => absensiData.value)
       <div class="header-status">
         <span class="status-pulse" />
         <span class="status-label">Sistem Aktif</span>
-        <ShieldCheck class="size-4" style="color: var(--primary)" />
+        <ShieldCheck
+          class="size-4"
+          style="color: var(--primary)"
+        />
       </div>
     </header>
 
     <!-- ══ MAIN CONTENT ══ -->
     <main class="kiosk-main">
-
       <!-- LEFT: Scanner Viewport -->
       <section
         v-motion
         :initial="glassSlide.initial"
-        :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 100 } }"
+        :visible-once="{
+          ...glassSlide.visible,
+          transition: { ...glassSlide.visible.transition, delay: 100 }
+        }"
         class="right-panel"
       >
         <Card class="scanner-card">
-
           <!-- Scanner Header -->
           <div class="scanner-topbar">
             <div class="scanner-topbar-left">
               <span class="scanner-dot" />
               <span class="scanner-mode-text">
-                {{ activeMode === 'fingerprint' ? 'FINGERPRINT MODULE' : activeMode === 'rfid' ? 'RFID CARD READER' : 'CAMERA MODULE' }}
+                {{
+                  activeMode === 'fingerprint'
+                    ? 'FINGERPRINT MODULE'
+                    : activeMode === 'rfid'
+                      ? 'RFID CARD READER'
+                      : 'CAMERA MODULE'
+                }}
               </span>
             </div>
             <div class="scanner-topbar-right">
-              <Wifi class="size-3.5" style="color: var(--muted-foreground)" />
+              <Wifi
+                class="size-3.5"
+                style="color: var(--muted-foreground)"
+              />
               <span class="scanner-online">ONLINE</span>
             </div>
           </div>
@@ -295,7 +321,10 @@ const filteredStudents = computed(() => absensiData.value)
           <!-- ─ MODE: FINGERPRINT ─ -->
           <template v-if="activeMode === 'fingerprint'">
             <div class="scanner-viewport">
-              <div v-if="isScanningSensor" class="scan-anim">
+              <div
+                v-if="isScanningSensor"
+                class="scan-anim"
+              >
                 <div class="scan-ring-fp">
                   <div class="scan-ping-fp" />
                   <div class="scan-inner-fp" />
@@ -304,20 +333,32 @@ const filteredStudents = computed(() => absensiData.value)
                 </div>
                 <p class="scan-label-fp">Membaca Sidik Jari...</p>
               </div>
-              <div v-else-if="activeScannedSiswa" class="success-box">
+              <div
+                v-else-if="activeScannedSiswa"
+                class="success-box"
+              >
                 <div class="success-icon">
-                  <CheckCircle class="size-8" style="color: var(--primary)" />
+                  <CheckCircle
+                    class="size-8"
+                    style="color: var(--primary)"
+                  />
                 </div>
                 <p class="success-msg">{{ scanSuccessMsg }}</p>
                 <p class="success-name">{{ activeScannedSiswa.nama }}</p>
-                <p class="success-meta">{{ activeScannedSiswa.kelas }} &bull; NISN: {{ activeScannedSiswa.nisn }}</p>
+                <p class="success-meta">
+                  {{ activeScannedSiswa.kelas }} &bull; NISN: {{ activeScannedSiswa.nisn }}
+                </p>
                 <div class="success-time-row">
                   <Clock class="size-3" />
-                  {{ activeScannedSiswa.jamKeluar ? 'Keluar' : 'Masuk' }}: {{ activeScannedSiswa.jamKeluar || activeScannedSiswa.jamMasuk }}
+                  {{ activeScannedSiswa.jamKeluar ? 'Keluar' : 'Masuk' }}:
+                  {{ activeScannedSiswa.jamKeluar || activeScannedSiswa.jamMasuk }}
                 </div>
                 <span class="success-chip">FINGERPRINT VERIFIED</span>
               </div>
-              <div v-else class="idle-state">
+              <div
+                v-else
+                class="idle-state"
+              >
                 <div class="idle-ring">
                   <Fingerprint class="size-14 idle-icon" />
                 </div>
@@ -330,7 +371,10 @@ const filteredStudents = computed(() => absensiData.value)
           <!-- ─ MODE: RFID ─ -->
           <template v-else-if="activeMode === 'rfid'">
             <div class="scanner-viewport">
-              <div v-if="isScanningSensor" class="scan-anim">
+              <div
+                v-if="isScanningSensor"
+                class="scan-anim"
+              >
                 <div class="scan-ring-rfid">
                   <div class="scan-ping-rfid" />
                   <div class="scan-inner-rfid" />
@@ -338,27 +382,42 @@ const filteredStudents = computed(() => absensiData.value)
                 </div>
                 <p class="scan-label-rfid">Membaca RFID Card...</p>
               </div>
-              <div v-else-if="activeScannedSiswa" class="success-box">
+              <div
+                v-else-if="activeScannedSiswa"
+                class="success-box"
+              >
                 <div class="success-icon">
-                  <CheckCircle class="size-8" style="color: var(--primary)" />
+                  <CheckCircle
+                    class="size-8"
+                    style="color: var(--primary)"
+                  />
                 </div>
                 <p class="success-msg">{{ scanSuccessMsg }}</p>
                 <p class="success-name">{{ activeScannedSiswa.nama }}</p>
-                <p class="success-meta">{{ activeScannedSiswa.kelas }} &bull; NISN: {{ activeScannedSiswa.nisn }}</p>
+                <p class="success-meta">
+                  {{ activeScannedSiswa.kelas }} &bull; NISN: {{ activeScannedSiswa.nisn }}
+                </p>
                 <div class="success-time-row">
                   <Clock class="size-3" />
-                  {{ activeScannedSiswa.jamKeluar ? 'Keluar' : 'Masuk' }}: {{ activeScannedSiswa.jamKeluar || activeScannedSiswa.jamMasuk }}
+                  {{ activeScannedSiswa.jamKeluar ? 'Keluar' : 'Masuk' }}:
+                  {{ activeScannedSiswa.jamKeluar || activeScannedSiswa.jamMasuk }}
                 </div>
                 <span class="success-chip">RFID CARD VERIFIED</span>
               </div>
-              <div v-else class="idle-state">
+              <div
+                v-else
+                class="idle-state"
+              >
                 <div class="idle-ring idle-ring--rfid">
                   <Radio class="size-14 idle-icon" />
                 </div>
                 <p class="idle-title">Mode Scan Aktif</p>
                 <p class="idle-sub">Dekatkan kartu RFID ke reader</p>
                 <div class="rfid-input-row">
-                  <Radio class="size-3.5" style="color: var(--muted-foreground)" />
+                  <Radio
+                    class="size-3.5"
+                    style="color: var(--muted-foreground)"
+                  />
                   <span class="rfid-scan-text">Scanning...</span>
                 </div>
                 <p class="rfid-hint">Jangan klik di luar kotak ini</p>
@@ -369,37 +428,78 @@ const filteredStudents = computed(() => absensiData.value)
           <!-- ─ MODE: KAMERA ─ -->
           <template v-else-if="activeMode === 'kamera'">
             <div class="scanner-viewport scanner-viewport--cam">
-              <video v-if="cameraStatus === 'active'" ref="videoRef" autoplay playsinline class="cam-feed" />
-              <div v-if="cameraStatus === 'active' && !activeScannedSiswa" class="cam-overlay">
+              <video
+                v-if="cameraStatus === 'active'"
+                ref="videoRef"
+                autoplay
+                playsinline
+                class="cam-feed"
+              />
+              <div
+                v-if="cameraStatus === 'active' && !activeScannedSiswa"
+                class="cam-overlay"
+              >
                 <span class="corner corner-tl" />
                 <span class="corner corner-tr" />
                 <span class="corner corner-bl" />
                 <span class="corner corner-br" />
                 <div class="cam-scan-line" />
               </div>
-              <div v-if="cameraStatus === 'loading'" class="cam-state-wrap">
+              <div
+                v-if="cameraStatus === 'loading'"
+                class="cam-state-wrap"
+              >
                 <div class="cam-spinner" />
                 <span class="cam-state-text">Menghubungkan Kamera...</span>
               </div>
-              <div v-if="cameraStatus === 'error'" class="cam-state-wrap">
+              <div
+                v-if="cameraStatus === 'error'"
+                class="cam-state-wrap"
+              >
                 <div class="cam-error-icon"><CameraOff class="size-7" /></div>
                 <p class="cam-error-text">{{ cameraError }}</p>
-                <button class="cam-retry-btn" @click="startCamera">Coba Ulang</button>
+                <button
+                  class="cam-retry-btn"
+                  @click="startCamera"
+                >
+                  Coba Ulang
+                </button>
               </div>
-              <div v-if="cameraStatus === 'idle'" class="cam-state-wrap">
-                <div class="cam-idle-icon"><Camera class="size-10" style="color: var(--muted-foreground)" /></div>
+              <div
+                v-if="cameraStatus === 'idle'"
+                class="cam-state-wrap"
+              >
+                <div class="cam-idle-icon">
+                  <Camera
+                    class="size-10"
+                    style="color: var(--muted-foreground)"
+                  />
+                </div>
                 <p class="cam-idle-text">Kamera siap dinyalakan</p>
-                <button class="cam-start-btn" @click="startCamera">
+                <button
+                  class="cam-start-btn"
+                  @click="startCamera"
+                >
                   <Camera class="size-4" />
                   Nyalakan Kamera
                 </button>
               </div>
-              <div v-if="activeScannedSiswa && cameraStatus === 'active'" class="cam-success-overlay">
+              <div
+                v-if="activeScannedSiswa && cameraStatus === 'active'"
+                class="cam-success-overlay"
+              >
                 <div class="success-box">
-                  <div class="success-icon"><CheckCircle class="size-8" style="color: var(--primary)" /></div>
+                  <div class="success-icon">
+                    <CheckCircle
+                      class="size-8"
+                      style="color: var(--primary)"
+                    />
+                  </div>
                   <p class="success-msg">{{ scanSuccessMsg }}</p>
                   <p class="success-name">{{ activeScannedSiswa.nama }}</p>
-                  <p class="success-meta">{{ activeScannedSiswa.kelas }} &bull; NISN: {{ activeScannedSiswa.nisn }}</p>
+                  <p class="success-meta">
+                    {{ activeScannedSiswa.kelas }} &bull; NISN: {{ activeScannedSiswa.nisn }}
+                  </p>
                   <span class="success-chip">FACE SCAN VERIFIED</span>
                 </div>
               </div>
@@ -413,10 +513,15 @@ const filteredStudents = computed(() => absensiData.value)
               <span class="footer-text">DEVICE COMPLIANT · ONLINE</span>
             </div>
             <span class="footer-ver">
-              {{ activeMode === 'fingerprint' ? 'FINGER_V2.1' : activeMode === 'rfid' ? 'RFID_RF4.0' : 'CAM_HD_1.0' }}
+              {{
+                activeMode === 'fingerprint'
+                  ? 'FINGER_V2.1'
+                  : activeMode === 'rfid'
+                    ? 'RFID_RF4.0'
+                    : 'CAM_HD_1.0'
+              }}
             </span>
           </div>
-
         </Card>
       </section>
 
@@ -424,24 +529,32 @@ const filteredStudents = computed(() => absensiData.value)
       <section
         v-motion
         :initial="glassSlide.initial"
-        :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 250 } }"
+        :visible-once="{
+          ...glassSlide.visible,
+          transition: { ...glassSlide.visible.transition, delay: 250 }
+        }"
         class="left-panel"
       >
-
         <!-- Clock Card -->
         <Card class="clock-card">
           <div class="clock-time">{{ currentTime }}</div>
           <div class="clock-date">
-            <CalendarDays class="size-4" style="color: var(--muted-foreground)" />
+            <CalendarDays
+              class="size-4"
+              style="color: var(--muted-foreground)"
+            />
             <span>{{ currentDate }}</span>
           </div>
           <div class="divider" />
-          
+
           <!-- Scan Type Switcher -->
           <div class="type-tabs mb-4">
             <button
               @click="scanType = 'Otomatis'"
-              :class="['type-tab', scanType === 'Otomatis' ? 'type-tab--active type-tab--otomatis' : '']"
+              :class="[
+                'type-tab',
+                scanType === 'Otomatis' ? 'type-tab--active type-tab--otomatis' : ''
+              ]"
             >
               <ShieldCheck class="size-4" />
               <span>Otomatis</span>
@@ -455,13 +568,16 @@ const filteredStudents = computed(() => absensiData.value)
             </button>
             <button
               @click="scanType = 'Keluar'"
-              :class="['type-tab', scanType === 'Keluar' ? 'type-tab--active type-tab--keluar' : '']"
+              :class="[
+                'type-tab',
+                scanType === 'Keluar' ? 'type-tab--active type-tab--keluar' : ''
+              ]"
             >
               <LogOut class="size-4" />
               <span>Pulang</span>
             </button>
           </div>
-          
+
           <!-- Module Switcher -->
           <div class="mode-tabs">
             <button
@@ -491,13 +607,26 @@ const filteredStudents = computed(() => absensiData.value)
         <!-- Scan Log List -->
         <Card class="log-card">
           <div class="log-header">
-            <UserCheck class="size-4" style="color: var(--primary)" />
+            <UserCheck
+              class="size-4"
+              style="color: var(--primary)"
+            />
             <span class="log-title">Riwayat Scan</span>
-            <Badge variant="secondary" class="log-badge">{{ scanResults.length }}</Badge>
+            <Badge
+              variant="secondary"
+              class="log-badge"
+              >{{ scanResults.length }}</Badge
+            >
           </div>
           <div class="log-list">
-            <div v-if="scanResults.length === 0" class="log-empty">
-              <Clock class="size-5" style="color: var(--muted-foreground)" />
+            <div
+              v-if="scanResults.length === 0"
+              class="log-empty"
+            >
+              <Clock
+                class="size-5"
+                style="color: var(--muted-foreground)"
+              />
               <span>Menunggu pemindaian pertama...</span>
             </div>
             <div
@@ -510,13 +639,15 @@ const filteredStudents = computed(() => absensiData.value)
                 <p class="log-name">{{ log.nama }}</p>
                 <p class="log-meta">{{ log.kelas }} · {{ log.tipe }} · {{ log.waktu }}</p>
               </div>
-              <Badge variant="outline" :class="['log-badge-type', log.tipe === 'Masuk' ? 'badge-masuk' : 'badge-keluar']">
+              <Badge
+                variant="outline"
+                :class="['log-badge-type', log.tipe === 'Masuk' ? 'badge-masuk' : 'badge-keluar']"
+              >
                 {{ log.tipe }}
               </Badge>
             </div>
           </div>
         </Card>
-
       </section>
     </main>
   </div>
@@ -571,7 +702,9 @@ const filteredStudents = computed(() => absensiData.value)
   border-color: var(--primary);
 }
 
-.header-center { text-align: center; }
+.header-center {
+  text-align: center;
+}
 .header-title {
   font-size: 1.05rem;
   font-weight: 800;
@@ -594,7 +727,8 @@ const filteredStudents = computed(() => absensiData.value)
   font-weight: 600;
 }
 .status-pulse {
-  width: 8px; height: 8px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--primary);
   animation: kpulse 2s infinite;
@@ -628,7 +762,7 @@ const filteredStudents = computed(() => absensiData.value)
   border-radius: var(--radius-lg, 14px);
   padding: 1.5rem 1.75rem;
   text-align: center;
-  box-shadow: var(--glass-shadow, 0 2px 8px rgba(0,0,0,0.06));
+  box-shadow: var(--glass-shadow, 0 2px 8px rgba(0, 0, 0, 0.06));
 }
 
 .clock-time {
@@ -692,21 +826,27 @@ const filteredStudents = computed(() => absensiData.value)
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
   border: 1px solid rgba(59, 130, 246, 0.2);
 }
-.dark .type-tab--otomatis { color: #60a5fa; }
+.dark .type-tab--otomatis {
+  color: #60a5fa;
+}
 
 .type-tab--masuk {
   color: #10b981; /* emerald-500 */
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
   border: 1px solid rgba(16, 185, 129, 0.2);
 }
-.dark .type-tab--masuk { color: #34d399; }
+.dark .type-tab--masuk {
+  color: #34d399;
+}
 
 .type-tab--keluar {
   color: #f59e0b; /* amber-500 */
   box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
   border: 1px solid rgba(245, 158, 11, 0.2);
 }
-.dark .type-tab--keluar { color: #fbbf24; }
+.dark .type-tab--keluar {
+  color: #fbbf24;
+}
 
 /* Mode Tabs */
 .mode-tabs {
@@ -741,7 +881,7 @@ const filteredStudents = computed(() => absensiData.value)
   background: var(--background);
   color: var(--primary);
   border: 1px solid var(--border);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 /* Log Card */
@@ -754,7 +894,7 @@ const filteredStudents = computed(() => absensiData.value)
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: var(--glass-shadow, 0 2px 8px rgba(0,0,0,0.06));
+  box-shadow: var(--glass-shadow, 0 2px 8px rgba(0, 0, 0, 0.06));
 }
 .log-header {
   display: flex;
@@ -807,21 +947,42 @@ const filteredStudents = computed(() => absensiData.value)
   animation: kslideIn 0.25s ease;
 }
 .log-avatar {
-  width: 30px; height: 30px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: var(--accent);
   border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.6rem; font-weight: 700; color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--primary);
   flex-shrink: 0;
 }
-.log-info { flex: 1; min-width: 0; }
-.log-name { font-size: 0.72rem; font-weight: 600; color: var(--foreground); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.log-meta { font-size: 0.62rem; color: var(--muted-foreground); margin-top: 1px; }
+.log-info {
+  flex: 1;
+  min-width: 0;
+}
+.log-name {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.log-meta {
+  font-size: 0.62rem;
+  color: var(--muted-foreground);
+  margin-top: 1px;
+}
 .log-badge-type {
-  font-size: 0.58rem; font-weight: 700;
+  font-size: 0.58rem;
+  font-weight: 700;
   padding: 0.1rem 0.4rem;
-  border-radius: 4px; flex-shrink: 0;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 .badge-masuk {
   background: color-mix(in oklch, var(--primary) 12%, transparent);
@@ -837,7 +998,10 @@ const filteredStudents = computed(() => absensiData.value)
 /* ══════════════════════════════════════════
    RIGHT PANEL: SCANNER CARD
 ══════════════════════════════════════════ */
-.right-panel { display: flex; flex-direction: column; }
+.right-panel {
+  display: flex;
+  flex-direction: column;
+}
 
 .scanner-card {
   flex: 1;
@@ -849,7 +1013,7 @@ const filteredStudents = computed(() => absensiData.value)
   flex-direction: column;
   gap: 0.875rem;
   overflow: hidden;
-  box-shadow: var(--glass-shadow, 0 2px 8px rgba(0,0,0,0.06));
+  box-shadow: var(--glass-shadow, 0 2px 8px rgba(0, 0, 0, 0.06));
 }
 
 .scanner-topbar {
@@ -861,9 +1025,14 @@ const filteredStudents = computed(() => absensiData.value)
   border-radius: var(--radius-md, 10px);
   padding: 0.5rem 0.875rem;
 }
-.scanner-topbar-left { display: flex; align-items: center; gap: 0.5rem; }
+.scanner-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 .scanner-dot {
-  width: 8px; height: 8px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--primary);
   animation: kpulse 1.5s infinite;
@@ -874,7 +1043,11 @@ const filteredStudents = computed(() => absensiData.value)
   color: var(--muted-foreground);
   letter-spacing: 0.07em;
 }
-.scanner-topbar-right { display: flex; align-items: center; gap: 0.375rem; }
+.scanner-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
 .scanner-online {
   font-size: 0.62rem;
   font-weight: 600;
@@ -895,69 +1068,127 @@ const filteredStudents = computed(() => absensiData.value)
   border: 1px solid var(--border);
   overflow: hidden;
 }
-.scanner-viewport--cam { background: #000; }
+.scanner-viewport--cam {
+  background: #000;
+}
 
 /* Scan Animation: Fingerprint */
-.scan-anim { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; }
+.scan-anim {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
 
 .scan-ring-fp {
   position: relative;
-  width: 130px; height: 130px;
+  width: 130px;
+  height: 130px;
   border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: color-mix(in oklch, var(--primary) 8%, transparent);
   border: 1px solid color-mix(in oklch, var(--primary) 25%, transparent);
 }
 .scan-ping-fp {
-  position: absolute; inset: 0; border-radius: 50%;
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
   border: 1px solid color-mix(in oklch, var(--primary) 30%, transparent);
-  animation: kping 1.2s cubic-bezier(0,0,0.2,1) infinite;
+  animation: kping 1.2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 .scan-inner-fp {
-  position: absolute; inset: 12px; border-radius: 50%;
+  position: absolute;
+  inset: 12px;
+  border-radius: 50%;
   border: 1px solid color-mix(in oklch, var(--primary) 20%, transparent);
   animation: kpulse 1.5s ease-in-out infinite;
 }
-.scan-icon-fp { color: var(--primary); position: relative; z-index: 10; animation: kpulse 1.5s ease-in-out infinite; }
+.scan-icon-fp {
+  color: var(--primary);
+  position: relative;
+  z-index: 10;
+  animation: kpulse 1.5s ease-in-out infinite;
+}
 .scan-laser-fp {
-  position: absolute; left: 18px; right: 18px;
-  height: 2px; border-radius: 999px;
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  height: 2px;
+  border-radius: 999px;
   background: var(--primary);
   box-shadow: 0 0 8px var(--primary);
   animation: kscanY 1.8s ease-in-out infinite;
   z-index: 20;
 }
-.scan-label-fp { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--primary); animation: kpulse 1.5s ease-in-out infinite; }
+.scan-label-fp {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--primary);
+  animation: kpulse 1.5s ease-in-out infinite;
+}
 
 /* Scan Animation: RFID */
 .scan-ring-rfid {
   position: relative;
-  width: 130px; height: 130px;
+  width: 130px;
+  height: 130px;
   border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: color-mix(in oklch, var(--primary) 8%, transparent);
   border: 1px solid color-mix(in oklch, var(--primary) 25%, transparent);
 }
 .scan-ping-rfid {
-  position: absolute; inset: 0; border-radius: 50%;
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
   border: 1px solid color-mix(in oklch, var(--primary) 30%, transparent);
-  animation: kping 1.2s cubic-bezier(0,0,0.2,1) infinite;
+  animation: kping 1.2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 .scan-inner-rfid {
-  position: absolute; inset: 12px; border-radius: 50%;
+  position: absolute;
+  inset: 12px;
+  border-radius: 50%;
   border: 1px solid color-mix(in oklch, var(--primary) 20%, transparent);
   animation: kpulse 1.5s ease-in-out infinite;
 }
-.scan-icon-rfid { color: var(--primary); position: relative; z-index: 10; animation: kpulse 1.5s ease-in-out infinite; }
-.scan-label-rfid { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--primary); animation: kpulse 1.5s ease-in-out infinite; }
+.scan-icon-rfid {
+  color: var(--primary);
+  position: relative;
+  z-index: 10;
+  animation: kpulse 1.5s ease-in-out infinite;
+}
+.scan-label-rfid {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--primary);
+  animation: kpulse 1.5s ease-in-out infinite;
+}
 
 /* Idle State */
-.idle-state { display: flex; flex-direction: column; align-items: center; gap: 0.875rem; text-align: center; padding: 1rem; }
+.idle-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.875rem;
+  text-align: center;
+  padding: 1rem;
+}
 .idle-ring {
-  width: 130px; height: 130px;
+  width: 130px;
+  height: 130px;
   border-radius: 50%;
   border: 2px dashed color-mix(in oklch, var(--primary) 35%, var(--border));
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: color-mix(in oklch, var(--primary) 5%, transparent);
   transition: all 0.3s;
 }
@@ -965,135 +1196,366 @@ const filteredStudents = computed(() => absensiData.value)
   border-color: color-mix(in oklch, var(--primary) 60%, transparent);
   background: color-mix(in oklch, var(--primary) 8%, transparent);
 }
-.idle-icon { color: color-mix(in oklch, var(--primary) 50%, transparent); }
-.idle-title { font-size: 0.95rem; font-weight: 700; color: var(--foreground); }
-.idle-sub { font-size: 0.72rem; color: var(--muted-foreground); max-width: 200px; }
+.idle-icon {
+  color: color-mix(in oklch, var(--primary) 50%, transparent);
+}
+.idle-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+.idle-sub {
+  font-size: 0.72rem;
+  color: var(--muted-foreground);
+  max-width: 200px;
+}
 
 /* RFID input row */
 .rfid-input-row {
-  display: flex; align-items: center; gap: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   background: color-mix(in oklch, var(--primary) 6%, var(--muted));
   border: 1px solid color-mix(in oklch, var(--primary) 20%, var(--border));
-  border-radius: 8px; padding: 0.45rem 0.875rem;
+  border-radius: 8px;
+  padding: 0.45rem 0.875rem;
   margin-top: 0.375rem;
 }
-.rfid-scan-text { font-size: 0.72rem; color: var(--primary); font-weight: 600; animation: kpulse 1.5s ease-in-out infinite; }
-.rfid-hint { font-size: 0.62rem; color: var(--muted-foreground); }
+.rfid-scan-text {
+  font-size: 0.72rem;
+  color: var(--primary);
+  font-weight: 600;
+  animation: kpulse 1.5s ease-in-out infinite;
+}
+.rfid-hint {
+  font-size: 0.62rem;
+  color: var(--muted-foreground);
+}
 
 /* Success Box */
 .success-box {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 0.4rem; text-align: center; padding: 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  text-align: center;
+  padding: 1.5rem 1.25rem;
   background: color-mix(in oklch, var(--primary) 6%, var(--card));
   border: 1px solid color-mix(in oklch, var(--primary) 20%, var(--border));
   border-radius: var(--radius-lg, 14px);
-  max-width: 260px; width: 100%;
+  max-width: 260px;
+  width: 100%;
   animation: kzoomIn 0.2s ease;
 }
 .success-icon {
-  width: 54px; height: 54px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   background: color-mix(in oklch, var(--primary) 10%, transparent);
   border: 1px solid color-mix(in oklch, var(--primary) 20%, transparent);
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   animation: kbounce 2s infinite;
 }
-.success-msg { font-size: 0.65rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em; }
-.success-name { font-size: 1.05rem; font-weight: 700; color: var(--foreground); }
-.success-meta { font-size: 0.72rem; color: var(--muted-foreground); }
+.success-msg {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.success-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+.success-meta {
+  font-size: 0.72rem;
+  color: var(--muted-foreground);
+}
 .success-time-row {
-  display: flex; align-items: center; gap: 0.25rem;
-  font-size: 0.7rem; color: var(--muted-foreground);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
 }
 .success-chip {
-  font-size: 0.58rem; font-weight: 700;
+  font-size: 0.58rem;
+  font-weight: 700;
   color: var(--primary);
   background: color-mix(in oklch, var(--primary) 10%, transparent);
   border: 1px solid color-mix(in oklch, var(--primary) 20%, transparent);
   padding: 0.125rem 0.625rem;
-  border-radius: 4px; letter-spacing: 0.07em; font-family: monospace;
+  border-radius: 4px;
+  letter-spacing: 0.07em;
+  font-family: monospace;
 }
 
 /* Camera */
-.cam-feed { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.cam-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 10; }
-.corner { position: absolute; width: 20px; height: 20px; border-color: var(--primary); border-style: solid; }
-.corner-tl { top: 20%; left: 22%; border-width: 2px 0 0 2px; border-radius: 4px 0 0 0; }
-.corner-tr { top: 20%; right: 22%; border-width: 2px 2px 0 0; border-radius: 0 4px 0 0; }
-.corner-bl { bottom: 20%; left: 22%; border-width: 0 0 2px 2px; border-radius: 0 0 0 4px; }
-.corner-br { bottom: 20%; right: 22%; border-width: 0 2px 2px 0; border-radius: 0 0 4px 0; }
+.cam-feed {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cam-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+.corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: var(--primary);
+  border-style: solid;
+}
+.corner-tl {
+  top: 20%;
+  left: 22%;
+  border-width: 2px 0 0 2px;
+  border-radius: 4px 0 0 0;
+}
+.corner-tr {
+  top: 20%;
+  right: 22%;
+  border-width: 2px 2px 0 0;
+  border-radius: 0 4px 0 0;
+}
+.corner-bl {
+  bottom: 20%;
+  left: 22%;
+  border-width: 0 0 2px 2px;
+  border-radius: 0 0 0 4px;
+}
+.corner-br {
+  bottom: 20%;
+  right: 22%;
+  border-width: 0 2px 2px 0;
+  border-radius: 0 0 4px 0;
+}
 .cam-scan-line {
-  position: absolute; left: 22%; right: 22%; height: 2px;
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  height: 2px;
   background: linear-gradient(90deg, transparent, var(--primary), transparent);
   animation: kscan 2s linear infinite;
   box-shadow: 0 0 8px var(--ring);
   border-radius: 999px;
 }
 .cam-state-wrap {
-  position: absolute; inset: 0; z-index: 20;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 0.75rem; background: rgba(0,0,0,0.65); text-align: center; padding: 1rem;
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: rgba(0, 0, 0, 0.65);
+  text-align: center;
+  padding: 1rem;
 }
 .cam-spinner {
-  width: 30px; height: 30px;
+  width: 30px;
+  height: 30px;
   border: 3px solid color-mix(in oklch, var(--primary) 30%, transparent);
   border-top-color: var(--primary);
-  border-radius: 50%; animation: kspin 0.8s linear infinite;
+  border-radius: 50%;
+  animation: kspin 0.8s linear infinite;
 }
-.cam-state-text { font-size: 0.72rem; color: #94a3b8; font-weight: 600; }
+.cam-state-text {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
 .cam-error-icon {
-  padding: 1rem; border-radius: 50%;
-  background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.2); color: #f87171;
+  padding: 1rem;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #f87171;
 }
-.cam-error-text { font-size: 0.72rem; color: #f87171; max-width: 200px; }
+.cam-error-text {
+  font-size: 0.72rem;
+  color: #f87171;
+  max-width: 200px;
+}
 .cam-retry-btn {
-  padding: 0.375rem 1rem; border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.08); color: #e2e8f0;
-  font-size: 0.72rem; cursor: pointer;
+  padding: 0.375rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  font-size: 0.72rem;
+  cursor: pointer;
 }
 .cam-idle-icon {
-  padding: 1.25rem; border-radius: 50%;
-  background: var(--muted); border: 1px solid var(--border);
+  padding: 1.25rem;
+  border-radius: 50%;
+  background: var(--muted);
+  border: 1px solid var(--border);
 }
-.cam-idle-text { font-size: 0.72rem; color: var(--muted-foreground); }
+.cam-idle-text {
+  font-size: 0.72rem;
+  color: var(--muted-foreground);
+}
 .cam-start-btn {
-  display: flex; align-items: center; gap: 0.5rem;
-  padding: 0.5rem 1.25rem; border-radius: var(--radius-md, 10px);
-  background: var(--primary); color: var(--primary-foreground);
-  border: none; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-md, 10px);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
   transition: opacity 0.2s;
 }
-.cam-start-btn:hover { opacity: 0.88; }
+.cam-start-btn:hover {
+  opacity: 0.88;
+}
 .cam-success-overlay {
-  position: absolute; inset: 0; z-index: 30;
-  background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);
-  display: flex; align-items: center; justify-content: center;
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: var(--radius-md, 10px);
 }
 
 /* Scanner Footer */
 .scanner-footer {
-  display: flex; align-items: center; justify-content: space-between;
-  background: var(--muted); border: 1px solid var(--border);
-  border-radius: var(--radius-md, 10px); padding: 0.45rem 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  padding: 0.45rem 0.875rem;
 }
-.scanner-footer-left { display: flex; align-items: center; gap: 0.5rem; }
-.footer-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); animation: kpulse 2s infinite; }
-.footer-text { font-size: 0.62rem; font-weight: 700; color: var(--muted-foreground); letter-spacing: 0.06em; font-family: monospace; }
-.footer-ver { font-size: 0.6rem; color: var(--muted-foreground); font-family: monospace; opacity: 0.6; }
+.scanner-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.footer-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: kpulse 2s infinite;
+}
+.footer-text {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--muted-foreground);
+  letter-spacing: 0.06em;
+  font-family: monospace;
+}
+.footer-ver {
+  font-size: 0.6rem;
+  color: var(--muted-foreground);
+  font-family: monospace;
+  opacity: 0.6;
+}
 
 /* Simulation Panel removed */
 
 /* ══════════════════════════════════════════
    KEYFRAMES
 ══════════════════════════════════════════ */
-@keyframes kpulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
-@keyframes kping { 0% { transform: scale(0.95); opacity: 0.8; } 75%, 100% { transform: scale(1.35); opacity: 0; } }
-@keyframes kscan { 0% { top: 15%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 85%; opacity: 0; } }
-@keyframes kscanY { 0% { top: 12px; } 50% { top: calc(100% - 14px); } 100% { top: 12px; } }
-@keyframes kspin { to { transform: rotate(360deg); } }
-@keyframes kslideIn { from { transform: translateY(-5px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-@keyframes kzoomIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-@keyframes kbounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes kpulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+@keyframes kping {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  75%,
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+@keyframes kscan {
+  0% {
+    top: 15%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    top: 85%;
+    opacity: 0;
+  }
+}
+@keyframes kscanY {
+  0% {
+    top: 12px;
+  }
+  50% {
+    top: calc(100% - 14px);
+  }
+  100% {
+    top: 12px;
+  }
+}
+@keyframes kspin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes kslideIn {
+  from {
+    transform: translateY(-5px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes kzoomIn {
+  from {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes kbounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
 </style>

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\HasCurriculumMappingTrait;
 use App\Models\School;
+use App\Models\Foundation;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -11,6 +13,7 @@ use Illuminate\Support\Facades\Validator;
 
 class SchoolController extends Controller
 {
+    use HasCurriculumMappingTrait;
     /**
      * Display a listing of the resource.
      */
@@ -19,18 +22,7 @@ class SchoolController extends Controller
         $user = $request->user();
 
         if ($user->isSuperAdmin()) {
-            $query = School::select('schools.*')
-                ->with(['foundation:id,name,code', 'users' => function ($q) {
-                    $q->whereIn('role_id', function ($sq) {
-                        $sq->select('id')->from('roles')->where('name', 'admin_sekolah');
-                    });
-                }])
-                ->addSelect(['students_count' => User::selectRaw('count(*)')
-                    ->whereColumn('users.school_id', 'schools.id')
-                    ->whereIn('users.role_id', function ($sq) {
-                        $sq->select('id')->from('roles')->where('name', 'siswa');
-                    })
-                ]);
+            $query = School::with('foundation:id,name,code')->withCount('students');
 
             if ($request->has('search')) {
                 $search = $request->input('search');
@@ -63,7 +55,7 @@ class SchoolController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'data'   => $query->latest('schools.created_at')->paginate($perPage, ['*'], 'page', $page),
+'data'   => $query->latest('schools.created_at')->paginate($request->input('per_page', $perPage), ['*'], 'page', $page),
                 'stats'  => [
                     'total' => $total,
                     'active' => $active,
@@ -74,19 +66,9 @@ class SchoolController extends Controller
         }
 
         if ($user->hasRole('admin_yayasan')) {
-            $query = School::select('schools.*')
-                ->with(['foundation:id,name,code', 'users' => function ($q) {
-                    $q->whereIn('role_id', function ($sq) {
-                        $sq->select('id')->from('roles')->where('name', 'admin_sekolah');
-                    });
-                }])
-                ->where('foundation_id', $user->foundation_id)
-                ->addSelect(['students_count' => User::selectRaw('count(*)')
-                    ->whereColumn('users.school_id', 'schools.id')
-                    ->whereIn('users.role_id', function ($sq) {
-                        $sq->select('id')->from('roles')->where('name', 'siswa');
-                    })
-                ]);
+            $query = School::with('foundation:id,name,code')
+                ->withCount('students')
+                ->where('foundation_id', $user->foundation_id);
 
             if ($request->has('search')) {
                 $search = $request->input('search');
@@ -115,7 +97,7 @@ class SchoolController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'data'   => $query->latest('schools.created_at')->paginate($perPage, ['*'], 'page', $page),
+'data'   => $query->latest('schools.created_at')->paginate($request->input('per_page', $perPage), ['*'], 'page', $page),
                 'stats'  => [
                     'total' => $total,
                     'active' => $active,
@@ -125,17 +107,8 @@ class SchoolController extends Controller
             ]);
         }
 
-        if ($user->hasRole('admin_sekolah')) {
-            $school = School::select('schools.*')
-                ->with('foundation:id,name,code')
-                ->addSelect(['students_count' => User::selectRaw('count(*)')
-                    ->whereColumn('users.school_id', 'schools.id')
-                    ->whereIn('users.role_id', function ($sq) {
-                        $sq->select('id')->from('roles')->where('name', 'siswa');
-                    })
-                ])
-                ->find($user->school_id);
-
+        if ($user->school_id) { // admin_sekolah, kepala_sekolah, tata_usaha, wali_kelas
+            $school = School::with('foundation:id,name,code')->withCount('students')->find($user->school_id);
             if (!$school) {
                 return response()->json([
                     'status'  => 'error',
@@ -200,6 +173,7 @@ class SchoolController extends Controller
             'accreditation'        => 'nullable|string|max:10',
             'accreditation_date'   => 'nullable|date',
             'accreditation_number' => 'nullable|string|max:255',
+            'curriculum_id'        => 'nullable|exists:curriculums,id',
             'logo'                 => 'nullable|image|max:2048',
         ];
 
@@ -225,6 +199,14 @@ class SchoolController extends Controller
             $data['foundation_id'] = $user->foundation_id;
         }
 
+        // Inherit curriculum_id from Foundation if not explicitly provided
+        if (empty($data['curriculum_id']) && !empty($data['foundation_id'])) {
+            $foundation = Foundation::find($data['foundation_id']);
+            if ($foundation && $foundation->curriculum_id) {
+                $data['curriculum_id'] = $foundation->curriculum_id;
+            }
+        }
+
         if ($request->hasFile('logo')) {
             $path = $request->file('logo')->store('logos', 'public');
             $data['logo'] = $path;
@@ -234,10 +216,13 @@ class SchoolController extends Controller
 
         $school = School::create($data);
 
+        // Auto sync mandatory subjects from curriculum
+        $this->syncSchoolSubjectsFromCurriculum($school);
+
         return response()->json([
             'status'  => 'success',
             'message' => 'School created successfully.',
-            'data'    => $school,
+            'data'    => $school->load('curriculum'),
         ], 201);
     }
 

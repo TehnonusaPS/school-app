@@ -21,7 +21,11 @@ defineEmits(['update:modelValue'])
   <Field :data-invalid="!!error">
     <FieldLabel>
       {{ label }}
-      <span v-if="required"class="text-destructive">*</span>
+      <span
+        v-if="required"
+        class="text-destructive"
+        >*</span
+      >
     </FieldLabel>
 
     <FieldContent>
@@ -30,7 +34,7 @@ defineEmits(['update:modelValue'])
         :placeholder="placeholder"
         :model-value="modelValue"
         @update:model-value="$emit('update:modelValue', $event)"
-        :class="{'border-destructive': error }"
+        :class="{ 'border-destructive': error }"
       />
     </FieldContent>
     <FieldError v-if="error">{{ error }}</FieldError>

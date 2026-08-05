@@ -69,7 +69,10 @@ const filteredStudents = computed(() => {
     <Card
       v-motion
       :initial="glassSlide.initial"
-      :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 100 } }"
+      :visible-once="{
+        ...glassSlide.visible,
+        transition: { ...glassSlide.visible.transition, delay: 100 }
+      }"
       class="border border-border bg-card/60 backdrop-blur-md rounded-2xl shadow-sm overflow-hidden"
     >
       <CardContent class="p-6">
@@ -114,7 +117,10 @@ const filteredStudents = computed(() => {
     <div
       v-motion
       :initial="glassSlide.initial"
-      :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 200 } }"
+      :visible-once="{
+        ...glassSlide.visible,
+        transition: { ...glassSlide.visible.transition, delay: 200 }
+      }"
       class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4"
     >
       <StatCard
@@ -152,7 +158,10 @@ const filteredStudents = computed(() => {
     <Card
       v-motion
       :initial="glassSlide.initial"
-      :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 300 } }"
+      :visible-once="{
+        ...glassSlide.visible,
+        transition: { ...glassSlide.visible.transition, delay: 300 }
+      }"
       class="border border-border bg-card/60 backdrop-blur-md rounded-2xl shadow-sm overflow-hidden"
     >
       <CardContent class="p-0">
@@ -189,14 +198,21 @@ const filteredStudents = computed(() => {
                   <Badge
                     :variant="student.gender === 'L' ? 'primary' : 'outline'"
                     class="font-semibold text-xs px-2.5 py-0.5 rounded-full"
-                    :class="student.gender === 'L' ? 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-none' : 'bg-pink-500/10 text-pink-500 hover:bg-pink-500/20 border-none'"
+                    :class="
+                      student.gender === 'L'
+                        ? 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-none'
+                        : 'bg-pink-500/10 text-pink-500 hover:bg-pink-500/20 border-none'
+                    "
                   >
                     {{ student.gender }}
                   </Badge>
                 </TableCell>
               </TableRow>
               <TableRow v-if="filteredStudents.length === 0">
-                <TableCell colspan="5" class="h-24 text-center text-muted-foreground font-semibold">
+                <TableCell
+                  colspan="5"
+                  class="h-24 text-center text-muted-foreground font-semibold"
+                >
                   Tidak ada data siswa untuk tahun ajaran dan kelas yang dipilih.
                 </TableCell>
               </TableRow>

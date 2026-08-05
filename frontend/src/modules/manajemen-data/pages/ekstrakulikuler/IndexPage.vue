@@ -17,23 +17,16 @@ import {
   DialogDescription,
   DialogFooter
 } from '@/components/ui/dialog'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription
+} from '@/components/ui/sheet'
 import EkskulForm from './components/EkskulForm.vue'
-import {
-  Award,
-  Plus,
-  Eye,
-  Pencil,
-  Trash2,
-  ToggleLeft,
-  ToggleRight
-} from 'lucide-vue-next'
-import {
-  getEkskul,
-  saveEkskul,
-  columns,
-  filters
-} from './data/mockEkskul'
+import { Award, Plus, Eye, Pencil, Trash2, ToggleLeft, ToggleRight } from 'lucide-vue-next'
+import { getEkskul, saveEkskul, columns, filters } from './data/mockEkskul'
 
 const auth = useAuthStore()
 
@@ -91,7 +84,7 @@ const handleCreate = () => {
   isFormSheetOpen.value = true
 }
 
-const handleEdit = (item) => {
+const handleEdit = item => {
   isEditMode.value = true
   formErrors.value = {}
   formItem.value = {
@@ -215,7 +208,7 @@ const headerActions = computed(() => {
 const isDetailSheetOpen = ref(false)
 const selectedItemForDetail = ref(null)
 
-const handleViewDetail = (id) => {
+const handleViewDetail = id => {
   const item = ekskuls.value.find(s => s.id === id)
   if (item) {
     selectedItemForDetail.value = item
@@ -247,7 +240,7 @@ const detailSections = computed(() => {
 })
 
 // --- Toggle Status ---
-const handleToggleStatus = (item) => {
+const handleToggleStatus = item => {
   const nextStatus = item.status === 'aktif' ? 'nonaktif' : 'aktif'
   const updated = ekskuls.value.map(s => {
     if (s.id === item.id) {
@@ -266,7 +259,7 @@ const handleToggleStatus = (item) => {
 const isDeleteConfirmOpen = ref(false)
 const selectedItemToDelete = ref(null)
 
-const openDeleteConfirm = (item) => {
+const openDeleteConfirm = item => {
   selectedItemToDelete.value = item
   isDeleteConfirmOpen.value = true
 }
@@ -374,7 +367,11 @@ const confirmDelete = () => {
             <!-- Toggle Status -->
             <button
               class="flex flex-col items-center justify-center gap-0.5 group/btn focus:outline-none transition-colors"
-              :class="item.status === 'aktif' ? 'text-emerald-500 hover:text-emerald-600' : 'text-muted-foreground hover:text-foreground'"
+              :class="
+                item.status === 'aktif'
+                  ? 'text-emerald-500 hover:text-emerald-600'
+                  : 'text-muted-foreground hover:text-foreground'
+              "
               :title="item.status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan'"
               @click="handleToggleStatus(item)"
             >
@@ -403,18 +400,28 @@ const confirmDelete = () => {
 
     <!-- Form Sheet (Create / Edit) -->
     <Sheet v-model:open="isFormSheetOpen">
-      <SheetContent :show-close-button="false" class="sm:max-w-[500px] flex flex-col h-full gap-2">
+      <SheetContent
+        :show-close-button="false"
+        class="sm:max-w-[500px] flex flex-col h-full gap-2"
+      >
         <SheetHeader class="border-b border-border pb-3 text-left">
           <SheetTitle class="text-base font-bold text-foreground">
             {{ isEditMode ? 'Edit Ekstrakulikuler' : 'Tambah Ekstrakulikuler' }}
           </SheetTitle>
           <SheetDescription class="text-xs text-muted-foreground">
-            {{ isEditMode ? 'Perbarui informasi ekstrakulikuler.' : 'Tambahkan ekstrakulikuler baru untuk sekolah.' }}
+            {{
+              isEditMode
+                ? 'Perbarui informasi ekstrakulikuler.'
+                : 'Tambahkan ekstrakulikuler baru untuk sekolah.'
+            }}
           </SheetDescription>
         </SheetHeader>
 
         <div class="flex-1 overflow-y-auto py-6 pr-1 space-y-6 no-scrollbar">
-          <EkskulForm :form="formItem" :errors="formErrors" />
+          <EkskulForm
+            :form="formItem"
+            :errors="formErrors"
+          />
         </div>
 
         <div class="border-t border-border pt-4 flex items-center justify-end gap-2 shrink-0">
@@ -445,8 +452,12 @@ const confirmDelete = () => {
             <Trash2 class="h-5 w-5 text-rose-500 animate-bounce" />
             Hapus Ekstrakulikuler
           </DialogTitle>
-          <DialogDescription class="text-[10px] text-muted-foreground leading-relaxed mt-2 text-left">
-            Apakah Anda yakin ingin menghapus ekstrakulikuler <strong class="text-foreground">"{{ selectedItemToDelete?.nama }}"</strong>? Tindakan ini tidak dapat dibatalkan.
+          <DialogDescription
+            class="text-[10px] text-muted-foreground leading-relaxed mt-2 text-left"
+          >
+            Apakah Anda yakin ingin menghapus ekstrakulikuler
+            <strong class="text-foreground">"{{ selectedItemToDelete?.nama }}"</strong>? Tindakan
+            ini tidak dapat dibatalkan.
           </DialogDescription>
         </DialogHeader>
 

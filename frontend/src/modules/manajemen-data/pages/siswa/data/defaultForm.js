@@ -22,4 +22,3 @@ export const defaultForm = {
   emailLogin: '',
   noHpLogin: ''
 }
-

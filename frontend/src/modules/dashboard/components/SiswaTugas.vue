@@ -9,7 +9,7 @@ const props = defineProps({
   delay: { type: Number, default: 0 }
 })
 
-const statusVariant = (s: string) => s === 'Selesai' ? 'default' : 'secondary'
+const statusVariant = (s: string) => (s === 'Selesai' ? 'default' : 'secondary')
 </script>
 
 <template>
@@ -22,7 +22,11 @@ const statusVariant = (s: string) => s === 'Selesai' ? 'default' : 'secondary'
     illustration="pencil"
   >
     <template #header-action>
-      <Button variant="ghost" size="sm" class="h-8 text-xs gap-1 text-muted-foreground hover:text-foreground">
+      <Button
+        variant="ghost"
+        size="sm"
+        class="h-8 text-xs gap-1 text-muted-foreground hover:text-foreground"
+      >
         Lihat Semua Tugas
         <ChevronRight class="size-3.5" />
       </Button>
@@ -67,12 +71,18 @@ const statusVariant = (s: string) => s === 'Selesai' ? 'default' : 'secondary'
           <td class="py-3 text-muted-foreground text-sm">{{ t.guru }}</td>
           <td class="py-3 text-center text-sm text-muted-foreground">{{ t.deadline }}</td>
           <td class="py-3 text-center">
-            <Badge :variant="statusVariant(t.status)" class="text-xs">
+            <Badge
+              :variant="statusVariant(t.status)"
+              class="text-xs"
+            >
               {{ t.status }}
             </Badge>
           </td>
           <td class="pr-6 py-3 text-right">
-            <Button size="sm" class="h-7 text-xs">
+            <Button
+              size="sm"
+              class="h-7 text-xs"
+            >
               {{ t.tipe === 'upload' ? 'Upload Tugas' : 'Buka Penilaian' }}
             </Button>
           </td>

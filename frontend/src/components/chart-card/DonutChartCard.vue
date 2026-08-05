@@ -1,10 +1,6 @@
 <script setup>
 import { computed, h, render } from 'vue'
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent
-} from '@/components/ui/chart'
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { VisSingleContainer, VisDonut } from '@unovis/vue'
 import { Donut } from '@unovis/ts'
 import WidgetCard from '@/components/dashboard-widget/WidgetCard.vue'
@@ -30,7 +26,10 @@ const props = defineProps({
   centerLabelText: { type: String, default: '' },
   showLegend: { type: Boolean, default: true },
   contentClass: { type: String, default: 'flex-1 flex items-center justify-center pb-2' },
-  footerClass: { type: String, default: 'flex-col gap-1.5 items-stretch mt-4 pt-4 border-t border-white/10' },
+  footerClass: {
+    type: String,
+    default: 'flex-col gap-1.5 items-stretch mt-4 pt-4 border-t border-white/10'
+  },
   trendValue: { type: String, default: '' },
   trendDirection: { type: String, default: 'up' }, // 'up' | 'down' | 'neutral'
   footerTitle: { type: String, default: '' },
@@ -58,7 +57,7 @@ function getColorClasses(colorName) {
 // Auto-calculate center label percentage if not custom specified
 const calculatedCenterLabelValue = computed(() => {
   if (props.centerLabelValue) return props.centerLabelValue
-  
+
   // Try to find the primary/positive value to display as percentage
   // Usually, first element in data is the main/progress metric
   const firstVal = props.data[0]?.[props.category] || 0
@@ -74,11 +73,11 @@ const tooltipCache = new Map()
 const customTooltip = computed(() => {
   if (!isClient) return undefined
 
-  return (_data) => {
+  return _data => {
     const data = 'data' in _data ? _data.data : _data
     const sliceKey = data[props.index]
     const sliceConfig = props.config[sliceKey] || {}
-    
+
     // Create a temporary config that maps the category key to the hovered slice config
     // This allows ChartTooltipContent to correctly match the value key and show its label/color
     const tempConfig = {
@@ -94,7 +93,7 @@ const customTooltip = computed(() => {
       const vnode = h(ChartTooltipContent, {
         hideLabel: true,
         payload: data,
-        config: tempConfig,
+        config: tempConfig
       })
       const div = document.createElement('div')
       render(vnode, div)
@@ -144,7 +143,10 @@ const customTooltip = computed(() => {
             getColorClasses(color).bg
           ]"
         >
-          <component :is="icon" :class="['size-4 drop-shadow-md', getColorClasses(color).color]" />
+          <component
+            :is="icon"
+            :class="['size-4 drop-shadow-md', getColorClasses(color).color]"
+          />
         </div>
       </slot>
     </template>
@@ -152,7 +154,11 @@ const customTooltip = computed(() => {
     <slot name="extra" />
 
     <!-- Chart Content -->
-    <ChartContainer :config="config" class="mx-auto aspect-square relative w-full opacity-90 drop-shadow-sm" :style="{ maxHeight: typeof height === 'number' ? `${height}px` : height }">
+    <ChartContainer
+      :config="config"
+      class="mx-auto aspect-square relative w-full opacity-90 drop-shadow-sm"
+      :style="{ maxHeight: typeof height === 'number' ? `${height}px` : height }"
+    >
       <VisSingleContainer
         :data="data"
         :margin="{ top: 20, bottom: 20 }"
@@ -177,18 +183,35 @@ const customTooltip = computed(() => {
         class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-1"
       >
         <span class="text-3xl font-bold text-foreground">
-          <RollingNumber :value="calculatedCenterLabelValue" :delay="0" :duration="1200" />
+          <RollingNumber
+            :value="calculatedCenterLabelValue"
+            :delay="0"
+            :duration="1200"
+          />
         </span>
-        <span v-if="centerLabelText" class="text-xs text-muted-foreground mt-0.5">{{ centerLabelText }}</span>
+        <span
+          v-if="centerLabelText"
+          class="text-xs text-muted-foreground mt-0.5"
+          >{{ centerLabelText }}</span
+        >
       </div>
     </ChartContainer>
 
     <!-- Custom Legend Footer rendered using WidgetCard footer slot -->
-    <template v-if="showLegend || $slots.footer || footerTitle || footerSubtext" #footer>
+    <template
+      v-if="showLegend || $slots.footer || footerTitle || footerSubtext"
+      #footer
+    >
       <slot name="footer">
         <!-- Case 1: Simple Title/Subtext Footer -->
-        <div v-if="footerTitle || footerSubtext" class="flex flex-col gap-1 w-full text-left">
-          <div v-if="footerTitle" class="flex gap-2 font-medium leading-none items-center drop-shadow-sm">
+        <div
+          v-if="footerTitle || footerSubtext"
+          class="flex flex-col gap-1 w-full text-left"
+        >
+          <div
+            v-if="footerTitle"
+            class="flex gap-2 font-medium leading-none items-center drop-shadow-sm"
+          >
             {{ footerTitle }}
             <component
               v-if="footerTrend === 'up'"
@@ -201,19 +224,31 @@ const customTooltip = computed(() => {
               class="h-4 w-4 text-rose-500"
             />
           </div>
-          <div v-if="footerSubtext" class="leading-none text-muted-foreground text-xs mt-1">
+          <div
+            v-if="footerSubtext"
+            class="leading-none text-muted-foreground text-xs mt-1"
+          >
             {{ footerSubtext }}
           </div>
         </div>
         <!-- Case 2: Default Legend -->
-        <div v-else-if="showLegend" class="w-full flex flex-col gap-1.5 items-stretch">
-          <div v-for="item in data" :key="item[index]" class="flex items-center justify-between text-xs">
+        <div
+          v-else-if="showLegend"
+          class="w-full flex flex-col gap-1.5 items-stretch"
+        >
+          <div
+            v-for="item in data"
+            :key="item[index]"
+            class="flex items-center justify-between text-xs"
+          >
             <div class="flex items-center gap-2">
               <span
                 class="inline-block size-2.5 rounded-xs"
                 :style="{ backgroundColor: config[item[index]]?.color || 'var(--primary)' }"
               />
-              <span class="text-muted-foreground">{{ config[item[index]]?.label || item[index] }}</span>
+              <span class="text-muted-foreground">{{
+                config[item[index]]?.label || item[index]
+              }}</span>
             </div>
             <span class="font-semibold text-foreground">{{ item[category] }}</span>
           </div>

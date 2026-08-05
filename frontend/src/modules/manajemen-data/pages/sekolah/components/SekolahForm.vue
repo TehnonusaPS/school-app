@@ -4,6 +4,9 @@ import {
   Image,
   School,
   Scale,
+  Globe,
+  MapPin,
+  Sparkles,
   UserCog
 } from 'lucide-vue-next'
 import { Separator } from '@/components/ui/separator'
@@ -13,6 +16,7 @@ import FormTextArea from '@/components/forms/FormTextArea.vue'
 import FormDate from '@/components/forms/FormDate.vue'
 import FormSection from '@/components/forms/FormSection.vue'
 import FormSelect from '@/components/forms/FormSelect.vue'
+import CurriculumSelect from '@/components/curriculum/CurriculumSelect.vue'
 
 const props = defineProps({
   form: { type: Object, required: true },
@@ -32,67 +36,220 @@ const handleImageChange = (file) => {
 </script>
 
 <template>
-    <div class="grid gap-6 md:grid-cols-3">
-      <!-- Kolom Kiri: Data Logo & Kontak (Lebar 1 Kolom) -->
-      <div class="space-y-6">
-        <!-- Logo Sekolah -->
-        <FormSection title="Logo Sekolah" description="Upload logo sekolah disini" :icon="Image">
-            <ImageUpload :preview="imagePreview" @change="handleImageChange" note="Format: JPG atau PNG. Maksimal 2MB. Dimensi rasio 1:1" :error="errors.logo"/>
-        </FormSection>
+  <div class="grid gap-6 md:grid-cols-3 text-left">
+    <!-- Kolom Kiri: Data Logo, Kontak & Login Admin (Lebar 1 Kolom) -->
+    <div class="space-y-6">
+      <!-- Logo Sekolah -->
+      <FormSection
+        title="Logo Sekolah"
+        description="Unggah identitas visual logo unit sekolah"
+        :icon="Image"
+      >
+        <ImageUpload
+          :preview="imagePreview"
+          @change="handleImageChange"
+          note="Format: JPG atau PNG. Maksimal 2MB. Dimensi rekomendasi 1:1"
+          :error="errors.logo"
+        />
+      </FormSection>
 
-        <!-- Informasi Kontak -->
-        <FormSection title="Kontak Sekolah" description="Informasi kontak dari sekolah" :icon="Phone">
-            <FormInput v-model="form.email" label="E-mail" placeholder="Contoh: sekolah@yayasan.com" :error="errors.email"/>
-            <FormInput v-model="form.no_hp" label="No. Telp" placeholder="Contoh: 081289170180" :error="errors.phone"/>
-            <FormInput v-model="form.website" label="Website Sekolah" placeholder="Contoh: www.sekolah-yayasan.com" :error="errors.website"/>
-            <FormInput v-model="form.instagram" label="Instagram" placeholder="Contoh: @sekolah_yayasan" :error="errors.instagram"/>
-            <FormInput v-model="form.facebook" label="Facebook" placeholder="Contoh: @sekolah_yayasan" :error="errors.facebook"/>
-        </FormSection>
-      </div>
+      <!-- Informasi Kontak Resmi -->
+      <FormSection
+        title="Kontak Resmi Sekolah"
+        description="Informasi email, telepon kantor, website, dan media sosial resmi unit sekolah"
+        :icon="Phone"
+      >
+        <FormInput
+          v-model="form.email"
+          label="E-mail Resmi Sekolah"
+          placeholder="Contoh: info@sdnpbekasi.sch.id"
+          :error="errors.email"
+        />
+        <FormInput
+          v-model="form.no_hp"
+          label="No. Telepon Sekolah"
+          placeholder="Contoh: (021) 87654321"
+          :error="errors.phone"
+        />
+        <FormInput
+          v-model="form.website"
+          label="Website Resmi Sekolah"
+          placeholder="Contoh: https://sdnpbekasi.sch.id"
+          :error="errors.website"
+        />
+        <FormInput
+          v-model="form.instagram"
+          label="Akun Instagram"
+          placeholder="Contoh: @sd_nusantara_bekasi"
+          :error="errors.instagram"
+        />
+        <FormInput
+          v-model="form.facebook"
+          label="Halaman Facebook"
+          placeholder="Contoh: @sd_nusantara_bekasi"
+          :error="errors.facebook"
+        />
+      </FormSection>
 
-      <!-- Kolom Kanan: Informasi Umum Sekolah (Lebar 2 Kolom) -->
-      <div class="md:col-span-2 space-y-6">
-        <FormSection title="Informasi Umum" description="Informasi dasar mengenai sekolah" :icon="School">
-            <div class="grid gap-4 md:grid-cols-2">
-                <FormInput v-model="form.nama" label="Nama Sekolah" placeholder="Contoh: Sekolah Cerdas Bangsa 1 Tebet" :error="errors.name"/>
-                <FormInput v-model="form.npsn" label="NPSN" placeholder="Contoh: YCB001" :error="errors.npsn"/>
-            </div>
-            <div class="grid gap-4 md:grid-cols-2">
-                <FormSelect v-model="form.yayasan" label="Nama Yayasan" placeholder="Pilih yayasan" :options="foundationOptions" :error="errors.foundation_id"/>
-                <FormSelect v-model="form.jenjang" label="Jenjang Pendidikan" placeholder="Pilih jenjang" :options="jenjangOptions" :error="errors.level"/>
-            </div>
-            <div class="grid gap-4 md:grid-cols-2">
-                <FormDate v-model="form.tanggal_berdiri" label="Tanggal Berdiri" :error="errors.established_date"/>
-                <FormSelect v-model="form.status" label="Status" placeholder="Pilih status sekolah" :options="statusOptions" :error="errors.status"/>
-            </div>
-            <Separator class="my-4" />
-            <FormTextArea v-model="form.alamat" label="Alamat Lengkap" placeholder="Contoh: Nama Jalan, RT/RW, Kelurahan, Kecamatan, Kota" :error="errors.address"/>
-        </FormSection>
+      <!-- Akun Administrator (Login) -->
+      <FormSection
+        title="Akun Administrator Login"
+        description="Data E-mail dan No. HP yang digunakan administrator sekolah untuk login ke sistem"
+        :icon="UserCog"
+      >
+        <FormInput
+          v-model="form.emailLogin"
+          label="E-mail Login Administrator"
+          placeholder="Contoh: admin@sdnpbekasi.sch.id"
+          :error="errors.emailLogin || errors.email"
+          required
+        />
 
-        <!-- Informasi Legalitas Sekolah -->
-        <FormSection title="Data Legalitas" description="Informasi mengenai legalitas sekolah" :icon="Scale">
-            <div class="grid gap-4 md:grid-cols-2">
-                <FormInput v-model="form.no_sk" label="No. SK Pendirian" placeholder="Contoh: 1234567890" :error="errors.decree_number"/>
-                <FormDate v-model="form.tanggal_sk" label="Tanggal SK Pendirian" :error="errors.decree_date"/>
-            </div>
-            <div class="grid gap-4 md:grid-cols-2">
-                <FormInput v-model="form.no_izin" label="No. Izin Operasional" placeholder="Contoh: 1234567890" :error="errors.permit_number"/>
-                <FormDate v-model="form.tanggal_izin" label="Tanggal Izin Operasional" :error="errors.permit_date"/>
-            </div>
-            <div class="grid gap-4 md:grid-cols-2">
-                <FormSelect v-model="form.akreditasi" label="Akreditasi" placeholder="Pilih akreditasi" :options="akreditasi" :error="errors.accreditation"/>
-                <FormDate v-model="form.tanggal_akreditasi" label="Tanggal Akreditasi" :error="errors.accreditation_date"/>
-            </div>
-            <FormInput v-model="form.no_akreditasi" label="No. SK Akreditasi" placeholder="Contoh: 1234567890" :error="errors.accreditation_number"/>
-        </FormSection>
-
-        <!-- Informasi Login -->
-        <FormSection title="Akun Administrator" description="Data akun yang digunakan oleh administrator sekolah untuk mengakses sistem." :icon="UserCog">
-          <div class="grid gap-4 md:grid-cols-2">
-            <FormInput v-model="form.emailLogin" label="E-mail Login" placeholder="Contoh: admin@sekolah.sch.id" :error="errors.emailLogin"/>
-            <FormInput v-model="form.noHpLogin" label="No. HP Login" placeholder="Contoh: 081234567890" :error="errors.noHpLogin"/>
-          </div>
-        </FormSection>
-      </div>
+        <FormInput
+          v-model="form.noHpLogin"
+          label="No. HP Login Administrator"
+          placeholder="Contoh: 081234567890"
+          :error="errors.noHpLogin || errors.phone"
+          required
+        />
+      </FormSection>
     </div>
+
+    <!-- Kolom Kanan: Informasi Umum & Legalitas (Lebar 2 Kolom) -->
+    <div class="md:col-span-2 space-y-6">
+      <!-- Informasi Umum -->
+      <FormSection
+        title="Informasi Dasar Sekolah"
+        description="Rincian nama sekolah, NPSN, naungan yayasan, jenjang, dan kurikulum"
+        :icon="School"
+      >
+        <div class="grid gap-4 md:grid-cols-2">
+          <FormInput
+            v-model="form.nama"
+            label="Nama Unit Sekolah"
+            placeholder="Contoh: SD Nusantara Pintar Bekasi"
+            :error="errors.name"
+            required
+          />
+          <FormInput
+            v-model="form.npsn"
+            label="NPSN"
+            placeholder="Contoh: 20100001"
+            :error="errors.npsn"
+            required
+          />
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          <FormSelect
+            v-model="form.yayasan"
+            label="Yayasan Induk"
+            placeholder="Pilih yayasan naungan"
+            :options="foundationOptions"
+            :error="errors.foundation_id"
+          />
+          <FormSelect
+            v-model="form.jenjang"
+            label="Jenjang Pendidikan"
+            placeholder="Pilih jenjang (SD / SMP)"
+            :options="jenjangOptions"
+            :error="errors.level"
+          />
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          <FormDate
+            v-model="form.tanggal_berdiri"
+            label="Tanggal Berdiri"
+            :error="errors.established_date"
+          />
+          <FormSelect
+            v-model="form.status"
+            label="Status Operasional"
+            placeholder="Pilih status sekolah"
+            :options="statusOptions"
+            :error="errors.status"
+          />
+        </div>
+
+        <div class="pt-1">
+          <CurriculumSelect
+            v-model="form.curriculum_id"
+            mode="school"
+            :level-filter="form.jenjang"
+            label="Jenis Kurikulum Sekolah"
+            hint="Pilihan kurikulum spesifik jenjang (SD / SMP) disesuaikan dengan Kurikulum Yayasan Induk."
+            :error="errors.curriculum_id"
+          />
+        </div>
+
+        <Separator class="my-2 bg-border/60 dark:bg-zinc-800" />
+
+        <FormTextArea
+          v-model="form.alamat"
+          label="Alamat Lengkap Sekolah"
+          placeholder="Contoh: Jl. Raya Bekasi No. 45, Kel. Harapan Mulya, Kec. Medan Satria, Kota Bekasi"
+          :rows="3"
+          :error="errors.address"
+        />
+      </FormSection>
+
+      <!-- Data Legalitas & Akreditasi -->
+      <FormSection
+        title="Dokumen Legalitas & Akreditasi"
+        description="Informasi SK Pendirian, Izin Operasional, dan Sertifikat Akreditasi"
+        :icon="Scale"
+      >
+        <div class="grid gap-4 md:grid-cols-2">
+          <FormInput
+            v-model="form.no_sk"
+            label="No. SK Pendirian"
+            placeholder="Contoh: SK-002/SDNP/2012"
+            :error="errors.decree_number"
+          />
+          <FormDate
+            v-model="form.tanggal_sk"
+            label="Tanggal SK Pendirian"
+            :error="errors.decree_date"
+          />
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          <FormInput
+            v-model="form.no_izin"
+            label="No. Izin Operasional"
+            placeholder="Contoh: IZIN-001/2012"
+            :error="errors.permit_number"
+          />
+          <FormDate
+            v-model="form.tanggal_izin"
+            label="Tanggal Izin Operasional"
+            :error="errors.permit_date"
+          />
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          <FormSelect
+            v-model="form.akreditasi"
+            label="Peringkat Akreditasi"
+            placeholder="Pilih akreditasi"
+            :options="akreditasi"
+            :error="errors.accreditation"
+          />
+          <FormDate
+            v-model="form.tanggal_akreditasi"
+            label="Tanggal Akreditasi"
+            :error="errors.accreditation_date"
+          />
+        </div>
+
+        <FormInput
+          v-model="form.no_akreditasi"
+          label="No. SK Akreditasi"
+          placeholder="Contoh: AKR-2023-0001"
+          :error="errors.accreditation_number"
+        />
+      </FormSection>
+    </div>
+  </div>
 </template>

@@ -28,9 +28,13 @@ const filterValues = ref({})
 const page = ref(1)
 const perPage = ref(5)
 
-watch(filterValues, () => {
-  page.value = 1
-}, { deep: true })
+watch(
+  filterValues,
+  () => {
+    page.value = 1
+  },
+  { deep: true }
+)
 
 const schoolList = computed(() => {
   const schools = [...new Set(props.items.map(i => i.school_name).filter(Boolean))]
@@ -72,7 +76,7 @@ const filters = computed(() => {
 
 const actions = computed(() => {
   const list = []
-  
+
   if (props.isYayasan || props.readonly) {
     list.push({
       label: 'Export Excel',
@@ -124,17 +128,18 @@ const filteredItems = computed(() => {
     const fCategory = filterValues.value.category || 'all'
     const fSchool = filterValues.value.school || 'all'
 
-    const matchesSearch = !fSearch || 
+    const matchesSearch =
+      !fSearch ||
       book.name?.toLowerCase().includes(fSearch) ||
       book.isbn?.toLowerCase().includes(fSearch)
-      
+
     const matchesCategory = fCategory === 'all' || book.kategori === fCategory
-    
+
     let matchesSchool = true
     if (props.isYayasan && fSchool !== 'all') {
       matchesSchool = book.school_name === fSchool
     }
-    
+
     return matchesSearch && matchesCategory && matchesSchool
   })
 })
@@ -146,7 +151,7 @@ const paginatedItems = computed(() => {
 
 import { Badge } from '@/components/ui/badge'
 
-const kategoriBadgeClass = (kategori) => {
+const kategoriBadgeClass = kategori => {
   switch (kategori) {
     case 'Sains':
       return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shadow-xs'
@@ -177,20 +182,23 @@ const kategoriBadgeClass = (kategori) => {
     :to="Math.min(page * perPage, filteredItems.length)"
     @update:page="page = $event"
     @update:perPage="perPage = $event"
-    :on-edit="!readonly ? (item) => router.push(`/lainnya/perpustakaan/edit/${item.id}`) : undefined"
-    :on-delete="!readonly ? (id) => emit('delete', id) : undefined"
-    :on-view="(id) => emit('view', id)"
+    :on-edit="!readonly ? item => router.push(`/lainnya/perpustakaan/edit/${item.id}`) : undefined"
+    :on-delete="!readonly ? id => emit('delete', id) : undefined"
+    :on-view="id => emit('view', id)"
   >
     <template #cell-kategori="{ item }">
-      <Badge :class="kategoriBadgeClass(item.kategori)" class="rounded-full px-2.5 py-0.5 font-bold uppercase tracking-wider text-[9px]">
+      <Badge
+        :class="kategoriBadgeClass(item.kategori)"
+        class="rounded-full px-2.5 py-0.5 font-bold uppercase tracking-wider text-[9px]"
+      >
         {{ item.kategori }}
       </Badge>
     </template>
-    
+
     <template #cell-jumlahStok="{ item }">
       <div class="text-center w-full">{{ item.jumlahStok }}</div>
     </template>
-    
+
     <template #cell-lokasiRak="{ item }">
       <div class="text-center w-full text-muted-foreground">{{ item.lokasiRak || '-' }}</div>
     </template>

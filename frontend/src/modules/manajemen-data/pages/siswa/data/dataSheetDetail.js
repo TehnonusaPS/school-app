@@ -11,8 +11,7 @@ export const rawSiswaItem = {
   jenis_kelamin: 'Laki-laki',
   agama: 'Islam',
 
-  alamat:
-    'Jl. Ciumbuleuit No. 45, Kel. Hegarmanah, Kec. Cidadap, Kota Bandung',
+  alamat: 'Jl. Ciumbuleuit No. 45, Kel. Hegarmanah, Kec. Cidadap, Kota Bandung',
 
   email: 'rizky@student.sch.id',
   no_hp: '081234567890',

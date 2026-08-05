@@ -15,17 +15,17 @@ const isLoading = ref(true)
 
 onMounted(() => {
   const targetId = route.params.id
-  
+
   setTimeout(() => {
     const foundData = store.getById(targetId)
-    
+
     if (foundData) {
       asetData.value = foundData
     } else {
       toast.error('Data aset tidak ditemukan')
       router.push('/lainnya/aset')
     }
-    
+
     isLoading.value = false
   }, 500)
 })
@@ -43,22 +43,25 @@ function handleCancel() {
 
 <template>
   <div class="space-y-6">
-    <PageHeader 
-      title="Edit Aset Sekolah" 
+    <PageHeader
+      title="Edit Aset Sekolah"
       description="Ubah informasi aset sekolah di bawah ini"
       back
     />
-    
-    <div v-if="isLoading" class="flex justify-center items-center py-20">
+
+    <div
+      v-if="isLoading"
+      class="flex justify-center items-center py-20"
+    >
       <p class="text-muted-foreground font-medium animate-pulse">Memuat data aset...</p>
     </div>
-    
-    <AsetForm 
+
+    <AsetForm
       v-else
-      :initial-data="asetData" 
+      :initial-data="asetData"
       is-edit
-      @submit="handleSubmit" 
-      @cancel="handleCancel" 
+      @submit="handleSubmit"
+      @cancel="handleCancel"
     />
   </div>
 </template>

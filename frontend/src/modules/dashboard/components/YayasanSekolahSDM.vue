@@ -33,7 +33,9 @@ const props = defineProps({
         </colgroup>
         <thead>
           <tr class="border-b bg-muted/50">
-            <th class="pl-6 py-3 text-left text-xs font-medium text-muted-foreground">Nama Sekolah</th>
+            <th class="pl-6 py-3 text-left text-xs font-medium text-muted-foreground">
+              Nama Sekolah
+            </th>
             <th class="py-3 text-left text-xs font-medium text-muted-foreground">Kepala Sekolah</th>
             <th class="py-3 text-center text-xs font-medium text-muted-foreground">Jenjang</th>
             <th class="py-3 text-center text-xs font-medium text-muted-foreground">Akreditasi</th>
@@ -60,13 +62,23 @@ const props = defineProps({
               :key="i"
               v-motion
               :initial="tableRowFade.initial"
-              :visible-once="{ ...tableRowFade.visible, transition: { ...tableRowFade.visible.transition, delay: props.delay + 100 + (i * 50) } }"
+              :visible-once="{
+                ...tableRowFade.visible,
+                transition: {
+                  ...tableRowFade.visible.transition,
+                  delay: props.delay + 100 + i * 50
+                }
+              }"
               class="border-b transition-colors hover:bg-muted/50 cursor-default"
             >
               <td class="pl-6 py-3 font-medium text-sm">{{ s.nama }}</td>
               <td class="py-3 text-muted-foreground text-sm">{{ s.kepala }}</td>
               <td class="py-3 text-center">
-                <Badge variant="outline" class="text-xs font-semibold">{{ s.jenjang }}</Badge>
+                <Badge
+                  variant="outline"
+                  class="text-xs font-semibold"
+                  >{{ s.jenjang }}</Badge
+                >
               </td>
               <td class="py-3 text-center">
                 <Badge
@@ -78,7 +90,10 @@ const props = defineProps({
               </td>
               <td class="py-3 text-right text-sm text-muted-foreground">{{ s.kelas }}</td>
               <td class="pr-6 py-3 text-right">
-                <Badge variant="secondary" class="font-mono text-xs">
+                <Badge
+                  variant="secondary"
+                  class="font-mono text-xs"
+                >
                   {{ s.siswa.toLocaleString('id-ID') }}
                 </Badge>
               </td>
@@ -98,7 +113,9 @@ const props = defineProps({
     >
       <!-- Divider / Ringkasan -->
       <div class="border-t pt-4">
-        <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Ringkasan</p>
+        <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+          Ringkasan
+        </p>
         <div class="grid grid-cols-2 gap-3">
           <div
             v-for="stat in sdmQuickStats"

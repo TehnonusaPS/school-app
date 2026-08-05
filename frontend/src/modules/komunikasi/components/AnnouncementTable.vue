@@ -42,10 +42,10 @@ const filters = computed(() => [
 const columns = computed(() => {
   const cols = [
     { key: 'judul', label: 'Judul Pengumuman' },
-    { 
-      key: 'kategori', 
-      label: 'Kategori', 
-      badge: true, 
+    {
+      key: 'kategori',
+      label: 'Kategori',
+      badge: true,
       badgeVariant: {
         AKADEMIK: 'blue',
         KEUANGAN: 'green',
@@ -65,7 +65,8 @@ const columns = computed(() => {
 const filteredItems = computed(() => {
   return props.items.filter(item => {
     const searchVal = filterValues.value.search?.trim().toLowerCase() || ''
-    const matchesSearch = !searchVal || 
+    const matchesSearch =
+      !searchVal ||
       item.judul.toLowerCase().includes(searchVal) ||
       item.deskripsi.toLowerCase().includes(searchVal)
 
@@ -86,7 +87,7 @@ watch(filteredItems, () => {
   currentPage.value = 1
 })
 
-const formatDate = (dateStr) => {
+const formatDate = dateStr => {
   if (!dateStr) return '-'
   const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0]
   const [year, month, day] = datePart.split('-')
@@ -108,24 +109,28 @@ const formatDate = (dateStr) => {
     :page="currentPage"
     @update:page="currentPage = $event"
     @view="(id, item) => $emit('view', item)"
-    :on-edit="!isSchoolRole ? (item) => $emit('edit', item) : undefined"
+    :on-edit="!isSchoolRole ? item => $emit('edit', item) : undefined"
     :on-delete="!isSchoolRole ? (id, item) => $emit('delete', item) : undefined"
     delete-label="judul"
   >
     <template #cell-judul="{ item }">
-      <div 
-        class="font-bold text-foreground leading-snug text-sm sm:text-base hover:text-primary transition-colors cursor-pointer text-left" 
+      <div
+        class="font-bold text-foreground leading-snug text-sm sm:text-base hover:text-primary transition-colors cursor-pointer text-left"
         @click="$emit('view', item)"
       >
         {{ item.judul }}
       </div>
-      <div class="text-xs text-muted-foreground mt-1 line-clamp-2 max-w-[550px] leading-relaxed text-left">
+      <div
+        class="text-xs text-muted-foreground mt-1 line-clamp-2 max-w-[550px] leading-relaxed text-left"
+      >
         {{ item.deskripsi }}
       </div>
     </template>
 
     <template #cell-sekolah="{ value }">
-      <div class="inline-flex items-center gap-1.5 text-xs text-foreground/80 font-semibold bg-muted/60 border border-border/40 px-2 py-1 rounded-lg">
+      <div
+        class="inline-flex items-center gap-1.5 text-xs text-foreground/80 font-semibold bg-muted/60 border border-border/40 px-2 py-1 rounded-lg"
+      >
         <span class="size-1.5 rounded-full bg-primary/60"></span>
         {{ value }}
       </div>

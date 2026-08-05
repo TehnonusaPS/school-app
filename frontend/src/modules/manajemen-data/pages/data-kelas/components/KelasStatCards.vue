@@ -24,41 +24,44 @@ const waliKelasTerisi = computed(() => props.items.filter(i => i.homeroom_teache
 const waliKelasBelum = computed(() => totalKelas.value - waliKelasTerisi.value)
 
 const stats = computed(() => [
-  { 
-    label: 'Total Kelas', 
-    value: totalKelas.value.toLocaleString('id-ID'), 
-    sub: 'kelas aktif', 
-    icon: School, 
-    variant: 'blue' 
+  {
+    label: 'Total Kelas',
+    value: totalKelas.value.toLocaleString('id-ID'),
+    sub: 'kelas aktif',
+    icon: School,
+    variant: 'blue'
   },
-  { 
-    label: 'Total Siswa', 
-    value: totalSiswa.value.toLocaleString('id-ID'), 
-    sub: `dari kapasitas ${totalKapasitas.value}`, 
-    icon: Users, 
-    variant: 'emerald' 
+  {
+    label: 'Total Siswa',
+    value: totalSiswa.value.toLocaleString('id-ID'),
+    sub: `dari kapasitas ${totalKapasitas.value}`,
+    icon: Users,
+    variant: 'emerald'
   },
-  { 
-    label: 'Kursi Terisi', 
-    value: `${persenTerisi.value}%`, 
-    sub: `${totalKapasitas.value - totalSiswa.value} kursi kosong`, 
-    icon: PieChart, 
-    variant: persenTerisi.value > 95 ? 'amber' : 'violet' 
+  {
+    label: 'Kursi Terisi',
+    value: `${persenTerisi.value}%`,
+    sub: `${totalKapasitas.value - totalSiswa.value} kursi kosong`,
+    icon: PieChart,
+    variant: persenTerisi.value > 95 ? 'amber' : 'violet'
   },
-  { 
-    label: 'Wali Kelas', 
-    value: `${waliKelasTerisi.value}/${totalKelas.value}`, 
-    sub: waliKelasBelum.value > 0 ? `${waliKelasBelum.value} belum ada` : 'Semua terisi', 
-    icon: UserCheck, 
-    variant: waliKelasBelum.value > 0 ? 'rose' : 'emerald' 
-  },
+  {
+    label: 'Wali Kelas',
+    value: `${waliKelasTerisi.value}/${totalKelas.value}`,
+    sub: waliKelasBelum.value > 0 ? `${waliKelasBelum.value} belum ada` : 'Semua terisi',
+    icon: UserCheck,
+    variant: waliKelasBelum.value > 0 ? 'rose' : 'emerald'
+  }
 ])
 </script>
 
 <template>
-  <StatCardGrid cols="4" :delay="300">
-    <StatCard 
-      v-for="(stat, index) in stats" 
+  <StatCardGrid
+    cols="4"
+    :delay="300"
+  >
+    <StatCard
+      v-for="(stat, index) in stats"
       :key="index"
       :label="stat.label"
       :value="stat.value"

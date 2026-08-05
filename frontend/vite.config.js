@@ -18,12 +18,11 @@ export default defineConfig({
   css: {
     lightningcss: {
       targets: {
-        chrome: (90 << 16),
-        firefox: (90 << 16),
-        safari: (14 << 16),
-        edge: (90 << 16)
+        chrome: 90 << 16,
+        firefox: 90 << 16,
+        safari: 14 << 16,
+        edge: 90 << 16
       }
     }
   }
 })
-

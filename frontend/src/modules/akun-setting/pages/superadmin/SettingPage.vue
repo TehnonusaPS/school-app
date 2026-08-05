@@ -21,7 +21,7 @@ const form = ref({
 })
 
 const imagePreview = ref('')
-const handleImageChange = (file) => {
+const handleImageChange = file => {
   imagePreview.value = URL.createObjectURL(file)
 }
 
@@ -32,7 +32,7 @@ const handleSave = () => {
     })
     return
   }
-  
+
   isLoading.value = true
   setTimeout(() => {
     isLoading.value = false
@@ -63,11 +63,21 @@ const actions = computed(() => [
     <div class="grid gap-6 md:grid-cols-2">
       <!-- Col 1: Foto Profil -->
       <div class="h-full">
-        <FormSection title="Foto Profil" description="Ubah foto profil akun Anda" :icon="Image" class="h-full">
+        <FormSection
+          title="Foto Profil"
+          description="Ubah foto profil akun Anda"
+          :icon="Image"
+          class="h-full"
+        >
           <div class="flex-1 flex flex-col justify-center py-4">
-            <ImageUpload :preview="imagePreview" @change="handleImageChange" />
+            <ImageUpload
+              :preview="imagePreview"
+              @change="handleImageChange"
+            />
           </div>
-          <div class="p-4 rounded-lg bg-white/50 border border-primary/10 text-xs text-muted-foreground italic">
+          <div
+            class="p-4 rounded-lg bg-white/50 border border-primary/10 text-xs text-muted-foreground italic"
+          >
             Format: JPG/PNG. Maks 2MB. Rasio 1:1.
           </div>
         </FormSection>
@@ -75,24 +85,67 @@ const actions = computed(() => [
 
       <!-- Col 2: Identitas & Keamanan -->
       <div class="space-y-6">
-        <FormSection title="Informasi Identitas" description="Data detail identitas, kontak, dan alamat administrator" :icon="SquareUserRound">
+        <FormSection
+          title="Informasi Identitas"
+          description="Data detail identitas, kontak, dan alamat administrator"
+          :icon="SquareUserRound"
+        >
           <div class="grid gap-4 md:grid-cols-2">
-            <FormInput v-model="form.namaDepan" label="Nama Depan" />
-            <FormInput v-model="form.namaBelakang" label="Nama Belakang" />
+            <FormInput
+              v-model="form.namaDepan"
+              label="Nama Depan"
+            />
+            <FormInput
+              v-model="form.namaBelakang"
+              label="Nama Belakang"
+            />
           </div>
           <div class="grid gap-4 md:grid-cols-2 pt-4">
-            <FormInput v-model="form.email" label="E-mail" placeholder="E-mail" disabled />
-            <FormInput v-model="form.noHp" label="No. Handphone" placeholder="Contoh: 0812xxxxxxxx" />
+            <FormInput
+              v-model="form.email"
+              label="E-mail"
+              placeholder="E-mail"
+              disabled
+            />
+            <FormInput
+              v-model="form.noHp"
+              label="No. Handphone"
+              placeholder="Contoh: 0812xxxxxxxx"
+            />
           </div>
           <div class="pt-4">
-            <FormTextArea v-model="form.alamat" label="Alamat Lengkap" :rows="3" placeholder="Alamat tinggal saat ini" />
+            <FormTextArea
+              v-model="form.alamat"
+              label="Alamat Lengkap"
+              :rows="3"
+              placeholder="Alamat tinggal saat ini"
+            />
           </div>
         </FormSection>
 
-        <FormSection title="Keamanan Akun" description="Ganti password Anda secara berkala untuk menjaga keamanan akun" :icon="Key">
-          <FormInput v-model="form.passwordLama" type="password" label="Password Lama" placeholder="Masukkan password saat ini" />
-          <FormInput v-model="form.passwordBaru" type="password" label="Password Baru" placeholder="Masukkan password baru" />
-          <FormInput v-model="form.confirmPasswordBaru" type="password" label="Konfirmasi Password Baru" placeholder="Ulangi password baru" />
+        <FormSection
+          title="Keamanan Akun"
+          description="Ganti password Anda secara berkala untuk menjaga keamanan akun"
+          :icon="Key"
+        >
+          <FormInput
+            v-model="form.passwordLama"
+            type="password"
+            label="Password Lama"
+            placeholder="Masukkan password saat ini"
+          />
+          <FormInput
+            v-model="form.passwordBaru"
+            type="password"
+            label="Password Baru"
+            placeholder="Masukkan password baru"
+          />
+          <FormInput
+            v-model="form.confirmPasswordBaru"
+            type="password"
+            label="Konfirmasi Password Baru"
+            placeholder="Ulangi password baru"
+          />
         </FormSection>
       </div>
     </div>

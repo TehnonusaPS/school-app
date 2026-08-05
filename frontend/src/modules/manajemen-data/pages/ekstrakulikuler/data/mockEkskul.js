@@ -2,7 +2,8 @@ export const initialEkskul = [
   {
     id: '1',
     nama: 'Pramuka',
-    deskripsi: 'Kegiatan kepramukaan untuk mengembangkan karakter, kemandirian, dan jiwa kepemimpinan siswa.',
+    deskripsi:
+      'Kegiatan kepramukaan untuk mengembangkan karakter, kemandirian, dan jiwa kepemimpinan siswa.',
     status: 'aktif'
   },
   {
@@ -20,19 +21,22 @@ export const initialEkskul = [
   {
     id: '4',
     nama: 'Seni Tari',
-    deskripsi: 'Ekstrakulikuler tari tradisional dan modern untuk mengembangkan apresiasi seni budaya Indonesia.',
+    deskripsi:
+      'Ekstrakulikuler tari tradisional dan modern untuk mengembangkan apresiasi seni budaya Indonesia.',
     status: 'nonaktif'
   },
   {
     id: '5',
     nama: 'Robotika',
-    deskripsi: 'Kegiatan belajar pemrograman dan perakitan robot sederhana untuk melatih berpikir logis dan kreatif.',
+    deskripsi:
+      'Kegiatan belajar pemrograman dan perakitan robot sederhana untuk melatih berpikir logis dan kreatif.',
     status: 'aktif'
   },
   {
     id: '6',
     nama: 'Jurnalistik',
-    deskripsi: 'Ekstrakulikuler penulisan berita dan fotografi untuk mengembangkan kemampuan komunikasi dan literasi siswa.',
+    deskripsi:
+      'Ekstrakulikuler penulisan berita dan fotografi untuk mengembangkan kemampuan komunikasi dan literasi siswa.',
     status: 'nonaktif'
   }
 ]

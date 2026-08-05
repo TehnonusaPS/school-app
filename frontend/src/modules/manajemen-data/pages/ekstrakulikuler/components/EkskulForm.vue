@@ -1,5 +1,10 @@
 <script setup>
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '@/components/ui/accordion'
 import FormInput from '@/components/forms/FormInput.vue'
 import FormTextArea from '@/components/forms/FormTextArea.vue'
 import FormSelect from '@/components/forms/FormSelect.vue'
@@ -18,7 +23,11 @@ defineProps({
 
 <template>
   <div class="w-full space-y-4 text-left">
-    <Accordion type="multiple" class="w-full" :default-value="['info']">
+    <Accordion
+      type="multiple"
+      class="w-full"
+      :default-value="['info']"
+    >
       <AccordionItem value="info">
         <AccordionTrigger class="text-sm font-semibold">
           Informasi Ekstrakulikuler

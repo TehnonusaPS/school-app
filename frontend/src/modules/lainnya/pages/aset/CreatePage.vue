@@ -21,11 +21,14 @@ function handleCancel() {
 
 <template>
   <div class="space-y-6">
-    <PageHeader 
-      title="Tambah Aset Sekolah" 
+    <PageHeader
+      title="Tambah Aset Sekolah"
       description="Lengkapi formulir dibawah ini untuk menambahkan aset sekolah"
       back
     />
-    <AsetForm @submit="handleSubmit" @cancel="handleCancel" />
+    <AsetForm
+      @submit="handleSubmit"
+      @cancel="handleCancel"
+    />
   </div>
 </template>

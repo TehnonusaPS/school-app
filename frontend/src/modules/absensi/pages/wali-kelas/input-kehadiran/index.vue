@@ -11,14 +11,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
-import {
-  ChevronLeft,
-  ChevronRight,
-  Lock,
-  Download,
-  Printer,
-  AlertCircle
-} from 'lucide-vue-next'
+import { ChevronLeft, ChevronRight, Lock, Download, Printer, AlertCircle } from 'lucide-vue-next'
 import {
   mockStudents,
   kelasList,
@@ -66,7 +59,7 @@ const getCurrentAcademicMonthIdx = () => {
 const activeMonthIdx = ref(getCurrentAcademicMonthIdx())
 
 // --- Lock Class for Wali Kelas ---
-watch(selectedTahun, (newTahun) => {
+watch(selectedTahun, newTahun => {
   if (isWaliKelas.value) {
     selectedKelas.value = waliKelasAssignments[newTahun] || '2-D'
   }
@@ -121,10 +114,10 @@ const daysInMonth = computed(() => {
   const year = currentCalendarYear.value
   const month = selectedMonthVal.value
   const totalDays = new Date(year, month + 1, 0).getDate()
-  
+
   const days = []
   const dayNamesShort = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
-  
+
   for (let d = 1; d <= totalDays; d++) {
     const dateObj = new Date(year, month, d)
     const dayName = dayNamesShort[dateObj.getDay()]
@@ -157,17 +150,17 @@ const seedAttendance = () => {
   const currentKelas = selectedKelas.value
   const currentTahun = selectedTahun.value
   const currentMonthIdx = activeMonthIdx.value
-  
+
   const testKey = getAttendanceKey(currentKelas, currentTahun, currentMonthIdx, 1, 1)
   if (attendanceMap.value[testKey] !== undefined) return
-  
+
   students.value.forEach(student => {
     const daysCount = daysInMonth.value.length
     for (let d = 1; d <= daysCount; d++) {
       const dateObj = new Date(currentCalendarYear.value, selectedMonthVal.value, d)
       const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6
       const key = getAttendanceKey(currentKelas, currentTahun, currentMonthIdx, student.id, d)
-      
+
       if (isWeekend) {
         attendanceMap.value[key] = null
       } else {
@@ -175,7 +168,7 @@ const seedAttendance = () => {
         const r = Math.random()
         if (r < 0.75) {
           attendanceMap.value[key] = 'H'
-        } else if (r < 0.80) {
+        } else if (r < 0.8) {
           attendanceMap.value[key] = 'S'
         } else if (r < 0.85) {
           attendanceMap.value[key] = 'I'
@@ -195,7 +188,13 @@ watch([selectedKelas, selectedTahun, activeMonthIdx], () => {
 })
 
 const getStatus = (studentId, dayNum) => {
-  const key = getAttendanceKey(selectedKelas.value, selectedTahun.value, activeMonthIdx.value, studentId, dayNum)
+  const key = getAttendanceKey(
+    selectedKelas.value,
+    selectedTahun.value,
+    activeMonthIdx.value,
+    studentId,
+    dayNum
+  )
   return attendanceMap.value[key] || null
 }
 
@@ -207,8 +206,14 @@ const toggleStatus = async (studentId, dayNum) => {
     })
     return
   }
-  
-  const key = getAttendanceKey(selectedKelas.value, selectedTahun.value, activeMonthIdx.value, studentId, dayNum)
+
+  const key = getAttendanceKey(
+    selectedKelas.value,
+    selectedTahun.value,
+    activeMonthIdx.value,
+    studentId,
+    dayNum
+  )
   const currentVal = attendanceMap.value[key]
   
   // Cycle: null (?) -> H -> T -> I -> S -> A -> null (?)
@@ -248,7 +253,7 @@ const getStudentTotal = (studentId, statusType) => {
   const currentKelas = selectedKelas.value
   const currentTahun = selectedTahun.value
   const currentMonthIdx = activeMonthIdx.value
-  
+
   for (let d = 1; d <= daysCount; d++) {
     const key = getAttendanceKey(currentKelas, currentTahun, currentMonthIdx, studentId, d)
     if (attendanceMap.value[key] === statusType) {
@@ -298,12 +303,7 @@ const handleExport = () => {
 
   // Content rows
   students.value.forEach((student, index) => {
-    const row = [
-      (index + 1).toString(),
-      student.nama,
-      student.nis,
-      student.gender
-    ]
+    const row = [(index + 1).toString(), student.nama, student.nis, student.gender]
 
     // Days attendance status
     days.forEach(d => {
@@ -325,13 +325,13 @@ const handleExport = () => {
   const csvContent = '\uFEFF' + csvRows.join('\n')
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
-  
+
   const link = document.createElement('a')
   link.setAttribute('href', url)
-  
+
   const sanitizedKelas = currentKelas.replace(/\s+/g, '_')
   link.setAttribute('download', `Absensi_Kelas_${sanitizedKelas}_${monthName}_${year}.csv`)
-  
+
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
@@ -345,7 +345,7 @@ const handleExport = () => {
 const handlePrint = () => {
   // Simpan data presensi aktif ke localStorage agar terbaca di tab cetak khusus
   localStorage.setItem('print_attendance_map', JSON.stringify(attendanceMap.value))
-  
+
   // Set URL untuk iframe tersembunyi agar memicu print dialog secara inline (tanpa pindah halaman)
   printUrl.value = `/absensi/input/print?kelas=${selectedKelas.value}&tahun=${selectedTahun.value}&monthIdx=${activeMonthIdx.value}&t=${Date.now()}`
 }
@@ -386,25 +386,36 @@ const handlePrint = () => {
         <Card
           v-motion
           :initial="glassSlide.initial"
-          :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 100 } }"
+          :visible-once="{
+            ...glassSlide.visible,
+            transition: { ...glassSlide.visible.transition, delay: 100 }
+          }"
           class="rounded-2xl border-border bg-card shadow-xs overflow-hidden"
         >
           <CardContent class="p-6 space-y-6">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-              
+            <div
+              class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
+            >
               <!-- Info Box (Match wireframe left block) -->
               <div class="space-y-2.5 text-left border-l-4 border-primary pl-4 py-1">
                 <div class="text-lg font-bold text-foreground flex items-center gap-2">
                   <span>Kelas : {{ selectedKelas }}</span>
-                  <span v-if="isWaliKelas" class="inline-flex items-center gap-1 text-[10px] bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-bold">
+                  <span
+                    v-if="isWaliKelas"
+                    class="inline-flex items-center gap-1 text-[10px] bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-bold"
+                  >
                     <Lock class="w-3 h-3" /> Wali Kelas
                   </span>
                 </div>
                 <div class="text-sm font-semibold text-muted-foreground">
-                  Tahun Pelajaran : <span class="text-foreground/95">{{ selectedTahun }}</span> - Semester {{ selectedSemester }}
+                  Tahun Pelajaran : <span class="text-foreground/95">{{ selectedTahun }}</span> -
+                  Semester {{ selectedSemester }}
                 </div>
                 <div class="text-sm font-semibold text-muted-foreground">
-                  Bulan : <span class="text-foreground/95">{{ academicMonths[activeMonthIdx].name }} {{ currentCalendarYear }}</span>
+                  Bulan :
+                  <span class="text-foreground/95"
+                    >{{ academicMonths[activeMonthIdx].name }} {{ currentCalendarYear }}</span
+                  >
                 </div>
               </div>
 
@@ -412,21 +423,34 @@ const handlePrint = () => {
               <div class="flex flex-wrap items-center gap-4 w-full md:w-auto">
                 <!-- Select Tahun Pelajaran -->
                 <div class="flex flex-col gap-1.5 text-left">
-                  <label class="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">Tahun Pelajaran</label>
+                  <label
+                    class="text-[10px] uppercase font-bold tracking-wider text-muted-foreground"
+                    >Tahun Pelajaran</label
+                  >
                   <Select v-model="selectedTahun">
                     <SelectTrigger class="w-[160px] h-10 rounded-xl">
                       <SelectValue placeholder="Pilih Tahun" />
                     </SelectTrigger>
                     <SelectContent class="rounded-xl bg-card border-border shadow-md">
-                      <SelectItem v-for="t in tahunList" :key="t" :value="t">{{ t }}</SelectItem>
+                      <SelectItem
+                        v-for="t in tahunList"
+                        :key="t"
+                        :value="t"
+                        >{{ t }}</SelectItem
+                      >
                     </SelectContent>
                   </Select>
                 </div>
 
                 <!-- Pager Month Slider -->
                 <div class="flex flex-col gap-1.5 text-left">
-                  <label class="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">Slide Bulan</label>
-                  <div class="flex items-center bg-muted/60 p-0.5 rounded-xl border border-border/50">
+                  <label
+                    class="text-[10px] uppercase font-bold tracking-wider text-muted-foreground"
+                    >Slide Bulan</label
+                  >
+                  <div
+                    class="flex items-center bg-muted/60 p-0.5 rounded-xl border border-border/50"
+                  >
                     <Button
                       variant="ghost"
                       size="icon"
@@ -435,7 +459,9 @@ const handlePrint = () => {
                     >
                       <ChevronLeft class="size-4" />
                     </Button>
-                    <div class="px-3 min-w-[110px] text-center font-bold text-xs text-foreground uppercase tracking-wide">
+                    <div
+                      class="px-3 min-w-[110px] text-center font-bold text-xs text-foreground uppercase tracking-wide"
+                    >
                       {{ academicMonths[activeMonthIdx].name }}
                     </div>
                     <Button
@@ -451,18 +477,28 @@ const handlePrint = () => {
 
                 <!-- Select Kelas (Disabled for Wali Kelas) -->
                 <div class="flex flex-col gap-1.5 text-left">
-                  <label class="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">Pilih Kelas</label>
-                  <Select v-model="selectedKelas" :disabled="isWaliKelas">
+                  <label
+                    class="text-[10px] uppercase font-bold tracking-wider text-muted-foreground"
+                    >Pilih Kelas</label
+                  >
+                  <Select
+                    v-model="selectedKelas"
+                    :disabled="isWaliKelas"
+                  >
                     <SelectTrigger class="w-[120px] h-10 rounded-xl">
                       <SelectValue placeholder="Pilih Kelas" />
                     </SelectTrigger>
                     <SelectContent class="rounded-xl bg-card border-border shadow-md">
-                      <SelectItem v-for="k in kelasList" :key="k" :value="k">Kelas {{ k }}</SelectItem>
+                      <SelectItem
+                        v-for="k in kelasList"
+                        :key="k"
+                        :value="k"
+                        >Kelas {{ k }}</SelectItem
+                      >
                     </SelectContent>
                   </Select>
                 </div>
               </div>
-
             </div>
 
             <!-- Read Only Banner -->
@@ -472,7 +508,9 @@ const handlePrint = () => {
             >
               <AlertCircle class="w-5 h-5 shrink-0" />
               <div class="text-left font-medium">
-                <span class="font-bold">Mode Riwayat Aktif:</span> Lembar absensi ini dikunci (Hanya Lihat). Anda tidak dapat memodifikasi data presensi di tahun ajaran atau semester masa lalu.
+                <span class="font-bold">Mode Riwayat Aktif:</span> Lembar absensi ini dikunci (Hanya
+                Lihat). Anda tidak dapat memodifikasi data presensi di tahun ajaran atau semester
+                masa lalu.
               </div>
             </div>
           </CardContent>
@@ -482,7 +520,10 @@ const handlePrint = () => {
         <Card
           v-motion
           :initial="glassSlide.initial"
-          :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 200 } }"
+          :visible-once="{
+            ...glassSlide.visible,
+            transition: { ...glassSlide.visible.transition, delay: 200 }
+          }"
           class="rounded-2xl border-border bg-card shadow-sm overflow-hidden"
         >
           <CardContent class="p-0">
@@ -502,7 +543,10 @@ const handlePrint = () => {
       <AttendanceLegend
         v-motion
         :initial="glassSlide.initial"
-        :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 300 } }"
+        :visible-once="{
+          ...glassSlide.visible,
+          transition: { ...glassSlide.visible.transition, delay: 300 }
+        }"
         :is-read-only="isReadOnly"
       />
     </div>
@@ -511,7 +555,15 @@ const handlePrint = () => {
     <iframe
       v-if="printUrl"
       :src="printUrl"
-      style="position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; overflow: hidden; border: none;"
+      style="
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        border: none;
+      "
     ></iframe>
   </div>
 </template>

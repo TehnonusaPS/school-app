@@ -35,7 +35,9 @@ const asKehadiranItem = (item: unknown) => item as KehadiranProgressItem
     illustration="bag"
   >
     <template #value="{ item }">
-      <span class="text-sm font-bold tabular-nums text-foreground">{{ asKehadiranItem(item).value }}</span>
+      <span class="text-sm font-bold tabular-nums text-foreground">{{
+        asKehadiranItem(item).value
+      }}</span>
     </template>
     <template #item-footer="{ item }">
       <div class="flex items-center gap-4 text-xs text-muted-foreground mt-2">
@@ -57,7 +59,9 @@ const asKehadiranItem = (item: unknown) => item as KehadiranProgressItem
 
     <!-- Ringkasan -->
     <div class="mt-2">
-      <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Ringkasan Hari Ini</p>
+      <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+        Ringkasan Hari Ini
+      </p>
       <div class="grid grid-cols-2 gap-3">
         <div
           v-for="stat in kehadiranQuickStats"
@@ -65,7 +69,12 @@ const asKehadiranItem = (item: unknown) => item as KehadiranProgressItem
           class="rounded-lg bg-muted/50 p-3 space-y-0.5"
         >
           <p class="text-[10px] text-muted-foreground">{{ stat.label }}</p>
-          <p class="text-sm font-bold" :class="stat.valueClass">{{ stat.value }}</p>
+          <p
+            class="text-sm font-bold"
+            :class="stat.valueClass"
+          >
+            {{ stat.value }}
+          </p>
         </div>
       </div>
     </div>

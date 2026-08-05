@@ -17,7 +17,10 @@
     >
       <div class="mx-auto flex max-w-md flex-col items-center gap-3">
         <div class="rounded-full bg-muted p-4">
-          <component :is="icon" class="size-8 text-muted-foreground" />
+          <component
+            :is="icon"
+            class="size-8 text-muted-foreground"
+          />
         </div>
         <h2 class="text-lg font-semibold">{{ title }}</h2>
         <p class="text-sm text-muted-foreground">

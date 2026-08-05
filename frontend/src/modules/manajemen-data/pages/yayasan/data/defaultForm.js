@@ -12,6 +12,7 @@ export const defaultForm = {
   tanggal_akta: '',
   no_sk: '',
   tanggal_sk: '',
+  curriculum_id: '',
   emailLogin: '',
   noHpLogin: ''
 }

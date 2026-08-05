@@ -18,7 +18,7 @@ class ScheduleSeeder extends Seeder
     public function run(): void
     {
         $academicYear = AcademicYear::where('is_active', true)->first();
-        $classroom = Classroom::first();
+        $classroom = $academicYear ? Classroom::where('academic_year_id', $academicYear->id)->first() : null;
         $subjects = Subject::where('is_active', true)->get();
         $timeSlots = TimeSlot::where('is_break', false)->orderBy('slot_number')->get();
         $teachers = User::whereHas('role', function($q) {

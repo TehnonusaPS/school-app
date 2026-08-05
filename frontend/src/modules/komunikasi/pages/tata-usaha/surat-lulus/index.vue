@@ -9,8 +9,19 @@ import SuratLulusPrintModal from '../../../components/SuratLulusPrintModal.vue'
 import PageHeader from '@/components/page-header/PageHeader.vue'
 import StatCard from '@/components/stat-card/StatCard.vue'
 import { glassSlide, glassFade } from '@/config/motion'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription
+} from '@/components/ui/sheet'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '@/components/ui/accordion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { fetchAllSiswa } from '@/services/siswaService'
@@ -41,16 +52,26 @@ onMounted(async () => {
   try {
     const data = await fetchAllSiswa()
     siswaList.value = data.map(user => {
-      const randomCities = ['Jakarta', 'Bandung', 'Surabaya', 'Medan', 'Semarang', 'Yogyakarta', 'Makassar', 'Denpasar']
+      const randomCities = [
+        'Jakarta',
+        'Bandung',
+        'Surabaya',
+        'Medan',
+        'Semarang',
+        'Yogyakarta',
+        'Makassar',
+        'Denpasar'
+      ]
       const city = randomCities[user.id % randomCities.length]
-      
+
       const year = 2013 + (user.id % 3)
       const month = String(1 + (user.id % 12)).padStart(2, '0')
       const day = String(10 + (user.id % 18)).padStart(2, '0')
-      
+
       return {
         ...user,
-        nisn: '00' + user.id.toString().padStart(3, '0') + Math.floor(10000 + Math.random() * 90000),
+        nisn:
+          '00' + user.id.toString().padStart(3, '0') + Math.floor(10000 + Math.random() * 90000),
         nis: '20230' + user.id.toString().padStart(3, '0'),
         tempatLahir: city,
         tanggalLahir: `${year}-${month}-${day}`
@@ -68,7 +89,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select'
 const computedSiswaList = computed(() => {
   const list = [...siswaList.value]
@@ -122,20 +143,26 @@ const itemsPerPage = ref(5)
 
 const suratList = computed(() => {
   let list = store.items
-  
+
   if (filterValues.value.search) {
     const query = filterValues.value.search.toLowerCase()
     list = list.filter(item => item.nama.toLowerCase().includes(query))
   }
-  
+
   if (filterValues.value.tanggalDibuat) {
     list = list.filter(item => item.tanggalDibuat === filterValues.value.tanggalDibuat)
   }
-  
+
   return list
 })
 
-const { currentPage, total, from, to, paginatedItems: paginatedSuratList } = usePagination(suratList, itemsPerPage)
+const {
+  currentPage,
+  total,
+  from,
+  to,
+  paginatedItems: paginatedSuratList
+} = usePagination(suratList, itemsPerPage)
 
 watch(suratList, () => {
   currentPage.value = 1
@@ -187,7 +214,12 @@ function deleteSurat(id, item) {
 }
 
 function handleSave() {
-  if (!formItem.value.nama || !formItem.value.namaOrangTua || !formItem.value.tempatLahir || !formItem.value.tanggalLahir) {
+  if (
+    !formItem.value.nama ||
+    !formItem.value.namaOrangTua ||
+    !formItem.value.tempatLahir ||
+    !formItem.value.tanggalLahir
+  ) {
     toast.error('Mohon lengkapi seluruh kolom formulir.')
     return
   }
@@ -231,7 +263,10 @@ function handleSave() {
     <div
       v-motion
       :initial="glassSlide.initial"
-      :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 100 } }"
+      :visible-once="{
+        ...glassSlide.visible,
+        transition: { ...glassSlide.visible.transition, delay: 100 }
+      }"
     >
       <StatCard
         label="Total Surat Keterangan Lulus Siswa Dibuat"
@@ -246,7 +281,10 @@ function handleSave() {
     <div
       v-motion
       :initial="glassSlide.initial"
-      :visible-once="{ ...glassSlide.visible, transition: { ...glassSlide.visible.transition, delay: 200 } }"
+      :visible-once="{
+        ...glassSlide.visible,
+        transition: { ...glassSlide.visible.transition, delay: 200 }
+      }"
     >
       <DataTableCard
         :columns="columns"
@@ -273,38 +311,53 @@ function handleSave() {
         </template>
       </DataTableCard>
     </div>
-    
+
     <!-- Form Sheet (Inline Create/Edit) -->
     <Sheet v-model:open="isFormSheetOpen">
-      <SheetContent :show-close-button="false" class="sm:max-w-[500px] flex flex-col h-full gap-2">
+      <SheetContent
+        :show-close-button="false"
+        class="sm:max-w-[500px] flex flex-col h-full gap-2"
+      >
         <SheetHeader class="border-b border-border pb-3 text-left">
           <SheetTitle class="text-base font-bold text-foreground">
             {{ isEditMode ? 'Edit Surat Keterangan Lulus' : 'Buat Surat Keterangan Lulus' }}
           </SheetTitle>
           <SheetDescription class="text-xs text-muted-foreground">
-            {{ isEditMode ? 'Perbarui informasi surat keterangan lulus siswa.' : 'Lengkapi formulir di bawah ini untuk menerbitkan surat keterangan lulus baru.' }}
+            {{
+              isEditMode
+                ? 'Perbarui informasi surat keterangan lulus siswa.'
+                : 'Lengkapi formulir di bawah ini untuk menerbitkan surat keterangan lulus baru.'
+            }}
           </SheetDescription>
         </SheetHeader>
 
         <div class="flex-1 overflow-y-auto py-6 pr-1 space-y-6 no-scrollbar">
-          <Accordion type="multiple" class="w-full" :default-value="['info']">
+          <Accordion
+            type="multiple"
+            class="w-full"
+            :default-value="['info']"
+          >
             <AccordionItem value="info">
-              <AccordionTrigger class="text-sm font-semibold">
-                Informasi Umum
-              </AccordionTrigger>
+              <AccordionTrigger class="text-sm font-semibold"> Informasi Umum </AccordionTrigger>
               <AccordionContent class="space-y-4 pt-3 text-left">
                 <div class="space-y-4">
                   <!-- Nama Siswa -->
                   <div class="space-y-1.5">
                     <label class="text-xs font-semibold text-muted-foreground">Nama Siswa</label>
-                    <Select :modelValue="selectedSiswaId" @update:modelValue="onSiswaSelected" :disabled="isLoadingSiswa">
+                    <Select
+                      :modelValue="selectedSiswaId"
+                      @update:modelValue="onSiswaSelected"
+                      :disabled="isLoadingSiswa"
+                    >
                       <SelectTrigger class="h-10 rounded-xl">
-                        <SelectValue :placeholder="isLoadingSiswa ? 'Memuat data siswa...' : 'Pilih Siswa...'" />
+                        <SelectValue
+                          :placeholder="isLoadingSiswa ? 'Memuat data siswa...' : 'Pilih Siswa...'"
+                        />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem 
-                          v-for="siswa in computedSiswaList" 
-                          :key="siswa.id" 
+                        <SelectItem
+                          v-for="siswa in computedSiswaList"
+                          :key="siswa.id"
                           :value="siswa.id.toString()"
                         >
                           {{ siswa.name }} - {{ siswa.nisn }}
@@ -315,20 +368,38 @@ function handleSave() {
 
                   <!-- Nama Orang Tua -->
                   <div class="space-y-1.5">
-                    <label class="text-xs font-semibold text-muted-foreground">Nama Orang Tua</label>
-                    <Input v-model="formItem.namaOrangTua" placeholder="Masukkan nama orang tua / wali..." class="h-10 rounded-xl" />
+                    <label class="text-xs font-semibold text-muted-foreground"
+                      >Nama Orang Tua</label
+                    >
+                    <Input
+                      v-model="formItem.namaOrangTua"
+                      placeholder="Masukkan nama orang tua / wali..."
+                      class="h-10 rounded-xl"
+                    />
                   </div>
 
                   <!-- Tempat & Tanggal Lahir -->
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="space-y-1.5">
-                      <label class="text-xs font-semibold text-muted-foreground">Tempat Lahir Siswa</label>
-                      <Input v-model="formItem.tempatLahir" placeholder="Masukkan tempat lahir..." class="h-10 rounded-xl" />
+                      <label class="text-xs font-semibold text-muted-foreground"
+                        >Tempat Lahir Siswa</label
+                      >
+                      <Input
+                        v-model="formItem.tempatLahir"
+                        placeholder="Masukkan tempat lahir..."
+                        class="h-10 rounded-xl"
+                      />
                     </div>
 
                     <div class="space-y-1.5">
-                      <label class="text-xs font-semibold text-muted-foreground">Tanggal Lahir Siswa</label>
-                      <Input type="date" v-model="formItem.tanggalLahir" class="h-10 rounded-xl" />
+                      <label class="text-xs font-semibold text-muted-foreground"
+                        >Tanggal Lahir Siswa</label
+                      >
+                      <Input
+                        type="date"
+                        v-model="formItem.tanggalLahir"
+                        class="h-10 rounded-xl"
+                      />
                     </div>
                   </div>
                 </div>
@@ -338,10 +409,19 @@ function handleSave() {
         </div>
 
         <div class="border-t border-border pt-4 flex items-center justify-end gap-2 shrink-0">
-          <Button type="button" variant="ghost" class="text-xs font-bold rounded-xl" @click="isFormSheetOpen = false">
+          <Button
+            type="button"
+            variant="ghost"
+            class="text-xs font-bold rounded-xl"
+            @click="isFormSheetOpen = false"
+          >
             Batal
           </Button>
-          <Button type="button" class="text-xs font-bold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-none border-none" @click="handleSave">
+          <Button
+            type="button"
+            class="text-xs font-bold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-none border-none"
+            @click="handleSave"
+          >
             {{ isEditMode ? 'Simpan Perubahan' : 'Simpan' }}
           </Button>
         </div>
@@ -349,6 +429,9 @@ function handleSave() {
     </Sheet>
 
     <!-- Print Preview Modal -->
-    <SuratLulusPrintModal v-model:open="isPrintModalOpen" :data="selectedSurat" />
+    <SuratLulusPrintModal
+      v-model:open="isPrintModalOpen"
+      :data="selectedSurat"
+    />
   </div>
 </template>

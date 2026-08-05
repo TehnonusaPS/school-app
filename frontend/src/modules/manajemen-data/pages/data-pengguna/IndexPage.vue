@@ -57,10 +57,29 @@ const filterValues = ref({
   status: 'all'
 })
 
-// --- Computed Stats ---
-const totalCount = ref(0)
-const aktifCount = ref(0)
-const nonaktifCount = ref(0)
+const statsData = ref({
+  total: 0,
+  aktif: 0,
+  nonaktif: 0
+})
+
+const fetchStats = async () => {
+  try {
+    const res = await getUsers({ per_page: 1000 })
+    const list = res.data.data || []
+    statsData.value = {
+      total: list.length,
+      aktif: list.filter(item => item.is_active).length,
+      nonaktif: list.filter(item => !item.is_active).length
+    }
+  } catch (err) {
+    console.error('Gagal mengambil data statistik pengguna', err)
+  }
+}
+
+const totalCount = computed(() => statsData.value.total)
+const aktifCount = computed(() => statsData.value.aktif)
+const nonaktifCount = computed(() => statsData.value.nonaktif)
 
 function getRoleLabel(role) {
   const roleName = typeof role === 'object' && role !== null ? role.name : role;
@@ -130,11 +149,6 @@ const fetchUsers = async () => {
     total.value = res.data.total
     from.value = res.data.from || 1
     to.value = res.data.to || 1
-
-    // Quick stats count from database
-    totalCount.value = res.stats ? res.stats.total : res.data.total
-    aktifCount.value = res.stats ? res.stats.active : 0
-    nonaktifCount.value = res.stats ? res.stats.inactive : 0
   } catch (err) {
     toast.error('Gagal mengambil data pengguna')
   } finally {
@@ -166,6 +180,7 @@ onMounted(async () => {
   }
 
   fetchUsers()
+  fetchStats()
 })
 
 watch([currentPage, perPage, filterValues], () => {
@@ -194,6 +209,16 @@ const formItem = ref({
   sekolah: '-',
   status: 'aktif',
   password: ''
+})
+
+// Clear fields when role changes to match requested rules
+watch(() => formItem.value.role, (newRole) => {
+  if (newRole === 'superadmin') {
+    formItem.value.yayasan = '-'
+    formItem.value.sekolah = '-'
+  } else if (newRole === 'admin_yayasan') {
+    formItem.value.sekolah = '-'
+  }
 })
 
 function handleCreate() {
@@ -241,6 +266,22 @@ function validateForm() {
   }
   if (!formItem.value.role) errors.role = 'Peran wajib dipilih.'
   if (!formItem.value.status) errors.status = 'Status wajib dipilih.'
+
+  // Yayasan & Sekolah validation based on role
+  const role = formItem.value.role
+  if (role === 'admin_yayasan') {
+    if (!formItem.value.yayasan || formItem.value.yayasan === '-') {
+      errors.yayasan = 'Yayasan wajib dipilih.'
+    }
+  } else if (role && role !== 'superadmin') {
+    if (!formItem.value.yayasan || formItem.value.yayasan === '-') {
+      errors.yayasan = 'Yayasan wajib dipilih.'
+    }
+    if (!formItem.value.sekolah || formItem.value.sekolah === '-') {
+      errors.sekolah = 'Sekolah wajib dipilih.'
+    }
+  }
+
   formErrors.value = errors
   return Object.keys(errors).length === 0
 }
@@ -353,6 +394,7 @@ async function handleSave() {
     }
     isFormSheetOpen.value = false
     fetchUsers()
+    fetchStats()
   } catch (err) {
     if (err.response?.status === 422 && err.response?.data?.errors) {
       const serverErrors = err.response.data.errors
@@ -427,6 +469,7 @@ async function handleToggleStatus(item) {
       { description: `Pengguna "${item.nama}" kini berstatus ${nextActive ? 'Aktif' : 'Nonaktif'}.` }
     )
     fetchUsers()
+    fetchStats()
   } catch (err) {
     toast.error('Gagal memperbarui status akun')
   }
@@ -449,6 +492,7 @@ async function confirmDelete() {
     toast.success('Berhasil Dihapus', { description: `Pengguna "${selectedItemToDelete.value.nama}" telah dihapus.` })
     selectedItemToDelete.value = null
     fetchUsers()
+    fetchStats()
   } catch (err) {
     toast.error('Gagal menghapus pengguna')
   }
@@ -591,7 +635,7 @@ async function confirmDelete() {
       :sections="detailSections"
     />
 
-    <!-- Form Sheet (Create / Edit) using FormSheet component -->
+<!-- Form Sheet (Create / Edit) using FormSheet component -->
     <FormSheet
       v-model:open="isFormSheetOpen"
       :item="formItem"

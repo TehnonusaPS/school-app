@@ -16,6 +16,8 @@ import lainnyaRoutes from '../modules/lainnya/routes'
 import devRoutes from '../modules/dev/routes'
 import administrasiRoutes from '../modules/administrasi/routes'
 import akunSettingRoutes from '../modules/akun-setting/routes'
+import schoolLandingRoutes from '../modules/school-landing/routes'
+import landingEditorRoutes from '../modules/landing-editor/routes'
 
 const routes = [
   // Landing page
@@ -23,6 +25,9 @@ const routes = [
 
   // Rute Auth (Login, dll) biasanya tidak pakai SidebarLayout
   ...authRoutes,
+
+  // Public: Landing page sekolah/yayasan by slug
+  ...schoolLandingRoutes,
 
   // Landing page publik
   {
@@ -91,7 +96,8 @@ const routes = [
       ...lainnyaRoutes,
       ...devRoutes,
       ...administrasiRoutes,
-      ...akunSettingRoutes
+      ...akunSettingRoutes,
+      ...landingEditorRoutes
     ]
   }
 ]
@@ -102,12 +108,24 @@ const router = createRouter({
 })
 
 /* 🔥 INI DIA PROTEKSI ROLE */
-router.beforeEach((to, from) => {
+router.beforeEach(async (to, from) => {
   const auth = useAuthStore()
 
-  // ❌ belum login
-  if (to.meta.requiresAuth && !auth.user) {
-    return '/login'
+  if (to.meta.requiresAuth) {
+    // ❌ belum login sama sekali
+    if (!auth.token) {
+      return '/login'
+    }
+
+    // Jika ada token tapi data user belum ter-load (misal habis direfresh)
+    if (!auth.user) {
+      await auth.initUser()
+      // Jika setelah initUser data user masih kosong (token tidak valid/expired)
+      if (!auth.user) {
+        auth.logout()
+        return '/login'
+      }
+    }
   }
 
   // ❌ role tidak sesuai

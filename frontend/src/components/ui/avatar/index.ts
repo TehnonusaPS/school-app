@@ -15,13 +15,13 @@ export const avatarVariants = cva(
       size: {
         sm: '',
         default: '',
-        lg: '',
-      },
+        lg: ''
+      }
     },
     defaultVariants: {
-      size: 'default',
-    },
-  },
+      size: 'default'
+    }
+  }
 )
 
 export type AvatarVariants = VariantProps<typeof avatarVariants>

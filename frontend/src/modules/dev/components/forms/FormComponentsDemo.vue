@@ -18,7 +18,7 @@ const form = ref({
   kelas: '',
   tanggalLahir: '',
   alamat: '',
-  foto: null,
+  foto: null
 })
 
 const previewUrl = ref(null)
@@ -29,17 +29,17 @@ const isSubmitted = ref(false)
 
 const genderOptions = [
   { value: 'L', label: 'Laki-laki' },
-  { value: 'P', label: 'Perempuan' },
+  { value: 'P', label: 'Perempuan' }
 ]
 
 const kelasOptions = [
   { value: '10-A', label: 'Kelas X - A' },
   { value: '10-B', label: 'Kelas X - B' },
   { value: '11-A', label: 'Kelas XI - A' },
-  { value: '11-B', label: 'Kelas XI - B' },
+  { value: '11-B', label: 'Kelas XI - B' }
 ]
 
-const handleFotoChange = (file) => {
+const handleFotoChange = file => {
   form.value.foto = file
   previewUrl.value = URL.createObjectURL(file)
   errors.value.foto = ''
@@ -53,7 +53,7 @@ const validateForm = () => {
   } else if (!/^\d{10}$/.test(form.value.nisn)) {
     newErrors.nisn = 'NISN harus berupa 10 digit angka.'
   }
-  
+
   if (!form.value.email) {
     newErrors.email = 'Email wajib diisi.'
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
@@ -88,7 +88,7 @@ const resetForm = () => {
     kelas: '',
     tanggalLahir: '',
     alamat: '',
-    foto: null,
+    foto: null
   }
   previewUrl.value = null
   errors.value = {}
@@ -105,7 +105,7 @@ const triggerErrorsDemo = () => {
     kelas: 'Pilih kelas.',
     tanggalLahir: 'Tanggal lahir wajib diisi.',
     alamat: 'Alamat lengkap wajib diisi.',
-    foto: 'Foto profil wajib diunggah.',
+    foto: 'Foto profil wajib diunggah.'
   }
   isSubmitted.value = false
 }
@@ -115,7 +115,10 @@ const triggerErrorsDemo = () => {
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 p-4">
     <!-- Form Area -->
     <div class="lg:col-span-2 space-y-6">
-      <form @submit.prevent="handleSubmit" class="space-y-6">
+      <form
+        @submit.prevent="handleSubmit"
+        class="space-y-6"
+      >
         <!-- Section 1: Identitas Diri -->
         <FormSection
           title="Identitas Siswa"
@@ -130,7 +133,7 @@ const triggerErrorsDemo = () => {
               :error="errors.nama"
               required
             />
-            
+
             <FormInput
               v-model="form.nisn"
               label="NISN"
@@ -204,13 +207,25 @@ const triggerErrorsDemo = () => {
 
         <!-- Buttons -->
         <div class="flex items-center gap-4">
-          <Button type="submit" class="bg-primary hover:bg-primary/90">
+          <Button
+            type="submit"
+            class="bg-primary hover:bg-primary/90"
+          >
             Submit Registrasi
           </Button>
-          <Button type="button" variant="outline" @click="resetForm">
+          <Button
+            type="button"
+            variant="outline"
+            @click="resetForm"
+          >
             Reset Form
           </Button>
-          <Button type="button" variant="ghost" class="text-destructive hover:bg-destructive/10" @click="triggerErrorsDemo">
+          <Button
+            type="button"
+            variant="ghost"
+            class="text-destructive hover:bg-destructive/10"
+            @click="triggerErrorsDemo"
+          >
             Demo Error State
           </Button>
         </div>
@@ -241,35 +256,52 @@ const triggerErrorsDemo = () => {
         <div class="space-y-3 text-xs">
           <div>
             <span class="font-semibold text-muted-foreground block">Nama Lengkap:</span>
-            <span class="text-foreground font-mono bg-muted/50 px-1 py-0.5 rounded break-all">{{ form.nama || '-' }}</span>
+            <span class="text-foreground font-mono bg-muted/50 px-1 py-0.5 rounded break-all">{{
+              form.nama || '-'
+            }}</span>
           </div>
           <div>
             <span class="font-semibold text-muted-foreground block">NISN:</span>
-            <span class="text-foreground font-mono bg-muted/50 px-1 py-0.5 rounded">{{ form.nisn || '-' }}</span>
+            <span class="text-foreground font-mono bg-muted/50 px-1 py-0.5 rounded">{{
+              form.nisn || '-'
+            }}</span>
           </div>
           <div>
             <span class="font-semibold text-muted-foreground block">Email:</span>
-            <span class="text-foreground font-mono bg-muted/50 px-1 py-0.5 rounded break-all">{{ form.email || '-' }}</span>
+            <span class="text-foreground font-mono bg-muted/50 px-1 py-0.5 rounded break-all">{{
+              form.email || '-'
+            }}</span>
           </div>
           <div>
             <span class="font-semibold text-muted-foreground block">Jenis Kelamin:</span>
-            <span class="text-foreground font-mono bg-muted/50 px-1 py-0.5 rounded">{{ form.gender || '-' }}</span>
+            <span class="text-foreground font-mono bg-muted/50 px-1 py-0.5 rounded">{{
+              form.gender || '-'
+            }}</span>
           </div>
           <div>
             <span class="font-semibold text-muted-foreground block">Kelas:</span>
-            <span class="text-foreground font-mono bg-muted/50 px-1 py-0.5 rounded">{{ form.kelas || '-' }}</span>
+            <span class="text-foreground font-mono bg-muted/50 px-1 py-0.5 rounded">{{
+              form.kelas || '-'
+            }}</span>
           </div>
           <div>
             <span class="font-semibold text-muted-foreground block">Tanggal Lahir:</span>
-            <span class="text-foreground font-mono bg-muted/50 px-1 py-0.5 rounded">{{ form.tanggalLahir || '-' }}</span>
+            <span class="text-foreground font-mono bg-muted/50 px-1 py-0.5 rounded">{{
+              form.tanggalLahir || '-'
+            }}</span>
           </div>
           <div>
             <span class="font-semibold text-muted-foreground block">Alamat:</span>
-            <span class="text-foreground font-mono bg-muted/50 px-1 py-0.5 rounded block whitespace-pre-wrap break-all">{{ form.alamat || '-' }}</span>
+            <span
+              class="text-foreground font-mono bg-muted/50 px-1 py-0.5 rounded block whitespace-pre-wrap break-all"
+              >{{ form.alamat || '-' }}</span
+            >
           </div>
           <div>
             <span class="font-semibold text-muted-foreground block">Foto Profil:</span>
-            <span class="text-foreground font-mono bg-muted/50 px-1 py-0.5 rounded break-all">{{ form.foto ? form.foto.name : '-' }}</span>
+            <span class="text-foreground font-mono bg-muted/50 px-1 py-0.5 rounded break-all">{{
+              form.foto ? form.foto.name : '-'
+            }}</span>
           </div>
         </div>
       </FormSection>
@@ -285,7 +317,9 @@ const triggerErrorsDemo = () => {
         <CheckCircle class="h-5 w-5 mt-0.5 shrink-0" />
         <div>
           <h4 class="font-bold text-sm">Registrasi Berhasil!</h4>
-          <p class="text-xs mt-1">Seluruh data form telah tervalidasi dan siap untuk dikirim ke API server.</p>
+          <p class="text-xs mt-1">
+            Seluruh data form telah tervalidasi dan siap untuk dikirim ke API server.
+          </p>
         </div>
       </div>
     </div>

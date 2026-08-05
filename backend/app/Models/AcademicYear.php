@@ -15,6 +15,11 @@ class AcademicYear extends Model
         'start_date',
         'end_date',
         'is_active',
+        'calendar_status',
+        'calendar_rejected_reason',
+        'calendar_submitted_at',
+        'calendar_reviewed_at',
+        'calendar_reviewed_by',
     ];
 
     protected function casts(): array
@@ -23,6 +28,9 @@ class AcademicYear extends Model
             'start_date' => 'date',
             'end_date'   => 'date',
             'is_active'  => 'boolean',
+            'calendar_submitted_at' => 'datetime',
+            'calendar_reviewed_at'  => 'datetime',
+            'calendar_reviewed_by'  => 'integer',
         ];
     }
 
@@ -48,5 +56,21 @@ class AcademicYear extends Model
     public function schedules(): HasMany
     {
         return $this->hasMany(Schedule::class);
+    }
+
+    /**
+     * Get all calendar events in this academic year.
+     */
+    public function calendarEvents(): HasMany
+    {
+        return $this->hasMany(AcademicCalendarEvent::class);
+    }
+
+    /**
+     * Get the user who reviewed this calendar.
+     */
+    public function calendarReviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'calendar_reviewed_by');
     }
 }

@@ -210,7 +210,7 @@ class DatabaseSeeder extends Seeder
             'accreditation_number' => 'AKR-2024-0004',
         ]);
 
-        $allSchools = [$school1, $school2, $school3, $school4];
+        $allSchools = [$school1, $school1B, $school3, $school4];
 
         // ─────────────────────────────────────────────
         //  4. Core System Users (Superadmin & Foundation Admins)

@@ -140,10 +140,12 @@ const fetchFoundations = async () => {
     to.value = res.data.to || 1
 
     if (res.stats) {
-      stats.value[0].value = String(res.stats.total)
-      stats.value[1].value = String(res.stats.active)
-      stats.value[2].value = String(res.stats.trial)
-      stats.value[3].value = String(res.stats.inactive)
+      statsData.value = {
+        total: res.stats.total,
+        aktif: res.stats.active,
+        trial: res.stats.trial,
+        inactive: res.stats.inactive
+      }
     }
   } catch (error) {
     toast.error('Gagal mengambil data yayasan')

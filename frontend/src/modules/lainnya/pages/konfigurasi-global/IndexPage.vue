@@ -292,15 +292,15 @@ const createSchoolSections = () => [
     { id: 24, title: 'Lingkungan Asri', description: 'Area sekolah hijau dan luas untuk mendukung kegiatan belajar mengajar yang nyaman.', icon: 'heart' }
   ] },
   { id: 3, type: 'programs', title: 'Program Unggulan', is_visible: true, sort_order: 3, items: [
-    { id: 31, title: 'Kelas Bilingual', description: 'Pengantar bahasa Inggris di mata pelajaran Matematika dan Sains.', image: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=600' },
-    { id: 32, title: 'Tahfidz Al-Quran', description: 'Program hafalan Al-Quran dengan target 3 Juz untuk tingkat SD.', image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=600' },
-    { id: 33, title: 'Klub Sains & Robotika', description: 'Mengembangkan logika anak melalui praktik sains aplikatif dan pembuatan robot sederhana.', image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=600' }
+    { id: 31, title: 'Kelas Bilingual', description: 'Pengantar bahasa Inggris di mata pelajaran Matematika dan Sains.', image: '/defaults/sd/classroom.png' },
+    { id: 32, title: 'Tahfidz Al-Quran', description: 'Program hafalan Al-Quran dengan target 3 Juz untuk tingkat SD.', image: '/defaults/sd/outdoor.png' },
+    { id: 33, title: 'Klub Sains & Robotika', description: 'Mengembangkan logika anak melalui praktik sains aplikatif dan pembuatan robot sederhana.', image: '/defaults/sd/science.png' }
   ] },
   { id: 4, type: 'gallery', title: 'Galeri Kegiatan Belajar', is_visible: true, sort_order: 4, items: [
-    { id: 41, title: 'Lomba Cerdas Cermat', image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=600' },
-    { id: 42, title: 'Pentas Seni Tahunan', image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=600' },
-    { id: 43, title: 'Kunjungan Edukatif', image: 'https://images.unsplash.com/photo-1523580494112-071dcb92a11d?q=80&w=600' },
-    { id: 44, title: 'Praktikum Biologi', image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=600' }
+    { id: 41, title: 'Lomba Cerdas Cermat', image: '/defaults/sd/classroom.png' },
+    { id: 42, title: 'Pentas Seni Tahunan', image: '/defaults/sd/art.png' },
+    { id: 43, title: 'Kunjungan Edukatif', image: '/defaults/sd/outdoor.png' },
+    { id: 44, title: 'Praktikum Biologi', image: '/defaults/sd/science.png' }
   ] },
   { id: 5, type: 'testimonials', title: 'Apa Kata Orang Tua Murid?', is_visible: true, sort_order: 5, items: [
     { id: 51, title: 'Bunda Larasati', description: 'Sangat senang menyekolahkan anak di sini. Gurunya sangat peduli perkembangan emosional anak.', value: 'Wali Murid Kelas 3' },
@@ -316,10 +316,10 @@ const createSchoolSections = () => [
 
 const createFoundationSections = (schools = []) => {
   const images = [
-    'https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=600',
-    'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=600',
-    'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=600',
-    'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=600'
+    '/defaults/sd/classroom.png',
+    '/defaults/sd/outdoor.png',
+    '/defaults/sd/science.png',
+    '/defaults/sd/art.png'
   ];
   
   const programItems = schools.length > 0 
@@ -349,10 +349,10 @@ const createFoundationSections = (schools = []) => {
   ] },
   { id: 3, type: 'programs', title: 'Lembaga Pendidikan', is_visible: true, sort_order: 3, items: programItems },
   { id: 4, type: 'gallery', title: 'Kegiatan Sosial & Diklat', is_visible: true, sort_order: 4, items: [
-    { id: 41, title: 'Santunan Yatim & Dhuafa', image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=600' },
-    { id: 42, title: 'Pelatihan Guru Nasional', image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=600' },
-    { id: 43, title: 'Bakti Sosial Kesehatan', image: 'https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?q=80&w=600' },
-    { id: 44, title: 'Perayaan Hari Besar', image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=600' }
+    { id: 41, title: 'Santunan Yatim & Dhuafa', image: '/defaults/sd/outdoor.png' },
+    { id: 42, title: 'Pelatihan Guru Nasional', image: '/defaults/sd/classroom.png' },
+    { id: 43, title: 'Bakti Sosial Kesehatan', image: '/defaults/sd/science.png' },
+    { id: 44, title: 'Perayaan Hari Besar', image: '/defaults/sd/art.png' }
   ] },
   { id: 5, type: 'testimonials', title: 'Kata Mitra Kami', is_visible: true, sort_order: 5, items: [
     { id: 51, title: 'Bapak H. Abdullah', description: 'Yayasan yang sangat amanah dalam menyalurkan dana umat untuk pendidikan berkualitas.', value: 'Donatur Tetap' },
@@ -379,11 +379,11 @@ const createDefaultEntity = (id, name, slug, avatarLetter, colorClass, type, sta
   hero_title: 'Selamat Datang di ' + name, hero_subtitle: 'Pendidikan Berkualitas, Karakter Unggul', hero_description: 'Kami berkomitmen mencetak generasi masa depan yang tangguh, berakhlak mulia, dan siap menghadapi tantangan global.', 
   hero_cta_text: 'Jelajahi Program', hero_cta_link: '#programs',
   hero_images: [
-    { url: 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?q=80&w=1200', caption: 'Gedung Sekolah Utama' },
-    { url: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=1200', caption: 'Kegiatan Belajar Mengajar' },
-    { url: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=1200', caption: 'Fasilitas Laboratorium Modern' }
+    { url: '/defaults/sd/building.png', caption: 'Gedung Sekolah Utama' },
+    { url: '/defaults/sd/classroom.png', caption: 'Kegiatan Belajar Mengajar' },
+    { url: '/defaults/sd/science.png', caption: 'Fasilitas Belajar & Eksplorasi' }
   ],
-  about_image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800',
+  about_image: '/defaults/sd/building.png',
   about_title: 'Lebih Dekat dengan ' + name, about_description: 'Berdiri sebagai pusat pendidikan terpadu, kami tidak hanya mengedepankan prestasi akademik namun juga penanaman nilai moral yang kuat dalam setiap kegiatan.', 
   about_vision: 'Menjadi institusi pendidikan terbaik yang menginspirasi kreativitas dan mencerdaskan bangsa.', 
   about_mission: ['Menyelenggarakan pendidikan inovatif', 'Menanamkan budi pekerti luhur'],
@@ -608,11 +608,11 @@ const openModalEditor = item => {
     hero_cta_text: item.hero_cta_text || 'Daftar Sekarang',
     hero_cta_link: item.hero_cta_link || '#daftar',
     hero_images: item.hero_images && item.hero_images.length ? [...item.hero_images] : [
-      { url: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1200', caption: 'Gedung Sekolah Utama' },
-      { url: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=1200', caption: 'Fasilitas Terpadu' },
-      { url: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=1200', caption: 'Kenyamanan Belajar' }
+      { url: '/defaults/sd/building.png', caption: 'Gedung Sekolah Utama' },
+      { url: '/defaults/sd/classroom.png', caption: 'Fasilitas Terpadu' },
+      { url: '/defaults/sd/science.png', caption: 'Kenyamanan Belajar' }
     ],
-    about_image: item.about_image || 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=800',
+    about_image: item.about_image || '/defaults/sd/building.png',
     about_title: item.about_title || ('Tentang ' + item.name),
     about_description: item.about_description || 'Berdiri sebagai pusat pendidikan terpadu, kami tidak hanya mengedepankan prestasi akademik namun juga penanaman nilai moral yang kuat.',
     about_vision: item.about_vision || 'Menjadi institusi pendidikan terbaik yang menginspirasi kreativitas dan mencerdaskan bangsa.',

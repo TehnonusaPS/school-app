@@ -24,7 +24,7 @@ export const rawSekolahItem = {
   emailLogin: 'admin@smacerdasbangsa.sch.id',
   noHpLogin: '081234567890',
 
-  logo: 'https://picsum.photos/200'
+  logo: '/defaults/sd/logo.png'
 }
 
 export const sekolahSheetSections = [

@@ -46,23 +46,23 @@ function getIcon(name) {
       </div>
       <div class="arabesque-divider max-w-xs mx-auto mb-16"></div>
 
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="flex flex-wrap justify-center gap-8">
         <div
           v-for="(item, i) in section.items"
           :key="item.id"
           :class="[
-            'group bg-white rounded-2xl p-8 border-2 border-primary/20 hover:border-secondary/20 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2',
+            'w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.35rem)] group bg-white rounded-2xl p-8 border-2 border-primary/20 hover:border-secondary/40 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2',
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           ]"
           :style="{ transitionDelay: `${i * 80}ms` }"
         >
           <div
-            class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center mb-6 group-hover:from-secondary/10 group-hover:to-secondary/5 transition-all"
+            class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center mb-6 group-hover:from-secondary/20 group-hover:to-secondary/10 transition-all duration-300"
           >
             <component
               v-if="getIcon(item.icon)"
               :is="getIcon(item.icon)"
-              class="w-7 h-7 text-white"
+              class="w-7 h-7 text-white group-hover:text-primary transition-colors duration-300"
             />
             <span
               v-else

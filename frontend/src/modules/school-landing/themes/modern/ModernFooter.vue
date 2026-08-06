@@ -19,16 +19,12 @@ const props = defineProps({
         <!-- Brand -->
         <div class="lg:col-span-2">
           <div class="flex items-center gap-3 mb-6">
-            <div
+            <img
               v-if="branding.logo"
-              class="w-12 h-12 rounded-xl overflow-hidden"
-            >
-              <img
-                :src="branding.logo"
-                alt="Logo"
-                class="w-full h-full object-cover"
-              />
-            </div>
+              :src="branding.logo"
+              alt="Logo"
+              class="w-12 h-12 object-contain"
+            />
             <div
               v-else
               class="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-xl"

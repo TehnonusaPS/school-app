@@ -64,12 +64,12 @@ function getIcon(name) {
       </div>
 
       <!-- Feature Cards Grid -->
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="flex flex-wrap justify-center gap-8">
         <div
           v-for="(item, i) in section.items"
           :key="item.id"
           :class="[
-            'group bg-white/5 rounded-[2rem] p-8 border border-white/10 hover:bg-white/10 hover:border-white/20 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] transition-all duration-500 hover:-translate-y-2 cursor-default relative overflow-hidden',
+            'w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.35rem)] group bg-white/5 rounded-[2rem] p-8 border border-white/10 hover:bg-white/10 hover:border-white/20 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] transition-all duration-500 hover:-translate-y-2 cursor-default relative overflow-hidden',
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           ]"
           :style="{ transitionDelay: `${i * 80}ms` }"

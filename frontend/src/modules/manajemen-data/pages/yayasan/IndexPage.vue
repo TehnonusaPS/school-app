@@ -137,7 +137,7 @@ const fetchFoundations = async () => {
       no_sk: item.decree_number,
       tanggal_sk: item.decree_date ? item.decree_date.split('T')[0] : '-',
       logo: getLogoUrl(item.logo) || 'https://picsum.photos/200',
-      foto: getLogoUrl(item.logo) || 'https://picsum.photos/200',
+      foto: getLogoUrl(item.logo) || '/defaults/sd/logo.png',
       status: item.status === 'active' ? 'Aktif' : (item.status === 'inactive' ? 'Nonaktif' : 'Trial'),
       emailLogin: item.users && item.users[0] ? item.users[0].email : '-',
       noHpLogin: item.users && item.users[0] ? item.users[0].phone : '-' ,
@@ -150,10 +150,12 @@ const fetchFoundations = async () => {
     to.value = res.data.to || 1
 
     if (res.stats) {
-      stats.value[0].value = String(res.stats.total)
-      stats.value[1].value = String(res.stats.active)
-      stats.value[2].value = String(res.stats.trial)
-      stats.value[3].value = String(res.stats.inactive)
+      statsData.value = {
+        total: res.stats.total,
+        aktif: res.stats.active,
+        trial: res.stats.trial,
+        inactive: res.stats.inactive
+      }
     }
   } catch (error) {
     toast.error('Gagal mengambil data yayasan')

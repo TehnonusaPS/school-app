@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { getDefaultImage } from '../../composables/useDefaultImages'
 const props = defineProps({ section: Object, branding: Object })
 const el = ref(null)
 const isVisible = ref(false)
@@ -39,12 +40,12 @@ onMounted(() => {
       </div>
       <div class="arabesque-divider max-w-xs mx-auto mb-16"></div>
 
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div class="flex flex-wrap justify-center gap-8">
         <div
           v-for="(item, i) in section.items"
           :key="item.id"
           :class="[
-            'text-center transition-all duration-500',
+            'w-full sm:w-[calc(50%-1rem)] lg:w-[calc(25%-1.5rem)] text-center transition-all duration-500',
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           ]"
           :style="{ transitionDelay: `${i * 80}ms` }"
@@ -60,9 +61,14 @@ onMounted(() => {
             />
             <div
               v-else
-              class="w-full h-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-4xl font-bold"
+              class="relative w-full h-full overflow-hidden"
             >
-              {{ (item.title || 'T')[0] }}
+              <img
+                :src="getDefaultImage('teacher', i)"
+                :alt="item.title"
+                class="w-full h-full object-cover"
+              />
+              <div class="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/10" />
             </div>
           </div>
           <h4 class="font-bold text-primary">{{ item.title }}</h4>

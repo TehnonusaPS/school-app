@@ -53,7 +53,7 @@ class DatabaseSeeder extends Seeder
             'decree_date'      => '2010-02-01',
         ]);
 
-        $foundation2 = Foundation::create([
+        $foundationB = Foundation::create([
             'code'             => 'Y0002',
             'name'             => 'Yayasan Harapan Bangsa',
             'established_date' => '2015-05-10',
@@ -93,7 +93,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $school1B = School::create([
-            'foundation_id'        => $foundation->id,
+            'foundation_id'        => $foundationB->id,
             'name'                 => 'SMP Nusantara Pintar Bekasi',
             'npsn'                 => '20100002',
             'level'                => 'SMP',
@@ -129,7 +129,7 @@ class DatabaseSeeder extends Seeder
             ['code' => 'SBD', 'name' => 'Seni Budaya'],
         ];
 
-        $schools = [$school, $school1B, $school2];
+        $schools = [$school1, $school1B];
         foreach ($schools as $sch) {
             $ayEven = AcademicYear::create([
                 'school_id'  => $sch->id,
@@ -149,7 +149,7 @@ class DatabaseSeeder extends Seeder
                 'is_active'  => false,
             ]);
 
-            if ($sch->id === $school->id) {
+            if ($sch->id === $school1->id) {
                 $academicYear = $ayEven;
                 $academicYearOdd = $ayOdd;
             }
@@ -163,7 +163,23 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
         }
-
+        
+        $school2 = School::create([
+            'foundation_id'        => $foundationB->id,
+            'name'                 => 'SMP Harapan Bangsa Jakarta',
+            'npsn'                 => '20200001',
+            'level'                => 'SMP',
+            'established_date'     => '2016-07-01',
+            'status'               => 'active',
+            'address'              => 'Jl. Harapan No. 89, Jakarta Selatan',
+            'email'                => 'info@smphbjakarta.sch.id',
+            'phone'                => '021-87650001',
+            'website'              => 'https://smphbjakarta.sch.id',
+            'decree_number'        => 'SK-004/SMPHB/2016',
+            'decree_date'          => '2016-06-15',
+            'permit_number'        => 'IZIN-003/2016',
+            'permit_date'          => '2016-06-01',
+            'accreditation'        => 'A',
             'accreditation_date'   => '2023-08-15',
             'accreditation_number' => 'AKR-2023-0002',
         ]);
@@ -210,7 +226,7 @@ class DatabaseSeeder extends Seeder
             'accreditation_number' => 'AKR-2024-0004',
         ]);
 
-        $allSchools = [$school1, $school2, $school3, $school4];
+        $allSchools = [$school1, $school1B, $school3, $school4];
 
         // ─────────────────────────────────────────────
         //  4. Core System Users (Superadmin & Foundation Admins)

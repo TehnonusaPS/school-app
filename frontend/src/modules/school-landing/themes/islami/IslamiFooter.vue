@@ -13,16 +13,12 @@ const props = defineProps({ branding: Object, contact: Object, social: Object, d
       <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
         <div class="lg:col-span-2">
           <div class="flex items-center gap-3 mb-6">
-            <div
+            <img
               v-if="branding.logo"
-              class="w-12 h-12 rounded-xl overflow-hidden border-2 border-secondary/20"
-            >
-              <img
-                :src="branding.logo"
-                alt="Logo"
-                class="w-full h-full object-cover"
-              />
-            </div>
+              :src="branding.logo"
+              alt="Logo"
+              class="w-12 h-12 object-contain"
+            />
             <div
               v-else
               class="w-12 h-12 rounded-xl bg-primary border-2 border-secondary/20 flex items-center justify-center font-bold text-xl text-secondary"

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ArrowRight } from 'lucide-vue-next'
+import { getDefaultImage } from '../../composables/useDefaultImages'
 
 const props = defineProps({
   section: Object,
@@ -61,12 +62,12 @@ onMounted(() => {
       </div>
 
       <!-- Programs -->
-      <div class="grid md:grid-cols-2 gap-8">
+      <div class="flex flex-wrap justify-center gap-8">
         <div
           v-for="(item, i) in section.items"
           :key="item.id"
           :class="[
-            'group relative rounded-3xl overflow-hidden transition-all duration-500 hover:-translate-y-2',
+            'w-full md:w-[calc(50%-1rem)] group relative rounded-3xl overflow-hidden transition-all duration-500 hover:-translate-y-2',
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           ]"
           :style="{ transitionDelay: `${i * 100}ms` }"
@@ -81,12 +82,17 @@ onMounted(() => {
             />
             <div
               v-else
-              class="w-full h-full flex items-center justify-center"
-              :style="{
-                background: `linear-gradient(135deg, ${branding.primaryColor}20, ${branding.accentColor}20)`
-              }"
+              class="relative w-full h-full overflow-hidden"
             >
-              <span class="text-5xl">{{ item.icon || '📚' }}</span>
+              <img
+                :src="getDefaultImage('program', i)"
+                :alt="item.title || 'Program Sekolah'"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+              <div
+                class="absolute inset-0"
+                :style="{ background: `linear-gradient(135deg, ${branding.primaryColor}30, ${branding.accentColor}20)` }"
+              />
             </div>
           </div>
           <!-- Overlay content -->

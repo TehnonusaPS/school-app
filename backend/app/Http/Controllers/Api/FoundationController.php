@@ -46,6 +46,11 @@ class FoundationController extends Controller
                 return $f;
             });
 
+            $total = Foundation::count();
+            $active = Foundation::where('status', 'active')->count();
+            $trial = Foundation::where('status', 'trial')->count();
+            $inactive = Foundation::where('status', 'inactive')->count();
+
             return response()->json([
                 'status' => 'success',
                 'data'   => $foundations,
@@ -73,6 +78,13 @@ class FoundationController extends Controller
                 ->count();
 
             $foundation->users_count = $usersCount;
+
+            $stats = [
+                'total' => 1,
+                'active' => $foundation->status === 'active' ? 1 : 0,
+                'trial' => $foundation->status === 'trial' ? 1 : 0,
+                'inactive' => $foundation->status === 'inactive' ? 1 : 0,
+            ];
 
             return response()->json([
                 'status' => 'success',

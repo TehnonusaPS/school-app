@@ -68,12 +68,12 @@ onUnmounted(() => {
       </div>
 
       <!-- Testimonial Cards -->
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="flex flex-wrap justify-center gap-8">
         <div
           v-for="(item, i) in section.items"
           :key="item.id"
           :class="[
-            'bg-white rounded-2xl p-8 shadow-lg shadow-gray-100/50 border border-gray-100 transition-all duration-500 hover:shadow-xl',
+            'w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.35rem)] bg-white rounded-2xl p-8 shadow-lg shadow-gray-100/50 border border-gray-100 transition-all duration-500 hover:shadow-xl',
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           ]"
           :style="{ transitionDelay: `${i * 100}ms` }"

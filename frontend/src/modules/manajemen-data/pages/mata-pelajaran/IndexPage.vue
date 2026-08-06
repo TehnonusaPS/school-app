@@ -147,7 +147,7 @@ const formItem = ref({
   kode: '',
   nama: '',
   deskripsi: '',
-  grades: [1, 2, 3, 4, 5, 6]
+  grades: []
 })
 
 const handleCreate = () => {
@@ -157,7 +157,7 @@ const handleCreate = () => {
     kode: '',
     nama: '',
     deskripsi: '',
-    grades: [1, 2, 3, 4, 5, 6],
+    grades: [],
     status: 'approved'
   }
   isFormSheetOpen.value = true

@@ -44,9 +44,9 @@ async function loadData() {
       getTimeSlots()
     ])
     
-    academicYears.value = ayRes.data
-    allClassrooms.value = classRes.data
-    timeSlots.value = slotRes.data
+    academicYears.value = ayRes.data || []
+    allClassrooms.value = Array.isArray(classRes.data) ? classRes.data : (classRes.data?.data || classRes || [])
+    timeSlots.value = slotRes.data || []
 
     const active = ayRes.data.find(ay => ay.is_active)
     if (active) {
@@ -66,9 +66,7 @@ onMounted(() => {
 })
 
 const filteredClassrooms = computed(() => {
-  if (!allClassrooms.value || !allClassrooms.value.length) return []
-  if (!selectedTahun.value) return allClassrooms.value
-  return allClassrooms.value.filter(c => !c.academic_year_id || String(c.academic_year_id) === String(selectedTahun.value))
+  return allClassrooms.value || []
 })
 
 watch(filteredClassrooms, (newClasses) => {

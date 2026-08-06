@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\HasSchoolScope;
 use App\Models\AcademicYear;
-use App\Models\School;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,24 +12,21 @@ use Illuminate\Support\Facades\Validator;
 
 class AcademicYearController extends Controller
 {
+    use HasSchoolScope;
+
     /**
-     * Helper to get school scope for the current user.
+     * Authorize if the user can access/modify the academic year.
      */
-    private function getSchoolScope(Request $request, $user)
+    private function authorizeAcademicYear(Request $request, AcademicYear $academicYear): bool
     {
+        $user = $request->user();
         if ($user->isSuperAdmin()) {
-            return $request->input('school_id');
-        } elseif ($user->hasRole('admin_yayasan')) {
-            $schoolId = $request->input('school_id');
-            if ($schoolId) {
-                $belongs = School::where('id', $schoolId)
-                    ->where('foundation_id', $user->foundation_id)
-                    ->exists();
-                return $belongs ? $schoolId : -1;
-            }
-            return null;
+            return true;
         }
-        return $user->school_id;
+        if ($user->hasRole('admin_yayasan')) {
+            return $academicYear->school && $academicYear->school->foundation_id == $user->foundation_id;
+        }
+        return $academicYear->school_id == $user->school_id;
     }
 
     /**
@@ -55,7 +52,6 @@ class AcademicYearController extends Controller
             $query->where('school_id', $user->school_id);
         }
 
-        // Apply filters
         if ($request->has('search')) {
             $search = $request->input('search');
             $query->where('name', 'like', "%{$search}%");
@@ -78,8 +74,7 @@ class AcademicYearController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $user = $request->user();
-        $schoolId = $this->getSchoolScope($request, $user);
+        $schoolId = $this->resolveSchoolId($request);
 
         if ($schoolId === -1) {
             return response()->json([
@@ -178,7 +173,6 @@ class AcademicYearController extends Controller
         DB::beginTransaction();
         try {
             if ($isActive) {
-                // Deactivate other academic years for the same school
                 AcademicYear::where('school_id', $schoolId)->update(['is_active' => false]);
             }
 
@@ -213,7 +207,6 @@ class AcademicYearController extends Controller
      */
     public function show(Request $request, string $id): JsonResponse
     {
-        $user = $request->user();
         $academicYear = AcademicYear::find($id);
 
         if (!$academicYear) {
@@ -223,17 +216,8 @@ class AcademicYearController extends Controller
             ], 404);
         }
 
-        // Scope check
-        if (!$user->isSuperAdmin()) {
-            if ($user->hasRole('admin_yayasan')) {
-                if ($academicYear->school->foundation_id != $user->foundation_id) {
-                    return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
-                }
-            } else {
-                if ($academicYear->school_id != $user->school_id) {
-                    return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
-                }
-            }
+        if (!$this->authorizeAcademicYear($request, $academicYear)) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
         }
 
         return response()->json([
@@ -247,7 +231,6 @@ class AcademicYearController extends Controller
      */
     public function update(Request $request, string $id): JsonResponse
     {
-        $user = $request->user();
         $academicYear = AcademicYear::find($id);
 
         if (!$academicYear) {
@@ -257,17 +240,8 @@ class AcademicYearController extends Controller
             ], 404);
         }
 
-        // Scope check
-        if (!$user->isSuperAdmin()) {
-            if ($user->hasRole('admin_yayasan')) {
-                if ($academicYear->school->foundation_id != $user->foundation_id) {
-                    return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
-                }
-            } else {
-                if ($academicYear->school_id != $user->school_id) {
-                    return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
-                }
-            }
+        if (!$this->authorizeAcademicYear($request, $academicYear)) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
         }
 
         $validator = Validator::make($request->all(), [
@@ -288,14 +262,23 @@ class AcademicYearController extends Controller
 
         DB::beginTransaction();
         try {
-            if ($request->has('is_active') && $request->input('is_active') == true) {
-                // Deactivate other academic years for the same school
+            if ($request->has('is_active') && filter_var($request->input('is_active'), FILTER_VALIDATE_BOOLEAN) === true) {
+                // Deactivate other academic years with a different name for the same school
                 AcademicYear::where('school_id', $academicYear->school_id)
-                    ->where('id', '!=', $academicYear->id)
+                    ->where('name', '!=', $academicYear->name)
                     ->update(['is_active' => false]);
-            }
 
-            $academicYear->update($request->only(['name', 'semester', 'start_date', 'end_date', 'is_active']));
+                // Activate all semesters (both odd and even) for this academic year
+                AcademicYear::where('school_id', $academicYear->school_id)
+                    ->where('name', $academicYear->name)
+                    ->update(['is_active' => true]);
+
+                if ($request->has('start_date') || $request->has('end_date') || $request->has('name')) {
+                    $academicYear->update($request->only(['name', 'semester', 'start_date', 'end_date']));
+                }
+            } else {
+                $academicYear->update($request->only(['name', 'semester', 'start_date', 'end_date', 'is_active']));
+            }
 
             DB::commit();
 
@@ -319,7 +302,6 @@ class AcademicYearController extends Controller
      */
     public function destroy(Request $request, string $id): JsonResponse
     {
-        $user = $request->user();
         $academicYear = AcademicYear::find($id);
 
         if (!$academicYear) {
@@ -329,17 +311,8 @@ class AcademicYearController extends Controller
             ], 404);
         }
 
-        // Scope check
-        if (!$user->isSuperAdmin()) {
-            if ($user->hasRole('admin_yayasan')) {
-                if ($academicYear->school->foundation_id != $user->foundation_id) {
-                    return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
-                }
-            } else {
-                if ($academicYear->school_id != $user->school_id) {
-                    return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
-                }
-            }
+        if (!$this->authorizeAcademicYear($request, $academicYear)) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
         }
 
         $academicYear->delete();

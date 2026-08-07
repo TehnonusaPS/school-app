@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import ScheduleEventCard from './ScheduleEventCard.vue';
 
 const props = defineProps<{
+  role?: string;
   selectedDate: Date;
   selectedDateDetails: {
     dateStr: string;
@@ -22,6 +23,8 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'view-all'): void;
+  (e: 'edit-agenda', agenda: any): void;
+  (e: 'delete-agenda', id: number): void;
 }>();
 
 const formattedSelectedDate = computed(() => {
@@ -44,10 +47,24 @@ const hasNoEvents = computed(() => {
     props.selectedDateDetails.lessons.length === 0 &&
     (!props.selectedDateDetails.calendarEvents || props.selectedDateDetails.calendarEvents.length === 0);
 });
+
+const getTaskSubtitle = (task: any) => {
+  const parts: string[] = [];
+  if (task.classroom_name) {
+    parts.push(task.classroom_name);
+  }
+  if (task.subject_name) {
+    parts.push(task.subject_name);
+  }
+  if (parts.length > 0) {
+    return parts.join(' • ');
+  }
+  return task.mapel || task.classroom_name || 'Umum';
+};
 </script>
 
 <template>
-  <Card class="flex flex-col overflow-hidden min-h-0">
+  <Card class="flex flex-col overflow-hidden min-h-0 border-border/60 shadow-2xs">
     <!-- Header (shrink-0 — tidak ikut scroll) -->
     <CardHeader class="px-5 py-4 border-b border-border/30 shrink-0 space-y-1">
       <div class="flex items-center gap-2">
@@ -84,20 +101,45 @@ const hasNoEvents = computed(() => {
           </div>
 
           <div v-if="selectedDateDetails.exams.length > 0" class="space-y-2.5">
-            <ScheduleEventCard v-for="exam in selectedDateDetails.exams" :key="exam.id" type="exam" :title="exam.nama"
-              :subtitle="exam.mapel" :time="exam.waktu" :location="exam.ruang" />
+            <ScheduleEventCard 
+              v-for="exam in selectedDateDetails.exams" 
+              :key="exam.id" 
+              type="exam" 
+              :title="`Ujian ${exam.nama}`"
+              :subtitle="exam.event_title ? `${exam.event_title} (${exam.mapel})` : exam.mapel" 
+              :time="exam.waktu" 
+              :location="exam.ruang" 
+            />
           </div>
 
+          <!-- Teacher Agendas / Assignments -->
           <div v-if="selectedDateDetails.assignments.length > 0" class="space-y-2.5">
-            <ScheduleEventCard v-for="task in selectedDateDetails.assignments" :key="task.id" type="assignment"
-              :title="task.nama" :subtitle="task.mapel" :time="`Kumpul s.d ${task.deadline}`"
-              :description="task.deskripsi" />
+            <ScheduleEventCard
+              v-for="task in selectedDateDetails.assignments"
+              :key="`agenda-${task.id}`"
+              :type="task.type || 'tugas'"
+              :title="task.title || task.nama"
+              :subtitle="task.classroom_name || 'Semua Kelas'"
+              :subject="task.subject_name || undefined"
+              :time="task.time || (task.date === task.end_date ? 'Satu Hari' : `${task.date} s.d ${task.end_date}`)"
+              :description="task.description || task.deskripsi"
+              :canManage="role === 'guru' || role === 'wali_kelas'"
+              @edit="emit('edit-agenda', task)"
+              @delete="emit('delete-agenda', task.id)"
+            />
           </div>
 
           <div v-if="selectedDateDetails.lessons.length > 0" class="space-y-2.5">
-            <ScheduleEventCard v-for="lesson in selectedDateDetails.lessons" :key="lesson.id" type="lesson"
-              :title="lesson.mapel" :subtitle="lesson.kelas" :time="`${lesson.mulai} - ${lesson.selesai} WIB`"
-              :location="lesson.ruang" :guru="lesson.guru" />
+            <ScheduleEventCard 
+              v-for="lesson in selectedDateDetails.lessons" 
+              :key="lesson.id" 
+              :type="lesson.is_break ? 'break' : 'lesson'"
+              :title="lesson.mapel" 
+              :subtitle="lesson.is_break ? 'Sesi Istirahat Sekolah' : lesson.kelas" 
+              :time="`${lesson.mulai} - ${lesson.selesai} WIB`"
+              :location="lesson.ruang" 
+              :guru="lesson.guru" 
+            />
           </div>
 
           <!-- Empty State -->
@@ -137,8 +179,16 @@ const hasNoEvents = computed(() => {
               <span class="text-[10px] font-bold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full inline-block">
                 {{ new Date(event.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) }}
               </span>
-              <ScheduleEventCard :type="event.type" :title="event.title" :subtitle="event.subtitle" :time="event.time"
-                :location="event.location" />
+              <ScheduleEventCard
+                :type="event.type"
+                :title="event.title"
+                :subtitle="event.subtitle"
+                :time="event.time"
+                :location="event.location"
+                :canManage="(role === 'guru' || role === 'wali_kelas') && event.isTeacherAgenda"
+                @edit="emit('edit-agenda', event.agendaData)"
+                @delete="emit('delete-agenda', event.agendaId)"
+              />
             </div>
           </div>
         </div>

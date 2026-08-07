@@ -1,0 +1,197 @@
+/* ── CalendarRoot Override ── */
+.sched-calendar-root {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+}
+
+.sched-calendar-root::after {
+  display: none !important;
+}
+
+/* ── Calendar Grid — CSS Grid based ── */
+.sched-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  border-collapse: unset !important;
+  width: 100% !important;
+}
+
+/* ── Row: 7 equal columns ── */
+.sched-row {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  gap: 4px !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.sched-row--body {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── Body: flex-col to distribute rows evenly ── */
+.sched-body {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+/* ── Head Cell ── */
+.sched-head-cell {
+  width: auto !important;
+  text-align: center !important;
+  font-weight: 700 !important;
+  font-size: 0.65rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  padding: 0.4rem 0 !important;
+}
+
+/* ── Table Cell (CalendarCell wrapper) ── */
+.sched-td {
+  padding: 0 !important;
+  position: relative !important;
+  text-align: left !important;
+  background: transparent !important;
+}
+
+.sched-td:has([data-selected]) {
+  background: transparent !important;
+}
+
+/* ── Day Cell (CalendarCellTrigger) ── */
+.sched-cell {
+  width: 100%;
+  height: 100%;
+  min-height: 68px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 5px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  /* LESS ROUNDED, MORE PROPORTIONAL */
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  position: relative;
+  gap: 3px;
+  box-sizing: border-box;
+  outline: none;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  line-height: 1;
+}
+
+.sched-cell:hover:not(.sched-cell--outside) {
+  border-color: var(--primary);
+  background: color-mix(in oklch, var(--accent) 50%, transparent);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* ── State: Outside Month ── */
+.sched-cell--outside {
+  opacity: 0.15;
+  background: transparent !important;
+  border-color: transparent !important;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ── State: Today ── */
+.sched-cell--today {
+  border-color: var(--primary);
+  font-weight: 700;
+  background: color-mix(in oklch, var(--primary) 8%, transparent);
+}
+
+/* ── State: Selected ── */
+.sched-cell--selected {
+  background: color-mix(in oklch, var(--primary) 14%, transparent);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1.5px var(--primary);
+}
+
+/* ── State: Holiday/Sunday (red tint) ── */
+.sched-cell--holiday {
+  background: color-mix(in oklch, oklch(0.577 0.245 27) 7%, transparent);
+  border-color: color-mix(in oklch, oklch(0.577 0.245 27) 25%, transparent);
+}
+
+.sched-cell--holiday .sched-day-num {
+  color: oklch(0.577 0.245 27);
+}
+
+.dark .sched-cell--holiday {
+  background: color-mix(in oklch, oklch(0.577 0.245 27) 12%, transparent);
+}
+
+/* ── State: Exam (purple tint) ── */
+.sched-cell--exam {
+  background: color-mix(in oklch, oklch(0.541 0.281 293) 7%, transparent);
+  border-color: color-mix(in oklch, oklch(0.541 0.281 293) 25%, transparent);
+}
+
+.dark .sched-cell--exam {
+  background: color-mix(in oklch, oklch(0.541 0.281 293) 12%, transparent);
+}
+
+/* ── Day Number ── */
+.sched-day-num {
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* ── Micro Badges Container ── */
+.sched-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  margin-top: auto;
+}
+
+.sched-micro-badge {
+  font-size: 7px !important;
+  height: 13px !important;
+  padding: 0 4px !important;
+  line-height: 13px !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  width: 100%;
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* ══ Responsive: Mobile stack ══ */
+@media (max-width: 1023px) {
+  .sched-cell {
+    min-height: 52px;
+    padding: 3px 4px;
+  }
+
+  .sched-day-num {
+    font-size: 0.7rem;
+  }
+
+  .sched-micro-badge {
+    font-size: 6px !important;
+    height: 11px !important;
+    line-height: 11px !important;
+  }
+}

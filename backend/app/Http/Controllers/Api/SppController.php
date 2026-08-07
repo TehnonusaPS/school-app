@@ -321,25 +321,25 @@ class SppController extends Controller
     }
 
     /**
-     * Create a payment record (submit online or manual processing).
+     * Create a new payment (Online Midtrans or Manual).
      */
     public function createPayment(Request $request): JsonResponse
     {
         $user = $request->user();
 
         $request->validate([
-            'payment_method' => 'required|string',
-            'amount' => 'required|numeric|min:0',
-            'bill_ids' => 'required|array',
-            'bill_ids.*' => 'exists:student_bills,id',
             'student_id' => 'nullable|exists:users,id',
+            'payment_method' => 'required|string',
+            'amount' => 'required|numeric|min:1',
+            'bill_ids' => 'required|array|min:1',
+            'bill_ids.*' => 'exists:student_bills,id',
             'notes' => 'nullable|string'
         ]);
 
-        $studentId = $request->student_id ?: $user->id;
+        $studentId = $request->student_id ?? $user->id;
 
         // Ensure user is authorized to perform payment for this student
-        if ($user->role->name === 'siswa' && $user->id !== (int)$studentId) {
+        if ($user->role->name === 'siswa' && (int)$user->id !== (int)$studentId) {
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
         }
 
@@ -350,10 +350,10 @@ class SppController extends Controller
             $isManualAdmin = $user->hasAnyRole(['admin_sekolah', 'tata_usaha']);
             
             // Generate references
-            $refNumber = 'INV-' . Carbon::now()->format('Ymd') . '-' . strtoupper(Str::random(6));
+            $refNumber = 'SPP-' . Carbon::now()->format('Ymd') . '-' . strtoupper(Str::random(6));
 
             // Determine status
-            // Admin cash processing is immediately 'success'. E-wallet / VA is 'pending' till callback/verification.
+            // Admin cash processing is immediately 'success'. Online / E-wallet / VA is 'pending' till callback/verification.
             $status = ($paymentMethod === 'cash' || $isManualAdmin) ? 'success' : 'pending';
 
             $payment = StudentPayment::create([
@@ -369,6 +369,8 @@ class SppController extends Controller
 
             // Track how much money is allocated to each bill
             $remainingPaymentAmount = $request->amount;
+            $itemDetails = [];
+
             foreach ($request->bill_ids as $billId) {
                 $bill = StudentBill::lockForUpdate()->find($billId);
                 $unpaidAmount = $bill->amount - $bill->paid_amount;
@@ -387,6 +389,13 @@ class SppController extends Controller
                     'student_bill_id' => $bill->id,
                     'amount_paid' => $allocAmount
                 ]);
+
+                $itemDetails[] = [
+                    'id' => (string)$bill->id,
+                    'price' => (int)$allocAmount,
+                    'quantity' => 1,
+                    'name' => mb_strimwidth($bill->title, 0, 48, '...')
+                ];
 
                 if ($status === 'success') {
                     $bill->paid_amount += $allocAmount;
@@ -412,6 +421,41 @@ class SppController extends Controller
                 }
 
                 $remainingPaymentAmount -= $allocAmount;
+            }
+
+            // Midtrans Snap Token Generation for Online Payments
+            if ($paymentMethod === 'midtrans') {
+                $serverKey = config('midtrans.server_key');
+                if (empty($serverKey)) {
+                    throw new \Exception('MIDTRANS_SERVER_KEY belum dikonfigurasi di file backend/.env. Silakan isi Server Key Midtrans Sandbox Anda.');
+                }
+
+                \Midtrans\Config::$serverKey = $serverKey;
+                \Midtrans\Config::$isProduction = (bool) config('midtrans.is_production', false);
+                \Midtrans\Config::$isSanitized = (bool) config('midtrans.is_sanitized', true);
+                \Midtrans\Config::$is3ds = (bool) config('midtrans.is_3ds', true);
+
+                $params = [
+                    'transaction_details' => [
+                        'order_id' => $refNumber,
+                        'gross_amount' => (int)$request->amount,
+                    ],
+                    'customer_details' => [
+                        'first_name' => $user->name,
+                        'email' => $user->email ?? ($user->nisn . '@school.app'),
+                    ],
+                    'item_details' => $itemDetails,
+                ];
+
+                try {
+                    $snapToken = \Midtrans\Snap::getSnapToken($params);
+                    $payment->snap_token = $snapToken;
+                    $payment->snap_redirect_url = (\Midtrans\Config::$isProduction ? 'https://app.midtrans.com/snap/v2/vtweb/' : 'https://app.sandbox.midtrans.com/snap/v2/vtweb/') . $snapToken;
+                    $payment->save();
+                } catch (\Exception $e) {
+                    Log::error('Midtrans Snap Token Exception: ' . $e->getMessage());
+                    throw new \Exception('Gagal dari Midtrans: ' . $e->getMessage());
+                }
             }
 
             DB::commit();
@@ -762,5 +806,84 @@ class SppController extends Controller
             'status' => 'success',
             'data' => $payment
         ]);
+    }
+
+    /**
+     * Handle Midtrans Payment Webhook Notification
+     */
+    public function handleNotification(Request $request): JsonResponse
+    {
+        try {
+            $serverKey = config('midtrans.server_key');
+            if (empty($serverKey)) {
+                return response()->json(['status' => 'error', 'message' => 'Midtrans server key not configured'], 500);
+            }
+
+            \Midtrans\Config::$serverKey = $serverKey;
+            \Midtrans\Config::$isProduction = (bool) config('midtrans.is_production', false);
+
+            $notif = new \Midtrans\Notification();
+
+            $transaction = $notif->transaction_status;
+            $type = $notif->payment_type;
+            $orderId = $notif->order_id;
+            $fraud = $notif->fraud_status;
+
+            $payment = StudentPayment::where('reference_number', $orderId)->first();
+
+            if (!$payment) {
+                return response()->json(['status' => 'error', 'message' => 'Payment reference not found'], 404);
+            }
+
+            if ($transaction == 'capture') {
+                if ($type == 'credit_card') {
+                    if ($fraud == 'challenge') {
+                        $payment->status = 'pending';
+                    } else {
+                        $payment->status = 'success';
+                    }
+                }
+            } else if ($transaction == 'settlement') {
+                $payment->status = 'success';
+            } else if ($transaction == 'pending') {
+                $payment->status = 'pending';
+            } else if ($transaction == 'deny' || $transaction == 'expire' || $transaction == 'cancel') {
+                $payment->status = 'failed';
+            }
+
+            $payment->save();
+
+            // If payment became success, update associated student bills
+            if ($payment->status === 'success') {
+                DB::transaction(function () use ($payment) {
+                    $paymentItems = StudentPaymentItem::where('student_payment_id', $payment->id)->get();
+                    foreach ($paymentItems as $item) {
+                        $bill = StudentBill::lockForUpdate()->find($item->student_bill_id);
+                        if ($bill) {
+                            $bill->paid_amount += $item->amount_paid;
+                            if ($bill->paid_amount >= $bill->amount) {
+                                $bill->status = 'paid';
+                            } else if ($bill->paid_amount > 0) {
+                                $bill->status = 'partial';
+                            }
+                            $bill->save();
+                        }
+                    }
+                });
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Notification processed successfully',
+                'payment_status' => $payment->status
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Midtrans Webhook Error: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Webhook error: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

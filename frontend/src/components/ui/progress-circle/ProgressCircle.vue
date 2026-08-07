@@ -32,7 +32,7 @@ const props = defineProps({
   variant: {
     type: String,
     default: 'blue',
-    validator: v => ['blue', 'green', 'purple', 'amber'].includes(v)
+    validator: v => ['blue', 'green', 'purple', 'amber', 'emerald', 'indigo'].includes(v)
   }
 })
 
@@ -48,7 +48,9 @@ const gradientId = computed(() => `progress-gradient-${props.variant}`)
 const gradientColors = {
   blue: { start: '#60a5fa', end: '#3b82f6' },
   green: { start: '#4ade80', end: '#22c55e' },
+  emerald: { start: '#34d399', end: '#10b981' },
   purple: { start: '#c084fc', end: '#a855f7' },
+  indigo: { start: '#818cf8', end: '#6366f1' },
   amber: { start: '#fbbf24', end: '#f59e0b' }
 }
 

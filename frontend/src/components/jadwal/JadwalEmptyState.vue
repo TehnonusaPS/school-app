@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card'
 
 defineProps({
   icon: {
-    type: Object,
+    type: [Object, Function],
     required: true
   },
   iconColor: {

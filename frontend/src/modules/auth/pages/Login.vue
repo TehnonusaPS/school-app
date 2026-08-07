@@ -87,8 +87,13 @@ onMounted(async () => {
     }
   }
 
-  // Paksa halaman login selalu dalam light mode
-  document.documentElement.classList.remove('dark')
+  // Terapkan color mode berdasarkan preferensi tersimpan (bukan paksa light mode)
+  const savedTheme = localStorage.getItem('theme') || 'system'
+  if (savedTheme === 'dark' || (savedTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
 
   // Bersihkan class tema/background yang mungkin terbawa dari halaman lain
   document.body.classList.forEach(cls => {
@@ -100,6 +105,7 @@ onMounted(async () => {
         'bg-glass',
         'bg-school',
         'bg-solid',
+        'bg-modern_minimalist',
         'finish-solid'
       ].includes(cls)
     ) {
@@ -332,12 +338,10 @@ onUnmounted(() => {
         decoding="sync"
         class="absolute inset-0 h-full w-full object-cover"
       />
+      <!-- Gradient hanya di bagian bawah untuk keterbacaan teks, foto terlihat natural di atas -->
       <div
-        class="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/70 to-transparent mix-blend-multiply"
-      ></div>
-      <!-- Additional normal gradient for text readability -->
-      <div
-        class="absolute inset-0 bg-gradient-to-t from-primary/60 via-primary/20 to-transparent"
+        class="absolute inset-0"
+        style="background: linear-gradient(to top, color-mix(in srgb, var(--primary) 92%, transparent) 0%, color-mix(in srgb, var(--primary) 55%, transparent) 20%, color-mix(in srgb, var(--primary) 18%, transparent) 40%, transparent 62%);"
       ></div>
 
       <div class="absolute inset-0 flex items-end p-8 xl:p-12 z-10">

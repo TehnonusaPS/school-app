@@ -33,6 +33,7 @@ onMounted(() => {
         'bg-glass',
         'bg-school',
         'bg-solid',
+        'bg-modern_minimalist',
         'finish-solid'
       ].includes(cls)
     ) {

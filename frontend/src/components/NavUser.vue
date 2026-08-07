@@ -133,13 +133,14 @@ const setBackgroundStyle = styleName => {
     'bg-static_squares',
     'bg-glass',
     'bg-school',
-    'bg-solid'
+    'bg-solid',
+    'bg-modern_minimalist'
   )
   document.body.classList.add(`bg-${resolvedStyle}`)
   localStorage.setItem('backgroundStyle', resolvedStyle)
 
-  // Auto finish and vector visibility based on theme: solid uses solid finish (with vector illustration), others use glass (no illustration)
-  if (resolvedStyle === 'solid') {
+  // Auto finish and vector visibility based on theme: solid AND modern_minimalist use solid finish (with vector illustrations)
+  if (resolvedStyle === 'solid' || resolvedStyle === 'modern_minimalist') {
     setThemeFinish('solid')
   } else {
     setThemeFinish('glossy')
@@ -147,7 +148,7 @@ const setBackgroundStyle = styleName => {
 }
 
 const cycleBackgroundStyle = () => {
-  const styles = ['animated', 'static_squares', 'glass', 'solid']
+  const styles = ['animated', 'static_squares', 'glass', 'solid', 'modern_minimalist']
   const currentIndex = styles.indexOf(activeBackgroundStyle.value)
   const newStyle = styles[(currentIndex + 1) % styles.length]
   setBackgroundStyle(newStyle)
@@ -157,7 +158,8 @@ const backgroundNames = {
   animated: 'Animated Squares',
   static_squares: 'Static Squares',
   glass: 'Glass Effect',
-  solid: 'School Illustration'
+  solid: 'School Illustration',
+  modern_minimalist: 'Modern Minimalist'
 }
 
 // --- Finish Style Logic (Glossy/Solid) ---

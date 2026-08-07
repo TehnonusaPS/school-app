@@ -1631,3 +1631,233 @@ body:not(.finish-solid) [data-slot='sidebar'][data-mobile='true']::before {
 body.finish-solid .watermark-illustration ~ .watermark-icon-fallback {
   display: none !important;
 }
+
+@layer components {
+  /* =========================================================================
+     TEMA MODERN MINIMALIST (bg-modern_minimalist)
+     ========================================================================= */
+
+  /* Root html element must be transparent so the body background propagates to the
+     HTML canvas. When html has its own background (oklch(1 0 0) from @apply bg-background),
+     body background stays on the body element — which sits ABOVE .school-background at
+     z-index:-1 and covers it. Making html transparent forces body's background to the
+     canvas level, leaving body itself "paint-transparent" in the stacking context so
+     .school-background (z-index:-1, position:fixed) shows above the canvas. */
+  html:has(body.bg-modern_minimalist) {
+    background-color: transparent !important;
+  }
+
+  /* Body gets the soft primary-tinted background which then propagates to the canvas */
+  body.bg-modern_minimalist {
+    background-color: color-mix(in srgb, var(--primary) 4%, #f0f2f5) !important;
+    background-image: none !important;
+    --radius: 8px !important;
+  }
+  .dark body.bg-modern_minimalist {
+    background-color: color-mix(in srgb, var(--primary) 6%, #0b0f19) !important;
+    background-image: none !important;
+    --radius: 8px !important;
+  }
+
+  /* SidebarInset must stay transparent so the school illustration shows through */
+  body.bg-modern_minimalist [data-slot="sidebar-inset"] {
+    background-color: transparent !important;
+  }
+
+  /* Sidebar Container & Gap (Convert to non-floating layout) */
+  body.bg-modern_minimalist [data-slot="sidebar-container"] {
+    padding: 0 !important;
+  }
+
+  body.bg-modern_minimalist [data-slot="sidebar"][data-collapsible="icon"] [data-slot="sidebar-container"] {
+    width: var(--sidebar-width-icon) !important;
+  }
+
+  body.bg-modern_minimalist [data-slot="sidebar"][data-collapsible="icon"] [data-slot="sidebar-gap"] {
+    width: var(--sidebar-width-icon) !important;
+  }
+
+  /* Sidebar Inner Styles - Colored tint matching the active brand color */
+  body.bg-modern_minimalist [data-slot="sidebar-inner"] {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-right: 1px solid color-mix(in srgb, var(--primary) 12%, #e5e7eb) !important;
+    background: color-mix(in srgb, var(--primary) 6%, #f8fafc) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .dark body.bg-modern_minimalist [data-slot="sidebar-inner"] {
+    border-right: 1px solid color-mix(in srgb, var(--primary) 15%, #1e293b) !important;
+    background: color-mix(in srgb, var(--primary) 8%, #0d121f) !important;
+  }
+
+  body.bg-modern_minimalist [data-slot="sidebar-inner"]::after {
+    display: none !important;
+  }
+
+  /* Topbar Sticky Header Parent Padding */
+  body.bg-modern_minimalist .sticky.top-0.pt-2 {
+    padding-top: 0 !important;
+  }
+
+  /* Glass Mini global reset for Modern Minimalist (makes it square and flat by default) */
+  body.bg-modern_minimalist .glass-mini {
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: #ffffff !important;
+  }
+
+  .dark body.bg-modern_minimalist .glass-mini {
+    background: color-mix(in srgb, var(--primary) 5%, #131926) !important;
+  }
+
+  /* Specific sidebar buttons (logo header, user profile) should be transparent inside the sidebar */
+  body.bg-modern_minimalist [data-slot="sidebar"] .glass-mini {
+    background: transparent !important;
+  }
+
+  /* Specific Topbar Header overrides (needs margin reset, card background and bottom border) */
+  body.bg-modern_minimalist header.glass-mini {
+    margin: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    border: none !important;
+    border-bottom: 1px solid color-mix(in srgb, var(--primary) 12%, #e5e7eb) !important;
+    background: color-mix(in srgb, var(--primary) 6%, #f8fafc) !important;
+  }
+
+  .dark body.bg-modern_minimalist header.glass-mini {
+    border-bottom: 1px solid color-mix(in srgb, var(--primary) 15%, #1e293b) !important;
+    background: color-mix(in srgb, var(--primary) 8%, #0d121f) !important;
+  }
+
+  body.bg-modern_minimalist header.glass-mini::after {
+    display: none !important;
+  }
+
+  /* Strip all glass effects globally for Modern Minimalist (making them solid and flat).
+     glass-btn is intentionally EXCLUDED from background:white so button variant colours
+     (primary, destructive, secondary etc.) are preserved. */
+  body.bg-modern_minimalist .glass-ui,
+  body.bg-modern_minimalist .glass,
+  body.bg-modern_minimalist .glass-ui-card,
+  body.bg-modern_minimalist .glass-popup {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.04), 0 4px 12px -2px rgba(0, 0, 0, 0.02) !important;
+    border: 1px solid color-mix(in srgb, var(--primary) 8%, #e5e7eb) !important;
+    background: #ffffff !important;
+  }
+
+  .dark body.bg-modern_minimalist .glass-ui,
+  .dark body.bg-modern_minimalist .glass,
+  .dark body.bg-modern_minimalist .glass-ui-card,
+  .dark body.bg-modern_minimalist .glass-popup {
+    border: 1px solid color-mix(in srgb, var(--primary) 12%, #1e293b) !important;
+    background: color-mix(in srgb, var(--primary) 5%, #131926) !important;
+  }
+
+  /* glass-btn: only strip blur/glow, keep background so variant colours work */
+  body.bg-modern_minimalist .glass-btn {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+  }
+
+  body.bg-modern_minimalist .glass-overlay::after,
+  body.bg-modern_minimalist .glass-btn::after,
+  body.bg-modern_minimalist .glossy-active::after,
+  body.bg-modern_minimalist [class*="glass-"]::after {
+    display: none !important;
+  }
+
+  /* Card, Calendar, Alert & Glass UI Solid styling with consistent reference radius and soft drop shadow */
+  body.bg-modern_minimalist [data-slot="card"],
+  body.bg-modern_minimalist [data-slot="calendar"],
+  body.bg-modern_minimalist [data-slot="range-calendar"],
+  body.bg-modern_minimalist [data-slot="alert"],
+  body.bg-modern_minimalist .glass-ui,
+  body.bg-modern_minimalist .glass-ui-card {
+    background: #ffffff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid color-mix(in srgb, var(--primary) 8%, #e5e7eb) !important;
+    box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.04), 0 4px 12px -2px rgba(0, 0, 0, 0.02) !important;
+    border-radius: 8px !important;
+  }
+
+  /* Dark mode overrides for card styling */
+  .dark body.bg-modern_minimalist [data-slot="card"],
+  .dark body.bg-modern_minimalist [data-slot="calendar"],
+  .dark body.bg-modern_minimalist [data-slot="range-calendar"],
+  .dark body.bg-modern_minimalist [data-slot="alert"],
+  .dark body.bg-modern_minimalist .glass-ui,
+  .dark body.bg-modern_minimalist .glass-ui-card {
+    background: color-mix(in srgb, var(--primary) 5%, #131926) !important;
+    border: 1px solid color-mix(in srgb, var(--primary) 12%, #1e293b) !important;
+    box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.4), 0 4px 12px -2px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  /* Dark mode shadow optimization for other components */
+  .dark body.bg-modern_minimalist .glass-popup,
+  .dark body.bg-modern_minimalist [class*="glass-"] {
+    box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.4), 0 4px 12px -2px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  /* Form Input & Select Controls - Soft contrast style */
+  body.bg-modern_minimalist input,
+  body.bg-modern_minimalist select,
+  body.bg-modern_minimalist textarea,
+  body.bg-modern_minimalist button[role="combobox"],
+  body.bg-modern_minimalist [data-slot="select-trigger"] {
+    background-color: color-mix(in srgb, var(--primary) 2%, #ffffff) !important;
+    border: 1px solid color-mix(in srgb, var(--primary) 10%, #e5e7eb) !important;
+  }
+
+  .dark body.bg-modern_minimalist input,
+  .dark body.bg-modern_minimalist select,
+  .dark body.bg-modern_minimalist textarea,
+  .dark body.bg-modern_minimalist button[role="combobox"],
+  .dark body.bg-modern_minimalist [data-slot="select-trigger"] {
+    background-color: color-mix(in srgb, var(--primary) 4%, #0b0f19) !important;
+    border: 1px solid color-mix(in srgb, var(--primary) 12%, #2e3e59) !important;
+  }
+
+  @media (min-width: 640px) {
+    body.bg-modern_minimalist [data-slot="card"],
+    body.bg-modern_minimalist [data-slot="calendar"],
+    body.bg-modern_minimalist [data-slot="range-calendar"],
+    body.bg-modern_minimalist [data-slot="alert"],
+    body.bg-modern_minimalist .glass-ui,
+    body.bg-modern_minimalist .glass-ui-card {
+      border-radius: 12px !important;
+    }
+  }
+
+  body.bg-modern_minimalist [data-slot="card"]::after,
+  body.bg-modern_minimalist [data-slot="calendar"]::after,
+  body.bg-modern_minimalist [data-slot="range-calendar"]::after,
+  body.bg-modern_minimalist [data-slot="alert"]::after {
+    display: none !important;
+  }
+
+  /* Show school watermark illustrations, page backgrounds, and sidebar doodles in Modern Minimalist theme */
+  body.bg-modern_minimalist .watermark-illustration,
+  body.bg-modern_minimalist .school-background::before,
+  body.bg-modern_minimalist [data-slot='sidebar-inner']::before,
+  body.bg-modern_minimalist [data-slot='sidebar'][data-mobile='true']::before {
+    display: block !important;
+  }
+
+  /* Hide fallback icon when proper illustration is present (mirrors finish-solid behaviour) */
+  body.bg-modern_minimalist .watermark-illustration ~ .watermark-icon-fallback {
+    display: none !important;
+  }
+}

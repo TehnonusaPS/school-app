@@ -21,6 +21,20 @@ export async function deleteExamSession(sessionId) {
   return response.data
 }
 
+export async function publishExamSchedules(eventId) {
+  const response = await api.post('/academic-calendar/exam-schedules/publish', {
+    academic_calendar_event_id: eventId
+  })
+  return response.data
+}
+
+export async function unpublishExamSchedules(eventId) {
+  const response = await api.post('/academic-calendar/exam-schedules/unpublish', {
+    academic_calendar_event_id: eventId
+  })
+  return response.data
+}
+
 export async function fetchMyExamSchedule(params = {}) {
   const response = await api.get('/exam-schedules/my-schedule', { params })
   return response.data

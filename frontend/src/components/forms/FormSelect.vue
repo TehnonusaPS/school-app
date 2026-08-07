@@ -33,9 +33,13 @@ defineEmits(['update:modelValue'])
  * opening the dropdown, SelectValue shows the placeholder instead.
  */
 const selectedLabel = computed(() => {
-  if (!props.modelValue) return ''
+  if (props.modelValue === undefined || props.modelValue === null || props.modelValue === '') return ''
   const match = props.options.find(o => String(o.value) === String(props.modelValue))
   return match ? match.label : ''
+})
+
+const sanitizedOptions = computed(() => {
+  return (props.options || []).filter(o => o && o.value !== undefined && o.value !== null && String(o.value) !== '')
 })
 </script>
 
@@ -67,9 +71,9 @@ const selectedLabel = computed(() => {
 
         <SelectContent>
           <SelectItem
-            v-for="item in options"
+            v-for="item in sanitizedOptions"
             :key="item.value"
-            :value="item.value"
+            :value="String(item.value)"
             :disabled="item.disabled"
           >
             {{ item.label }}

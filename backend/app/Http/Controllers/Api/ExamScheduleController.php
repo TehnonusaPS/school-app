@@ -80,6 +80,7 @@ class ExamScheduleController extends Controller
                 'start_time'                 => substr($s->start_time, 0, 5),
                 'end_time'                   => substr($s->end_time, 0, 5),
                 'notes'                      => $s->notes,
+                'status'                     => $s->status ?? 'draft',
                 'session_subjects'           => $s->sessionSubjects->map(function ($ss) {
                     return [
                         'id'              => $ss->id,
@@ -165,6 +166,7 @@ class ExamScheduleController extends Controller
                     'start_time'                 => $sessionData['start_time'],
                     'end_time'                   => $sessionData['end_time'],
                     'notes'                      => $sessionData['notes'] ?? null,
+                    'status'                     => 'draft',
                     'created_by'                 => $user->id,
                 ]);
 
@@ -199,6 +201,7 @@ class ExamScheduleController extends Controller
                     'start_time'                 => substr($s->start_time, 0, 5),
                     'end_time'                   => substr($s->end_time, 0, 5),
                     'notes'                      => $s->notes,
+                    'status'                     => $s->status ?? 'draft',
                     'session_subjects'           => $s->sessionSubjects->map(function ($ss) {
                         return [
                             'id'              => $ss->id,
@@ -230,6 +233,66 @@ class ExamScheduleController extends Controller
     }
 
     /**
+     * Publish exam sessions for an academic calendar event.
+     */
+    public function publish(Request $request): JsonResponse
+    {
+        $schoolId = $this->resolveSchoolId($request);
+        if (!$schoolId || $schoolId === -1) {
+            return response()->json(['status' => 'error', 'message' => 'Sekolah ID tidak valid.'], 400);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'academic_calendar_event_id' => 'required|exists:academic_calendar_events,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+        }
+
+        $eventId = $request->input('academic_calendar_event_id');
+        $updatedCount = ExamSession::where('school_id', $schoolId)
+            ->where('academic_calendar_event_id', $eventId)
+            ->update(['status' => 'published']);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => "Berhasil mempublikasikan {$updatedCount} sesi ujian. Jadwal ujian kini dapat dilihat oleh guru, siswa, dan orang tua.",
+            'count'   => $updatedCount,
+        ]);
+    }
+
+    /**
+     * Unpublish (revert to draft) exam sessions for an academic calendar event.
+     */
+    public function unpublish(Request $request): JsonResponse
+    {
+        $schoolId = $this->resolveSchoolId($request);
+        if (!$schoolId || $schoolId === -1) {
+            return response()->json(['status' => 'error', 'message' => 'Sekolah ID tidak valid.'], 400);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'academic_calendar_event_id' => 'required|exists:academic_calendar_events,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+        }
+
+        $eventId = $request->input('academic_calendar_event_id');
+        $updatedCount = ExamSession::where('school_id', $schoolId)
+            ->where('academic_calendar_event_id', $eventId)
+            ->update(['status' => 'draft']);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Jadwal ujian berhasil ditarik kembali menjadi Draft.',
+            'count'   => $updatedCount,
+        ]);
+    }
+
+    /**
      * Delete single session.
      */
     public function destroySession(Request $request, int $id): JsonResponse
@@ -241,7 +304,11 @@ class ExamScheduleController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Sesi ujian tidak ditemukan.'], 404);
         }
 
+        $eventId = $session->academic_calendar_event_id;
         $session->delete();
+
+        // Revert all remaining sessions for this event to draft
+        ExamSession::where('academic_calendar_event_id', $eventId)->update(['status' => 'draft']);
 
         return response()->json([
             'status'  => 'success',
@@ -264,20 +331,23 @@ class ExamScheduleController extends Controller
             $classroom = $user->studentProfile->classroom;
             if ($classroom) {
                 $grade = $classroom->grade;
+                $schoolId = $classroom->school_id;
             }
         } elseif ($user->hasRole('orang_tua') && $user->parentProfile) {
             // Determine grade from parent's student child
-            $child = $user->parentProfile->students()->with('classroom')->first();
+            $child = $user->parentProfile->children()->with('classroom')->first();
             if ($child && $child->classroom) {
                 $grade = $child->classroom->grade;
+                $schoolId = $child->classroom->school_id;
             }
         } elseif ($request->filled('grade')) {
             $grade = (int) $request->input('grade');
         }
 
-        $query = ExamSession::with(['calendarEvent', 'sessionSubjects.subject']);
+        $query = ExamSession::with(['calendarEvent', 'sessionSubjects.subject'])
+            ->published();
 
-        if ($schoolId) {
+        if ($schoolId && $schoolId > 0) {
             $query->where('school_id', $schoolId);
         }
 

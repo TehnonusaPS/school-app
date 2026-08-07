@@ -2,7 +2,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { fetchAllAcademicYears } from '@/services/academicYearService'
 import { fetchEvents } from '@/services/academicCalendarService'
-import { fetchExamSchedules, bulkStoreExamSchedules, fetchMyExamSchedule } from '@/services/examScheduleService'
+import { fetchExamSchedules, bulkStoreExamSchedules, fetchMyExamSchedule, publishExamSchedules, unpublishExamSchedules } from '@/services/examScheduleService'
 import { toast } from 'vue-sonner'
 
 export function useExamSchedule() {
@@ -277,6 +277,42 @@ export function useExamSchedule() {
     }
   }
 
+  const rawSessionsFromApi = ref([])
+  const isPublishing = ref(false)
+
+  const isPublished = computed(() => {
+    if (!rawSessionsFromApi.value || rawSessionsFromApi.value.length === 0) return false
+    return rawSessionsFromApi.value.some(s => s.status === 'published')
+  })
+
+  const handlePublishExamSchedule = async () => {
+    if (!selectedEventId.value) return
+    isPublishing.value = true
+    try {
+      const res = await publishExamSchedules(selectedEventId.value)
+      toast.success('Berhasil Dipublikasikan', { description: res.message })
+      await loadEventSessions()
+    } catch (err) {
+      toast.error('Gagal mempublikasikan jadwal ujian')
+    } finally {
+      isPublishing.value = false
+    }
+  }
+
+  const handleUnpublishExamSchedule = async () => {
+    if (!selectedEventId.value) return
+    isPublishing.value = true
+    try {
+      const res = await unpublishExamSchedules(selectedEventId.value)
+      toast.success('Ditarik ke Draft', { description: res.message })
+      await loadEventSessions()
+    } catch (err) {
+      toast.error('Gagal menarik jadwal ujian ke draft')
+    } finally {
+      isPublishing.value = false
+    }
+  }
+
   // Load detail sessions for selected event (Admin / Manager Mode)
   const loadEventSessions = async () => {
     if (!selectedEventId.value) return
@@ -284,6 +320,8 @@ export function useExamSchedule() {
     try {
       const res = await fetchExamSchedules(selectedEventId.value)
       if (res && res.status === 'success') {
+        rawSessionsFromApi.value = res.sessions || []
+
         if (res.grades && res.grades.length > 0) {
           availableGrades.value = res.grades
         }
@@ -500,6 +538,10 @@ export function useExamSchedule() {
     removeSession,
     confirmSave,
     executeSaveAllSessions,
-    printSchedule
+    printSchedule,
+    isPublished,
+    isPublishing,
+    handlePublishExamSchedule,
+    handleUnpublishExamSchedule
   }
 }

@@ -4,6 +4,7 @@ import { fetchIndonesianHolidays } from '@/services/api/nagerDate';
 import { getMySchedule, getStudentSchedule } from '@/services/scheduleService';
 import { fetchParentSchedule, fetchPublicEvents } from '@/services/academicCalendarService';
 import { fetchMyExamSchedule } from '@/services/examScheduleService';
+import { fetchTeacherAgendas } from '@/services/teacherAgendaService';
 
 // Helper to format Date to YYYY-MM-DD in local time
 export function formatDateISO(date) {
@@ -36,6 +37,10 @@ export function useJadwal() {
   // Real Exam Schedules from API
   const examScheduleData = ref([]);
   const isLoadingExams = ref(false);
+
+  // Teacher Agendas from API
+  const teacherAgendas = ref([]);
+  const isLoadingTeacherAgendas = ref(false);
 
   // Weekly schedule from API
   const apiScheduleData = ref({});
@@ -96,16 +101,32 @@ export function useJadwal() {
     }
   };
 
+  const fetchAgendas = async () => {
+    isLoadingTeacherAgendas.value = true;
+    try {
+      const res = await fetchTeacherAgendas();
+      if (res && res.status === 'success') {
+        teacherAgendas.value = res.data || [];
+      }
+    } catch (e) {
+      console.error('Failed to load teacher agendas from API', e);
+    } finally {
+      isLoadingTeacherAgendas.value = false;
+    }
+  };
+
   watch(role, () => {
     fetchSchedule();
     fetchCalendar();
     fetchExams();
+    fetchAgendas();
   }, { immediate: true });
 
   watch(selectedChildId, (newId) => {
     if (role.value === 'orang_tua' && newId) {
       fetchSchedule();
       fetchExams();
+      fetchAgendas();
     }
   });
 
@@ -206,9 +227,9 @@ export function useJadwal() {
     return items
   };
 
-  // Get assignments on a specific date (mock data removed)
+  // Get teacher agendas/assignments on a specific date
   const getAssignmentsForDate = (dateStr) => {
-    return [];
+    return teacherAgendas.value.filter(a => isDateInBetween(dateStr, a.date, a.end_date || a.date));
   };
 
   // Combine everything for a specific date
@@ -217,6 +238,7 @@ export function useJadwal() {
     const holiday = getHolidayForDate(dateStr);
     const lessons = getLessonsForDate(dateStr);
     const exams = getExamsForDate(dateStr);
+    const assignments = getAssignmentsForDate(dateStr);
     const dbEvents = calendarEvents.value.filter(e => isDateInBetween(dateStr, e.startDate, e.endDate));
 
     return {
@@ -225,9 +247,9 @@ export function useJadwal() {
       holiday,
       lessons,
       exams,
-      assignments: [],
+      assignments,
       calendarEvents: dbEvents,
-      hasEvent: !!holiday || exams.length > 0 || dbEvents.length > 0
+      hasEvent: !!holiday || exams.length > 0 || assignments.length > 0 || dbEvents.length > 0
     };
   };
 
@@ -293,6 +315,25 @@ export function useJadwal() {
       }
     });
 
+    // Add teacher agendas
+    teacherAgendas.value.forEach(a => {
+      if ((a.end_date || a.date) >= todayStr) {
+        list.push({
+          id: `teacher-agenda-${a.id}`,
+          agendaId: a.id,
+          tanggal: a.date,
+          type: a.type,
+          title: a.title,
+          subtitle: a.classroom_name || 'Semua Kelas',
+          subject: a.subject_name || undefined,
+          time: a.time || (a.date === a.end_date ? 'Satu Hari' : `${a.date} s.d ${a.end_date}`),
+          location: a.description || '',
+          isTeacherAgenda: true,
+          agendaData: a
+        });
+      }
+    });
+
     // Sort list chronologically by date
     return list.sort((a, b) => a.tanggal.localeCompare(b.tanggal));
   });
@@ -302,13 +343,14 @@ export function useJadwal() {
     const holiday = getHolidayForDate(dateStr);
     const exams = getExamsForDate(dateStr);
     const lessons = getLessonsForDate(dateStr);
+    const assignments = getAssignmentsForDate(dateStr);
     const dbEvents = calendarEvents.value.filter(e => isDateInBetween(dateStr, e.startDate, e.endDate));
 
     return {
       isHoliday: !!holiday || dbEvents.some(e => ['libur_nasional', 'libur_semester', 'libur_khusus', 'tanggal_merah'].includes(e.type)),
       isSunday: new Date(dateStr).getDay() === 0,
       isExam: exams.length > 0 || dbEvents.some(e => ['uts', 'uas', 'us', 'anbk', 'ujian'].includes(e.type)),
-      isAssignment: false,
+      isAssignment: assignments.length > 0,
       isLesson: lessons.length > 0,
       isActivity: dbEvents.some(e => ['kegiatan', 'p5', 'mpls', 'rapor', 'remedi', 'rapat_guru'].includes(e.type))
     };
@@ -323,6 +365,8 @@ export function useJadwal() {
     isLoadingHolidays,
     calendarEvents,
     isLoadingCalendarEvents,
+    teacherAgendas,
+    isLoadingTeacherAgendas,
     parentChildren,
     selectedChildId,
     selectedDateDetails,
@@ -333,6 +377,7 @@ export function useJadwal() {
     getAssignmentsForDate,
     getDetailsForDate,
     getDateMarkers,
-    formatDateISO
+    formatDateISO,
+    fetchAgendas
   };
 }

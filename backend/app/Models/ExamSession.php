@@ -16,6 +16,7 @@ class ExamSession extends Model
         'start_time',
         'end_time',
         'notes',
+        'status',
         'created_by',
     ];
 
@@ -25,6 +26,14 @@ class ExamSession extends Model
             'exam_date'      => 'date:Y-m-d',
             'session_number' => 'integer',
         ];
+    }
+
+    /**
+     * Scope query to only include published exam sessions.
+     */
+    public function scopePublished($query)
+    {
+        return $query->where('status', 'published');
     }
 
     protected function serializeDate(\DateTimeInterface $date): string

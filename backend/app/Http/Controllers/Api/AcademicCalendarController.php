@@ -12,6 +12,7 @@ use App\Models\AcademicYear;
 use App\Models\Classroom;
 use App\Models\Schedule;
 use App\Models\TimeSlot;
+use App\Models\ExamSession;
 use App\Services\AcademicCalendarService;
 use App\Http\Requests\AcademicCalendar\SetupYearDatesRequest;
 use App\Http\Requests\AcademicCalendar\BatchStoreEventsRequest;
@@ -525,14 +526,12 @@ class AcademicCalendarController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Classroom not found.'], 404);
         }
 
-        $schoolId = $this->resolveSchoolId($request);
-        if ($schoolId !== null && $classroom->school_id !== $schoolId) {
-            return response()->json(['status' => 'error', 'message' => 'Unauthorized school access.'], 403);
-        }
+        $schoolId = $classroom->school_id;
 
         $schedules = Schedule::with(['subject', 'teacher', 'timeSlot'])
             ->where('academic_year_id', $classroom->academic_year_id)
             ->where('classroom_id', $classroom->id)
+            ->published()
             ->get();
 
         $formatted = [];
@@ -540,12 +539,26 @@ class AcademicCalendarController extends Controller
             $formatted[$i] = [];
         }
 
+        if ($schedules->isEmpty()) {
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'children' => $children->map(function($c) {
+                        return ['id' => $c->id, 'name' => $c->user ? $c->user->name : '', 'classroom_name' => $c->classroom ? $c->classroom->name : ''];
+                    })->toArray(),
+                    'selected_child' => ['id' => $selectedChild->id, 'name' => $selectedChild->user ? $selectedChild->user->name : '', 'classroom_name' => $classroom->name],
+                    'schedule' => $formatted
+                ]
+            ]);
+        }
+
+        $daysWithLessons = $schedules->pluck('day_of_week')->map(fn($d) => (int)$d)->unique()->toArray();
         $timeSlots = TimeSlot::where('school_id', $classroom->school_id)->orderBy('slot_number')->get();
 
         foreach ($timeSlots as $slot) {
             for ($day = 1; $day <= 7; $day++) {
                 $sched = $schedules->first(function($s) use ($slot, $day) {
-                    return $s->time_slot_id === $slot->id && $s->day_of_week === $day;
+                    return $s->time_slot_id === $slot->id && (int)$s->day_of_week === $day;
                 });
 
                 if ($sched) {
@@ -559,7 +572,7 @@ class AcademicCalendarController extends Controller
                         'guru'     => $sched->teacher ? $sched->teacher->name : '',
                         'is_break' => $slot->is_break
                     ];
-                } elseif ($slot->is_break) {
+                } elseif ($slot->is_break && in_array($day, $daysWithLessons)) {
                     $formatted[$day][] = [
                         'id'       => 'break-' . $slot->id,
                         'mulai'    => substr($slot->start_time, 0, 5),
@@ -590,6 +603,229 @@ class AcademicCalendarController extends Controller
                 'schedule' => $formatted
             ]
         ]);
+    }
+
+    /**
+     * Complete dashboard overview for Parent (Jadwal Anak Saya).
+     */
+    public function parentDashboard(Request $request): JsonResponse
+    {
+        try {
+            $user = $request->user();
+            if (!$user->hasRole('orang_tua') && !$user->hasRole('siswa')) {
+                return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
+            }
+
+            if ($user->hasRole('siswa')) {
+                $studentProfile = $user->studentProfile;
+                if (!$studentProfile) {
+                    return response()->json(['status' => 'error', 'message' => 'Student profile not found.'], 404);
+                }
+                $children = collect([$studentProfile]);
+            } else {
+                $parentProfile = $user->parentProfile;
+                if (!$parentProfile) {
+                    return response()->json(['status' => 'error', 'message' => 'Parent profile not found.'], 404);
+                }
+                $children = $parentProfile->children()->with(['user', 'classroom'])->get();
+            }
+            if ($children->isEmpty()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => [
+                        'children'        => [],
+                        'selected_child'  => null,
+                        'weekly_schedule' => [],
+                        'upcoming_exams'  => [],
+                        'upcoming_events' => []
+                    ]
+                ]);
+            }
+
+            $childId = $request->query('child_id');
+            $selectedChild = $childId ? $children->firstWhere('id', (int)$childId) : $children->first();
+
+            if (!$selectedChild) {
+                $selectedChild = $children->first();
+            }
+
+            $childrenList = $children->map(function($c) {
+                return [
+                    'id'             => $c->id,
+                    'name'           => $c->user ? $c->user->name : '',
+                    'classroom_name' => $c->classroom ? $c->classroom->name : '',
+                    'grade'          => $c->classroom ? $c->classroom->grade : null,
+                ];
+            })->toArray();
+
+            $classroomId = $selectedChild->classroom_id;
+            $classroom = $classroomId ? Classroom::find($classroomId) : null;
+            $schoolId = $classroom ? $classroom->school_id : ($selectedChild->user ? $selectedChild->user->school_id : null);
+            $grade = $classroom ? $classroom->grade : null;
+
+            $selectedChildData = [
+                'id'             => $selectedChild->id,
+                'name'           => $selectedChild->user ? $selectedChild->user->name : '',
+                'classroom_name' => $classroom ? $classroom->name : 'Belum Ada Kelas',
+                'grade'          => $grade,
+                'room'           => $classroom ? $classroom->room : '',
+            ];
+
+            // 1. Weekly Schedule
+            $weeklySchedule = [];
+            for ($i = 1; $i <= 7; $i++) {
+                $weeklySchedule[$i] = [];
+            }
+
+            if ($classroom) {
+                $schedules = Schedule::with(['subject', 'teacher', 'timeSlot'])
+                    ->where('academic_year_id', $classroom->academic_year_id)
+                    ->where('classroom_id', $classroom->id)
+                    ->published()
+                    ->get();
+
+                if ($schedules->isNotEmpty()) {
+                    $daysWithLessons = $schedules->pluck('day_of_week')->map(fn($d) => (int)$d)->unique()->toArray();
+                    $timeSlots = TimeSlot::where('school_id', $classroom->school_id)->orderBy('slot_number')->get();
+
+                    foreach ($timeSlots as $slot) {
+                        for ($day = 1; $day <= 7; $day++) {
+                            $sched = $schedules->first(function($s) use ($slot, $day) {
+                                return $s->time_slot_id === $slot->id && (int)$s->day_of_week === $day;
+                            });
+
+                            if ($sched) {
+                                $weeklySchedule[$day][] = [
+                                    'id'       => $sched->id,
+                                    'mulai'    => substr($slot->start_time, 0, 5),
+                                    'selesai'  => substr($slot->end_time, 0, 5),
+                                    'mapel'    => $sched->subject ? $sched->subject->name : '',
+                                    'code'     => $sched->subject ? $sched->subject->code : '',
+                                    'kelas'    => $classroom->name,
+                                    'ruang'    => $classroom->room,
+                                    'guru'     => $sched->teacher ? $sched->teacher->name : '',
+                                    'is_break' => (bool)$slot->is_break
+                                ];
+                            } elseif ($slot->is_break && in_array($day, $daysWithLessons)) {
+                                $weeklySchedule[$day][] = [
+                                    'id'       => 'break-' . $slot->id,
+                                    'mulai'    => substr($slot->start_time, 0, 5),
+                                    'selesai'  => substr($slot->end_time, 0, 5),
+                                    'mapel'    => $slot->label ?: 'Istirahat',
+                                    'code'     => '',
+                                    'kelas'    => '',
+                                    'ruang'    => '',
+                                    'guru'     => '',
+                                    'is_break' => true
+                                ];
+                            }
+                        }
+                    }
+
+                    foreach ($weeklySchedule as $day => &$lessons) {
+                        usort($lessons, function($a, $b) {
+                            return strcmp($a['mulai'], $b['mulai']);
+                        });
+                    }
+                }
+            }
+
+            // 2. Upcoming Exams
+            $upcomingExams = [];
+            if ($schoolId && $grade) {
+                $examSessions = ExamSession::with(['calendarEvent', 'sessionSubjects.subject'])
+                    ->published()
+                    ->where('school_id', $schoolId)
+                    ->whereHas('sessionSubjects', function($q) use ($grade) {
+                        $q->where('grade', $grade);
+                    })
+                    ->where('exam_date', '>=', now()->toDateString())
+                    ->orderBy('exam_date')
+                    ->orderBy('session_number')
+                    ->get();
+
+                $groupedExams = [];
+                foreach ($examSessions as $session) {
+                    $eventId = $session->academic_calendar_event_id;
+                    if (!isset($groupedExams[$eventId])) {
+                        $startDateStr = $session->calendarEvent?->start_date 
+                            ? (is_string($session->calendarEvent->start_date) ? $session->calendarEvent->start_date : $session->calendarEvent->start_date->format('Y-m-d'))
+                            : (is_string($session->exam_date) ? $session->exam_date : $session->exam_date->format('Y-m-d'));
+
+                        $endDateStr = $session->calendarEvent?->end_date 
+                            ? (is_string($session->calendarEvent->end_date) ? $session->calendarEvent->end_date : $session->calendarEvent->end_date->format('Y-m-d'))
+                            : (is_string($session->exam_date) ? $session->exam_date : $session->exam_date->format('Y-m-d'));
+
+                        $groupedExams[$eventId] = [
+                            'id'          => $eventId,
+                            'event_title' => $session->calendarEvent?->title ?? 'Ujian',
+                            'start_date'  => $startDateStr,
+                            'end_date'    => $endDateStr,
+                            'description' => $session->calendarEvent?->description,
+                            'sessions'    => []
+                        ];
+                    }
+
+                    $gradeSubjects = $session->sessionSubjects->where('grade', $grade);
+                    foreach ($gradeSubjects as $ss) {
+                        $examDateStr = is_string($session->exam_date) ? $session->exam_date : $session->exam_date->format('Y-m-d');
+                        $groupedExams[$eventId]['sessions'][] = [
+                            'id'             => $session->id,
+                            'exam_date'      => $examDateStr,
+                            'session_number' => $session->session_number,
+                            'start_time'     => substr($session->start_time, 0, 5),
+                            'end_time'       => substr($session->end_time, 0, 5),
+                            'subject_name'   => $ss->subject?->name ?? 'Mata Pelajaran',
+                            'subject_code'   => $ss->subject?->code ?? '',
+                            'notes'          => $session->notes ?? 'Ruang Ujian'
+                        ];
+                    }
+                }
+                $upcomingExams = array_values($groupedExams);
+            }
+
+            // 3. Upcoming Events & Holidays
+            $upcomingEvents = [];
+            if ($schoolId) {
+                $events = AcademicCalendarEvent::where(function($q) use ($schoolId) {
+                    $q->where('school_id', $schoolId)->orWhereNull('school_id');
+                })
+                ->where('end_date', '>=', now()->toDateString())
+                ->orderBy('start_date')
+                ->get();
+
+                $upcomingEvents = $events->map(function($e) {
+                    $sDateStr = is_string($e->start_date) ? $e->start_date : $e->start_date->format('Y-m-d');
+                    $eDateStr = is_string($e->end_date) ? $e->end_date : $e->end_date->format('Y-m-d');
+                    return [
+                        'id'          => $e->id,
+                        'title'       => $e->title,
+                        'type'        => $e->type,
+                        'start_date'  => $sDateStr,
+                        'end_date'    => $eDateStr,
+                        'description' => $e->description,
+                        'is_holiday'  => in_array($e->type, ['libur_nasional', 'libur_semester', 'libur_khusus', 'tanggal_merah'])
+                    ];
+                })->toArray();
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'data'   => [
+                    'children'        => $childrenList,
+                    'selected_child'  => $selectedChildData,
+                    'weekly_schedule' => $weeklySchedule,
+                    'upcoming_exams'  => $upcomingExams,
+                    'upcoming_events' => $upcomingEvents
+                ]
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Error in parentDashboard: ' . $e->getMessage() . ' line ' . $e->getLine());
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Gagal memuat data jadwal anak: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

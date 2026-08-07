@@ -15,6 +15,7 @@ class Schedule extends Model
         'teacher_id',
         'time_slot_id',
         'day_of_week',
+        'status',
     ];
 
     protected function casts(): array
@@ -22,6 +23,14 @@ class Schedule extends Model
         return [
             'day_of_week' => 'integer',
         ];
+    }
+
+    /**
+     * Scope query to only include published schedules.
+     */
+    public function scopePublished($query)
+    {
+        return $query->where('status', 'published');
     }
 
     /**

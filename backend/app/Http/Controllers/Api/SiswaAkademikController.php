@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Classroom;
+use App\Models\Subject;
+use App\Models\SubjectGrade;
+use App\Models\Schedule;
 use App\Models\SubjectMaterial;
 use App\Models\Assessment;
 use App\Models\TeacherSubjectAssignment;
@@ -47,9 +50,9 @@ class SiswaAkademikController extends Controller
                 'classroom_name'     => $c->name,
                 'grade'              => $c->grade,
                 'academic_year_id'   => $c->academic_year_id,
-                'academic_year_name' => $c->academicYear->name,
-                'semester'           => $c->academicYear->semester,
-                'semester_label'     => $c->academicYear->semester === 'odd' ? 'Ganjil' : 'Genap',
+                'academic_year_name' => $c->academicYear ? $c->academicYear->name : '-',
+                'semester'           => $c->academicYear ? $c->academicYear->semester : 'odd',
+                'semester_label'     => ($c->academicYear && $c->academicYear->semester === 'odd') ? 'Ganjil' : 'Genap',
                 'is_current'         => $c->id === $student->classroom_id
             ];
         })->sortByDesc('academic_year_id')->values();
@@ -73,14 +76,41 @@ class SiswaAkademikController extends Controller
             ], 400);
         }
 
-        $assignments = TeacherSubjectAssignment::with('subject')
-            ->where('classroom_id', $classroomId)
+        $classroom = Classroom::find($classroomId);
+        if (!$classroom) {
+            return response()->json([
+                'status' => 'success',
+                'data'   => []
+            ]);
+        }
+
+        // 1. Subjects from TeacherSubjectAssignment
+        $assignmentSubjectIds = TeacherSubjectAssignment::where('classroom_id', $classroomId)
+            ->pluck('subject_id')
+            ->toArray();
+
+        // 2. Subjects from Schedule (Jadwal Pelajaran Kelas)
+        $scheduleSubjectIds = Schedule::where('classroom_id', $classroomId)
+            ->pluck('subject_id')
+            ->toArray();
+
+        // 3. Subjects mapped by grade level (SubjectGrade)
+        $gradeSubjectIds = SubjectGrade::where('grade', $classroom->grade)
+            ->pluck('subject_id')
+            ->toArray();
+
+        $allSubjectIds = array_filter(array_unique(array_merge($assignmentSubjectIds, $scheduleSubjectIds, $gradeSubjectIds)));
+
+        $subjects = Subject::whereIn('id', $allSubjectIds)
             ->where('is_active', true)
             ->get();
 
-        $subjects = $assignments->map(function ($assignment) {
-            return $assignment->subject;
-        })->filter()->unique('id')->values();
+        // Fallback: If no specific subject assignment is found yet, return all active subjects of the school
+        if ($subjects->isEmpty()) {
+            $subjects = Subject::where('school_id', $classroom->school_id)
+                ->where('is_active', true)
+                ->get();
+        }
 
         return response()->json([
             'status' => 'success',
@@ -106,7 +136,10 @@ class SiswaAkademikController extends Controller
 
         // 1. Fetch materials
         $materials = SubjectMaterial::where('subject_id', $subjectId)
-            ->where('classroom_id', $classroomId)
+            ->where(function ($q) use ($classroomId) {
+                $q->where('classroom_id', $classroomId)
+                  ->orWhereNull('classroom_id');
+            })
             ->where('is_active', true)
             ->get();
 
@@ -115,7 +148,10 @@ class SiswaAkademikController extends Controller
                 $q->where('student_id', $student->id);
             }])
             ->where('subject_id', $subjectId)
-            ->where('classroom_id', $classroomId)
+            ->where(function ($q) use ($classroomId) {
+                $q->where('classroom_id', $classroomId)
+                  ->orWhereNull('classroom_id');
+            })
             ->where('is_active', true)
             ->get();
 

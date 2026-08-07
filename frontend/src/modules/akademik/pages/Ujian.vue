@@ -10,7 +10,8 @@ import ExamStickySaveBar from '../components/ujian/ExamStickySaveBar.vue'
 import ExamTimelineView from '../components/ujian/ExamTimelineView.vue'
 
 import { Card, CardContent } from '@/components/ui/card'
-import { Layers, RefreshCw } from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
+import { Layers, RefreshCw, Send, RotateCcw, FileText, CheckCircle2 } from 'lucide-vue-next'
 
 const {
   canEditExams,
@@ -46,7 +47,11 @@ const {
   removeSession,
   confirmSave,
   executeSaveAllSessions,
-  printSchedule
+  printSchedule,
+  isPublished,
+  isPublishing,
+  handlePublishExamSchedule,
+  handleUnpublishExamSchedule
 } = useExamSchedule()
 </script>
 
@@ -105,6 +110,64 @@ const {
 
       <!-- Step 3: Main Form Editor (Only shown when Exam Event is selected) -->
       <div v-else class="space-y-6">
+        <!-- Status Banner (Draft vs Published) -->
+        <div
+          v-if="editorSessions.length > 0"
+          class="p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs transition-all shadow-2xs"
+          :class="isPublished 
+            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-950 dark:text-emerald-200' 
+            : 'bg-amber-500/10 border-amber-500/30 text-amber-950 dark:text-amber-200'"
+        >
+          <div class="flex items-start gap-3">
+            <div 
+              class="p-2 rounded-xl shrink-0 font-bold mt-0.5"
+              :class="isPublished ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/20 text-amber-600 dark:text-amber-400'"
+            >
+              <component :is="isPublished ? CheckCircle2 : FileText" class="size-4" />
+            </div>
+            <div>
+              <h4 class="font-extrabold flex items-center gap-2 text-sm flex-wrap">
+                Status: {{ isPublished ? 'DIPUBLIKASIKAN' : 'DRAFT (Belum Dipublikasikan)' }}
+                <span 
+                  class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider"
+                  :class="isPublished ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30'"
+                >
+                  {{ isPublished ? 'Aktif dibaca Guru & Siswa' : 'Private Admin Only' }}
+                </span>
+              </h4>
+              <p class="text-[11px] opacity-80 mt-0.5 leading-relaxed">
+                {{ isPublished 
+                  ? 'Jadwal ujian ini telah dipublikasikan secara resmi dan dapat dilihat oleh Guru, Siswa, dan Orang Tua.' 
+                  : 'Jadwal ujian ini masih tersimpan sebagai Draft. Anda dapat terus menyusun atau mengubah matriks sesi tanpa mempengaruhi akun Guru, Siswa, maupun Orang Tua.' }}
+              </p>
+            </div>
+          </div>
+
+          <Button
+            v-if="!isPublished"
+            type="button"
+            size="sm"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shrink-0 px-4 h-9 shadow-sm cursor-pointer border-none"
+            :disabled="isPublishing"
+            @click="handlePublishExamSchedule"
+          >
+            <Send class="size-3.5 mr-1.5" />
+            Publikasikan Jadwal Ujian
+          </Button>
+
+          <Button
+            v-else
+            type="button"
+            size="sm"
+            variant="outline"
+            class="border-emerald-500/40 hover:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-bold rounded-xl shrink-0 px-4 h-9 cursor-pointer"
+            :disabled="isPublishing"
+            @click="handleUnpublishExamSchedule"
+          >
+            <RotateCcw class="size-3.5 mr-1.5" />
+            Tarik ke Draft
+          </Button>
+        </div>
         <!-- Date Navigation Tabs -->
         <ExamDateTabs
           v-model:selectedDateTab="selectedDateTab"

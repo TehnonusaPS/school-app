@@ -445,6 +445,10 @@ class SppController extends Controller
                         'email' => $user->email ?? ($user->nisn . '@school.app'),
                     ],
                     'item_details' => $itemDetails,
+                    'enabled_payments' => [
+                        'credit_card', 'bca_va', 'bni_va', 'bri_va', 'other_va',
+                        'gopay', 'shopeepay', 'qris', 'indomaret', 'alfamart'
+                    ],
                 ];
 
                 try {

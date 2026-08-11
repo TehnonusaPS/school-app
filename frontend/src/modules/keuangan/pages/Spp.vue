@@ -71,6 +71,22 @@ const stats = ref({
   pending_verifikasi_count: 0
 })
 
+const filteredStudentsList = computed(() => {
+  let list = students.value || []
+  if (siswaSearchQuery.value) {
+    const q = siswaSearchQuery.value.toLowerCase()
+    list = list.filter(s => 
+      (s.nama && s.nama.toLowerCase().includes(q)) ||
+      (s.nisn && s.nisn.toLowerCase().includes(q)) ||
+      (s.kelas && String(s.kelas).toLowerCase().includes(q))
+    )
+  }
+  if (statusFilter.value !== 'all') {
+    list = list.filter(s => (s.payment_status || 'Belum Lunas') === statusFilter.value)
+  }
+  return list
+})
+
 // Bill selection state for Payer (Siswa / Orang Tua)
 const selectedBillIds = ref([])
 const paymentMethodType = ref('online') // 'online' (Midtrans) | 'manual'

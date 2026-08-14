@@ -102,6 +102,8 @@ class StudentAttendanceController extends Controller
                 'jamKeluar' => $attendance ? $attendance->time_out : null,
                 'status' => $attendance ? strtolower($attendance->status) : 'belum_absen',
                 'is_face_registered' => (bool)$student->is_face_registered,
+                'rfid_number' => $student->rfid_number,
+                'is_rfid_registered' => (bool)$student->is_rfid_registered,
                 'foto' => $student->user->photo ? (str_starts_with($student->user->photo, 'http') ? $student->user->photo : asset($student->user->photo)) : null,
             ];
         });
@@ -595,6 +597,171 @@ class StudentAttendanceController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Status absensi berhasil diperbarui.'
+        ]);
+    }
+
+    private function sanitizeRfidNumber(string $rfid): string
+    {
+        $str = trim($rfid);
+        if (strlen($str) >= 6 && strlen($str) % 2 === 0) {
+            $half = (int)(strlen($str) / 2);
+            if (substr($str, 0, $half) === substr($str, $half)) {
+                return substr($str, 0, $half);
+            }
+        }
+        if (preg_match('/^([a-zA-Z0-9]{8,12})\1+$/', $str, $matches)) {
+            return $matches[1];
+        }
+        for ($len = 10; $len >= 8; $len--) {
+            if (strlen($str) >= $len * 2) {
+                $chunk = substr($str, 0, $len);
+                if (str_replace($chunk, '', $str) === '') {
+                    return $chunk;
+                }
+            }
+        }
+        if (strlen($str) > 12 && preg_match('/^[a-zA-Z0-9]{8,10}/', $str, $matches)) {
+            return $matches[0];
+        }
+        return $str;
+    }
+
+    /**
+     * Register or update student RFID card number.
+     */
+    public function registerRfid(Request $request, $id): JsonResponse
+    {
+        $request->validate([
+            'rfid_number' => 'required|string|max:100',
+        ]);
+
+        $rfidNumber = $this->sanitizeRfidNumber($request->rfid_number);
+
+        // Check if RFID card is already assigned to another student
+        $existing = StudentProfile::where('rfid_number', $rfidNumber)
+            ->where('id', '!=', $id)
+            ->with('user')
+            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'success' => false,
+                'message' => "Kartu RFID ini sudah terdaftar atas nama siswa {$existing->user->name}!"
+            ], 422);
+        }
+
+        $studentProfile = StudentProfile::findOrFail($id);
+        $studentProfile->rfid_number = $rfidNumber;
+        $studentProfile->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Kartu RFID berhasil didaftarkan untuk {$studentProfile->user->name}.",
+            'data' => [
+                'id' => $studentProfile->id,
+                'rfid_number' => $studentProfile->rfid_number,
+                'is_rfid_registered' => true,
+            ]
+        ]);
+    }
+
+    /**
+     * Process RFID Scan for Attendance.
+     */
+    public function scanRfid(Request $request): JsonResponse
+    {
+        $request->validate([
+            'rfid_number' => 'required|string',
+        ]);
+
+        $user = $request->user();
+        $schoolId = $user ? $user->school_id : null;
+        $rfidNumber = $this->sanitizeRfidNumber($request->rfid_number);
+
+        // Find student profile by rfid_number
+        $query = StudentProfile::where('rfid_number', $rfidNumber)->with(['user', 'classroom']);
+        if ($schoolId) {
+            $query->whereHas('user', function ($q) use ($schoolId) {
+                $q->where('school_id', $schoolId);
+            });
+        }
+        $studentProfile = $query->first();
+
+        if (!$studentProfile) {
+            return response()->json([
+                'success' => false,
+                'message' => "Kartu RFID tidak terdaftar / tidak dikenali."
+            ], 404);
+        }
+
+        $today = now()->toDateString();
+        $timeIn = now()->toTimeString();
+
+        // Check if student already checked in today
+        $existingAttendance = StudentAttendance::where('student_profile_id', $studentProfile->id)
+            ->where('date', $today)
+            ->first();
+
+        if ($existingAttendance) {
+            return response()->json([
+                'success' => false,
+                'already_checked_in' => true,
+                'message' => "Siswa {$studentProfile->user->name} sudah melakukan presensi masuk hari ini pada jam {$existingAttendance->time_in}.",
+                'student' => [
+                    'id' => $studentProfile->id,
+                    'nama' => $studentProfile->user->name,
+                    'kelas' => $studentProfile->classroom ? $studentProfile->classroom->name : '-',
+                    'nisn' => $studentProfile->nisn,
+                    'waktu' => $existingAttendance->time_in,
+                    'foto' => $studentProfile->user->photo ? (str_starts_with($studentProfile->user->photo, 'http') ? $studentProfile->user->photo : asset($studentProfile->user->photo)) : null,
+                ]
+            ], 400);
+        }
+
+        // Attendance Threshold
+        $school = $studentProfile->user->school;
+        $lateThreshold = ($school && $school->attendance_threshold_time) ? $school->attendance_threshold_time : '07:15:00';
+
+        $status = (strtotime($timeIn) <= strtotime($lateThreshold)) ? 'H' : 'T';
+
+        $attendance = StudentAttendance::create([
+            'student_profile_id' => $studentProfile->id,
+            'date' => $today,
+            'time_in' => $timeIn,
+            'status' => $status,
+            'verification_method' => 'rfid',
+        ]);
+
+        $initials = collect(explode(' ', $studentProfile->user->name))
+            ->map(fn($n) => mb_substr($n, 0, 1))
+            ->take(2)
+            ->join('');
+
+        $newLog = [
+            'id' => $attendance->id,
+            'nama' => $studentProfile->user->name,
+            'kelas' => $studentProfile->classroom ? $studentProfile->classroom->name : '-',
+            'nisn' => $studentProfile->nisn,
+            'inisial' => strtoupper($initials),
+            'waktu' => $timeIn,
+            'tipe' => 'Masuk (RFID)',
+            'status' => $status,
+            'foto' => $studentProfile->user->photo ? (str_starts_with($studentProfile->user->photo, 'http') ? $studentProfile->user->photo : asset($studentProfile->user->photo)) : null,
+        ];
+
+        return response()->json([
+            'success' => true,
+            'message' => "Presensi RFID Berhasil! Selamat Datang, {$studentProfile->user->name}.",
+            'log' => $newLog,
+            'student' => [
+                'id' => $studentProfile->id,
+                'nama' => $studentProfile->user->name,
+                'kelas' => $studentProfile->classroom ? $studentProfile->classroom->name : '-',
+                'nisn' => $studentProfile->nisn,
+                'waktu' => $timeIn,
+                'status' => $status === 'H' ? 'Hadir' : 'Terlambat',
+                'foto' => $studentProfile->user->photo ? (str_starts_with($studentProfile->user->photo, 'http') ? $studentProfile->user->photo : asset($studentProfile->user->photo)) : null,
+            ]
         ]);
     }
 }

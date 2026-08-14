@@ -46,12 +46,8 @@ const handleAction = action => {
 </script>
 
 <template>
-  <div
-    class="p-4 flex flex-col lg:flex-row justify-between items-stretch lg:items-center border-b gap-4"
-  >
-    <div
-      class="flex flex-col lg:flex-row lg:items-center gap-3 w-full lg:w-auto order-2 lg:order-1"
-    >
+  <div class="p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b">
+    <div class="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 w-full md:w-auto flex-1">
       <!-- Search Filter -->
       <template
         v-for="filter in filters"
@@ -59,7 +55,7 @@ const handleAction = action => {
       >
         <div
           v-if="filter.type === 'search'"
-          class="relative w-full md:w-[288px]"
+          class="relative w-full sm:w-[288px] shrink-0"
         >
           <Search
             class="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none"
@@ -75,7 +71,7 @@ const handleAction = action => {
       </template>
 
       <!-- Select & Date Filters -->
-      <div class="flex flex-row flex-wrap items-center gap-3 w-full lg:w-auto">
+      <div class="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 w-full sm:w-auto">
         <template
           v-for="filter in filters"
           :key="filter.key"
@@ -83,9 +79,9 @@ const handleAction = action => {
           <!-- Select Filter -->
           <div
             v-if="filter.type === 'select'"
-            class="flex items-center gap-1.5 w-auto"
+            class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto"
           >
-            <span class="text-sm font-medium text-muted-foreground whitespace-nowrap">
+            <span class="text-xs font-semibold text-muted-foreground whitespace-nowrap">
               {{ filter.label }}
             </span>
 
@@ -93,7 +89,7 @@ const handleAction = action => {
               :model-value="filterValues[filter.key]"
               @update:model-value="updateFilter(filter.key, $event)"
             >
-              <SelectTrigger class="min-w-[85px] max-w-[160px] h-8 bg-background">
+              <SelectTrigger class="h-8 w-full sm:min-w-[120px] sm:max-w-[200px] bg-background text-xs">
                 <SelectValue :placeholder="filter.placeholder" />
               </SelectTrigger>
 
@@ -113,11 +109,11 @@ const handleAction = action => {
           <!-- Date Filter -->
           <div
             v-else-if="filter.type === 'date'"
-            class="flex items-center gap-1.5 w-auto"
+            class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto"
           >
             <span
               v-if="filter.label"
-              class="text-sm font-medium text-muted-foreground whitespace-nowrap"
+              class="text-xs font-semibold text-muted-foreground whitespace-nowrap"
             >
               {{ filter.label }}
             </span>
@@ -131,27 +127,28 @@ const handleAction = action => {
       </div>
     </div>
 
+    <!-- Actions -->
     <div
       v-if="actions && actions.length"
-      class="flex flex-row-reverse flex-wrap gap-2 items-center justify-start w-full lg:w-auto shrink-0 order-1 lg:order-2"
+      class="flex flex-wrap items-center gap-2 shrink-0 self-end sm:self-auto w-full sm:w-auto justify-end"
     >
       <Button
         v-for="(action, index) in actions"
         :key="action.label || index"
         :variant="action.variant || 'default'"
         size="sm"
-        class="h-8 justify-center shrink-0 w-auto [direction:ltr]"
+        class="h-8 gap-1.5"
         :disabled="action.disabled || action.loading"
         @click="handleAction(action)"
       >
         <span
           v-if="action.loading"
-          class="mr-2 h-4 w-4 animate-spin border-2 border-current border-t-transparent rounded-full"
+          class="size-3.5 animate-spin border-2 border-current border-t-transparent rounded-full shrink-0"
         />
         <component
           :is="action.icon"
           v-else-if="action.icon"
-          class="w-4 h-4 mr-1"
+          class="size-3.5 shrink-0"
         />
         {{ action.label }}
       </Button>

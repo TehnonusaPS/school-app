@@ -50,6 +50,10 @@ Route::get('/test-db', function () {
     }
 });
 
+// Midtrans Public Webhook Notification Callback Route (Unauthenticated)
+Route::post('/spp/payments/notification', [\App\Http\Controllers\Api\SppController::class, 'handleNotification']);
+Route::post('/finance/spp/payments/notification', [\App\Http\Controllers\Api\SppController::class, 'handleNotification']);
+
 Route::get('/env-check', function () {
     return [
         'DB_CONNECTION' => env('DB_CONNECTION'),

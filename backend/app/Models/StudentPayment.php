@@ -16,6 +16,8 @@ class StudentPayment extends Model
         'payment_method',
         'amount',
         'reference_number',
+        'snap_token',
+        'snap_redirect_url',
         'status',
         'payment_date',
         'verified_by',

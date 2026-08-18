@@ -22,5 +22,6 @@ export const defaultForm = {
   status_aktif: '',
   emailLogin: '',
   noHpLogin: '',
-  join_date: ''
+  join_date: '',
+  subject_ids: []
 }

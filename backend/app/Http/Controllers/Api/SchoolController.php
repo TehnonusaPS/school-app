@@ -22,13 +22,13 @@ class SchoolController extends Controller
         $user = $request->user();
 
         if ($user->isSuperAdmin()) {
-            $query = School::with('foundation:id,name,code')->withCount('students');
+            $query = School::with('foundation:id,name,code', 'users:id,school_id,email,phone')->withCount('students');
 
             if ($request->has('search')) {
                 $search = $request->input('search');
                 $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                       ->orWhere('npsn', 'like', "%{$search}%");
+                    $q->where('name', 'ilike', "%{$search}%")
+                       ->orWhere('npsn', 'ilike', "%{$search}%");
                 });
             }
 
@@ -55,7 +55,7 @@ class SchoolController extends Controller
 
             return response()->json([
                 'status' => 'success',
-'data'   => $query->latest('schools.created_at')->paginate($request->input('per_page', $perPage), ['*'], 'page', $page),
+                'data'   => $query->latest('schools.created_at')->paginate($request->input('per_page', $perPage), ['*'], 'page', $page),
                 'stats'  => [
                     'total' => $total,
                     'active' => $active,
@@ -66,15 +66,16 @@ class SchoolController extends Controller
         }
 
         if ($user->hasRole('admin_yayasan')) {
-            $query = School::with('foundation:id,name,code')
+            $query = School::with('foundation:id,name,code', 'users:id,school_id,email,phone')
                 ->withCount('students')
                 ->where('foundation_id', $user->foundation_id);
 
+                // dd($query);
             if ($request->has('search')) {
                 $search = $request->input('search');
                 $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                       ->orWhere('npsn', 'like', "%{$search}%");
+                    $q->where('name', 'ilike', "%{$search}%")
+                       ->orWhere('npsn', 'ilike', "%{$search}%");
                 });
             }
 
@@ -97,7 +98,7 @@ class SchoolController extends Controller
 
             return response()->json([
                 'status' => 'success',
-'data'   => $query->latest('schools.created_at')->paginate($request->input('per_page', $perPage), ['*'], 'page', $page),
+                'data'   => $query->latest('schools.created_at')->paginate($request->input('per_page', $perPage), ['*'], 'page', $page),
                 'stats'  => [
                     'total' => $total,
                     'active' => $active,

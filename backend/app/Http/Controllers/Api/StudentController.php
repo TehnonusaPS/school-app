@@ -196,9 +196,9 @@ class StudentController extends Controller
         if ($request->has('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
+                $q->where('name', 'ilike', "%{$search}%")
                   ->orWhereHas('studentProfile', function ($sq) use ($search) {
-                      $sq->where('nisn', 'like', "%{$search}%");
+                      $sq->where('nisn', 'ilike', "%{$search}%");
                   });
             });
         }

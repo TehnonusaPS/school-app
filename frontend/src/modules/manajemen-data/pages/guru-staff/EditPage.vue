@@ -10,104 +10,171 @@ import { useAuthStore } from '@/stores/authStore'
 import GuruStaffForm from './components/GuruStaffForm.vue'
 import { agamaOptions, jabatanOptions, kelaminOptions, pendidikanOptions, statusKepegawaianOptions, statusOptions, statusPernikahanOptions } from './data/guruStaff'
 import { toast } from 'vue-sonner'
-import { getTeacher, updateTeacher } from '@/services/managementService'
+import { getTeacher, updateTeacher, getFoundation, getSchools } from '@/services/managementService'
+import { fetchAllSubjects } from '@/services/subjectService'
 
 const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 const isLoading = ref(false)
-const teacherId = route.query.id
+const teacherId = route.params.id || route.query.id
+const unitOptions = ref([])
+const subjectOptions = ref([])
 
 const form = ref({ ...defaultForm })
 const imagePreview = ref('')
 const formErrors = ref({})
 
+
+const loadUnitOptions = async () => {
+  try {
+    const resSchools = await getSchools()
+    const options = resSchools.data.data.map(s => ({
+      label: s.name,
+      value: 'S' + String(s.id).padStart(4, '0')
+    }))
+
+    if (auth.user?.foundation_id) {
+      try {
+        const resFd = await getFoundation(auth.user.foundation_id)
+        options.unshift({
+          label: resFd.data.name,
+          value: 'Y' + String(auth.user.foundation_id).padStart(4, '0')
+        })
+      } catch (err) {
+        options.unshift({
+          label: 'Yayasan',
+          value: 'Y' + String(auth.user.foundation_id).padStart(4, '0')
+        })
+      }
+    }
+    unitOptions.value = options
+  } catch (err) {
+    console.error('Failed to load schools', err)
+  }
+}
+
 const mapAgamaToValue = (label) => {
+  if (!label) return ''
   const map = {
     'Islam': 'A01',
     'Kristen': 'A02',
     'Katolik': 'A03',
     'Buddha': 'A04',
     'Hindu': 'A05',
-    'Konghucu': 'A06'
+    'Konghucu': 'A06',
   }
   return map[label] || ''
 }
 
 const mapPernikahanToValue = (label) => {
+  if (!label) return ''
   const map = {
     'Belum Menikah': 'SP01',
     'Menikah': 'SP02',
     'Janda': 'SP03',
-    'Duda': 'SP04'
+    'Duda': 'SP04',
   }
   return map[label] || ''
 }
 
-const form = ref({ ...defaultForm})
-const imagePreview = ref('')
+const mapKelaminToValue = (label) => {
+  if (!label) return ''
+  const map = {
+    'Laki-laki': 'JK01',
+    'Perempuan': 'JK02',
+    'male': 'JK01',
+    'female': 'JK02',
+  }
+  return map[label] || ''
+}
+
+const formatDateString = (val) => {
+  if (!val) return ''
+  if (typeof val === 'string') {
+    return val.split('T')[0]
+  }
+  if (val instanceof Date) {
+    return val.toISOString().split('T')[0]
+  }
+  return val
+}
 
 const loadTeacher = async () => {
-  const teacherId = route.query.id
-  if (!teacherId) return
+  const currentId = route.params.id || route.query.id
+  if (!currentId) return
 
   isLoading.value = true
   try {
-    const res = await getTeacher(teacherId)
-    const data = res.data
+    const res = await getTeacher(currentId)
+    // Support either response wrapper or direct object
+    const data = (res && res.data) ? res.data : (res || {})
 
-    const jabMap = {
-      'Kepala Yayasan': 'J001',
-      'Staff Yayasan': 'J002',
-      'Kepala Sekolah': 'J003',
-      'Guru': 'J004',
-      'Staff Sekolah': 'J005',
-      'Admin Sekolah': 'J006'
-    }
-    const kepMap = {
-      'Tetap': 'SK01',
-      'Kontrak': 'SK02',
-      'Honorer': 'SK03'
-    }
+    const user = data.user || data || {}
+    const profile = data.teacher_profile || data.profile || data || {}
 
+    const rawGender = profile.gender || profile.jenis_kelamin || ''
+    const rawAgama = profile.religion || profile.agama || ''
+    const rawPernikahan = profile.marital_status || profile.status_pernikahan || ''
+    const rawPendidikan = profile.last_education || profile.pendidikan_terakhir || ''
+    const rawJabatan = profile.position || profile.jabatan || ''
+    const rawKepegawaian = profile.employment_status || profile.status_kepegawaian || ''
+
+    const isActiveVal = user.is_active !== undefined ? user.is_active : (data.status_aktif !== undefined ? data.status_aktif : true)
+    const statusAktifVal = (isActiveVal === true || isActiveVal === 1 || isActiveVal === 'aktif' || isActiveVal === 'Aktif') ? 'Aktif' : 'Nonaktif'
+
+    const rawSubjects =
+      data.subjects ||
+      profile.subjects ||
+      data.teacher_subject_assignments ||
+      profile.teacher_subject_assignments ||
+      []
+
+    const selectedSubjectIds = rawSubjects
+      .map(item => {
+        return item.subject_id || item.subject?.id || item.id
+      })
+      .filter(Boolean)
+      .map(id => String(id))
+      
     form.value = {
       ...defaultForm,
-      nama_depan: data.nama_depan || '',
-      nama_belakang: data.nama_belakang || '',
-      nik: data.nik || '',
-      nip_nuptk: data.nip_nuptk || '',
-      tempat_lahir: data.tempat_lahir || '',
-      tanggal_lahir: data.tanggal_lahir || '',
-      jenis_kelamin: data.jenis_kelamin || '',
-      agama: data.agama || '',
-      status_pernikahan: data.status_pernikahan || '',
-      pendidikan_terakhir: data.pendidikan_terakhir || '',
-      gelar_depan: data.gelar_depan || '',
-      gelar_belakang: data.gelar_belakang || '',
-      email: data.email || '',
-      no_hp: data.no_hp || '',
-      alamat: data.alamat || '',
-      jabatan: jabMap[data.jabatan] || data.jabatan || '',
-      status_kepegawaian: kepMap[data.status_kepegawaian] || data.status_kepegawaian || '',
-      unit_kerja: data.unit_id || '',
-      status_aktif: data.status_aktif === 'Aktif' ? 'Aktif' : 'Nonaktif',
-      emailLogin: data.emailLogin || '',
-      noHpLogin: data.noHpLogin || '',
-      join_date: data.join_date || ''
+      nama_depan: user.nama_depan || (user.name ? user.name.split(' ')[0] : ''),
+      nama_belakang: user.nama_belakang || (user.name ? user.name.split(' ').slice(1).join(' ') : ''),
+      nik: profile.nik || '',
+      nip_nuptk: profile.nip_nuptk || profile.nip || '',
+      tempat_lahir: profile.birth_place || profile.tempat_lahir || '',
+      tanggal_lahir: formatDateString(profile.birth_date || profile.tanggal_lahir || ''),
+      jenis_kelamin: mapKelaminToValue(rawGender),
+      agama: mapAgamaToValue(rawAgama),
+      status_pernikahan: mapPernikahanToValue(rawPernikahan),
+      pendidikan_terakhir: mapPendidikanToValue(rawPendidikan),
+      gelar_depan: profile.front_title || profile.gelar_depan || '',
+      gelar_belakang: profile.back_title || profile.gelar_belakang || '',
+      email: profile.email || user.email || '',
+      no_hp: profile.no_hp || profile.phone || user.phone || user.no_hp || '',
+      alamat: profile.address || profile.alamat || '',
+      jabatan: mapJabatanToValue(rawJabatan),
+      status_kepegawaian: mapStatusKepegawaianToValue(rawKepegawaian),
+      unit_kerja: data.unit_id || (user.school_id ? 'S' + String(user.school_id).padStart(4, '0') : (user.foundation_id ? 'Y' + String(user.foundation_id).padStart(4, '0') : '')) || '',
+      status_aktif: statusAktifVal,
+      emailLogin: user.email || user.emailLogin || data.emailLogin || '',
+      noHpLogin: user.phone || user.noHpLogin || data.noHpLogin || '',
+      join_date: formatDateString(profile.join_date || ''),
+      subject_ids: Array.isArray(data.subject_ids) ? data.subject_ids.map(id => String(id)): []
     }
 
-    if (data.foto) {
+    const photoPath = user.photo || data.foto
+    if (photoPath) {
       const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api').replace(/\/api$/, '')
-      imagePreview.value = data.foto.startsWith('http') ? data.foto : `${baseUrl}/storage/${data.foto}`
+      imagePreview.value = photoPath.startsWith('http') ? photoPath : `${baseUrl}/storage/${photoPath}`
     }
   } catch (err) {
+    console.error('Error loading teacher details:', err)
     toast.error('Gagal memuat data guru/staff')
   } finally {
     isLoading.value = false
   }
-}
-  }
-  return map[label] || ''
 }
 
 const mapPendidikanToValue = (label) => {
@@ -221,6 +288,7 @@ const mapValueToKelamin = (value) => {
 
 onMounted(async () => {
   await loadUnitOptions()
+  await loadSubjectOptions()
   await loadTeacher()
 })
 
@@ -229,118 +297,6 @@ const handleImage = (file) => {
   imagePreview.value = URL.createObjectURL(file)
 }
 
-const formErrors = ref({})
-
-const handleSubmit = async () => {
-  const teacherId = route.query.id
-  if (!teacherId) return
-
-  formErrors.value = {}
-
-  // Client-side Validation: All fields must be filled
-  const errors = {}
-  if (!form.value.nama_depan) {
-    errors.first_name = 'Nama depan harus diisi'
-  }
-  if (!form.value.nik) {
-    errors.nik = 'NIK harus diisi'
-  }
-  if (!form.value.nip_nuptk) {
-    errors.nip_nuptk = 'NIP/NUPTK harus diisi'
-  }
-  if (!form.value.tempat_lahir) {
-    errors.tempat_lahir = 'Tempat lahir harus diisi'
-  }
-  if (!form.value.tanggal_lahir) {
-    errors.tanggal_lahir = 'Tanggal lahir harus diisi'
-  }
-  if (!form.value.jenis_kelamin) {
-    errors.jenis_kelamin = 'Jenis kelamin harus diisi'
-  }
-  if (!form.value.agama) {
-    errors.agama = 'Agama harus diisi'
-  }
-  if (!form.value.status_pernikahan) {
-    errors.status_pernikahan = 'Status pernikahan harus diisi'
-  }
-  if (!form.value.pendidikan_terakhir) {
-    errors.pendidikan_terakhir = 'Pendidikan terakhir harus diisi'
-  }
-  if (!form.value.email) {
-    errors.email = 'E-mail sekolah harus diisi'
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
-    errors.email = 'Format e-mail tidak valid'
-  }
-  if (!form.value.no_hp) {
-    errors.phone = 'No. Telp harus diisi'
-  }
-  if (!form.value.alamat) {
-    errors.address = 'Alamat lengkap harus diisi'
-  }
-  if (!form.value.unit_kerja) {
-    errors.unit_kerja = 'Unit kerja harus diisi'
-  }
-  if (!form.value.status_aktif) {
-    errors.status_aktif = 'Status aktif harus diisi'
-  }
-  if (!form.value.join_date) {
-    errors.join_date = 'Tanggal bergabung harus diisi'
-  }
-  if (!form.value.status_kepegawaian) {
-    errors.status_kepegawaian = 'Status kepegawaian harus diisi'
-  }
-  if (!form.value.jabatan) {
-    errors.jabatan = 'Jabatan harus diisi'
-  }
-  if (!form.value.emailLogin) {
-    errors.emailLogin = 'E-mail login administrator harus diisi'
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.emailLogin)) {
-    errors.emailLogin = 'Format e-mail login tidak valid'
-  }
-  if (!form.value.noHpLogin) {
-    errors.noHpLogin = 'No. HP login administrator harus diisi'
-  }
-
-  if (Object.keys(errors).length > 0) {
-    formErrors.value = errors
-    toast.error('Gagal Menyimpan', {
-      description: 'Harap lengkapi semua data formulir sebelum menyimpan.'
-    })
-    return
-  }
-
-  isLoading.value = true
-  try {
-    let submitData = { ...form.value }
-    
-    if (form.value.foto instanceof File) {
-      const formData = new FormData()
-      Object.keys(submitData).forEach(key => {
-        if (submitData[key] !== null && submitData[key] !== undefined && key !== 'foto') {
-          formData.append(key, submitData[key])
-        }
-      })
-      formData.append('foto', form.value.foto)
-      submitData = formData
-    }
-
-    const res = await updateTeacher(teacherId, submitData)
-    if (res.status === 'success') {
-      toast.success('Berhasil diperbarui', {
-        description: 'Data guru/staff telah berhasil disimpan.'
-      })
-      router.push('/manajemen-data/guru-staff')
-    } else {
-      toast.error(res.message || 'Gagal memperbarui data')
-    }
-    imagePreview.value = t.foto || ''
-  } catch (err) {
-    toast.error('Gagal mengambil data guru/staff')
-    router.push('/manajemen-data/guru-staff')
-  } finally {
-    isLoading.value = false
-  }
-})
 
 const handleSubmit = async () => {
   isLoading.value = true
@@ -367,7 +323,9 @@ const handleSubmit = async () => {
     jabatan: mapValueToJabatan(form.value.jabatan),
     status_kepegawaian: mapValueToStatusKepegawaian(form.value.status_kepegawaian),
     unit_kerja: form.value.unit_kerja,
-    status_aktif: form.value.status_aktif === 'Aktif' ? 'aktif' : 'nonaktif'
+    status_aktif: form.value.status_aktif === 'Aktif' ? 'aktif' : 'nonaktif',
+    join_date: form.value.join_date,
+    subject_ids: form.value.subject_ids || []
   }
 
   if (form.value.password) {
@@ -375,15 +333,37 @@ const handleSubmit = async () => {
   }
 
   try {
-    // If there's a new photo, send as FormData
     if (form.value.foto instanceof File) {
       const fd = new FormData()
-      Object.keys(postData).forEach(k => fd.append(k, postData[k]))
+
+      Object.entries(postData).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          value.forEach(item => {
+            fd.append(`${key}[]`, item)
+          })
+
+          return
+        }
+
+        if (value !== null && value !== undefined && value !== '') {
+          fd.append(key, value)
+        }
+      })
+
       fd.append('foto', form.value.foto)
+
       await updateTeacher(teacherId, fd)
     } else {
       await updateTeacher(teacherId, postData)
     }
+    // if (form.value.foto instanceof File) {
+    //   const fd = new FormData()
+    //   Object.keys(postData).forEach(k => fd.append(k, postData[k]))
+    //   fd.append('foto', form.value.foto)
+    //   await updateTeacher(teacherId, fd)
+    // } else {
+    //   await updateTeacher(teacherId, postData)
+    // }
     toast.success('Data guru/staff berhasil diperbarui', {
       description: 'Perubahan data guru/staff telah berhasil disimpan.'
     })
@@ -405,10 +385,6 @@ const handleSubmit = async () => {
     isLoading.value = false
   }
 }
-  } finally {
-    isLoading.value = false
-  }
-}
 
 const customActions = computed(() => [
   {
@@ -418,6 +394,26 @@ const customActions = computed(() => [
     click: handleSubmit
   },
 ])
+
+const loadSubjectOptions = async () => {
+  try {
+    const res = await fetchAllSubjects()
+
+    const subjects = Array.isArray(res.data) ? res.data : []
+
+    subjectOptions.value = subjects
+      .filter(subject => subject.is_active === true)
+      .map(subject => ({
+        label: subject.name,
+        value: String(subject.id)
+      }))
+
+    console.log('Subject options:', subjectOptions.value)
+  } catch (error) {
+    console.error('Gagal memuat mata pelajaran:', error)
+    subjectOptions.value = []
+  }
+}
 </script>
 
 <template>
@@ -441,9 +437,9 @@ const customActions = computed(() => [
       :status-kepegawaian-options="statusKepegawaianOptions"
       :unit-kerja-options="unitOptions"
       :status-options="statusOptions"
+      :subject-options="subjectOptions"
       :errors="formErrors"
       @image-change="handleImage"
-      :errors="formErrors"
     />
   </div>
 </template>

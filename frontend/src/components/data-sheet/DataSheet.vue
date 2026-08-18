@@ -191,20 +191,21 @@ const resolveFieldValue = field => {
       <slot name="header">
         <SheetHeader class="border-b border-border pb-3">
           <div class="flex items-center gap-4">
-<Avatar v-if="showAvatar" class="size-16 border-2 border-border/80 shrink-0 overflow-hidden">
+            <Avatar
+              v-if="showAvatar"
+              class="size-16 border-2 border-border/80 shrink-0 overflow-hidden"
+            >
               <AvatarImage
-                v-if='resolvedAvatar'
-                :src='resolvedAvatar'
-                :alt='resolvedTitle'
-                class='w-full h-full object-cover'
-              />
-            </Avatar>
+                v-if="resolvedAvatar && !imageError"
                 :src="resolvedAvatar"
                 :alt="resolvedTitle"
                 class="w-full h-full object-cover"
                 @error="imageError = true"
               />
-              <AvatarFallback v-else class="text-lg font-bold">
+              <AvatarFallback
+                v-else
+                class="text-lg font-bold"
+              >
                 {{ resolvedAvatarFallback }}
               </AvatarFallback>
             </Avatar>

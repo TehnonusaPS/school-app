@@ -136,11 +136,11 @@ const fetchFoundations = async () => {
       tanggal_akta: item.deed_date ? item.deed_date.split('T')[0] : '-',
       no_sk: item.decree_number,
       tanggal_sk: item.decree_date ? item.decree_date.split('T')[0] : '-',
-      logo: getLogoUrl(item.logo) || 'https://picsum.photos/200',
+      logo: getLogoUrl(item.logo) || '/defaults/sd/logo.png',
       foto: getLogoUrl(item.logo) || '/defaults/sd/logo.png',
       status: item.status === 'active' ? 'Aktif' : (item.status === 'inactive' ? 'Nonaktif' : 'Trial'),
-      emailLogin: item.users && item.users[0] ? item.users[0].email : '-',
-      noHpLogin: item.users && item.users[0] ? item.users[0].phone : '-' ,
+      emailLogin: item.users?.[0]?.email || '-',
+      noHpLogin: item.users?.[0]?.phone || '-',
       // Mapped fields
       jmlSekolah: item.schools_count || 0,
       jmlPengguna: item.users_count || 0

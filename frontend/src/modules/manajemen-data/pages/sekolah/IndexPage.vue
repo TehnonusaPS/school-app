@@ -135,14 +135,14 @@ const fetchSchools = async () => {
       tanggal_sk: item.decree_date ? item.decree_date.split('T')[0] : '-',
       no_izin: item.permit_number,
       tanggal_izin: item.permit_date ? item.permit_date.split('T')[0] : '-',
-      akreditasi: item.accreditation,
+      akreditasi: item.accreditation == 0 ? 'Belum Akreditasi' : item.accreditation,
       tanggal_akreditasi: item.accreditation_date ? item.accreditation_date.split('T')[0] : '-',
       no_akreditasi: item.accreditation_number,
       status: item.status === 'active' ? 'Aktif' : (item.status === 'inactive' ? 'Nonaktif' : 'Trial'),
       foto: getLogoUrl(item.logo) || '/defaults/sd/logo.png',
       logo: getLogoUrl(item.logo) || '/defaults/sd/logo.png',
-      emailLogin: item.users && item.users[0] ? item.users[0].email : '-',
-      noHpLogin: item.users && item.users[0] ? item.users[0].phone : '-',
+      emailLogin: item.users?.[0]?.email || '-',
+      noHpLogin: item.users?.[0]?.phone || '-',
       jmlSiswa: item.students_count || 0
     }))
     total.value = res.data.total

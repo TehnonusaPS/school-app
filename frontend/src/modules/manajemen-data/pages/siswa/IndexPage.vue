@@ -127,26 +127,46 @@ onMounted(async () => {
   try {
     const resClass = await getClassrooms()
     activeClassrooms.value = resClass.data
-    
-    // Add classroom filter dynamically
+
     const classFilter = filters.find(f => f.key === 'kelasId')
+
+    const classroomOptions = activeClassrooms.value.map(c => ({
+      label: c.name,
+      value: String(c.id)
+    }))
+
     if (!classFilter) {
       filters.push({
         type: 'select',
         key: 'kelasId',
         label: 'Kelas:',
         placeholder: 'Semua Kelas',
-        options: [
-          { label: 'Semua Kelas', value: 'all' },
-          ...activeClassrooms.value.map(c => ({ label: c.name, value: String(c.id) }))
-        ]
+        options: classroomOptions
       })
     } else {
-      classFilter.options = [
-        { label: 'Semua Kelas', value: 'all' },
-        ...activeClassrooms.value.map(c => ({ label: c.name, value: String(c.id) }))
-      ]
+      classFilter.placeholder = 'Semua Kelas'
+      classFilter.options = classroomOptions
     }
+    
+    // Add classroom filter dynamically
+    // const classFilter = filters.find(f => f.key === 'kelasId')
+    // if (!classFilter) {
+    //   filters.push({
+    //     type: 'select',
+    //     key: 'kelasId',
+    //     label: 'Kelas:',
+    //     placeholder: 'Semua Kelas',
+    //     options: [
+    //       { label: 'Semua Kelas', value: 'all' },
+    //       ...activeClassrooms.value.map(c => ({ label: c.name, value: String(c.id) }))
+    //     ]
+    //   })
+    // } else {
+    //   classFilter.options = [
+    //     { label: 'Semua Kelas', value: 'all' },
+    //     ...activeClassrooms.value.map(c => ({ label: c.name, value: String(c.id) }))
+    //   ]
+    // }
   } catch (err) {
     console.error('Gagal mengambil data kelas', err)
   }

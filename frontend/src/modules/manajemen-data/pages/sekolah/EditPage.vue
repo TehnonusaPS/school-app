@@ -19,8 +19,7 @@ import {
 } from '@/components/ui/dialog'
 import { getSchool, updateSchool, getFoundations } from '@/services/managementService'
 import { glassFade } from '@/config/motion'
-import { getSchool, updateSchool, getFoundations } from '@/services/managementService'
-import { glassFade } from '@/config/motion'
+
 
 const auth = useAuthStore()
 const isSuperAdmin = computed(() => auth.user?.role === 'superadmin')
@@ -112,7 +111,6 @@ function onClickSave() {
 
 const handleSubmit = async () => {
   isConfirmOpen.value = false
-  isLoading.value = true
   formErrors.value = {}
 
   // Client-side Validation: All fields must be filled
@@ -185,6 +183,7 @@ const handleSubmit = async () => {
   }
 
   isLoading.value = true
+
   try {
     const formData = new FormData()
     formData.append('foundation_id', form.value.yayasan)

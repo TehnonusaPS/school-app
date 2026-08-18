@@ -46,6 +46,7 @@ const formErrors = ref({})
 
 // Trigger confirmation dialog before actual save
 function onClickSave() {
+  if (isLoading.value) return
   formErrors.value = {}
   if (!form.value.nama?.trim()) formErrors.value.name = 'Nama yayasan wajib diisi.'
   if (!form.value.kode?.trim()) formErrors.value.code = 'Kode yayasan wajib diisi.'
@@ -65,155 +66,156 @@ function onClickSave() {
 }
 
 const handleSubmit = async () => {
+  if (isLoading.value) return
   isConfirmOpen.value = false
   isLoading.value = true
   formErrors.value = {}
 
-  // Client-side Validation: All fields must be filled
-  const errors = {}
-  if (!logoFile.value) {
-    errors.logo = 'Logo yayasan harus diunggah'
-  }
-  if (!form.value.email) {
-    errors.email = 'E-mail yayasan harus diisi'
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
-    errors.email = 'Format e-mail tidak valid'
-  }
-  if (!form.value.no_hp) {
-    errors.phone = 'No. Telp harus diisi'
-  }
-  if (!form.value.nama) {
-    errors.name = 'Nama yayasan harus diisi'
-  }
-  if (!form.value.kode) {
-    errors.code = 'Kode yayasan harus diisi'
-  }
-  if (!form.value.tanggal_berdiri) {
-    errors.established_date = 'Tanggal berdiri harus diisi'
-  }
-  if (!form.value.status) {
-    errors.status = 'Status harus dipilih'
-  }
-  if (!form.value.no_akta) {
-    errors.deed_number = 'No. Akta Pendirian harus diisi'
-  }
-  if (!form.value.tanggal_akta) {
-    errors.deed_date = 'Tanggal akta pendirian harus diisi'
-  }
-  if (!form.value.no_sk) {
-    errors.decree_number = 'No. SK Kemenkumham harus diisi'
-  }
-  if (!form.value.tanggal_sk) {
-    errors.decree_date = 'Tanggal SK Kemenkumham harus diisi'
-  }
-  if (!form.value.alamat) {
-    errors.address = 'Alamat lengkap harus diisi'
-  }
-  if (!form.value.emailLogin) {
-    errors.emailLogin = 'E-mail login administrator harus diisi'
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.emailLogin)) {
-    errors.emailLogin = 'Format e-mail login tidak valid'
-  }
-  if (!form.value.noHpLogin) {
-    errors.noHpLogin = 'No. HP login administrator harus diisi'
-  }
-
-  if (Object.keys(errors).length > 0) {
-    formErrors.value = errors
-    toast.error('Gagal Menyimpan', {
-      description: 'Harap lengkapi semua data formulir sebelum menyimpan.'
-    })
-    return
-  }
-
-  isLoading.value = true
-  let newFoundationId = null
-  const loginEmail = form.value.emailLogin?.trim() || form.value.email?.trim()
-  const loginPhone = form.value.noHpLogin?.trim() || form.value.no_hp?.trim()
-  const yayasanEmail = form.value.email?.trim() || loginEmail
-  const yayasanPhone = form.value.no_hp?.trim() || loginPhone
-
-  // 1. Create the foundation using FormData
   try {
-    const formData = new FormData()
-    formData.append('code', form.value.kode || '')
-    formData.append('name', form.value.nama || '')
-    if (form.value.tanggal_berdiri) formData.append('established_date', form.value.tanggal_berdiri)
-    formData.append('status', form.value.status ? form.value.status.toLowerCase() : 'active')
-    if (form.value.alamat) formData.append('address', form.value.alamat)
-    if (yayasanEmail) formData.append('email', yayasanEmail)
-    if (yayasanPhone) formData.append('phone', yayasanPhone)
-    if (form.value.website) formData.append('website', form.value.website)
-    if (form.value.no_akta) formData.append('deed_number', form.value.no_akta)
-    if (form.value.tanggal_akta) formData.append('deed_date', form.value.tanggal_akta)
-    if (form.value.no_sk) formData.append('decree_number', form.value.no_sk)
-    if (form.value.tanggal_sk) formData.append('decree_date', form.value.tanggal_sk)
-    if (form.value.curriculum_id) formData.append('curriculum_id', form.value.curriculum_id)
-    if (logoFile.value) {
-      formData.append('logo', logoFile.value)
+    // Client-side Validation: All fields must be filled
+    const errors = {}
+    if (!logoFile.value) {
+      errors.logo = 'Logo yayasan harus diunggah'
+    }
+    if (!form.value.email) {
+      errors.email = 'E-mail yayasan harus diisi'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+      errors.email = 'Format e-mail tidak valid'
+    }
+    if (!form.value.no_hp) {
+      errors.phone = 'No. Telp harus diisi'
+    }
+    if (!form.value.nama) {
+      errors.name = 'Nama yayasan harus diisi'
+    }
+    if (!form.value.kode) {
+      errors.code = 'Kode yayasan harus diisi'
+    }
+    if (!form.value.tanggal_berdiri) {
+      errors.established_date = 'Tanggal berdiri harus diisi'
+    }
+    if (!form.value.status) {
+      errors.status = 'Status harus dipilih'
+    }
+    if (!form.value.no_akta) {
+      errors.deed_number = 'No. Akta Pendirian harus diisi'
+    }
+    if (!form.value.tanggal_akta) {
+      errors.deed_date = 'Tanggal akta pendirian harus diisi'
+    }
+    if (!form.value.no_sk) {
+      errors.decree_number = 'No. SK Kemenkumham harus diisi'
+    }
+    if (!form.value.tanggal_sk) {
+      errors.decree_date = 'Tanggal SK Kemenkumham harus diisi'
+    }
+    if (!form.value.alamat) {
+      errors.address = 'Alamat lengkap harus diisi'
+    }
+    if (!form.value.emailLogin) {
+      errors.emailLogin = 'E-mail login administrator harus diisi'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.emailLogin)) {
+      errors.emailLogin = 'Format e-mail login tidak valid'
+    }
+    if (!form.value.noHpLogin) {
+      errors.noHpLogin = 'No. HP login administrator harus diisi'
     }
 
-    const resFoundation = await createFoundation(formData)
-    newFoundationId = resFoundation.data.id
-  } catch (err) {
-    if (err.response?.status === 422 && err.response?.data?.errors) {
-      const serverErrors = err.response.data.errors
-      const localErrors = {}
-      Object.keys(serverErrors).forEach(key => {
-        localErrors[key] = serverErrors[key][0]
+    if (Object.keys(errors).length > 0) {
+      formErrors.value = errors
+      toast.error('Gagal Menyimpan', {
+        description: 'Harap lengkapi semua data formulir sebelum menyimpan.'
       })
-      formErrors.value = localErrors
-      toast.error('Gagal', { description: 'Terdapat kesalahan validasi pada data yayasan.' })
-    } else {
-      const errorMsg = err.response?.data?.message || 'Gagal menyimpan data yayasan.'
-      toast.error('Gagal', { description: errorMsg })
+      return
     }
-    isLoading.value = false
-    return
-  }
 
-  // 2. Retrieve Roles to find admin_yayasan role
-  let adminYayasanRole = null
-  try {
-    const resRoles = await getRoles()
-    adminYayasanRole = resRoles.data.find(r => r.name === 'admin_yayasan')
-  } catch (err) {
-    toast.error('Gagal mengambil data peran.')
-  }
+    let newFoundationId = null
+    const loginEmail = form.value.emailLogin?.trim() || form.value.email?.trim()
+    const loginPhone = form.value.noHpLogin?.trim() || form.value.no_hp?.trim()
+    const yayasanEmail = form.value.email?.trim() || loginEmail
+    const yayasanPhone = form.value.no_hp?.trim() || loginPhone
 
-  // 3. Create administrator user for this foundation using emailLogin & noHpLogin
-  const generatedPassword = Math.random().toString(36).substring(2, 10) + 'A1!'
-  const userData = {
-    name: 'Admin ' + form.value.nama,
-    email: loginEmail,
-    phone: loginPhone,
-    password: generatedPassword,
-    role_id: adminYayasanRole ? adminYayasanRole.id : 2,
-    foundation_id: newFoundationId,
-    is_active: true
-  }
+    // 1. Create the foundation using FormData
+    try {
+      const formData = new FormData()
+      formData.append('code', form.value.kode || '')
+      formData.append('name', form.value.nama || '')
+      if (form.value.tanggal_berdiri) formData.append('established_date', form.value.tanggal_berdiri)
+      formData.append('status', form.value.status ? form.value.status.toLowerCase() : 'active')
+      if (form.value.alamat) formData.append('address', form.value.alamat)
+      if (yayasanEmail) formData.append('email', yayasanEmail)
+      if (yayasanPhone) formData.append('phone', yayasanPhone)
+      if (form.value.website) formData.append('website', form.value.website)
+      if (form.value.no_akta) formData.append('deed_number', form.value.no_akta)
+      if (form.value.tanggal_akta) formData.append('deed_date', form.value.tanggal_akta)
+      if (form.value.no_sk) formData.append('decree_number', form.value.no_sk)
+      if (form.value.tanggal_sk) formData.append('decree_date', form.value.tanggal_sk)
+      if (form.value.curriculum_id) formData.append('curriculum_id', form.value.curriculum_id)
+      if (logoFile.value) {
+        formData.append('logo', logoFile.value)
+      }
 
-  try {
-    await createUser(userData)
+      const resFoundation = await createFoundation(formData)
+      newFoundationId = resFoundation.data.id
+    } catch (err) {
+      if (err.response?.status === 422 && err.response?.data?.errors) {
+        const serverErrors = err.response.data.errors
+        const localErrors = {}
+        Object.keys(serverErrors).forEach(key => {
+          localErrors[key] = serverErrors[key][0]
+        })
+        formErrors.value = localErrors
+        toast.error('Gagal', { description: 'Terdapat kesalahan validasi pada data yayasan.' })
+      } else {
+        const errorMsg = err.response?.data?.message || 'Gagal menyimpan data yayasan.'
+        toast.error('Gagal', { description: errorMsg })
+      }
+      return
+    }
 
-    generatedAccount.value = {
+    // 2. Retrieve Roles to find admin_yayasan role
+    let adminYayasanRole = null
+    try {
+      const resRoles = await getRoles()
+      adminYayasanRole = resRoles.data.find(r => r.name === 'admin_yayasan')
+    } catch (err) {
+      toast.error('Gagal mengambil data peran.')
+    }
+
+    // 3. Create administrator user for this foundation using emailLogin & noHpLogin
+    const generatedPassword = Math.random().toString(36).substring(2, 10) + 'A1!'
+    const userData = {
+      name: 'Admin ' + form.value.nama,
       email: loginEmail,
       phone: loginPhone,
-      password: generatedPassword
+      password: generatedPassword,
+      role_id: adminYayasanRole ? adminYayasanRole.id : 2,
+      foundation_id: newFoundationId,
+      is_active: true
     }
 
-    showSuccessModal.value = true
-  } catch (err) {
-    if (err.response?.status === 422 && err.response?.data?.errors) {
-      const serverErrors = err.response.data.errors
-      const localErrors = {}
-      if (serverErrors.email) localErrors.emailLogin = serverErrors.email[0]
-      if (serverErrors.phone) localErrors.noHpLogin = serverErrors.phone[0]
-      formErrors.value = localErrors
-      toast.error('Gagal', { description: 'Terdapat kesalahan validasi pada akun administrator.' })
-    } else {
-      const errorMsg = err.response?.data?.message || 'Gagal membuat akun administrator.'
-      toast.error('Gagal', { description: errorMsg })
+    try {
+      await createUser(userData)
+
+      generatedAccount.value = {
+        email: loginEmail,
+        phone: loginPhone,
+        password: generatedPassword
+      }
+
+      showSuccessModal.value = true
+    } catch (err) {
+      if (err.response?.status === 422 && err.response?.data?.errors) {
+        const serverErrors = err.response.data.errors
+        const localErrors = {}
+        if (serverErrors.email) localErrors.emailLogin = serverErrors.email[0]
+        if (serverErrors.phone) localErrors.noHpLogin = serverErrors.phone[0]
+        formErrors.value = localErrors
+        toast.error('Gagal', { description: 'Terdapat kesalahan validasi pada akun administrator.' })
+      } else {
+        const errorMsg = err.response?.data?.message || 'Gagal membuat akun administrator.'
+        toast.error('Gagal', { description: errorMsg })
+      }
     }
   } finally {
     isLoading.value = false
@@ -310,8 +312,8 @@ const goToList = () => {
       <div class="py-3 text-sm text-foreground dark:text-zinc-300 space-y-2">
         <p>Apakah Anda yakin data <strong>{{ form.nama }}</strong> sudah sesuai?</p>
         <div class="p-3 rounded-lg bg-accent/40 dark:bg-zinc-800/50 border border-border/50 dark:border-zinc-800 text-xs space-y-1">
-          <div><span class="text-muted-foreground">Email Administrator:</span> <span class="font-semibold text-foreground dark:text-zinc-100">{{ form.email }}</span></div>
-          <div><span class="text-muted-foreground">No. HP Administrator:</span> <span class="font-semibold text-foreground dark:text-zinc-100">{{ form.no_hp }}</span></div>
+          <div><span class="text-muted-foreground">Email Administrator:</span> <span class="font-semibold text-foreground dark:text-zinc-100">{{ form.emailLogin }}</span></div>
+          <div><span class="text-muted-foreground">No. HP Administrator:</span> <span class="font-semibold text-foreground dark:text-zinc-100">{{ form.noHpLogin }}</span></div>
         </div>
       </div>
 

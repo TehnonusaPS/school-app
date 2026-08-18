@@ -10,13 +10,15 @@ import { useAuthStore } from '@/stores/authStore'
 import GuruStaffForm from './components/GuruStaffForm.vue'
 import { agamaOptions, jabatanOptions, kelaminOptions, pendidikanOptions, statusKepegawaianOptions, statusOptions, statusPernikahanOptions } from './data/guruStaff'
 import SuccessAccountDialog from '@/components/dialogs/SuccessAccountDialog.vue'
-import { createTeacher } from '@/services/managementService'
+import { createTeacher, getFoundation, getSchools } from '@/services/managementService'
 import { toast } from 'vue-sonner'
+import { fetchAllSubjects } from '@/services/subjectService'
 
 const auth = useAuthStore()
 const router = useRouter()
 const isLoading = ref(false)
 const unitOptions = ref([])
+const subjectOptions = ref([])
 
 const loadUnitOptions = async () => {
   try {
@@ -48,6 +50,7 @@ const loadUnitOptions = async () => {
 
 onMounted(() => {
   loadUnitOptions()
+  loadSubjectOptions()
 })
 
 const form = ref({ ...defaultForm})
@@ -244,9 +247,18 @@ const handleSubmit = async () => {
     const formData = new FormData()
     const rawForm = form.value
     Object.keys(rawForm).forEach(key => {
+      const value = rawForm[key]
       if (key === 'foto') return // handle separately
-      if (rawForm[key] !== null && rawForm[key] !== undefined && rawForm[key] !== '') {
-        formData.append(key, rawForm[key])
+      if (Array.isArray(value)) {
+        value.forEach(item => {
+          formData.append(`${key}[]`, item)
+        })
+
+        return
+      }
+
+      if (value !== null && value !== undefined && value !== '') {
+        formData.append(key, value)
       }
     })
     if (rawForm.foto instanceof File) {
@@ -294,6 +306,26 @@ const customActions = computed(() => [
     click: handleSubmit
   },
 ])
+
+const loadSubjectOptions = async () => {
+  try {
+    const res = await fetchAllSubjects()
+
+    const subjects = Array.isArray(res.data) ? res.data : []
+
+    subjectOptions.value = subjects
+      .filter(subject => subject.is_active === true)
+      .map(subject => ({
+        label: subject.name,
+        value: String(subject.id)
+      }))
+
+    console.log('Subject options:', subjectOptions.value)
+  } catch (error) {
+    console.error('Gagal memuat mata pelajaran:', error)
+    subjectOptions.value = []
+  }
+}
 </script>
 
 <template>
@@ -317,9 +349,9 @@ const customActions = computed(() => [
       :status-kepegawaian-options="statusKepegawaianOptions"
       :unit-kerja-options="unitOptions"
       :status-options="statusOptions"
+      :subject-options="subjectOptions"
       :errors="formErrors"
       @image-change="handleImage"
-      :errors="formErrors"
     />
 
   </div>

@@ -7,6 +7,9 @@ use App\Models\User;
 use App\Models\Role;
 use App\Models\TeacherProfile;
 use App\Models\School;
+use App\Models\AcademicYear;
+use App\Models\TeacherSubjectAssignment;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -323,6 +326,15 @@ class TeacherController extends Controller
             'status_aktif'       => 'nullable|string',
             'join_date'          => 'nullable|date',
             'foto'               => 'nullable|image|max:2048',
+            'subject_ids' => 'nullable|array',
+            'subject_ids.*' => [
+                'integer',
+                'distinct',
+                Rule::exists('subjects', 'id')->where(function ($query) use ($tenant) {
+                    $query->where('school_id', $tenant['school_id'])
+                        ->where('is_active', true);
+                }),
+            ],
         ]);
 
         if ($validator->fails()) {
@@ -330,6 +342,24 @@ class TeacherController extends Controller
                 'status'  => 'error',
                 'message' => 'Validation error.',
                 'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        $isTeacher = in_array(
+            strtoupper((string) $request->input('jabatan')),
+            ['GURU', 'J004'],
+            true
+        );
+
+        if ($isTeacher && empty($request->input('subject_ids', []))) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Validation error.',
+                'errors'  => [
+                    'subject_ids' => [
+                        'Mata pelajaran wajib dipilih untuk jabatan guru.'
+                    ],
+                ],
             ], 422);
         }
 
@@ -385,6 +415,32 @@ class TeacherController extends Controller
                 'join_date'         => $request->input('join_date') ?: now(),
             ]);
 
+            if ($isTeacher) {
+                $academicYearId = AcademicYear::where(
+                    'school_id',
+                    $tenant['school_id']
+                )
+                    ->where('is_active', true)
+                    ->value('id');
+
+                if (!$academicYearId) {
+                    throw new \Exception(
+                        'Tahun ajaran aktif belum tersedia untuk sekolah ini.'
+                    );
+                }
+
+                foreach ($request->input('subject_ids', []) as $subjectId) {
+                    TeacherSubjectAssignment::create([
+                        'school_id'        => $tenant['school_id'],
+                        'teacher_id'       => $newUser->id,
+                        'subject_id'       => $subjectId,
+                        'classroom_id'     => 1,
+                        'academic_year_id' => $academicYearId,
+                        'is_active'        => true,
+                    ]);
+                }
+            }
+
             DB::commit();
 
             return response()->json([
@@ -413,7 +469,7 @@ class TeacherController extends Controller
     public function show(Request $request, string $id): JsonResponse
     {
         $user = $request->user();
-        $teacher = TeacherProfile::with(['user.school', 'user.role'])->where('user_id', $id)->first();
+        $teacher = TeacherProfile::with(['user.school', 'user.role', 'subjects'])->where('user_id', $id)->first();
 
         if (!$teacher) {
             // Check if user exists but has no profile
@@ -422,6 +478,7 @@ class TeacherController extends Controller
                 // Return dummy/empty profile
                 $teacher = new TeacherProfile(['user_id' => $u->id]);
                 $teacher->setRelation('user', $u);
+                $teacher->setRelation('subjects', collect());
             } else {
                 return response()->json(['status' => 'error', 'message' => 'Teacher not found.'], 404);
             }
@@ -481,6 +538,14 @@ class TeacherController extends Controller
                 'noHpLogin'          => $u->phone,
                 'masaKerja'          => $masaKerja,
                 'join_date'          => $teacher->join_date ? $teacher->join_date->format('Y-m-d') : null,
+                'subject_ids'        => $teacher->subjects->pluck('id')->map(fn($subjectId) => (string) $subjectId)->unique()->values(),
+                'subjects'           => $teacher->subjects->unique('id')->values()->map(function ($subject) {
+                    return [
+                        'id'   => $subject->id,
+                        'code' => $subject->code,
+                        'name' => $subject->name,
+                    ];
+                }),
             ],
         ]);
     }
@@ -542,6 +607,8 @@ class TeacherController extends Controller
             'status_aktif'       => 'nullable|string',
             'join_date'          => 'nullable|date',
             'foto'               => 'nullable|image|max:2048',
+            'subject_ids'   => 'nullable|array',
+            'subject_ids.*' => 'integer|distinct|exists:subjects,id',
         ]);
 
         if ($validator->fails()) {
@@ -549,6 +616,29 @@ class TeacherController extends Controller
                 'status'  => 'error',
                 'message' => 'Validation error.',
                 'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        $finalPosition = $request->input(
+            'jabatan',
+            $teacher->position
+        );
+
+        $isTeacher = in_array(
+            strtoupper((string) $finalPosition),
+            ['GURU', 'J004'],
+            true
+        );
+
+        if ($isTeacher && empty($request->input('subject_ids', []))) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Validation error.',
+                'errors'  => [
+                    'subject_ids' => [
+                        'Mata pelajaran wajib dipilih untuk jabatan guru.'
+                    ],
+                ],
             ], 422);
         }
 
@@ -620,6 +710,37 @@ class TeacherController extends Controller
             if ($request->has('join_date')) $profileData['join_date'] = $request->input('join_date');
 
             $teacher->update($profileData);
+
+            $academicYearId = AcademicYear::where(
+                'school_id',
+                $u->school_id
+            )
+                ->where('is_active', true)
+                ->value('id');
+
+            if ($isTeacher && !$academicYearId) {
+                throw new \Exception(
+                    'Tahun ajaran aktif belum tersedia untuk sekolah ini.'
+                );
+            }
+
+            /* Sementara classroom_id masih menggunakan default 1 */
+            TeacherSubjectAssignment::where('teacher_id', $u->id)
+                ->where('classroom_id', 1)
+                ->delete();
+
+            if ($isTeacher) {
+                foreach ($request->input('subject_ids', []) as $subjectId) {
+                    TeacherSubjectAssignment::create([
+                        'school_id'        => $u->school_id,
+                        'teacher_id'       => $u->id,
+                        'subject_id'       => $subjectId,
+                        'classroom_id'     => 1,
+                        'academic_year_id' => $academicYearId,
+                        'is_active'        => true,
+                    ]);
+                }
+            }
 
             DB::commit();
 

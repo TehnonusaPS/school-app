@@ -164,7 +164,7 @@ export default [
     }
   },
   {
-    path: 'manajemen-data/guru-staff/edit',
+    path: 'manajemen-data/guru-staff/edit/:id',
     component: () => import('./pages/guru-staff/EditPage.vue'),
     meta: {
       title: 'Edit Guru/Staff',

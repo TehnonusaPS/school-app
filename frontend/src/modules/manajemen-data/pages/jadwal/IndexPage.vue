@@ -43,6 +43,21 @@ async function loadData() {
       getClassrooms(),
       getTimeSlots()
     ])
+
+    console.table(
+      ayRes.data.map(ay => ({
+        id: ay.id,
+        name: ay.name,
+        semester: ay.semester,
+        is_active: ay.is_active,
+        school_id: ay.school_id
+      }))
+    )
+    
+    console.log('Detail data kelas pertama:')
+    console.log(JSON.stringify(classRes.data[0], null, 2))
+
+    
     
     academicYears.value = ayRes.data
     allClassrooms.value = classRes.data
@@ -54,6 +69,9 @@ async function loadData() {
     } else if (ayRes.data.length > 0) {
       selectedTahun.value = String(ayRes.data[0].id)
     }
+
+    console.log('Tahun terpilih:', selectedTahun.value)
+    console.log('ID tahun pada kelas:', classRes.data.map(c => c.academic_year_id))
   } catch (err) {
     toast.error('Gagal memuat data awal')
   } finally {
@@ -68,7 +86,11 @@ onMounted(() => {
 const filteredClassrooms = computed(() => {
   if (!allClassrooms.value || !allClassrooms.value.length) return []
   if (!selectedTahun.value) return allClassrooms.value
-  return allClassrooms.value.filter(c => !c.academic_year_id || String(c.academic_year_id) === String(selectedTahun.value))
+
+  return allClassrooms.value.filter(
+    classroom =>
+      String(classroom.academic_year_id) === String(selectedTahun.value)
+  )
 })
 
 watch(filteredClassrooms, (newClasses) => {

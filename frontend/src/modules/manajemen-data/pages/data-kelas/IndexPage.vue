@@ -11,7 +11,7 @@ import KelasStatCards from './components/KelasStatCards.vue'
 import KelasTable from './components/KelasTable.vue'
 import KelasForm from './components/KelasForm.vue'
 import router from '@/router/index.js'
-import { getClassrooms, createClassroom, updateClassroom, deleteClassroom } from '@/services/managementService'
+import { getClassrooms, createClassroom, updateClassroom, deleteClassroom, getTeachers } from '@/services/managementService'
 
 import {
   Eye,
@@ -35,8 +35,35 @@ const fetchClassrooms = async () => {
   }
 }
 
+const teacherOptions = ref([])
+
+const fetchTeachers = async () => {
+  try {
+    const res = await getTeachers()
+    const teachers = res.data?.data || res.data || []
+    
+    teacherOptions.value = teachers.map((teacher) => {
+      const teacherId =
+        teacher.id
+
+      const teacherName =
+        teacher.nama
+
+      return {
+        label: teacherName,
+        value: String(teacherId)
+      }
+    })
+  } catch (err) {
+    console.error('Gagal memuat guru:', err)
+    teacherOptions.value = []
+    toast.error('Gagal memuat pilihan wali kelas')
+  }
+}
+
 onMounted(() => {
   fetchClassrooms()
+  fetchTeachers()
 })
 
 // --- Form Sheet State & Methods ---
@@ -49,6 +76,7 @@ const formItem = ref({
   grade: '',
   major: '',
   homeroom_teacher: '',
+  homeroom_teacher_id: '',
   room: '',
   capacity: 36,
   students_count: 0,
@@ -64,6 +92,7 @@ const handleCreate = () => {
     grade: '',
     major: '',
     homeroom_teacher: '',
+    homeroom_teacher_id: '',
     room: '',
     capacity: 36,
     students_count: 0,
@@ -75,7 +104,13 @@ const handleCreate = () => {
 const handleEdit = (item) => {
   isEditMode.value = true
   formErrors.value = {}
-  formItem.value = { ...item }
+  formItem.value = {
+    ...item,
+    grade: item.grade != null ? String(item.grade) : '',
+    homeroom_teacher_id: item.homeroom_teacher_id != null
+      ? String(item.homeroom_teacher_id)
+      : ''
+  }
   isFormSheetOpen.value = true
 }
 
@@ -236,7 +271,7 @@ const rowActions = [
         </SheetHeader>
 
         <div class="flex-1 overflow-y-auto py-6 pr-1 space-y-6 no-scrollbar">
-          <KelasForm :form="formItem" :errors="formErrors" />
+          <KelasForm :form="formItem" :errors="formErrors" :teacher-options="teacherOptions"/>
         </div>
 
         <div class="border-t border-border pt-4 flex items-center justify-end gap-2 shrink-0">

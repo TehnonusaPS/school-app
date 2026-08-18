@@ -5,6 +5,11 @@ import { Plus } from 'lucide-vue-next'
 
 import DataTableCard from '@/components/data-table/DataTableCard.vue'
 import { Badge } from '@/components/ui/badge'
+import { useAuthStore } from '@/stores/authStore'
+
+const auth = useAuthStore()
+
+const schoolLevel = computed(() => auth.user?.school?.level)
 
 const props = defineProps({
   items: {
@@ -36,11 +41,7 @@ const filters = computed(() => {
     key: 'grade',
     type: 'select',
     placeholder: 'Semua Tingkat',
-    options: [
-      { label: 'Kelas 10', value: '10' },
-      { label: 'Kelas 11', value: '11' },
-      { label: 'Kelas 12', value: '12' }
-    ]
+    options: tingkatOptions.value
   })
 
   list.push({
@@ -100,7 +101,7 @@ const filteredItems = computed(() => {
       item.homeroom_teacher?.toLowerCase().includes(fSearch) ||
       item.room?.toLowerCase().includes(fSearch)
 
-    const matchesGrade = fGrade === 'all' || item.grade === fGrade
+    const matchesGrade = fGrade === 'all' || String(item.grade) === String(fGrade)
     const matchesStatus = fStatus === 'all' || item.status === fStatus
 
     return matchesSearch && matchesGrade && matchesStatus
@@ -132,6 +133,44 @@ const statusLabel = status => {
   if (status === 'no_teacher') return 'Tanpa Wali'
   return status
 }
+
+const tingkatOptions = computed(() => {
+  const jenjang = String(schoolLevel.value || '').toUpperCase()
+
+  // TK
+  if (jenjang === 'JP001' || jenjang === 'TK') {
+    return [
+      { label: 'TK A', value: 'TK A' },
+      { label: 'TK B', value: 'TK B' }
+    ]
+  }
+
+  // SD
+  if (jenjang === 'JP002' || jenjang === 'SD') {
+    return Array.from({ length: 6 }, (_, index) => ({
+      label: `Kelas ${index + 1}`,
+      value: String(index + 1)
+    }))
+  }
+
+  // SMP
+  if (jenjang === 'JP003' || jenjang === 'SMP') {
+    return Array.from({ length: 3 }, (_, index) => ({
+      label: `Kelas ${index + 7}`,
+      value: String(index + 7)
+    }))
+  }
+
+  // SMA
+  if (jenjang === 'JP004' || jenjang === 'SMA') {
+    return Array.from({ length: 3 }, (_, index) => ({
+      label: `Kelas ${index + 10}`,
+      value: String(index + 10)
+    }))
+  }
+
+  return []
+})
 </script>
 
 <template>

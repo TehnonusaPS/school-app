@@ -19,7 +19,7 @@ class FoundationController extends Controller
         $user = $request->user();
 
         if ($user->isSuperAdmin()) {
-            $query = Foundation::withCount('schools');
+            $query = Foundation::with(['users:id,foundation_id,email,phone'])->withCount('schools');
 
             // Search by name or code
             if ($request->filled('search')) {
@@ -35,7 +35,7 @@ class FoundationController extends Controller
             if ($request->filled('status') && $request->input('status') !== 'all') {
                 $query->where('status', $request->input('status'));
             }
-
+ 
             $foundations = $query->latest()->paginate($request->input('per_page', 15));
 
             $foundations->getCollection()->transform(function ($f) {
@@ -64,7 +64,9 @@ class FoundationController extends Controller
         }
 
         if ($user->hasRole('admin_yayasan')) {
-            $foundation = Foundation::withCount('schools')->find($user->foundation_id);
+            $foundation = Foundation::with(['users:id,foundation_id,email,phone',])->withCount('schools')
+                            ->find($user->foundation_id);
+
             if (!$foundation) {
                 return response()->json([
                     'status'  => 'error',

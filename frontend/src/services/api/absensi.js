@@ -138,6 +138,20 @@ export const registerStudentFace = async (studentId, formData) => {
   return response.data;
 };
 
+export const registerStudentRfid = async (studentId, rfidNumber) => {
+  const response = await api.post(`/absensi/siswa/${studentId}/register-rfid`, {
+    rfid_number: rfidNumber
+  });
+  return response.data;
+};
+
+export const scanRfid = async (rfidNumber) => {
+  const response = await api.post('/absensi/siswa/scan-rfid', {
+    rfid_number: rfidNumber
+  });
+  return response.data;
+};
+
 // ─── Real Staff Attendance & Leave APIs ──────────────────────────────────────
 
 export const clockInStaff = async (formData) => {

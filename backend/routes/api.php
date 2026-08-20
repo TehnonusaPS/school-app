@@ -299,11 +299,13 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/schedule', [AcademicCalendarController::class, 'parentSchedule']);
             Route::get('/jadwal-anak', [AcademicCalendarController::class, 'parentDashboard']);
         });
-    // Student Attendance & Face Registration
+    // Student Attendance & Face/RFID Registration
     Route::get('/absensi/siswa', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'index']);
     Route::get('/absensi/siswa/logs', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'logs']);
     Route::post('/absensi/siswa/scan', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'scan']);
+    Route::post('/absensi/siswa/scan-rfid', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'scanRfid']);
     Route::post('/absensi/siswa/{id}/register-face', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'registerFace']);
+    Route::post('/absensi/siswa/{id}/register-rfid', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'registerRfid']);
     Route::get('/absensi/siswa/monthly-grid', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'getMonthlyGrid']);
     Route::post('/absensi/siswa/monthly-grid/update', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'updateMonthlyCell']);
     Route::post('/absensi/siswa/{id}/status', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'changeStatus']);

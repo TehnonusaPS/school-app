@@ -20,6 +20,7 @@ import {
 import { getSchool, updateSchool, getFoundations } from '@/services/managementService'
 import { glassFade } from '@/config/motion'
 
+
 const auth = useAuthStore()
 const isSuperAdmin = computed(() => auth.user?.role === 'superadmin')
 const router = useRouter()
@@ -81,7 +82,10 @@ onMounted(async () => {
       emailLogin: school.users && school.users[0] ? school.users[0].email : '',
       noHpLogin: school.users && school.users[0] ? school.users[0].phone : ''
     }
-    imagePreview.value = school.logo || ''
+    if (school.logo) {
+      const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api').replace(/\/api$/, '')
+      imagePreview.value = school.logo.startsWith('http') ? school.logo : `${baseUrl}/storage/${school.logo}`
+    }
   } catch (err) {
     toast.error('Gagal mengambil data sekolah')
     router.push('/manajemen-data/sekolah')
@@ -107,7 +111,6 @@ function onClickSave() {
 
 const handleSubmit = async () => {
   isConfirmOpen.value = false
-  isLoading.value = true
   formErrors.value = {}
 
   // Client-side Validation: All fields must be filled
@@ -119,15 +122,6 @@ const handleSubmit = async () => {
   }
   if (!form.value.no_hp) {
     errors.phone = 'No. Telp harus diisi'
-  }
-  if (!form.value.website) {
-    errors.website = 'Website harus diisi'
-  }
-  if (!form.value.instagram) {
-    errors.instagram = 'Instagram harus diisi'
-  }
-  if (!form.value.facebook) {
-    errors.facebook = 'Facebook harus diisi'
   }
   if (!form.value.nama) {
     errors.name = 'Nama sekolah harus diisi'
@@ -189,6 +183,7 @@ const handleSubmit = async () => {
   }
 
   isLoading.value = true
+
   try {
     const formData = new FormData()
     formData.append('foundation_id', form.value.yayasan)

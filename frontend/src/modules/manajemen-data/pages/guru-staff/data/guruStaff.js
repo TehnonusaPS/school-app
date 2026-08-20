@@ -63,11 +63,11 @@ export const filters = [
     options: [
       {
         label: 'Tetap',
-        value: 'Tetap'
+        value: 'tetap'
       },
       {
         label: 'Kontrak',
-        value: 'Kontrak'
+        value: 'kontrak'
       },
       {
         label: 'Honorer',
@@ -107,12 +107,14 @@ export const columns = [
   { key: 'unitKerja', label: 'Unit Kerja' },
   { key: 'jabatan', label: 'Jabatan' },
   { key: 'masaKerja', label: 'Masa Kerja' },
-  { key: 'statusKepegawaian', label: 'Status Kepegawaian', badge: true,
+  {
+    key: 'statusKepegawaian', label: 'Status Kepegawaian', badge: true,
     badgeVariant: {
       Tetap: 'green',
       Honorer: 'gray',
       Kontrak: 'amber',
-    } },
+    }
+  },
   { key: 'actions', label: 'Aksi' }
 ]
 
@@ -306,6 +308,10 @@ export const jabatanOptions = [
     label: 'Staff Sekolah',
     value: 'J005'
   },
+  {
+    label: 'Admin Sekolah',
+    value: 'J006'
+  }
 ]
 
 export const statusKepegawaianOptions = [

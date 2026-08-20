@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\SubjectController;
 use App\Http\Controllers\Api\AcademicYearController;
 
 use App\Http\Controllers\Api\AcademicCalendarController;
+use App\Http\Controllers\Api\TeacherAgendaController;
 use App\Http\Controllers\Api\CurriculumController;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
@@ -193,6 +194,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/schedules/unassigned-subjects', [\App\Http\Controllers\Api\ScheduleController::class, 'unassignedSubjects']);
         Route::get('/schedules/teacher-conflicts', [\App\Http\Controllers\Api\ScheduleController::class, 'teacherConflicts']);
         Route::post('/schedules/bulk', [\App\Http\Controllers\Api\ScheduleController::class, 'bulkStore']);
+        Route::post('/schedules/publish', [\App\Http\Controllers\Api\ScheduleController::class, 'publish']);
+        Route::post('/schedules/unpublish', [\App\Http\Controllers\Api\ScheduleController::class, 'unpublish']);
         Route::apiResource('/schedules', \App\Http\Controllers\Api\ScheduleController::class);
     });
 
@@ -259,7 +262,28 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/approve', [AcademicCalendarController::class, 'approve']);
             Route::post('/reject', [AcademicCalendarController::class, 'reject']);
             Route::post('/reset', [AcademicCalendarController::class, 'reset']);
+
+            // Exam Schedule routes
+            Route::get('/exam-schedules', [\App\Http\Controllers\Api\ExamScheduleController::class, 'index']);
+            Route::post('/exam-schedules/bulk', [\App\Http\Controllers\Api\ExamScheduleController::class, 'bulkStore']);
+            Route::post('/exam-schedules/publish', [\App\Http\Controllers\Api\ExamScheduleController::class, 'publish']);
+            Route::post('/exam-schedules/unpublish', [\App\Http\Controllers\Api\ExamScheduleController::class, 'unpublish']);
+            Route::delete('/exam-schedules/sessions/{id}', [\App\Http\Controllers\Api\ExamScheduleController::class, 'destroySession']);
         });
+
+    // Exam Schedule Read-Only / My Schedule for all authenticated roles
+    Route::get('/exam-schedules/my-schedule', [\App\Http\Controllers\Api\ExamScheduleController::class, 'mySchedule']);
+
+    // Teacher Agendas CRUD & Read
+    Route::middleware('role:guru,wali_kelas')
+        ->prefix('teacher-agendas')
+        ->group(function () {
+            Route::get('/my-classrooms', [TeacherAgendaController::class, 'myClassrooms']);
+            Route::post('/', [TeacherAgendaController::class, 'store']);
+            Route::put('/{id}', [TeacherAgendaController::class, 'update']);
+            Route::delete('/{id}', [TeacherAgendaController::class, 'destroy']);
+        });
+    Route::get('/teacher-agendas', [TeacherAgendaController::class, 'index']);
 
     // Kalender Akademik - Read-Only (Guru, Wali Kelas, Siswa, Orang Tua)
     Route::middleware('role:guru,wali_kelas,siswa,orang_tua')
@@ -268,17 +292,20 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/public-events', [AcademicCalendarController::class, 'publicEvents']);
         });
 
-    // Orang Tua - Jadwal Pelajaran Anak & Kalender
-    Route::middleware('role:orang_tua')
+    // Orang Tua & Siswa - Jadwal Pelajaran Anak & Kalender
+    Route::middleware('role:orang_tua,siswa')
         ->prefix('orang-tua')
         ->group(function () {
             Route::get('/schedule', [AcademicCalendarController::class, 'parentSchedule']);
+            Route::get('/jadwal-anak', [AcademicCalendarController::class, 'parentDashboard']);
         });
-    // Student Attendance & Face Registration
+    // Student Attendance & Face/RFID Registration
     Route::get('/absensi/siswa', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'index']);
     Route::get('/absensi/siswa/logs', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'logs']);
     Route::post('/absensi/siswa/scan', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'scan']);
+    Route::post('/absensi/siswa/scan-rfid', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'scanRfid']);
     Route::post('/absensi/siswa/{id}/register-face', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'registerFace']);
+    Route::post('/absensi/siswa/{id}/register-rfid', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'registerRfid']);
     Route::get('/absensi/siswa/monthly-grid', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'getMonthlyGrid']);
     Route::post('/absensi/siswa/monthly-grid/update', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'updateMonthlyCell']);
     Route::post('/absensi/siswa/{id}/status', [\App\Http\Controllers\Api\StudentAttendanceController::class, 'changeStatus']);

@@ -56,6 +56,11 @@ function getSubjectBadgeClass(subjectName) {
   if (name.includes('seni') || name.includes('budaya')) return 'bg-fuchsia-500/10 text-fuchsia-600 hover:bg-fuchsia-500/20 border-none'
   return 'bg-slate-500/10 text-slate-600 hover:bg-slate-500/20 border-none'
 }
+
+const isPublished = computed(() => {
+  if (!props.schedules || props.schedules.length === 0) return false
+  return props.schedules.some(s => s.status === 'published')
+})
 </script>
 
 <template>
@@ -66,7 +71,18 @@ function getSubjectBadgeClass(subjectName) {
           <thead>
             <tr class="bg-muted/40 border-b border-border">
               <!-- Left spacer for Time Column -->
-              <th class="p-4 w-[160px] text-xs font-bold text-foreground text-left border-r border-border/60">WAKTU / HARI</th>
+              <th class="p-4 w-[160px] text-xs font-bold text-foreground text-left border-r border-border/60">
+                <div class="flex items-center justify-between gap-1">
+                  <span>WAKTU / HARI</span>
+                  <span
+                    v-if="schedules && schedules.length > 0"
+                    class="text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider"
+                    :class="isPublished ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300' : 'bg-amber-500/20 text-amber-600 dark:text-amber-300'"
+                  >
+                    {{ isPublished ? 'Published' : 'Draft' }}
+                  </span>
+                </div>
+              </th>
               <th
                 v-for="day in days"
                 :key="day.value"

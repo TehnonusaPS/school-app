@@ -108,6 +108,13 @@ const fetchSchools = async () => {
       params.status = statusMap[filterValues.value.status] || filterValues.value.status
     }
     const res = await getSchools(params)
+    const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api').replace(/\/api$/, '')
+    const getLogoUrl = (path) => {
+      if (!path) return null
+      if (path.startsWith('http')) return path
+      return `${baseUrl}/storage/${path}`
+    }
+
     tableItems.value = res.data.data.map(item => ({
       ...item,
       id: item.id,
@@ -128,12 +135,14 @@ const fetchSchools = async () => {
       tanggal_sk: item.decree_date ? item.decree_date.split('T')[0] : '-',
       no_izin: item.permit_number,
       tanggal_izin: item.permit_date ? item.permit_date.split('T')[0] : '-',
-      akreditasi: item.accreditation,
+      akreditasi: item.accreditation == 0 ? 'Belum Akreditasi' : item.accreditation,
       tanggal_akreditasi: item.accreditation_date ? item.accreditation_date.split('T')[0] : '-',
       no_akreditasi: item.accreditation_number,
       status: item.status === 'active' ? 'Aktif' : (item.status === 'inactive' ? 'Nonaktif' : 'Trial'),
-      foto: item.logo || '/defaults/sd/logo.png',
-      logo: item.logo || '/defaults/sd/logo.png',
+      foto: getLogoUrl(item.logo) || '/defaults/sd/logo.png',
+      logo: getLogoUrl(item.logo) || '/defaults/sd/logo.png',
+      emailLogin: item.users?.[0]?.email || '-',
+      noHpLogin: item.users?.[0]?.phone || '-',
       jmlSiswa: item.students_count || 0
     }))
     total.value = res.data.total

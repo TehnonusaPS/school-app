@@ -295,15 +295,15 @@ export const jenjangOptions = [
 export const akreditasi = [
   {
     label: 'A',
-    value: 'a'
+    value: 'A'
   },
   {
     label: 'B',
-    value: 'b'
+    value: 'B'
   },
   {
     label: 'C',
-    value: 'c'
+    value: 'C'
   },
   {
     label: 'Belum Akreditasi',

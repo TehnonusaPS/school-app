@@ -196,14 +196,14 @@ class StudentController extends Controller
         if ($request->has('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
+                $q->where('name', 'ilike', "%{$search}%")
                   ->orWhereHas('studentProfile', function ($sq) use ($search) {
-                      $sq->where('nisn', 'like', "%{$search}%");
+                      $sq->where('nisn', 'ilike', "%{$search}%");
                   });
             });
         }
 
-        $students = $query->latest()->get();
+        $students = $query->latest('updated_at')->get();
 
         $formatted = $students->map(function ($student) {
             $profile = $student->studentProfile;
@@ -341,6 +341,12 @@ class StudentController extends Controller
             $fullName = trim($request->nama_depan . ' ' . ($request->nama_belakang ?: ''));
             $studentEmail = $request->email ?: 'siswa-' . $request->nisn . '@school.com';
             
+            // Handle Photo Upload
+            $photoPath = null;
+            if ($request->hasFile('foto')) {
+                $photoPath = $request->file('foto')->store('photos/students', 'public');
+            }
+
             // 1. Create Student User
             $studentUser = User::create([
                 'name'      => $fullName,
@@ -350,6 +356,7 @@ class StudentController extends Controller
                 'school_id' => $schoolId,
                 'phone'     => $request->no_hp,
                 'is_active' => true,
+                'photo'     => $photoPath,
             ]);
 
             // Parse entry year
@@ -589,11 +596,20 @@ class StudentController extends Controller
         try {
             $fullName = trim($request->nama_depan . ' ' . ($request->nama_belakang ?: ''));
 
+            // Handle Photo Upload
+            $photoPath = $studentUser->photo;
+            if ($request->hasFile('foto')) {
+                $photoPath = $request->file('foto')->store('photos/students', 'public');
+            } elseif ($request->has('foto') && $request->foto === null) {
+                $photoPath = null;
+            }
+
             // 1. Update Student User
             $studentUser->update([
                 'name'  => $fullName,
                 'email' => $request->email ?: $studentUser->email,
                 'phone' => $request->no_hp,
+                'photo' => $photoPath,
             ]);
 
             // Parse entry year

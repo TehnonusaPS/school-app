@@ -11,7 +11,7 @@ const selectedTahun = computed(() => route.query.tahun || '2026/2027')
 const activeMonthIdx = computed(() => parseInt(route.query.monthIdx || '11'))
 
 // --- Data Siswa ---
-const students = ref(mockStudents)
+const students = ref([])
 
 const currentCalendarYear = computed(() => {
   const startYear = parseInt(selectedTahun.value.split('/')[0])
@@ -76,12 +76,15 @@ const getStudentTotal = (studentId, statusType) => {
   return count > 0 ? count : ''
 }
 
-import { glassFade } from '@/config/motion'
-
 onMounted(() => {
-  const saved = localStorage.getItem('print_attendance_map')
-  if (saved) {
-    attendanceMap.value = JSON.parse(saved)
+  const savedMap = localStorage.getItem('print_attendance_map')
+  if (savedMap) {
+    attendanceMap.value = JSON.parse(savedMap)
+  }
+
+  const savedStudents = localStorage.getItem('print_students_list')
+  if (savedStudents) {
+    students.value = JSON.parse(savedStudents)
   }
 
   // Auto-trigger window.print() once rendered
@@ -93,19 +96,17 @@ onMounted(() => {
 </script>
 
 <template>
-  <div
-    v-motion
-    :initial="glassFade.initial"
-    :visible-once="glassFade.visible"
-    class="p-6 max-w-full print-page"
-  >
+  <div class="p-6 max-w-full print-page">
     <!-- Print-only Header Box (Exact Wireframe match) -->
     <div class="print-header-box text-left mb-6">
       <div class="print-header-line">Kelas : {{ selectedKelas }}</div>
       <div class="print-header-line">
         Tahun Pelajaran : {{ selectedTahun }} - Semester {{ selectedSemester }}
       </div>
-      <div class="print-header-line">Bulan : {{ activeMonthName }} {{ currentCalendarYear }}</div>
+      <div class="print-header-line">
+        Bulan : {{ activeMonthName }} {{ currentCalendarYear }} 
+        (1 {{ activeMonthName }} {{ currentCalendarYear }} - {{ daysInMonth.length }} {{ activeMonthName }} {{ currentCalendarYear }})
+      </div>
     </div>
 
     <!-- Table -->
@@ -144,7 +145,7 @@ onMounted(() => {
               Tanggal
             </th>
             <th
-              colspan="4"
+              colspan="5"
               class="py-2"
             >
               Jumlah
@@ -159,6 +160,7 @@ onMounted(() => {
               {{ d.dateNum.toString().padStart(2, '0') }}
             </th>
             <th class="w-[30px]">H</th>
+            <th class="w-[30px]">T</th>
             <th class="w-[30px]">I</th>
             <th class="w-[30px]">S</th>
             <th class="w-[30px]">A</th>
@@ -181,12 +183,62 @@ onMounted(() => {
               {{ getStatus(student.id, d.dateNum) || '' }}
             </td>
             <td class="font-extrabold text-xs">{{ getStudentTotal(student.id, 'H') }}</td>
+            <td class="font-extrabold text-xs">{{ getStudentTotal(student.id, 'T') }}</td>
             <td class="font-extrabold text-xs">{{ getStudentTotal(student.id, 'I') }}</td>
             <td class="font-extrabold text-xs">{{ getStudentTotal(student.id, 'S') }}</td>
             <td class="font-extrabold text-xs">{{ getStudentTotal(student.id, 'A') }}</td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Keterangan Absensi -->
+    <div class="mt-8 border-2 border-black rounded-lg p-4 bg-gray-50/50 print:bg-white text-left break-inside-avoid">
+      <h3 class="font-bold text-sm uppercase mb-4 text-black tracking-wider">Keterangan Absensi</h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex items-start gap-3">
+          <span class="w-7 h-7 shrink-0 rounded border border-black font-extrabold flex items-center justify-center text-xs mt-0.5 bg-gray-200 print:bg-gray-200 print:color-black">H</span>
+          <div class="text-xs">
+            <p class="font-bold text-black">Hadir</p>
+            <p class="text-gray-700 font-medium">Siswa menghadiri proses belajar-mengajar.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="w-7 h-7 shrink-0 rounded border border-black font-extrabold flex items-center justify-center text-xs mt-0.5 bg-gray-200 print:bg-gray-200 print:color-black">T</span>
+          <div class="text-xs">
+            <p class="font-bold text-black">Terlambat</p>
+            <p class="text-gray-700 font-medium">Siswa hadir melewati batas toleransi keterlambatan sekolah.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="w-7 h-7 shrink-0 rounded border border-black font-extrabold flex items-center justify-center text-xs mt-0.5 bg-gray-200 print:bg-gray-200 print:color-black">S</span>
+          <div class="text-xs">
+            <p class="font-bold text-black">Sakit</p>
+            <p class="text-gray-700 font-medium">Siswa sakit dengan surat keterangan wali/dokter.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="w-7 h-7 shrink-0 rounded border border-black font-extrabold flex items-center justify-center text-xs mt-0.5 bg-gray-200 print:bg-gray-200 print:color-black">I</span>
+          <div class="text-xs">
+            <p class="font-bold text-black">Izin</p>
+            <p class="text-gray-700 font-medium">Siswa meminta izin untuk kepentingan mendesak.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="w-7 h-7 shrink-0 rounded border border-black font-extrabold flex items-center justify-center text-xs mt-0.5 bg-gray-200 print:bg-gray-200 print:color-black">A</span>
+          <div class="text-xs">
+            <p class="font-bold text-black">Alpha</p>
+            <p class="text-gray-700 font-medium">Tanpa keterangan atau tidak memberi kabar.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="w-7 h-7 shrink-0 rounded border border-black font-extrabold flex items-center justify-center text-xs mt-0.5 bg-gray-200 print:bg-gray-200 print:color-black">?</span>
+          <div class="text-xs">
+            <p class="font-bold text-black">Belum Diisi</p>
+            <p class="text-gray-700 font-medium">Data presensi tanggal tersebut belum dimasukkan.</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>

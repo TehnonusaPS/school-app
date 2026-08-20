@@ -98,6 +98,9 @@ class ScheduleController extends Controller
 
         $schedule = Schedule::create($data);
 
+        // Revert all schedules for this classroom to draft whenever a modification is made
+        $this->revertClassroomScheduleToDraft($schedule->academic_year_id, $schedule->classroom_id);
+
         return response()->json([
             'status'  => 'success',
             'message' => 'Schedule created successfully.',
@@ -148,6 +151,7 @@ class ScheduleController extends Controller
                 $item['school_id'] = $schoolId;
                 $item['academic_year_id'] = $academicYearId;
                 $item['classroom_id'] = $classroomId;
+                $item['status'] = 'draft';
 
                 $err = $this->validateScheduleConflict($item);
                 if ($err) {
@@ -220,6 +224,9 @@ class ScheduleController extends Controller
 
         $schedule->update($validator->validated());
 
+        // Revert all schedules for this classroom to draft whenever a modification is made
+        $this->revertClassroomScheduleToDraft($schedule->academic_year_id, $schedule->classroom_id);
+
         return response()->json([
             'status'  => 'success',
             'message' => 'Schedule updated successfully.',
@@ -243,12 +250,28 @@ class ScheduleController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
         }
 
+        $ayId = $schedule->academic_year_id;
+        $classId = $schedule->classroom_id;
+
         $schedule->delete();
+
+        // Revert all remaining schedules for this classroom to draft whenever a modification is made
+        $this->revertClassroomScheduleToDraft($ayId, $classId);
 
         return response()->json([
             'status'  => 'success',
             'message' => 'Schedule deleted successfully.'
         ]);
+    }
+
+    /**
+     * Helper to revert classroom schedule status to draft.
+     */
+    private function revertClassroomScheduleToDraft(int $academicYearId, int $classroomId): void
+    {
+        Schedule::where('academic_year_id', $academicYearId)
+            ->where('classroom_id', $classroomId)
+            ->update(['status' => 'draft']);
     }
 
     /**
@@ -336,6 +359,74 @@ class ScheduleController extends Controller
     }
 
     /**
+     * Publish schedules for a classroom in an academic year.
+     */
+    public function publish(Request $request): JsonResponse
+    {
+        $schoolId = $this->resolveSchoolId($request);
+        if (!$schoolId || $schoolId === -1) {
+            return response()->json(['status' => 'error', 'message' => 'School ID is required.'], 400);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'academic_year_id' => 'required|exists:academic_years,id',
+            'classroom_id'     => 'required|exists:classrooms,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $updatedCount = Schedule::where('school_id', $schoolId)
+            ->where('academic_year_id', $request->input('academic_year_id'))
+            ->where('classroom_id', $request->input('classroom_id'))
+            ->update(['status' => 'published']);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => "Berhasil mempublikasikan {$updatedCount} jadwal pelajaran. Jadwal kini dapat dilihat oleh guru, siswa, dan orang tua.",
+            'count'   => $updatedCount
+        ]);
+    }
+
+    /**
+     * Unpublish (revert to draft) schedules for a classroom in an academic year.
+     */
+    public function unpublish(Request $request): JsonResponse
+    {
+        $schoolId = $this->resolveSchoolId($request);
+        if (!$schoolId || $schoolId === -1) {
+            return response()->json(['status' => 'error', 'message' => 'School ID is required.'], 400);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'academic_year_id' => 'required|exists:academic_years,id',
+            'classroom_id'     => 'required|exists:classrooms,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $updatedCount = Schedule::where('school_id', $schoolId)
+            ->where('academic_year_id', $request->input('academic_year_id'))
+            ->where('classroom_id', $request->input('classroom_id'))
+            ->update(['status' => 'draft']);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => "Jadwal pelajaran berhasil ditarik kembali menjadi Draft.",
+            'count'   => $updatedCount
+        ]);
+    }
+
+    /**
      * Get the schedule for the current logged-in teacher.
      */
     public function mySchedule(Request $request): JsonResponse
@@ -357,6 +448,7 @@ class ScheduleController extends Controller
         $schedules = Schedule::with(['subject', 'classroom', 'timeSlot'])
             ->where('academic_year_id', $activeYear->id)
             ->where('teacher_id', $user->id)
+            ->published()
             ->get();
 
         // Format to weekly grouped array: day_of_week => [lessons]
@@ -414,6 +506,7 @@ class ScheduleController extends Controller
         $schedules = Schedule::with(['subject', 'teacher', 'timeSlot'])
             ->where('academic_year_id', $classroom->academic_year_id)
             ->where('classroom_id', $classroom->id)
+            ->published()
             ->get();
 
         // Format to weekly grouped array: day_of_week => [lessons]
@@ -422,6 +515,17 @@ class ScheduleController extends Controller
             $formatted[$i] = [];
         }
 
+        // If no published schedules exist for this classroom, return empty schedule array
+        if ($schedules->isEmpty()) {
+            return response()->json([
+                'status' => 'success',
+                'data'   => $formatted
+            ]);
+        }
+
+        // Find which days have active published schedules
+        $daysWithLessons = $schedules->pluck('day_of_week')->map(fn($d) => (int)$d)->unique()->toArray();
+
         // Inject all time slots including breaks to show a complete timetable
         $timeSlots = TimeSlot::where('school_id', $user->school_id)->orderBy('slot_number')->get();
         
@@ -429,7 +533,7 @@ class ScheduleController extends Controller
             for ($day = 1; $day <= 7; $day++) {
                 // Find matching schedule for this slot and day
                 $sched = $schedules->first(function($s) use ($slot, $day) {
-                    return $s->time_slot_id === $slot->id && $s->day_of_week === $day;
+                    return $s->time_slot_id === $slot->id && (int)$s->day_of_week === $day;
                 });
 
                 if ($sched) {
@@ -443,8 +547,8 @@ class ScheduleController extends Controller
                         'guru'     => $sched->teacher ? $sched->teacher->name : '',
                         'is_break' => $slot->is_break
                     ];
-                } elseif ($slot->is_break) {
-                    // Inject breaks automatically for full timetable visibility
+                } elseif ($slot->is_break && in_array($day, $daysWithLessons)) {
+                    // Inject breaks automatically ONLY for days that actually have scheduled lessons
                     $formatted[$day][] = [
                         'id'       => 'break-' . $slot->id,
                         'mulai'    => substr($slot->start_time, 0, 5),

@@ -48,11 +48,11 @@ const props = defineProps({
     type: Number,
     default: 0
   },
-  /** Variant warna progress: "blue" | "green" | "purple" | "amber" */
+  /** Variant warna progress: "blue" | "green" | "purple" | "amber" | "emerald" | "indigo" */
   variant: {
     type: String,
     default: 'blue',
-    validator: v => ['blue', 'green', 'purple', 'amber'].includes(v)
+    validator: v => ['blue', 'green', 'purple', 'amber', 'emerald', 'indigo'].includes(v)
   }
 })
 
@@ -64,14 +64,18 @@ const props = defineProps({
 const variantTextColors = {
   blue: 'text-blue-700 dark:text-blue-400',
   green: 'text-green-700 dark:text-green-400',
+  emerald: 'text-emerald-700 dark:text-emerald-400',
   purple: 'text-purple-700 dark:text-purple-400',
+  indigo: 'text-indigo-700 dark:text-indigo-400',
   amber: 'text-amber-700 dark:text-amber-400'
 }
 
 const variantLabelColors = {
   blue: 'text-blue-600 dark:text-blue-300',
   green: 'text-green-600 dark:text-green-300',
+  emerald: 'text-emerald-600 dark:text-emerald-300',
   purple: 'text-purple-600 dark:text-purple-300',
+  indigo: 'text-indigo-600 dark:text-indigo-300',
   amber: 'text-amber-600 dark:text-amber-300'
 }
 

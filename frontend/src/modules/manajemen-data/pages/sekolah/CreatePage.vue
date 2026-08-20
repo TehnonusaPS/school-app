@@ -87,7 +87,6 @@ function onClickSave() {
 
 const handleSubmit = async () => {
   isConfirmOpen.value = false
-  isLoading.value = true
   formErrors.value = {}
 
   let foundationId = isSuperAdmin.value ? form.value.yayasan : auth.user?.foundation_id
@@ -104,15 +103,6 @@ const handleSubmit = async () => {
   }
   if (!form.value.no_hp) {
     errors.phone = 'No. Telp harus diisi'
-  }
-  if (!form.value.website) {
-    errors.website = 'Website harus diisi'
-  }
-  if (!form.value.instagram) {
-    errors.instagram = 'Instagram harus diisi'
-  }
-  if (!form.value.facebook) {
-    errors.facebook = 'Facebook harus diisi'
   }
   if (!form.value.nama) {
     errors.name = 'Nama sekolah harus diisi'
@@ -178,7 +168,7 @@ const handleSubmit = async () => {
     return
   }
 
-  isLoading.value = true
+  // isLoading.value = true
 
   let newSchoolId = null
   const loginEmail = form.value.emailLogin?.trim() || form.value.email?.trim()
@@ -373,8 +363,8 @@ const goToList = () => {
       <div class="py-3 text-sm text-foreground dark:text-zinc-300 space-y-2">
         <p>Apakah Anda yakin data <strong>{{ form.nama }}</strong> sudah sesuai?</p>
         <div class="p-3 rounded-lg bg-accent/40 dark:bg-zinc-800/50 border border-border/50 dark:border-zinc-800 text-xs space-y-1">
-          <div><span class="text-muted-foreground">Email Administrator Sekolah:</span> <span class="font-semibold text-foreground dark:text-zinc-100">{{ form.email }}</span></div>
-          <div><span class="text-muted-foreground">No. HP Administrator:</span> <span class="font-semibold text-foreground dark:text-zinc-100">{{ form.no_hp }}</span></div>
+          <div><span class="text-muted-foreground">Email Administrator Sekolah:</span> <span class="font-semibold text-foreground dark:text-zinc-100">{{ form.emailLogin }}</span></div>
+          <div><span class="text-muted-foreground">No. HP Administrator:</span> <span class="font-semibold text-foreground dark:text-zinc-100">{{ form.noHpLogin }}</span></div>
         </div>
       </div>
 

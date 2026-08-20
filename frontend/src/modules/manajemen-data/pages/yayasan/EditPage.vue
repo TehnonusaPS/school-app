@@ -64,7 +64,10 @@ onMounted(async () => {
       emailLogin: foundation.users && foundation.users[0] ? foundation.users[0].email : '',
       noHpLogin: foundation.users && foundation.users[0] ? foundation.users[0].phone : ''
     }
-    imagePreview.value = foundation.logo || ''
+    if (foundation.logo) {
+      const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api').replace(/\/api$/, '')
+      imagePreview.value = foundation.logo.startsWith('http') ? foundation.logo : `${baseUrl}/storage/${foundation.logo}`
+    }
   } catch (err) {
     toast.error('Gagal mengambil data yayasan')
     router.push('/manajemen-data/yayasan')
@@ -76,6 +79,7 @@ onMounted(async () => {
 const formErrors = ref({})
 
 function onClickSave() {
+  if (isLoading.value) return
   formErrors.value = {}
   if (!form.value.nama?.trim()) formErrors.value.name = 'Nama yayasan wajib diisi.'
   if (!form.value.email?.trim()) formErrors.value.email = 'Email yayasan wajib diisi.'
@@ -89,69 +93,66 @@ function onClickSave() {
 }
 
 const handleSubmit = async () => {
+  if (isLoading.value) return
   isConfirmOpen.value = false
   isLoading.value = true
   formErrors.value = {}
 
-  // Client-side Validation: All fields must be filled
-  const errors = {}
-  if (!form.value.email) {
-    errors.email = 'E-mail yayasan harus diisi'
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
-    errors.email = 'Format e-mail tidak valid'
-  }
-  if (!form.value.no_hp) {
-    errors.phone = 'No. Telp harus diisi'
-  }
-  if (!form.value.website) {
-    errors.website = 'Website harus diisi'
-  }
-  if (!form.value.nama) {
-    errors.name = 'Nama yayasan harus diisi'
-  }
-  if (!form.value.kode) {
-    errors.code = 'Kode yayasan harus diisi'
-  }
-  if (!form.value.tanggal_berdiri) {
-    errors.established_date = 'Tanggal berdiri harus diisi'
-  }
-  if (!form.value.status) {
-    errors.status = 'Status harus dipilih'
-  }
-  if (!form.value.no_akta) {
-    errors.deed_number = 'No. Akta Pendirian harus diisi'
-  }
-  if (!form.value.tanggal_akta) {
-    errors.deed_date = 'Tanggal akta pendirian harus diisi'
-  }
-  if (!form.value.no_sk) {
-    errors.decree_number = 'No. SK Kemenkumham harus diisi'
-  }
-  if (!form.value.tanggal_sk) {
-    errors.decree_date = 'Tanggal SK Kemenkumham harus diisi'
-  }
-  if (!form.value.alamat) {
-    errors.address = 'Alamat lengkap harus diisi'
-  }
-  if (!form.value.emailLogin) {
-    errors.emailLogin = 'E-mail login administrator harus diisi'
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.emailLogin)) {
-    errors.emailLogin = 'Format e-mail login tidak valid'
-  }
-  if (!form.value.noHpLogin) {
-    errors.noHpLogin = 'No. HP login administrator harus diisi'
-  }
-
-  if (Object.keys(errors).length > 0) {
-    formErrors.value = errors
-    toast.error('Gagal Menyimpan', {
-      description: 'Harap lengkapi semua data formulir sebelum menyimpan.'
-    })
-    return
-  }
-
-  isLoading.value = true
   try {
+    // Client-side Validation: All fields must be filled
+    const errors = {}
+    if (!form.value.email) {
+      errors.email = 'E-mail yayasan harus diisi'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+      errors.email = 'Format e-mail tidak valid'
+    }
+    if (!form.value.no_hp) {
+      errors.phone = 'No. Telp harus diisi'
+    }
+    if (!form.value.nama) {
+      errors.name = 'Nama yayasan harus diisi'
+    }
+    if (!form.value.kode) {
+      errors.code = 'Kode yayasan harus diisi'
+    }
+    if (!form.value.tanggal_berdiri) {
+      errors.established_date = 'Tanggal berdiri harus diisi'
+    }
+    if (!form.value.status) {
+      errors.status = 'Status harus dipilih'
+    }
+    if (!form.value.no_akta) {
+      errors.deed_number = 'No. Akta Pendirian harus diisi'
+    }
+    if (!form.value.tanggal_akta) {
+      errors.deed_date = 'Tanggal akta pendirian harus diisi'
+    }
+    if (!form.value.no_sk) {
+      errors.decree_number = 'No. SK Kemenkumham harus diisi'
+    }
+    if (!form.value.tanggal_sk) {
+      errors.decree_date = 'Tanggal SK Kemenkumham harus diisi'
+    }
+    if (!form.value.alamat) {
+      errors.address = 'Alamat lengkap harus diisi'
+    }
+    if (!form.value.emailLogin) {
+      errors.emailLogin = 'E-mail login administrator harus diisi'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.emailLogin)) {
+      errors.emailLogin = 'Format e-mail login tidak valid'
+    }
+    if (!form.value.noHpLogin) {
+      errors.noHpLogin = 'No. HP login administrator harus diisi'
+    }
+
+    if (Object.keys(errors).length > 0) {
+      formErrors.value = errors
+      toast.error('Gagal Menyimpan', {
+        description: 'Harap lengkapi semua data formulir sebelum menyimpan.'
+      })
+      return
+    }
+
     const formData = new FormData()
     formData.append('code', form.value.kode || '')
     formData.append('name', form.value.nama || '')

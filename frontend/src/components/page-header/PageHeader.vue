@@ -23,11 +23,18 @@ defineProps({
   }
 })
 
+import { useAttrs } from 'vue'
+
 const emit = defineEmits(['back'])
 const router = useRouter()
+const attrs = useAttrs()
 
 const handleBack = () => {
   emit('back')
+  // If the parent component provides a custom @back listener, 
+  // don't execute the default router.back() to prevent double navigation.
+  if (attrs.onBack) return
+
   if (router) {
     router.back()
   } else {

@@ -13,6 +13,7 @@ import { rawSiswaItem, siswaSheetSections} from './data/dataSheetDetail.js'
 import { useRouter } from 'vue-router'
 import { fetchAllSiswa, deleteSiswa, getSiswaDetail } from '@/services/siswaService'
 import { getClassrooms } from '@/services/managementService'
+import { getPhotoUrl } from '@/utils/getPhotoUrl.js'
 import { Users, UserCheck, UserRound, UserRoundCheck } from 'lucide-vue-next'
 
 const auth = useAuthStore()
@@ -95,7 +96,10 @@ const fetchSiswa = async () => {
       params.kelasId = filterValues.value.kelasId
     }
     const res = await fetchAllSiswa(params)
-    tableItems.value = res.data
+    tableItems.value = res.data.map(item => ({
+      ...item,
+      foto: getPhotoUrl(item.foto)
+    }))
 
     if (res.stats) {
       stats.value[0].value = String(res.stats.total)
@@ -123,26 +127,46 @@ onMounted(async () => {
   try {
     const resClass = await getClassrooms()
     activeClassrooms.value = resClass.data
-    
-    // Add classroom filter dynamically
+
     const classFilter = filters.find(f => f.key === 'kelasId')
+
+    const classroomOptions = activeClassrooms.value.map(c => ({
+      label: c.name,
+      value: String(c.id)
+    }))
+
     if (!classFilter) {
       filters.push({
         type: 'select',
         key: 'kelasId',
         label: 'Kelas:',
         placeholder: 'Semua Kelas',
-        options: [
-          { label: 'Semua Kelas', value: 'all' },
-          ...activeClassrooms.value.map(c => ({ label: c.name, value: String(c.id) }))
-        ]
+        options: classroomOptions
       })
     } else {
-      classFilter.options = [
-        { label: 'Semua Kelas', value: 'all' },
-        ...activeClassrooms.value.map(c => ({ label: c.name, value: String(c.id) }))
-      ]
+      classFilter.placeholder = 'Semua Kelas'
+      classFilter.options = classroomOptions
     }
+    
+    // Add classroom filter dynamically
+    // const classFilter = filters.find(f => f.key === 'kelasId')
+    // if (!classFilter) {
+    //   filters.push({
+    //     type: 'select',
+    //     key: 'kelasId',
+    //     label: 'Kelas:',
+    //     placeholder: 'Semua Kelas',
+    //     options: [
+    //       { label: 'Semua Kelas', value: 'all' },
+    //       ...activeClassrooms.value.map(c => ({ label: c.name, value: String(c.id) }))
+    //     ]
+    //   })
+    // } else {
+    //   classFilter.options = [
+    //     { label: 'Semua Kelas', value: 'all' },
+    //     ...activeClassrooms.value.map(c => ({ label: c.name, value: String(c.id) }))
+    //   ]
+    // }
   } catch (err) {
     console.error('Gagal mengambil data kelas', err)
   }

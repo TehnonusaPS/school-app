@@ -7,6 +7,10 @@ import {
 } from '@/components/ui/accordion'
 import FormInput from '@/components/forms/FormInput.vue'
 import FormSelect from '@/components/forms/FormSelect.vue'
+import { computed } from 'vue'
+import { useAuthStore } from '@/stores/authStore'
+
+const auth = useAuthStore()
 
 defineProps({
   form: {
@@ -16,7 +20,49 @@ defineProps({
   errors: {
     type: Object,
     default: () => ({})
+  },
+  teacherOptions: {
+    type: Array,
+    default: () => []
   }
+})
+
+const schoolLevel = computed(() => auth.user?.school?.level)
+
+const tingkatOptions = computed(() => {
+  const jenjang = schoolLevel.value?.toUpperCase()
+
+  // TK
+  if (jenjang === 'JP001' || jenjang === 'TK') {
+    return [
+      { label: 'TK A', value: 'TK A' },
+      { label: 'TK B', value: 'TK B' }
+    ]
+  }
+
+  // SD
+  if (jenjang === 'JP002' || jenjang === 'SD') {
+    return Array.from({ length: 6 }, (_, index) => ({
+      label: `Kelas ${index + 1}`,
+      value: String(index + 1)
+    }))
+  }
+
+  // SMP
+  if (jenjang === 'JP003' || jenjang === 'SMP') {
+    return Array.from({ length: 3 }, (_, index) => ({
+      label: `Kelas ${index + 7}`,
+      value: String(index + 7)
+    }))
+  }
+
+  return []
+})
+
+const isSMA = computed(() => {
+  const jenjang = schoolLevel.value?.toUpperCase()
+
+  return jenjang === 'SMA' || jenjang === 'JP004' || jenjang === 'SMK' || jenjang === 'JP005'
 })
 </script>
 
@@ -39,20 +85,18 @@ defineProps({
               required
             />
 
-            <div class="grid grid-cols-2 gap-4">
+            <div :class="isSMA ? 'grid grid-cols-2 gap-4' : 'grid grid-cols-1 gap-4'">
               <FormSelect
                 v-model="form.grade"
                 label="Tingkat"
                 placeholder="Pilih tingkat"
                 :error="errors.grade"
-                :options="[
-                  { label: 'Kelas 10', value: '10' },
-                  { label: 'Kelas 11', value: '11' },
-                  { label: 'Kelas 12', value: '12' }
-                ]"
+                :options="tingkatOptions"
                 required
               />
+
               <FormInput
+                v-if="isSMA"
                 v-model="form.major"
                 label="Jurusan/Program"
                 placeholder="Contoh: MIPA, IPS, dll"
@@ -60,11 +104,19 @@ defineProps({
               />
             </div>
 
-            <FormInput
+            <!-- <FormInput
               v-model="form.homeroom_teacher"
               label="Wali Kelas"
               placeholder="Nama wali kelas (opsional)"
               :error="errors.homeroom_teacher"
+            /> -->
+
+            <FormSelect
+              v-model="form.homeroom_teacher_id"
+              label="Wali Kelas"
+              placeholder="Pilih wali kelas"
+              :options="teacherOptions"
+              :error="errors.homeroom_teacher_id"
             />
 
             <div class="grid grid-cols-2 gap-4">

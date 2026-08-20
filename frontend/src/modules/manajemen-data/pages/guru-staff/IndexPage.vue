@@ -19,7 +19,7 @@ const tableItems = ref([])
 const isLoading = ref(false)
 
 const stats = computed(() => {
-  const list = items.value || []
+  const list = tableItems.value || []
   const totalVal = list.length
   const aktifVal = list.filter(item => item.status_aktif === 'Aktif').length
   const guruVal = list.filter(item => ['guru', 'wali_kelas', 'kepala_sekolah'].includes(item.role)).length
@@ -75,6 +75,13 @@ const fetchTeachers = async () => {
   try {
     const params = {}
     const res = await getTeachers(params)
+    const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api').replace(/\/api$/, '')
+    const getPhotoUrl = (path) => {
+      if (!path) return null
+      if (path.startsWith('http')) return path
+      return `${baseUrl}/storage/${path}`
+    }
+
     tableItems.value = res.data.map(item => ({
       ...item,
       id: item.id,
@@ -85,15 +92,16 @@ const fetchTeachers = async () => {
       jabatan: item.jabatan,
       masaKerja: item.masaKerja,
       statusKepegawaian: item.status_kepegawaian,
-      status: item.status_aktif
+      status: item.status_aktif,
+      foto: getPhotoUrl(item.foto)
     }))
 
-    if (res.stats) {
-      stats.value[0].value = String(res.stats.total)
-      stats.value[1].value = String(res.stats.active)
-      stats.value[2].value = String(res.stats.guru)
-      stats.value[3].value = String(res.stats.staff)
-    }
+    // if (res.stats) {
+    //   stats.value[0].value = String(res.stats.total)
+    //   stats.value[1].value = String(res.stats.active)
+    //   stats.value[2].value = String(res.stats.guru)
+    //   stats.value[3].value = String(res.stats.staff)
+    // }
   } catch (err) {
     toast.error('Gagal mengambil data guru dan staff')
   } finally {
@@ -118,14 +126,14 @@ const deleteItem = async (id, item) => {
 }
 
 const filteredItems = computed(() => {
-  return items.value.filter(item => {
+  return tableItems.value.filter(item => {
     const searchVal = filterValues.value.search?.trim().toLowerCase() || ''
     const searchMatch =
       !searchVal ||
-      item.nama.toLowerCase().includes(searchVal)
+      item.nama?.toLowerCase().includes(searchVal)
 
     const statusVal = filterValues.value.status
-    const statusMatch = !statusVal || statusVal === 'all' || item.status === statusVal
+    const statusMatch = !statusVal || statusVal === 'all' || item.statusKepegawaian?.toLowerCase() === statusVal.toLowerCase()
 
     return searchMatch && statusMatch
   })
@@ -141,15 +149,16 @@ const isDetailSheetOpen = ref(false)
 const selectedItemForDetail = ref(null)
 
 const handleViewDetail = id => {
-  const item = items.value.find(x => x.id === id)
+  const item = tableItems.value.find(x => x.id === id)
   if (item) {
     selectedItemForDetail.value = item
     isDetailSheetOpen.value = true
+    console.log('test', selectedItemForDetail.value)
   }
 }
 
 </script>
-
+ 
 <template>
   <div class="space-y-6 w-full mx-auto px-0">
     <PageHeader
@@ -186,7 +195,7 @@ const handleViewDetail = id => {
       :page="currentPage"
       @update:page="currentPage = $event"
       @view="handleViewDetail"
-      @edit="$router.push(`/manajemen-data/guru-staff/edit?id=${$event}`)"
+      @edit="$router.push(`/manajemen-data/guru-staff/edit/${$event}`)"
       @delete="deleteItem"
     />
 

@@ -7,6 +7,8 @@ import FormTextArea from '@/components/forms/FormTextArea.vue'
 import FormDate from '@/components/forms/FormDate.vue'
 import FormSection from '@/components/forms/FormSection.vue'
 import FormSelect from '@/components/forms/FormSelect.vue'
+import FormMultiSelect from '@/components/forms/FormMultiSelect.vue'
+import { computed, watch } from 'vue'
 const props = defineProps({
   form: { type: Object, required: true },
   imagePreview: { type: String, default: '' },
@@ -18,6 +20,7 @@ const props = defineProps({
   statusKepegawaianOptions: { type: Array, default: () => [] },
   unitKerjaOptions: { type: Array, default: () => [] },
   statusOptions: { type: Array, default: () => [] },
+  subjectOptions: { type: Array, default: () => [] },
   errors: { type: Object, default: () => ({}) }
 })
 const emit = defineEmits(['image-change'])
@@ -25,6 +28,21 @@ const emit = defineEmits(['image-change'])
 const handleImageChange = file => {
   emit('image-change', file)
 }
+
+const isTeacher = computed(() => {
+  const jabatan = String(props.form.jabatan || '').toUpperCase()
+
+  return jabatan === 'GURU' || jabatan === 'J004'
+})
+
+watch(
+  () => props.form.jabatan,
+  () => {
+    if (!isTeacher.value) {
+      props.form.subject_ids = []
+    }
+  }
+)
 </script>
 
 <template>
@@ -48,7 +66,7 @@ const handleImageChange = file => {
       <div class="md:col-span-2 space-y-6">
         <FormSection title="Informasi Pribadi" description="Informasi dasar mengenai guru/staff" :icon="SquareUserRound">
           <div class="grid gap-4 md:grid-cols-2">
-              <FormInput v-model="form.nama_depan" label="Nama Depan" placeholder="Contoh: John" :error="errors.nama_depan"/>
+<FormInput v-model="form.nama_depan" label="Nama Depan" placeholder="Contoh: John" :error="errors.nama_depan"/>
               <FormInput v-model="form.nama_belakang" label="Nama Belakang" placeholder="Contoh: Doe" :error="errors.nama_belakang"/>
           </div>
           <div class="grid gap-4 md:grid-cols-2">
@@ -81,6 +99,20 @@ const handleImageChange = file => {
           <div class="grid gap-4 md:grid-cols-2">
             <FormSelect v-model="form.unit_kerja" label="Unit Kerja" placeholder="Pilih unit kerja" :options="unitKerjaOptions" :error="errors.unit_kerja"/>
             <FormSelect v-model="form.status_aktif" label="Status Aktif" placeholder="Pilih status" :options="statusOptions" :error="errors.status_aktif"/>
+          </div>
+          <div class="grid gap-4 md:grid-cols-2">
+            <FormDate v-model="form.join_date" label="Tanggal Bergabung" :error="errors.join_date"/>
+            <FormMultiSelect
+              v-if="isTeacher"
+              v-model="form.subject_ids"
+              label="Mata Pelajaran yang Diajarkan"
+              placeholder="Pilih mata pelajaran"
+              :options="subjectOptions"
+              :error="errors.subject_ids"
+              searchable
+              show-select-all
+              required
+            />
           </div>
         </FormSection>
 

@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import {
   Sheet,
   SheetContent,
@@ -87,6 +87,11 @@ const emit = defineEmits(['update:open'])
 const isOpen = computed({
   get: () => props.open,
   set: val => emit('update:open', val)
+})
+
+const imageError = ref(false)
+watch([isOpen, () => props.item], () => {
+  imageError.value = false
 })
 
 const resolvedTitle = computed(() => {
@@ -188,14 +193,19 @@ const resolveFieldValue = field => {
           <div class="flex items-center gap-4">
             <Avatar
               v-if="showAvatar"
-              class="size-16 border-2 border-border/80 shrink-0"
+              class="size-16 border-2 border-border/80 shrink-0 overflow-hidden"
             >
               <AvatarImage
-                v-if="resolvedAvatar"
+                v-if="resolvedAvatar && !imageError"
                 :src="resolvedAvatar"
                 :alt="resolvedTitle"
+                class="w-full h-full object-cover"
+                @error="imageError = true"
               />
-              <AvatarFallback class="text-lg font-bold">
+              <AvatarFallback
+                v-else
+                class="text-lg font-bold"
+              >
                 {{ resolvedAvatarFallback }}
               </AvatarFallback>
             </Avatar>

@@ -10,13 +10,15 @@ import { useAuthStore } from '@/stores/authStore'
 import GuruStaffForm from './components/GuruStaffForm.vue'
 import { agamaOptions, jabatanOptions, kelaminOptions, pendidikanOptions, statusKepegawaianOptions, statusOptions, statusPernikahanOptions } from './data/guruStaff'
 import SuccessAccountDialog from '@/components/dialogs/SuccessAccountDialog.vue'
-import { createTeacher } from '@/services/managementService'
+import { createTeacher, getFoundation, getSchools } from '@/services/managementService'
 import { toast } from 'vue-sonner'
+import { fetchAllSubjects } from '@/services/subjectService'
 
 const auth = useAuthStore()
 const router = useRouter()
 const isLoading = ref(false)
 const unitOptions = ref([])
+const subjectOptions = ref([])
 
 const loadUnitOptions = async () => {
   try {
@@ -48,6 +50,7 @@ const loadUnitOptions = async () => {
 
 onMounted(() => {
   loadUnitOptions()
+  loadSubjectOptions()
 })
 
 const form = ref({ ...defaultForm})
@@ -55,6 +58,7 @@ const form = ref({ ...defaultForm})
 const imagePreview = ref('')
 
 const handleImage = (file) => {
+  form.value.foto = file
   imagePreview.value = URL.createObjectURL(file)
 }
 
@@ -132,8 +136,83 @@ const mapValueToKelamin = (value) => {
   }
   return map[value] || value
 }
-
 const handleSubmit = async () => {
+  formErrors.value = {}
+
+  // Client-side Validation: All fields must be filled
+  const errors = {}
+  if (!form.value.nama_depan) {
+    errors.first_name = 'Nama depan harus diisi'
+  }
+  if (!form.value.nik) {
+    errors.nik = 'NIK harus diisi'
+  }
+  if (!form.value.nip_nuptk) {
+    errors.nip_nuptk = 'NIP/NUPTK harus diisi'
+  }
+  if (!form.value.tempat_lahir) {
+    errors.tempat_lahir = 'Tempat lahir harus diisi'
+  }
+  if (!form.value.tanggal_lahir) {
+    errors.tanggal_lahir = 'Tanggal lahir harus diisi'
+  }
+  if (!form.value.jenis_kelamin) {
+    errors.jenis_kelamin = 'Jenis kelamin harus diisi'
+  }
+  if (!form.value.agama) {
+    errors.agama = 'Agama harus diisi'
+  }
+  if (!form.value.status_pernikahan) {
+    errors.status_pernikahan = 'Status pernikahan harus diisi'
+  }
+  if (!form.value.pendidikan_terakhir) {
+    errors.pendidikan_terakhir = 'Pendidikan terakhir harus diisi'
+  }
+  if (!form.value.email) {
+    errors.email = 'E-mail sekolah harus diisi'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+    errors.email = 'Format e-mail tidak valid'
+  }
+  if (!form.value.no_hp) {
+    errors.phone = 'No. Telp harus diisi'
+  }
+  if (!form.value.alamat) {
+    errors.address = 'Alamat lengkap harus diisi'
+  }
+  if (!form.value.unit_kerja) {
+    errors.unit_kerja = 'Unit kerja harus diisi'
+  }
+  if (!form.value.status_aktif) {
+    errors.status_aktif = 'Status aktif harus diisi'
+  }
+  if (!form.value.join_date) {
+    errors.join_date = 'Tanggal bergabung harus diisi'
+  }
+  if (!form.value.status_kepegawaian) {
+    errors.status_kepegawaian = 'Status kepegawaian harus diisi'
+  }
+  if (!form.value.jabatan) {
+    errors.jabatan = 'Jabatan harus diisi'
+  }
+  if (!form.value.emailLogin) {
+    errors.emailLogin = 'E-mail login administrator harus diisi'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.emailLogin)) {
+    errors.emailLogin = 'Format e-mail login tidak valid'
+  }
+  if (!form.value.noHpLogin) {
+    errors.noHpLogin = 'No. HP login administrator harus diisi'
+  }
+
+  console.log(errors);
+
+  if (Object.keys(errors).length > 0) {
+    formErrors.value = errors
+    toast.error('Gagal Menyimpan', {
+      description: 'Harap lengkapi semua data formulir sebelum menyimpan.'
+    })
+    return
+  }
+
   isLoading.value = true
   formErrors.value = {}
 
@@ -165,11 +244,36 @@ const handleSubmit = async () => {
   }
 
   try {
-    await createTeacher(postData)
-    generatedAccount.value = {
-      email: postData.emailLogin,
-      phone: postData.noHpLogin || '-',
-      password: plainPassword
+    const formData = new FormData()
+    const rawForm = form.value
+    Object.keys(rawForm).forEach(key => {
+      const value = rawForm[key]
+      if (key === 'foto') return // handle separately
+      if (Array.isArray(value)) {
+        value.forEach(item => {
+          formData.append(`${key}[]`, item)
+        })
+
+        return
+      }
+
+      if (value !== null && value !== undefined && value !== '') {
+        formData.append(key, value)
+      }
+    })
+    if (rawForm.foto instanceof File) {
+      formData.append('foto', rawForm.foto)
+    }
+    const res = await createTeacher(formData)
+    if (res.status === 'success') {
+      generatedAccount.value = {
+        email: res.data.email,
+        phone: res.data.phone || '-',
+        password: res.data.password
+      }
+      showSuccessModal.value = true
+    } else {
+      toast.error(res.message || 'Gagal menyimpan data')
     }
     showSuccessModal.value = true
   } catch (err) {
@@ -202,6 +306,26 @@ const customActions = computed(() => [
     click: handleSubmit
   },
 ])
+
+const loadSubjectOptions = async () => {
+  try {
+    const res = await fetchAllSubjects()
+
+    const subjects = Array.isArray(res.data) ? res.data : []
+
+    subjectOptions.value = subjects
+      .filter(subject => subject.is_active === true)
+      .map(subject => ({
+        label: subject.name,
+        value: String(subject.id)
+      }))
+
+    console.log('Subject options:', subjectOptions.value)
+  } catch (error) {
+    console.error('Gagal memuat mata pelajaran:', error)
+    subjectOptions.value = []
+  }
+}
 </script>
 
 <template>
@@ -225,6 +349,7 @@ const customActions = computed(() => [
       :status-kepegawaian-options="statusKepegawaianOptions"
       :unit-kerja-options="unitOptions"
       :status-options="statusOptions"
+      :subject-options="subjectOptions"
       :errors="formErrors"
       @image-change="handleImage"
     />

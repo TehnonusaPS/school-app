@@ -115,6 +115,13 @@ const fetchFoundations = async () => {
       params.status = statusMap[filterValues.value.status] || filterValues.value.status
     }
     const res = await getFoundations(params)
+    const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api').replace(/\/api$/, '')
+    const getLogoUrl = (path) => {
+      if (!path) return null
+      if (path.startsWith('http')) return path
+      return `${baseUrl}/storage/${path}`
+    }
+
     tableItems.value = res.data.data.map(item => ({
       ...item,
       id: item.id,
@@ -129,8 +136,11 @@ const fetchFoundations = async () => {
       tanggal_akta: item.deed_date ? item.deed_date.split('T')[0] : '-',
       no_sk: item.decree_number,
       tanggal_sk: item.decree_date ? item.decree_date.split('T')[0] : '-',
-      logo: item.logo || '/defaults/sd/logo.png',
+      logo: getLogoUrl(item.logo) || '/defaults/sd/logo.png',
+      foto: getLogoUrl(item.logo) || '/defaults/sd/logo.png',
       status: item.status === 'active' ? 'Aktif' : (item.status === 'inactive' ? 'Nonaktif' : 'Trial'),
+      emailLogin: item.users?.[0]?.email || '-',
+      noHpLogin: item.users?.[0]?.phone || '-',
       // Mapped fields
       jmlSekolah: item.schools_count || 0,
       jmlPengguna: item.users_count || 0
@@ -246,7 +256,7 @@ const handleViewDetail = id => {
     title-key="nama"
     description-key="no_akta"
     description-prefix="No. Akta: "
-    avatar-key="logo"
+    avatar-key="foto"
     badge-key="status"
     :sections="yayasanSheetSections"
   />

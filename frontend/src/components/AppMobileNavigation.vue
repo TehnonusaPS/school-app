@@ -189,19 +189,21 @@ const setBackgroundStyle = styleName => {
     'bg-static_squares',
     'bg-glass',
     'bg-school',
-    'bg-solid'
+    'bg-solid',
+    'bg-modern_minimalist'
   )
   document.body.classList.add(`bg-${resolvedStyle}`)
   localStorage.setItem('backgroundStyle', resolvedStyle)
 
-  if (resolvedStyle === 'solid') {
+  // solid AND modern_minimalist both use solid finish (with vector illustrations)
+  if (resolvedStyle === 'solid' || resolvedStyle === 'modern_minimalist') {
     document.body.classList.add('finish-solid')
   } else {
     document.body.classList.remove('finish-solid')
   }
 }
 const cycleBackgroundStyle = () => {
-  const styles = ['animated', 'static_squares', 'glass', 'solid']
+  const styles = ['animated', 'static_squares', 'glass', 'solid', 'modern_minimalist']
   const currentIndex = styles.indexOf(activeBackgroundStyle.value)
   const newStyle = styles[(currentIndex + 1) % styles.length]
   setBackgroundStyle(newStyle)
@@ -210,7 +212,8 @@ const backgroundNames = {
   animated: 'Animated Squares',
   static_squares: 'Static Squares',
   glass: 'Glass Effect',
-  solid: 'School Illustration'
+  solid: 'School Illustration',
+  modern_minimalist: 'Modern Minimalist'
 }
 
 onMounted(() => {

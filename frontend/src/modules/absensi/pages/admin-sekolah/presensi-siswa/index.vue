@@ -22,7 +22,7 @@ import {
 } from 'lucide-vue-next'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { getStudents, getLogs, postScan } from '@/services/api/absensi'
+import { getStudents, getLogs, postScan, scanRfid } from '@/services/api/absensi'
 import { glassSlide, glassFade } from '@/config/motion'
 import { useAuthStore } from '@/stores/authStore'
 import { toast } from 'vue-sonner'
@@ -368,63 +368,6 @@ async function performRealFaceScan() {
   }
 }
 
-// ─── Scan Logic ──────────────────────────────────────────
-async function triggerSimulatedScan(siswaId, source) {
-  const studentObj = absensiData.value.find(s => s.id === siswaId)
-  try {
-    const newLog = await postScan({
-      student_id: siswaId,
-      verification_method: source
-    })
-    handleScanSuccess(newLog, source)
-  } catch (err) {
-    const msg = err.response?.data?.message || 'Gagal memproses absensi simulasi.'
-    handleScanError(msg, source, studentObj)
-  }
-}
-
-async function triggerQuickScan(source) {
-  let studentObj = null
-  let studentId = null
-
-  if (absensiData.value && absensiData.value.length > 0) {
-    studentObj = absensiData.value[0]
-    studentId = studentObj.id
-  } else if (scanResults.value && scanResults.value.length > 0) {
-    const firstLog = scanResults.value[0]
-    studentObj = {
-      nama: firstLog.nama,
-      kelas: firstLog.kelas,
-      nisn: firstLog.nisn || '1234567890',
-      id: firstLog.student_profile_id || firstLog.id
-    }
-    studentId = studentObj.id
-  }
-
-  if (studentId) {
-    try {
-      const newLog = await postScan({
-        student_id: studentId,
-        verification_method: source
-      })
-      handleScanSuccess(newLog, source)
-    } catch (err) {
-      const msg = err.response?.data?.message || 'Gagal memproses absensi.'
-      handleScanError(msg, source, studentObj)
-    }
-  } else {
-    const mockLog = {
-      id: Date.now(),
-      nama: 'Ilham Saputra',
-      kelas: '2-D',
-      nisn: '1234567890',
-      tipe: 'Masuk',
-      waktu: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-      inisial: 'IS'
-    }
-    handleScanSuccess(mockLog, source)
-  }
-}
 
 function getInitials(nama) {
   if (!nama) return ''
@@ -569,13 +512,61 @@ function goBackToFullscreen() {
   enterFullscreen()
 }
 
-// Tangkap F12 — tampilkan password guard
+// ─── RFID Keyboard Buffer & Listener ────────────────────────
+const rfidBuffer = ref('')
+let rfidKeyTimer = null
+const isProcessingRfid = ref(false)
+
+async function processRfidTap(cardUid) {
+  if (isProcessingRfid.value) return
+  isProcessingRfid.value = true
+
+  try {
+    const res = await scanRfid(cardUid)
+    if (res.success && res.log) {
+      handleScanSuccess(res.log, 'rfid')
+    }
+  } catch (err) {
+    const data = err.response?.data
+    const msg = data?.message || 'Kartu RFID tidak terdaftar / tidak dikenali.'
+    handleScanError(msg, 'rfid', data?.student || null)
+  } finally {
+    isProcessingRfid.value = false
+  }
+}
+
+// Tangkap F12 & USB RFID Reader Card Tap
 function onKeyDown(e) {
   if (e.key === 'F12') {
     e.preventDefault()
     isPasswordGuardOpen.value = true
     passwordInput.value = ''
     passwordError.value = ''
+    return
+  }
+
+  // Skip RFID capture if user is typing inside an input element (like password input)
+  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return
+  if (isPasswordGuardOpen.value) return
+
+  // USB RFID Reader types digits fast and sends 'Enter'
+  if (e.key === 'Enter') {
+    if (rfidBuffer.value.length >= 3) {
+      const cardUid = rfidBuffer.value.trim()
+      rfidBuffer.value = ''
+      processRfidTap(cardUid)
+    }
+    rfidBuffer.value = ''
+    return
+  }
+
+  if (e.key && e.key.length === 1) {
+    rfidBuffer.value += e.key
+
+    clearTimeout(rfidKeyTimer)
+    rfidKeyTimer = setTimeout(() => {
+      rfidBuffer.value = ''
+    }, 250)
   }
 }
 
@@ -651,9 +642,10 @@ const filteredStudents = computed(() => absensiData.value)
         v-else
         class="back-btn-placeholder"
       />
-      <div class="header-center">
-        <h1 class="header-title">Absensi & Presensi</h1>
-        <p class="header-sub">Sistem Presensi</p>
+      <div class="header-center flex flex-col items-center">
+        <h1 class="header-title flex items-center gap-2">
+          Absensi & Presensi Siswa
+        </h1>
       </div>
       <div class="header-right">
         <!-- Fullscreen Toggle Button (hidden when in fullscreen) -->
@@ -931,37 +923,6 @@ const filteredStudents = computed(() => absensiData.value)
               style="color: var(--muted-foreground)"
             />
             <span>{{ currentDate }}</span>
-          </div>
-        </Card>
-
-        <!-- Student Simulation Panel (For testing/demo) -->
-        <Card class="simulation-card">
-          <div class="log-header">
-            <Fingerprint
-              class="size-4"
-              style="color: var(--primary)"
-            />
-            <span class="log-title">Simulasi Tap Siswa</span>
-          </div>
-
-          <!-- Quick Simulation Action Buttons -->
-          <div class="px-4 pb-4 flex gap-2">
-            <button
-              type="button"
-              class="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors shadow-sm"
-              @click="triggerQuickScan('rfid')"
-            >
-              <Radio class="size-3.5" />
-              <span>Tap RFID</span>
-            </button>
-            <button
-              type="button"
-              class="flex-1 py-2 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors shadow-sm"
-              @click="triggerQuickScan('fingerprint')"
-            >
-              <Fingerprint class="size-3.5" />
-              <span>Tap Fingerprint</span>
-            </button>
           </div>
         </Card>
 
@@ -1622,86 +1583,7 @@ const filteredStudents = computed(() => absensiData.value)
   border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
-/* Simulation panel */
-.simulation-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg, 14px);
-  padding: 1.125rem;
-  display: flex;
-  flex-direction: column;
-  box-shadow: var(--glass-shadow, 0 2px 8px rgba(0, 0, 0, 0.06));
-}
 
-.sim-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.sim-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem;
-  border-radius: 8px;
-  background: var(--muted);
-  border: 1px solid var(--border);
-}
-
-.sim-avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: var(--accent);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--primary);
-}
-
-.sim-info {
-  flex: 1;
-  text-align: left;
-  min-width: 0;
-}
-.sim-name {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--foreground);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin: 0;
-}
-.sim-meta {
-  font-size: 0.65rem;
-  color: var(--muted-foreground);
-  margin: 0;
-}
-
-.sim-actions {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.sim-btn {
-  padding: 0.4rem;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--background);
-  color: var(--muted-foreground);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.sim-btn:hover {
-  background: var(--primary);
-  color: var(--primary-foreground);
-  border-color: var(--primary);
-}
 
 /* Log card */
 .log-card {

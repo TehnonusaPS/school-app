@@ -92,6 +92,7 @@ const groupedUpcomingEvents = computed(() => {
                 :type="event.type"
                 :title="event.title"
                 :subtitle="event.subtitle"
+                :subject="event.subject"
                 :time="event.time"
                 :location="event.location"
                 :description="event.type === 'assignment' ? event.location : undefined"

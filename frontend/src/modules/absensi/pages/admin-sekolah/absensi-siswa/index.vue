@@ -32,12 +32,17 @@ import {
   CreditCard,
   IdCard,
   Target,
+  Radio,
+  Volume2,
+  VolumeX,
 } from 'lucide-vue-next'
 import {
   getStudents,
   getLogs,
   updateStudentStatus,
   registerStudentFace,
+  registerStudentRfid,
+  scanRfid,
 } from '@/services/api/absensi'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -199,8 +204,8 @@ const filteredLogs = computed(() => {
 // Stats Computation
 const totalSiswa = computed(() => absensiData.value.length)
 const wajahTerdaftar = computed(() => absensiData.value.filter((d) => d.is_face_registered).length)
-const rfidTerhubung = computed(() => absensiData.value.filter((d) => d.rfid_uid).length)
-const belumTerdaftar = computed(() => absensiData.value.filter((d) => !d.is_face_registered).length)
+const rfidTerhubung = computed(() => absensiData.value.filter((d) => d.is_rfid_registered || d.rfid_number || d.rfid_uid).length)
+const belumTerdaftar = computed(() => absensiData.value.filter((d) => !d.is_face_registered && !d.is_rfid_registered && !d.rfid_number && !d.rfid_uid).length)
 
 const perPage = ref(10)
 const { currentPage, total, from, to, paginatedItems: paginatedData } = usePagination(filteredData, perPage)
@@ -212,6 +217,111 @@ watch(
     currentPage.value = 1
   }
 )
+
+// ─── Registrasi RFID Modal State ──────────────────────────
+const isRfidRegisterModalOpen = ref(false)
+const selectedStudentForRfid = ref(null)
+const rfidInput = ref('')
+const isSubmittingRfid = ref(false)
+const rfidInputRef = ref(null)
+
+function sanitizeRfidUid(val) {
+  if (!val) return ''
+  const str = val.trim()
+
+  // 1. Check if string is a repeated pattern of an 8-12 char UID (e.g. "0006562226" repeated 2x, 3x, 4x)
+  const match = str.match(/^([a-zA-Z0-9]{8,12})\1+$/)
+  if (match) {
+    return match[1]
+  }
+
+  // 2. Check if string contains multiple repeating chunks of length 8 to 12
+  for (let len = 10; len >= 8; len--) {
+    if (str.length >= len * 2) {
+      const chunk = str.substring(0, len)
+      if (str.replaceAll(chunk, '') === '') {
+        return chunk
+      }
+    }
+  }
+
+  // 3. Fallback: If string is longer than 12 characters and starts with digits/hex
+  if (str.length > 12) {
+    const firstBlock = str.match(/^[a-zA-Z0-9]{8,10}/)
+    if (firstBlock) {
+      return firstBlock[0]
+    }
+  }
+
+  return str
+}
+
+watch(rfidInput, (newVal) => {
+  if (!newVal) return
+  const clean = sanitizeRfidUid(newVal)
+  if (clean !== newVal) {
+    rfidInput.value = clean
+  }
+})
+
+function openRfidRegistration(student) {
+  selectedStudentForRfid.value = student
+  // Start with empty input so tapping replaces cleanly instead of appending to existing text
+  rfidInput.value = ''
+  isRfidRegisterModalOpen.value = true
+  nextTick(() => {
+    const inputEl = rfidInputRef.value?.$el?.querySelector?.('input') || rfidInputRef.value?.$el || rfidInputRef.value
+    inputEl?.focus?.()
+    inputEl?.select?.()
+  })
+}
+
+function closeRfidRegistration() {
+  isRfidRegisterModalOpen.value = false
+  selectedStudentForRfid.value = null
+  rfidInput.value = ''
+  isSubmittingRfid.value = false
+}
+
+async function handleRfidRegistrationSubmit() {
+  if (isSubmittingRfid.value) return // Prevent multiple submissions from fast taps
+  
+  const cleanUid = sanitizeRfidUid(rfidInput.value)
+  if (!selectedStudentForRfid.value || !cleanUid) {
+    toast.error('Gagal Registrasi', { description: 'Silakan tempelkan kartu RFID atau ketik nomor UID kartu!' })
+    return
+  }
+
+  isSubmittingRfid.value = true
+  try {
+    const res = await registerStudentRfid(selectedStudentForRfid.value.id, cleanUid)
+    if (res.success) {
+      toast.success('Registrasi RFID Sukses! 💳', {
+        description: res.message
+      })
+      // Update local item
+      const item = absensiData.value.find(s => s.id === selectedStudentForRfid.value.id)
+      if (item) {
+        item.rfid_number = cleanUid
+        item.rfid_uid = cleanUid
+        item.is_rfid_registered = true
+      }
+      
+      // Update the selectedStudentForRfid as well to reflect immediately if the modal stays open
+      selectedStudentForRfid.value.rfid_number = cleanUid
+      selectedStudentForRfid.value.rfid_uid = cleanUid
+      selectedStudentForRfid.value.is_rfid_registered = true
+      
+      closeRfidRegistration()
+      await loadData(true) // Force refresh list to ensure connection status propagates
+    }
+  } catch (err) {
+    const msg = err.response?.data?.message || 'Gagal mendaftarkan kartu RFID.'
+    toast.error('Registrasi RFID Gagal', { description: msg })
+  } finally {
+    isSubmittingRfid.value = false
+  }
+}
 
 // ─── Show Detail Modal State ──────────────────────────────
 const isShowModalOpen = ref(false)
@@ -234,7 +344,7 @@ const rfidCardUid = ref('')
 
 function openEditModal(student) {
   editStudent.value = student
-  rfidCardUid.value = student.rfid_uid || ''
+  rfidCardUid.value = student.rfid_number || student.rfid_uid || ''
   isEditModalOpen.value = true
 }
 
@@ -246,7 +356,9 @@ function closeEditModal() {
 
 function saveEditModal() {
   if (!editStudent.value) return
+  editStudent.value.rfid_number = rfidCardUid.value
   editStudent.value.rfid_uid = rfidCardUid.value
+  editStudent.value.is_rfid_registered = !!rfidCardUid.value
   toast.success('Data RFID Berhasil Diperbarui', {
     description: `Nomor kartu RFID untuk ${editStudent.value.nama} telah disimpan.`
   })
@@ -604,6 +716,13 @@ async function captureCurrentSample() {
     setTimeout(() => {
       isStepTransitioning.value = false
     }, 850)
+  } else {
+    // 4th sample captured — auto submit immediately without manual button click
+    isStepTransitioning.value = false
+    detectProgress.value = 100
+    nextTick(() => {
+      submitMultiAngleRegistration()
+    })
   }
 }
 
@@ -657,7 +776,7 @@ const tableActions = computed(() => [
       description="Kelola pendaftaran biometrik wajah (FaceID), nomor kartu RFID, dan status perangkat absensi siswa."
       :actions="[
         {
-          label: 'Buka Kamera Absensi',
+          label: 'Buka Monitoring Absensi',
           icon: Camera,
           variant: 'default',
           click: openScanTab
@@ -698,11 +817,11 @@ const tableActions = computed(() => [
     </StatCardGrid>
 
     <!-- ── Custom Glass Navigation Tabs ── -->
-    <div class="flex items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-3">
-      <div class="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-900/60 rounded-xl border border-slate-200/60 dark:border-slate-800">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-3">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto p-1 bg-slate-100 dark:bg-slate-900/60 rounded-xl border border-slate-200/60 dark:border-slate-800">
         <button
           @click="activeTab = 'rekap'"
-          class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer"
+          class="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer"
           :class="activeTab === 'rekap' 
             ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/50 dark:border-slate-700' 
             : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
@@ -716,7 +835,7 @@ const tableActions = computed(() => [
 
         <button
           @click="activeTab = 'logs'"
-          class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer"
+          class="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer"
           :class="activeTab === 'logs' 
             ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/50 dark:border-slate-700' 
             : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
@@ -729,11 +848,8 @@ const tableActions = computed(() => [
         </button>
       </div>
 
-      <div class="flex items-center gap-2">
-        <span class="text-xs text-slate-500 dark:text-slate-400 hidden md:inline-flex items-center gap-1.5">
-    
-        </span>
-        <Button variant="ghost" size="sm" class="h-8 gap-1.5 text-xs text-slate-600 dark:text-slate-300" @click="loadData(false)">
+      <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+        <Button variant="ghost" size="sm" class="h-8 gap-1.5 text-xs text-slate-600 dark:text-slate-300 cursor-pointer" @click="loadData(false)">
           <RefreshCw class="size-3.5" :class="{ 'animate-spin': isLoading }" />
           Refresh
         </Button>
@@ -792,11 +908,19 @@ const tableActions = computed(() => [
             </Badge>
 
             <Badge
-              v-if="item.rfid_uid"
-              class="bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 border border-indigo-500/30 text-[11px] gap-1 px-2 py-0.5 font-mono font-medium"
+              v-if="item.is_rfid_registered || item.rfid_number || item.rfid_uid"
+              class="bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 border border-indigo-500/30 text-[11px] gap-1 px-2.5 py-0.5 font-mono font-medium"
             >
               <CreditCard class="size-3" />
-              RFID: {{ item.rfid_uid }}
+              RFID: {{ item.rfid_number || item.rfid_uid }}
+            </Badge>
+
+            <Badge
+              v-else
+              class="bg-slate-100 text-slate-500 dark:bg-slate-800/60 dark:text-slate-400 border border-slate-200 dark:border-slate-700 text-[11px] gap-1 px-2.5 py-0.5 font-mono font-medium"
+            >
+              <CreditCard class="size-3" />
+              RFID: Belum
             </Badge>
           </div>
         </template>
@@ -831,6 +955,12 @@ const tableActions = computed(() => [
                 <Camera class="size-4 text-indigo-500" />
                 <span>Registrasi Wajah (FaceID)</span>
               </DropdownMenuItem>
+
+              <!-- 4. REGISTRASI RFID -->
+              <DropdownMenuItem class="cursor-pointer gap-2 text-emerald-600 dark:text-emerald-400 font-semibold" @click="openRfidRegistration(item)">
+                <IdCard class="size-4 text-emerald-500" />
+                <span>Registrasi RFID</span>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </template>
@@ -840,17 +970,17 @@ const tableActions = computed(() => [
     <!-- ── TAB 2: LOG ACTIVITY PEMINDAI REAL-TIME ── -->
     <div v-if="activeTab === 'logs'" class="space-y-4">
       <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 p-5 shadow-sm backdrop-blur-md">
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
             <h3 class="font-semibold text-base text-slate-900 dark:text-white flex items-center gap-2">
-              <Activity class="size-4 text-indigo-500" />
-              Riwayat Absensi Siswa Hari Ini
+              <Activity class="size-4 shrink-0 text-indigo-500" />
+              <span>Riwayat Absensi Siswa Hari Ini</span>
             </h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
               Riwayat siswa yang melakukan verifikasi presensi via Wajah AI, RFID, atau Fingerprint.
             </p>
           </div>
-          <Badge variant="outline" class="gap-1 font-mono text-xs">
+          <Badge variant="outline" class="gap-1 font-mono text-xs self-start sm:self-auto whitespace-nowrap">
             Total {{ filteredLogs.length }} Aktivitas
           </Badge>
         </div>
@@ -866,33 +996,33 @@ const tableActions = computed(() => [
           <table class="w-full text-sm text-left">
             <thead class="text-xs uppercase text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800">
               <tr>
-                <th class="px-4 py-3 font-semibold">Waktu Scan</th>
-                <th class="px-4 py-3 font-semibold">Nama Siswa</th>
-                <th class="px-4 py-3 font-semibold">NISN</th>
-                <th class="px-4 py-3 font-semibold">Kelas</th>
-                <th class="px-4 py-3 font-semibold">Tipe Absen</th>
+                <th class="px-4 py-3 font-semibold whitespace-nowrap">Waktu Scan</th>
+                <th class="px-4 py-3 font-semibold whitespace-nowrap">Nama Siswa</th>
+                <th class="px-4 py-3 font-semibold whitespace-nowrap">NISN</th>
+                <th class="px-4 py-3 font-semibold whitespace-nowrap">Kelas</th>
+                <th class="px-4 py-3 font-semibold whitespace-nowrap">Tipe Absen</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
               <tr v-for="log in filteredLogs" :key="log.id" class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                <td class="px-4 py-3 font-mono font-semibold text-xs text-indigo-600 dark:text-indigo-400">
+                <td class="px-4 py-3 font-mono font-semibold text-xs text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
                   {{ log.waktu }}
                 </td>
-                <td class="px-4 py-3 font-semibold text-slate-900 dark:text-slate-100">
+                <td class="px-4 py-3 font-semibold text-slate-900 dark:text-slate-100 whitespace-nowrap">
                   <div class="flex items-center gap-2">
-                    <div class="size-7 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-[10px] font-bold">
+                    <div class="size-7 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-[10px] font-bold shrink-0">
                       {{ log.inisial || getInitials(log.nama) }}
                     </div>
                     <span>{{ log.nama }}</span>
                   </div>
                 </td>
-                <td class="px-4 py-3 font-mono text-xs text-slate-500 dark:text-slate-400">
+                <td class="px-4 py-3 font-mono text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
                   {{ log.nisn || '-' }}
                 </td>
-                <td class="px-4 py-3 text-xs text-slate-600 dark:text-slate-300 font-medium">
+                <td class="px-4 py-3 text-xs text-slate-600 dark:text-slate-300 font-medium whitespace-nowrap">
                   {{ log.kelas || '-' }}
                 </td>
-                <td class="px-4 py-3">
+                <td class="px-4 py-3 whitespace-nowrap">
                   <Badge
                     :variant="log.tipe === 'Masuk' ? 'default' : 'secondary'"
                     :class="log.tipe === 'Masuk' 
@@ -1096,16 +1226,10 @@ const tableActions = computed(() => [
               Ambil Manual
             </Button>
 
-            <Button
-              v-else
-              size="sm"
-              class="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
-              :disabled="isRegistering"
-              @click="submitMultiAngleRegistration"
-            >
-              <Sparkles class="size-4" />
-              {{ isRegistering ? 'Menyimpan 4 Sampel...' : 'Simpan 4 Sampel Biometrik' }}
-            </Button>
+            <div v-else-if="isRegistering" class="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 animate-pulse">
+              <Sparkles class="size-4 animate-spin text-emerald-500" />
+              <span>Menyimpan 4 sampel biometrik otomatis...</span>
+            </div>
           </div>
         </DialogFooter>
       </DialogContent>
@@ -1154,9 +1278,9 @@ const tableActions = computed(() => [
             <div class="p-3 rounded-xl border bg-slate-50/50 dark:bg-slate-900/40 space-y-1">
               <span class="text-slate-400 font-medium">Kartu RFID (UID)</span>
               <div class="flex items-center gap-1.5 pt-0.5 font-mono">
-                <Badge v-if="detailStudent.rfid_uid" class="bg-indigo-500/10 text-indigo-600 text-[11px] gap-1">
-                  <CreditCard class="size-3" />
-                  {{ detailStudent.rfid_uid }}
+                <Badge v-if="detailStudent.rfid_number || detailStudent.rfid_uid" class="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[11px] gap-1 font-semibold">
+                  <CreditCard class="size-3 text-emerald-500" />
+                  {{ detailStudent.rfid_number || detailStudent.rfid_uid }}
                 </Badge>
                 <span v-else class="text-slate-400 italic">Belum Terhubung</span>
               </div>
@@ -1217,6 +1341,75 @@ const tableActions = computed(() => [
             Simpan Perubahan
           </Button>
         </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <!-- ── Modal Registrasi RFID Siswa ── -->
+    <Dialog :open="isRfidRegisterModalOpen" @update:open="val => !val && closeRfidRegistration()">
+      <DialogContent class="sm:max-w-[440px]">
+        <DialogHeader>
+          <DialogTitle class="flex items-center gap-2 text-base font-bold text-emerald-600 dark:text-emerald-400">
+            <IdCard class="size-5 text-emerald-500" />
+            Registrasi Kartu RFID Siswa
+          </DialogTitle>
+          <DialogDescription class="text-xs">
+            Tempelkan kartu RFID pada alat pemindai USB untuk mendaftarkan kartu siswa.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div v-if="selectedStudentForRfid" class="space-y-4 py-2">
+          <!-- Student Card Info -->
+          <div class="flex items-center gap-3 p-3 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/30 border border-emerald-500/20">
+            <div class="size-12 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-700 flex items-center justify-center shrink-0 border">
+              <img v-if="selectedStudentForRfid.foto" :src="getPhotoUrl(selectedStudentForRfid.foto)" :alt="selectedStudentForRfid.nama" class="size-full object-cover" />
+              <span v-else class="font-bold text-sm text-emerald-600 dark:text-emerald-400">
+                {{ getInitials(selectedStudentForRfid.nama) }}
+              </span>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm text-slate-900 dark:text-white">{{ selectedStudentForRfid.nama }}</h4>
+              <p class="text-xs text-slate-500">NISN: <code class="font-mono">{{ selectedStudentForRfid.nisn || '-' }}</code> • Kelas {{ selectedStudentForRfid.kelas || '-' }}</p>
+            </div>
+          </div>
+
+          <!-- RFID UID Form Input with Auto-focus & Tap indicator -->
+          <form @submit.prevent="handleRfidRegistrationSubmit" class="space-y-3">
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <CreditCard class="size-4 text-emerald-500 animate-pulse" />
+                Tempelkan Kartu RFID ke Pemindai USB:
+              </label>
+              <div v-if="selectedStudentForRfid.rfid_number || selectedStudentForRfid.rfid_uid" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-between text-xs mb-1">
+                <span class="text-slate-500 font-medium">Kartu Terdaftar Saat Ini:</span>
+                <Badge class="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20 font-mono text-xs">
+                  {{ selectedStudentForRfid.rfid_number || selectedStudentForRfid.rfid_uid }}
+                </Badge>
+              </div>
+
+              <Input
+                ref="rfidInputRef"
+                v-model="rfidInput"
+                placeholder="Menunggu tempelan kartu RFID..."
+                class="font-mono text-sm border-emerald-500/40 focus:border-emerald-500 shadow-sm"
+                autofocus
+                @focus="$event.target.select()"
+                @click="$event.target.select()"
+              />
+              <p class="text-[11px] text-slate-400 flex items-center gap-1">
+                <Info class="size-3 text-emerald-500" />
+                USB RFID Reader akan mengetikkan UID kartu dan menyimpan otomatis saat kartu di-tap.
+              </p>
+            </div>
+
+            <DialogFooter class="flex gap-2 justify-end pt-2">
+              <Button type="button" variant="outline" size="sm" @click="closeRfidRegistration">Batal</Button>
+              <Button type="submit" size="sm" class="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5" :disabled="isSubmittingRfid">
+                <IdCard class="size-4" />
+                {{ isSubmittingRfid ? 'Menyimpan...' : 'Simpan Kartu RFID' }}
+              </Button>
+            </DialogFooter>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   </div>

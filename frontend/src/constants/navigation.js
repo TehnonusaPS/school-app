@@ -91,9 +91,9 @@ export const navMain = [
     icon: GraduationCap,
     excludeRoles: ['superadmin', 'admin_yayasan', 'tata_usaha'],
     items: [
-      { title: 'Jadwal Pelajaran', url: '/akademik/jadwal', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'wali_kelas', 'orang_tua'] },
+      { title: 'Kalender Sekolah', url: '/akademik/jadwal', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'wali_kelas', 'orang_tua'] },
       { title: 'Nilai & Rapor', url: '/akademik/nilai', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'siswa', 'orang_tua'] },
-      { title: 'Ujian & Penilaian', url: '/akademik/ujian', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'siswa', 'orang_tua'] },
+      { title: 'Ujian & Penilaian', url: '/akademik/ujian', roles: ['admin_sekolah', 'superadmin', 'kepala_sekolah'] },
       { title: 'Kurikulum', url: '/akademik/kurikulum', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'siswa', 'orang_tua'] },
       { title: 'Mata Pelajaran', url: '/akademik/mapel', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'wali_kelas', 'siswa', 'orang_tua'] },
       { title: 'Ekstrakurikuler', url: '/akademik/ekskul', excludeRoles: ['kepala_sekolah', 'admin_sekolah', 'guru', 'wali_kelas', 'siswa', 'orang_tua'] },
@@ -106,6 +106,11 @@ export const navMain = [
         title: 'Kegiatan',
         url: '/akademik/kegiatan',
         roles: ['kepala_sekolah', 'admin_sekolah']
+      },
+      {
+        title: 'Agenda Siswa',
+        url: '/akademik/siswa/agenda',
+        roles: ['siswa']
       },
       {
         title: 'Nilai & Raport',
@@ -123,7 +128,12 @@ export const navMain = [
         roles: ['orang_tua']
       },
       {
-        title: 'Jadwal Pelajaran',
+        title: 'Jadwal Anak',
+        url: '/akademik/orang-tua/jadwal-anak',
+        roles: ['orang_tua']
+      },
+      {
+        title: 'Kalender Sekolah',
         url: '/akademik/jadwal',
         roles: ['orang_tua']
       }

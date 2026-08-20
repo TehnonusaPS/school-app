@@ -54,14 +54,14 @@ const props = defineProps({
   },
   // Icon di sisi kanan
   trailingIcon: {
-    type: Object,
+    type: [Object, Function],
     default: null
   },
   // Variant warna (hanya untuk leading element)
   variant: {
     type: String,
     default: 'green',
-    validator: v => ['green', 'blue', 'purple', 'yellow', 'amber'].includes(v)
+    validator: v => ['green', 'blue', 'purple', 'yellow', 'amber', 'indigo', 'emerald', 'red'].includes(v)
   }
 })
 
@@ -90,6 +90,24 @@ const variantStyles = {
     leadingText: 'text-amber-700 dark:text-amber-400',
     iconBg: 'bg-amber-500/15 dark:bg-amber-500/20',
     iconColor: 'text-amber-600 dark:text-amber-400'
+  },
+  emerald: {
+    leadingBg: 'bg-emerald-100/70 dark:bg-emerald-900/25',
+    leadingText: 'text-emerald-700 dark:text-emerald-400',
+    iconBg: 'bg-emerald-500/15 dark:bg-emerald-500/20',
+    iconColor: 'text-emerald-600 dark:text-emerald-400'
+  },
+  indigo: {
+    leadingBg: 'bg-indigo-100/70 dark:bg-indigo-900/25',
+    leadingText: 'text-indigo-700 dark:text-indigo-400',
+    iconBg: 'bg-indigo-500/15 dark:bg-indigo-500/20',
+    iconColor: 'text-indigo-600 dark:text-indigo-400'
+  },
+  red: {
+    leadingBg: 'bg-red-100/70 dark:bg-red-900/25',
+    leadingText: 'text-red-700 dark:text-red-400',
+    iconBg: 'bg-red-500/15 dark:bg-red-500/20',
+    iconColor: 'text-red-600 dark:text-red-400'
   }
 }
 

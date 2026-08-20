@@ -5,9 +5,9 @@ export default [
     path: 'akademik/jadwal',
     component: () => import('./pages/Jadwal.vue'),
     meta: {
-      title: 'Jadwal Pelajaran',
+      title: 'Kalender Sekolah',
       parent: 'Akademik',
-      description: 'Jadwal pelajaran per kelas dan per guru.'
+      description: 'Jadwal pelajaran per kelas dan per guru serta kegiatan kalender sekolah.'
     }
   },
   {
@@ -173,6 +173,28 @@ export default [
       title: 'Input Nilai',
       parent: 'Akademik',
       description: 'Lakukan penginputan nilai harian, UTS, UAS, dan rapor.'
+    }
+  },
+  {
+    path: 'akademik/orang-tua/jadwal-anak',
+    component: () => import('@/modules/akademik/pages/orang-tua/JadwalAnak.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['orang_tua'],
+      title: 'Jadwal & Agenda Anak',
+      parent: 'Akademik',
+      description: 'Pantau jadwal pelajaran mingguan, kalender ujian, dan agenda libur sekolah anak.'
+    }
+  },
+  {
+    path: 'akademik/siswa/agenda',
+    component: () => import('@/modules/akademik/pages/orang-tua/JadwalAnak.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['siswa'],
+      title: 'Agenda Siswa',
+      parent: 'Akademik',
+      description: 'Pantau jadwal pelajaran mingguan, tugas, ujian, dan kegiatan sekolah Anda.'
     }
   }
 ]

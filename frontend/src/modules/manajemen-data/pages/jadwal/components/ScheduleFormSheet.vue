@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { AlertCircle, Calendar, Clock, Trash2 } from 'lucide-vue-next'
+import { AlertCircle, Calendar, Clock, Trash2, BookOpen, UserCheck, Sparkles } from 'lucide-vue-next'
 import { fetchAllSubjects } from '@/services/subjectService'
 import { getTeachers } from '@/services/managementService'
 import { createSchedule, updateSchedule, deleteSchedule, checkTeacherConflicts } from '@/services/scheduleService'
@@ -36,8 +36,8 @@ async function loadFormOptions() {
       fetchAllSubjects(),
       getTeachers()
     ])
-    subjects.value = subRes.data.filter(s => s.is_active)
-    teachers.value = teachRes.data.filter(t => 
+    subjects.value = (subRes.data || []).filter(s => s.is_active)
+    teachers.value = (teachRes.data || []).filter(t => 
       t.status?.toLowerCase() === 'aktif' || 
       t.status_aktif?.toLowerCase() === 'aktif' || 
       t.status_aktif === true
@@ -150,90 +150,135 @@ async function handleDelete() {
 
 <template>
   <Sheet :open="open" @update:open="emit('update:open', $event)">
-    <SheetContent :show-close-button="false" class="sm:max-w-[450px] flex flex-col h-full gap-2">
-      <SheetHeader class="border-b border-border pb-3 text-left">
-        <SheetTitle class="text-base font-bold text-foreground">
-          {{ isEditMode ? 'Edit Jadwal Pelajaran' : 'Tambah Jadwal Pelajaran' }}
-        </SheetTitle>
-        <SheetDescription class="text-xs text-muted-foreground">
-          Atur mata pelajaran dan guru untuk hari dan jam yang dipilih.
-        </SheetDescription>
+    <SheetContent :show-close-button="false" class="sm:max-w-[460px] flex flex-col h-full text-left p-6">
+      
+      <!-- Modal Header -->
+      <SheetHeader class="border-b border-border/60 pb-3.5 text-left">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 rounded-xl bg-primary/10 text-primary shrink-0">
+            <Sparkles class="size-4" />
+          </div>
+          <div>
+            <SheetTitle class="text-base font-bold text-foreground">
+              {{ isEditMode ? 'Edit Jadwal Pelajaran' : 'Tambah Jadwal Pelajaran' }}
+            </SheetTitle>
+            <SheetDescription class="text-xs text-muted-foreground mt-0.5">
+              Atur alokasi mata pelajaran dan guru pengajar untuk slot sesi terpilih.
+            </SheetDescription>
+          </div>
+        </div>
       </SheetHeader>
 
-      <div class="flex-1 overflow-y-auto py-6 pr-1 space-y-5 no-scrollbar">
-        <!-- Target Info -->
-        <div class="p-3 bg-muted/40 rounded-xl flex flex-col gap-2 border text-left">
-          <div class="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-            <Calendar class="size-4 text-primary shrink-0" />
-            <span>Hari:</span>
-            <span class="text-foreground font-bold">{{ selectedSlot?.day_name }}</span>
+      <!-- Main Form Body -->
+      <div class="flex-1 overflow-y-auto py-5 space-y-5 no-scrollbar">
+        
+        <!-- Target Info Card (Hari & Jam) -->
+        <div class="p-3.5 bg-muted/30 dark:bg-zinc-900/50 rounded-2xl border border-border/70 text-left space-y-2.5 shadow-2xs">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2 text-xs text-muted-foreground">
+              <div class="p-1 rounded-lg bg-primary/10 text-primary">
+                <Calendar class="size-3.5" />
+              </div>
+              <span class="font-medium">Hari Pembelajaran:</span>
+            </div>
+            <span class="text-xs font-extrabold text-foreground bg-background dark:bg-zinc-800 px-2.5 py-1 rounded-lg border border-border/60">
+              {{ selectedSlot?.day_name }}
+            </span>
           </div>
-          <div class="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-            <Clock class="size-4 text-primary shrink-0" />
-            <span>Waktu/Jam:</span>
-            <span class="text-foreground font-bold">{{ selectedSlot?.slot_label }}</span>
+
+          <div class="flex items-center justify-between border-t border-border/40 pt-2.5">
+            <div class="flex items-center gap-2 text-xs text-muted-foreground">
+              <div class="p-1 rounded-lg bg-primary/10 text-primary">
+                <Clock class="size-3.5" />
+              </div>
+              <span class="font-medium">Sesi Waktu / Jam:</span>
+            </div>
+            <span class="text-xs font-bold text-foreground bg-background dark:bg-zinc-800 px-2.5 py-1 rounded-lg border border-border/60 font-mono">
+              {{ selectedSlot?.slot_label }}
+            </span>
           </div>
         </div>
 
-        <!-- Subject Select -->
-        <div class="space-y-1.5 text-left">
-          <label class="text-xs font-semibold text-muted-foreground">Mata Pelajaran <span class="text-rose-500">*</span></label>
-          <Select v-model="formItem.subject_id">
-            <SelectTrigger class="h-10 rounded-xl bg-background border-border">
-              <SelectValue placeholder="Pilih Mata Pelajaran..." />
-            </SelectTrigger>
-            <SelectContent class="rounded-xl">
-              <SelectItem
-                v-for="sub in subjects"
-                :key="sub.id"
-                :value="String(sub.id)"
-              >
-                {{ sub.name }} ({{ sub.code }})
-              </SelectItem>
-            </SelectContent>
-          </Select>
+        <!-- Form Container -->
+        <div class="space-y-4">
+          
+          <!-- Subject Select Form (Full Width w-full) -->
+          <div class="space-y-1.5 text-left w-full">
+            <label class="text-xs font-bold text-foreground flex items-center gap-1.5">
+              <BookOpen class="size-3.5 text-primary" />
+              Mata Pelajaran <span class="text-rose-500">*</span>
+            </label>
+            
+            <Select v-model="formItem.subject_id">
+              <SelectTrigger class="w-full h-11 rounded-xl bg-background border-border/80 focus:ring-2 focus:ring-primary/20 text-xs font-semibold px-3.5">
+                <SelectValue placeholder="Pilih Mata Pelajaran..." />
+              </SelectTrigger>
+              <SelectContent class="rounded-xl">
+                <SelectItem
+                  v-for="sub in subjects"
+                  :key="sub.id"
+                  :value="String(sub.id)"
+                  class="text-xs font-semibold cursor-pointer py-2"
+                >
+                  <span class="font-bold text-foreground">{{ sub.name }}</span>
+                  <span class="text-[10px] text-muted-foreground ml-1.5 font-mono">({{ sub.code }})</span>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <p class="text-[10px] text-muted-foreground">Pilih mata pelajaran yang dialokasikan pada jam ini.</p>
+          </div>
+
+          <!-- Teacher Select Form (Full Width w-full) -->
+          <div class="space-y-1.5 text-left w-full">
+            <label class="text-xs font-bold text-foreground flex items-center gap-1.5">
+              <UserCheck class="size-3.5 text-primary" />
+              Guru Pengajar <span class="text-rose-500">*</span>
+            </label>
+            
+            <Select v-model="formItem.teacher_id">
+              <SelectTrigger class="w-full h-11 rounded-xl bg-background border-border/80 focus:ring-2 focus:ring-primary/20 text-xs font-semibold px-3.5">
+                <SelectValue placeholder="Pilih Guru Pengajar..." />
+              </SelectTrigger>
+              <SelectContent class="rounded-xl">
+                <SelectItem
+                  v-for="t in teachers"
+                  :key="t.id"
+                  :value="String(t.id)"
+                  class="text-xs font-semibold cursor-pointer py-2"
+                >
+                  {{ t.nama }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <p class="text-[10px] text-muted-foreground">Pilih guru aktif yang bertugas mengajar di kelas ini.</p>
+          </div>
+
         </div>
 
-        <!-- Teacher Select -->
-        <div class="space-y-1.5 text-left">
-          <label class="text-xs font-semibold text-muted-foreground">Guru Pengajar <span class="text-rose-500">*</span></label>
-          <Select v-model="formItem.teacher_id">
-            <SelectTrigger class="h-10 rounded-xl bg-background border-border">
-              <SelectValue placeholder="Pilih Guru..." />
-            </SelectTrigger>
-            <SelectContent class="rounded-xl">
-              <SelectItem
-                v-for="t in teachers"
-                :key="t.id"
-                :value="String(t.id)"
-              >
-                {{ t.nama }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <!-- Conflict warning -->
-        <Alert v-if="conflictWarning" variant="destructive" class="rounded-xl border-rose-500 bg-rose-500/10 text-rose-600">
-          <AlertCircle class="h-4 w-4 text-rose-500" />
-          <AlertDescription class="text-[10px] font-bold text-left ml-2">
-            {{ conflictWarning }}
-          </AlertDescription>
+        <!-- Conflict Warning Alert -->
+        <Alert v-if="conflictWarning" variant="destructive" class="rounded-2xl border-rose-500/80 bg-rose-500/10 text-rose-600 dark:text-rose-400 p-3.5">
+          <div class="flex items-start gap-2.5">
+            <AlertCircle class="h-4 w-4 text-rose-500 shrink-0 mt-0.5" />
+            <AlertDescription class="text-xs font-bold leading-relaxed text-left">
+              {{ conflictWarning }}
+            </AlertDescription>
+          </div>
         </Alert>
+
       </div>
 
-      <div class="border-t border-border pt-4 flex items-center justify-between shrink-0">
-        <!-- Delete Button (Only in edit mode) -->
+      <!-- Footer Actions -->
+      <div class="border-t border-border/60 pt-3.5 flex items-center justify-between shrink-0">
         <div>
           <Button
             v-if="isEditMode"
             type="button"
             variant="ghost"
-            class="text-xs font-bold rounded-xl text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 cursor-pointer"
+            class="text-xs font-bold rounded-xl text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 cursor-pointer h-9 px-3"
             @click="handleDelete"
           >
-            <Trash2 class="size-4 mr-1" />
-            Hapus
+            <Trash2 class="size-3.5 mr-1.5" />
+            Hapus Jadwal
           </Button>
         </div>
 
@@ -241,14 +286,14 @@ async function handleDelete() {
           <Button
             type="button"
             variant="ghost"
-            class="text-xs font-bold rounded-xl cursor-pointer"
+            class="text-xs font-bold rounded-xl cursor-pointer h-9"
             @click="emit('update:open', false)"
           >
             Batal
           </Button>
           <Button
             type="button"
-            class="text-xs font-bold rounded-xl cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 border-none shadow-none"
+            class="text-xs font-bold rounded-xl cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 border-none px-6 h-9 shadow-xs"
             @click="handleSave"
             :disabled="isCheckingConflict"
           >
@@ -256,6 +301,7 @@ async function handleDelete() {
           </Button>
         </div>
       </div>
+
     </SheetContent>
   </Sheet>
 </template>

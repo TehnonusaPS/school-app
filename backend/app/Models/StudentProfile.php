@@ -13,6 +13,7 @@ class StudentProfile extends Model
         'classroom_id',
         'nisn',
         'nik',
+        'rfid_number',
         'birth_place',
         'birth_date',
         'gender',
@@ -22,6 +23,13 @@ class StudentProfile extends Model
         'is_face_registered',
         'embedding',
     ];
+
+    protected $appends = ['is_rfid_registered'];
+
+    public function getIsRfidRegisteredAttribute(): bool
+    {
+        return !empty($this->rfid_number);
+    }
 
     protected function casts(): array
     {

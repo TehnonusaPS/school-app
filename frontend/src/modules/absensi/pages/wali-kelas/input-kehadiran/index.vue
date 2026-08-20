@@ -292,52 +292,82 @@ const handleExport = () => {
   const year = currentCalendarYear.value
   const days = daysInMonth.value
 
-  // Header row
-  const headers = ['No', 'Nama Siswa', 'NIS', 'L/P']
+  let html = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head>
+      <meta charset="utf-8">
+      <style>
+        table { border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 5px; text-align: center; vertical-align: middle; }
+        th { background-color: #f2f2f2; font-weight: bold; }
+        .text-left { text-align: left; }
+      </style>
+    </head>
+    <body>
+      <h3>Laporan Kehadiran Kelas ${currentKelas} - ${monthName} ${year}</h3>
+      <table>
+        <thead>
+          <tr>
+            <th rowspan="2">No</th>
+            <th rowspan="2" class="text-left">Nama Siswa</th>
+            <th rowspan="2">NIS</th>
+            <th rowspan="2">L/P</th>
+            <th colspan="${days.length}">Tanggal</th>
+            <th colspan="5">Jumlah</th>
+          </tr>
+          <tr>
+  `
   days.forEach(d => {
-    headers.push(d.dateNum.toString())
+    html += `<th>${d.dateNum}</th>`
   })
-  headers.push('H', 'I', 'S', 'A')
+  html += `<th>H</th><th>T</th><th>I</th><th>S</th><th>A</th></tr></thead><tbody>`
 
-  const csvRows = [headers.join(';')]
-
-  // Content rows
   students.value.forEach((student, index) => {
-    const row = [(index + 1).toString(), student.nama, student.nis, student.gender]
-
-    // Days attendance status
+    html += `
+      <tr>
+        <td>${index + 1}</td>
+        <td class="text-left">${student.nama}</td>
+        <td style="mso-number-format:'\@'">${student.nis}</td>
+        <td>${student.gender}</td>
+    `
     days.forEach(d => {
       const status = getStatus(student.id, d.dateNum) || ''
-      row.push(status)
+      html += `<td>${status}</td>`
     })
 
-    // Totals
     const totalH = getStudentTotal(student.id, 'H')
+    const totalT = getStudentTotal(student.id, 'T')
     const totalI = getStudentTotal(student.id, 'I')
     const totalS = getStudentTotal(student.id, 'S')
     const totalA = getStudentTotal(student.id, 'A')
 
-    row.push(totalH, totalI, totalS, totalA)
-    csvRows.push(row.join(';'))
+    html += `
+        <td>${totalH}</td>
+        <td>${totalT}</td>
+        <td>${totalI}</td>
+        <td>${totalS}</td>
+        <td>${totalA}</td>
+      </tr>
+    `
   })
 
-  // Create Blob with UTF-8 BOM for Excel compatibility
-  const csvContent = '\uFEFF' + csvRows.join('\n')
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  html += `</tbody></table></body></html>`
+
+  const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
 
   const link = document.createElement('a')
   link.setAttribute('href', url)
 
   const sanitizedKelas = currentKelas.replace(/\s+/g, '_')
-  link.setAttribute('download', `Absensi_Kelas_${sanitizedKelas}_${monthName}_${year}.csv`)
+  link.setAttribute('download', `Absensi_Kelas_${sanitizedKelas}_${monthName}_${year}.xls`)
 
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
   URL.revokeObjectURL(url)
 
-  toast.success('Ekspor Spreadsheet Berhasil!', {
+  toast.success('Ekspor Excel Berhasil!', {
     description: `Lembar kehadiran kelas ${selectedKelas.value} untuk bulan ${monthName} ${year} telah diunduh.`
   })
 }
@@ -345,9 +375,10 @@ const handleExport = () => {
 const handlePrint = () => {
   // Simpan data presensi aktif ke localStorage agar terbaca di tab cetak khusus
   localStorage.setItem('print_attendance_map', JSON.stringify(attendanceMap.value))
+  localStorage.setItem('print_students_list', JSON.stringify(students.value))
 
-  // Set URL untuk iframe tersembunyi agar memicu print dialog secara inline (tanpa pindah halaman)
-  printUrl.value = `/absensi/input/print?kelas=${selectedKelas.value}&tahun=${selectedTahun.value}&monthIdx=${activeMonthIdx.value}&t=${Date.now()}`
+  const basePath = isWaliKelas.value ? '/absensi/wali-kelas/input-kehadiran/print' : '/absensi/guru/input-kehadiran/print'
+  printUrl.value = `${basePath}?kelas=${selectedKelas.value}&tahun=${selectedTahun.value}&monthIdx=${activeMonthIdx.value}&t=${Date.now()}`
 }
 </script>
 

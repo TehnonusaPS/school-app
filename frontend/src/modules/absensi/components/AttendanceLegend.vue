@@ -19,9 +19,9 @@ defineProps({
       </h3>
 
       <div class="space-y-4">
-        <div class="flex items-center gap-3">
+        <div class="flex items-start gap-3">
           <span
-            class="w-8 h-8 rounded-lg bg-emerald-500 text-white font-extrabold flex items-center justify-center text-xs shadow-sm"
+            class="w-8 h-8 shrink-0 rounded-lg bg-emerald-500 text-white font-extrabold flex items-center justify-center text-xs shadow-sm mt-0.5"
             >H</span
           >
           <div class="text-xs">
@@ -30,25 +30,25 @@ defineProps({
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
-          <span class="w-8 h-8 rounded-lg bg-amber-500 text-white font-extrabold flex items-center justify-center text-xs shadow-sm">T</span>
+        <div class="flex items-start gap-3">
+          <span class="w-8 h-8 shrink-0 rounded-lg bg-orange-500 text-white font-extrabold flex items-center justify-center text-xs shadow-sm mt-0.5">T</span>
           <div class="text-xs">
             <p class="font-bold text-foreground">Terlambat</p>
             <p class="text-muted-foreground">Siswa hadir melewati batas toleransi keterlambatan sekolah.</p>
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
-          <span class="w-8 h-8 rounded-lg bg-blue-500 text-white font-extrabold flex items-center justify-center text-xs shadow-sm">S</span>
+        <div class="flex items-start gap-3">
+          <span class="w-8 h-8 shrink-0 rounded-lg bg-blue-500 text-white font-extrabold flex items-center justify-center text-xs shadow-sm mt-0.5">S</span>
           <div class="text-xs">
             <p class="font-bold text-foreground">Sakit</p>
             <p class="text-muted-foreground">Siswa sakit dengan surat keterangan wali/dokter.</p>
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-start gap-3">
           <span
-            class="w-8 h-8 rounded-lg bg-amber-500 text-white font-extrabold flex items-center justify-center text-xs shadow-sm"
+            class="w-8 h-8 shrink-0 rounded-lg bg-amber-500 text-white font-extrabold flex items-center justify-center text-xs shadow-sm mt-0.5"
             >I</span
           >
           <div class="text-xs">
@@ -57,9 +57,9 @@ defineProps({
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-start gap-3">
           <span
-            class="w-8 h-8 rounded-lg bg-red-500 text-white font-extrabold flex items-center justify-center text-xs shadow-sm"
+            class="w-8 h-8 shrink-0 rounded-lg bg-red-500 text-white font-extrabold flex items-center justify-center text-xs shadow-sm mt-0.5"
             >A</span
           >
           <div class="text-xs">
@@ -68,9 +68,9 @@ defineProps({
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-start gap-3">
           <span
-            class="w-8 h-8 rounded-lg bg-muted border border-border text-muted-foreground/60 font-extrabold flex items-center justify-center text-xs"
+            class="w-8 h-8 shrink-0 rounded-lg bg-muted border border-border text-muted-foreground/60 font-extrabold flex items-center justify-center text-xs mt-0.5"
             >?</span
           >
           <div class="text-xs">

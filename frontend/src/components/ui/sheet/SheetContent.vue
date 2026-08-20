@@ -52,8 +52,9 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
         as-child
       >
         <Button
+          type="button"
           variant="ghost"
-          class="absolute top-3 right-3"
+          class="absolute top-3 right-3 z-10 cursor-pointer"
           size="icon-sm"
         >
           <XIcon />

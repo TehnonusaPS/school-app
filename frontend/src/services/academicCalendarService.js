@@ -64,6 +64,11 @@ export async function fetchParentSchedule(params) {
   return response.data
 }
 
+export async function fetchParentDashboard(params) {
+  const response = await api.get('/orang-tua/jadwal-anak', { params })
+  return response.data
+}
+
 export async function resetCalendar(academicYearId) {
   const response = await api.post('/academic-calendar/reset', {
     academic_year_id: academicYearId

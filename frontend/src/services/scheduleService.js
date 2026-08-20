@@ -42,6 +42,16 @@ export async function deleteSchedule(id) {
   return response.data
 }
 
+export async function publishSchedule(data) {
+  const response = await api.post('/management/schedules/publish', data)
+  return response.data
+}
+
+export async function unpublishSchedule(data) {
+  const response = await api.post('/management/schedules/unpublish', data)
+  return response.data
+}
+
 export async function getUnassignedSubjects(params) {
   const response = await api.get('/management/schedules/unassigned-subjects', { params })
   return response.data
